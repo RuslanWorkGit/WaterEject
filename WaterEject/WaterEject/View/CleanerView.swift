@@ -19,6 +19,11 @@ struct CleanerView: View {
                 .buttonStyle(.borderedProminent)
             Button("Both") { viewModel.playBoth() }
                 .buttonStyle(.bordered)
+            Button("Sweep (20Hz–20kHz)") {
+                            viewModel.playSweep()
+                        }
+                        .buttonStyle(.bordered)
+                        .foregroundColor(.orange)
         }
         .padding(40)
         .onDisappear {
