@@ -27,8 +27,35 @@ class CleanerViewModel: ObservableObject {
     
     func playSweep() {
         audioManager.playSweep()
+        print("sweep")
     }
     
+    
+    func playBurst() {
+        audioManager.playBurst()
+        print("Burst")
+    }
+    
+    func playBurstAndSweep() {
+        audioManager.playBurstAndSweep()
+        print("Burst and Sweep")
+    }
+    
+    func playLowFreqBursts() {
+        audioManager.playLowFreqBursts()
+        print("Low Frequency Bursts")
+    }
+    
+    func playMultiVibration() {
+        audioManager.playMultiVibration()
+        print("Multi Vibration")
+    }
+    
+    
+    func playCustomWaterEjectSequence() {
+            audioManager.playCustomWaterEjectSequence()
+            print("Custom Water Eject Sequence")
+        }
     
     
     func stop() {
