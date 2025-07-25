@@ -9,6 +9,7 @@ import Foundation
 
 class CleanerViewModel: ObservableObject {
     private let audioManager = AudioManager()
+    private let seqPlayer = AudioSequencePlayer()
     
     func playLeft() {
         audioManager.play(channel: "left")
@@ -57,8 +58,19 @@ class CleanerViewModel: ObservableObject {
             print("Custom Water Eject Sequence")
         }
     
+    func playSomeWav() {
+        audioManager.playWav(named: "some-sound")
+    }
+    
+    
+        func playCleaningSequence() {
+            // Приклад: 4 файли, усі в папці проєкту (без розширення!)
+            seqPlayer.playSequence(soundNames: ["fifty-tone", "hundred-tone-v1", "hundred-tone-v2", "hundred-and-fifty-tone"], duration: 5.0)
+        }
+    
     
     func stop() {
         audioManager.stop()
+        seqPlayer.stop()
     }
 }

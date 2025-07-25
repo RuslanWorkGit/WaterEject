@@ -41,6 +41,13 @@ struct CleanerView: View {
             Button("Custom Water Eject (30s)") { viewModel.playCustomWaterEjectSequence() }
                             .buttonStyle(.bordered)
                             .foregroundColor(.cyan)
+            Button("play wav") { viewModel.playSomeWav() }
+                            .buttonStyle(.bordered)
+                            .foregroundColor(.orange)
+            
+            Button("Play 4 different") {
+                viewModel.playCleaningSequence()
+            }
         }
         .padding(40)
         .onDisappear {
