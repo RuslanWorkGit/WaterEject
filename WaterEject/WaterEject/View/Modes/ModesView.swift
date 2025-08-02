@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ModesView: View {
     @Environment(\.dismiss) private var dismiss
+    let device: String
     
     var body: some View {
         ZStack {
@@ -69,7 +70,7 @@ struct ModesView: View {
                     
                     Spacer()
                     
-                    Text("Iphone 13")
+                    Text(device)
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.white)
                     Spacer()
@@ -93,5 +94,5 @@ struct ModesView: View {
 }
 
 #Preview {
-    ModesView()
+    ModesView(device: "Iphone")
 }

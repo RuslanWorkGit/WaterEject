@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct HomeView: View {
+    //@State private var showModesScreen = false
+    @State private var selectedDevice: String?
+    
     var body: some View {
         ZStack {
             Color(red: 19 / 255, green: 21 / 255, blue: 23 / 255)
@@ -72,12 +75,23 @@ struct HomeView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
                 
-                DeviceGridView()
+                DeviceGridView { device in
+                    selectedDevice = device
+                    //showModesScreen = true
+                }
                 
                 Spacer()
 
             }
         }
+        .fullScreenCover(item: $selectedDevice, content: { device in
+            ModesView(device: device)
+        })
+//        .fullScreenCover(isPresented: $showModesScreen, content: {
+//            if let selectedDevice {
+//                ModesView(device: selectedDevice)
+//            }   
+//        })
     }
 }
 
@@ -90,80 +104,72 @@ import SwiftUI
 struct DeviceButtonView: View {
     let imageName: String
     let label: String
-    let action: () -> Void
+    let action: (String) -> Void
     
     var body: some View {
-        Button(action: action) {
-            VStack(spacing: 12) {
-                Image(imageName)
-                    .foregroundStyle(.white)
-                Text(label)
-                    .font(.headline)
-                    .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
-            }
-        }
-        .frame(width: 150, height: 150)
-        .background(
+        Button(action: { action(label) }) {
             ZStack {
+                // Фон та overlay — ВСЕРЕДИНІ Button!
                 Circle()
                     .fill(Color(red: 19 / 255, green: 21 / 255, blue: 23 / 255))
-                
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.1), Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.2)],
+                            colors: [
+                                Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.1),
+                                Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.2)
+                            ],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
-
+                Circle()
+                    .stroke(Color.white.opacity(0.25), lineWidth: 2)
+                    .blur(radius: 0.5)
+                    .offset(x: 0, y: 1)
+                    .mask(
+                        Circle().fill(
+                            LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+                        )
+                    )
+                
+                VStack(spacing: 12) {
+                    Image(imageName)
+                        .foregroundStyle(.white)
+                    Text(label)
+                        .font(.headline)
+                        .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
+                }
             }
-        )
-        .overlay(
-            Circle()
-                .stroke(Color.white.opacity(0.25), lineWidth: 2)
-                .blur(radius: 0.5)
-                .offset(x: 0, y: 1)
-                .mask(
-                    Circle().fill(LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom))
-                )
-        )
-        
+            .frame(width: 150, height: 150)
+        }
+        .buttonStyle(.plain) // Щоб не було сірого ефекту system button
     }
 }
 
 struct DeviceGridView: View {
-    @State private var showModesScreen = false
+    let onDeviceTap: (String) -> Void
     
     var body: some View {
         VStack(spacing: 32) {
             // Верхній (центральний) елемент
-            DeviceButtonView(imageName: "devices", label: "iPhone") {
-                print("iPhone button tapped")
-                showModesScreen = true
-            }
+            DeviceButtonView(imageName: "devices", label: "iPhone", action: onDeviceTap)
             
             // Два ряди по 2 елементи
             HStack(spacing: 32) {
-                DeviceButtonView(imageName: "airpodsPro", label: "AirPods Pro") {
-                    print("AirPods Pro tapped")
-                }
-                DeviceButtonView(imageName: "airpods", label: "AirPods") {
-                    print("AirPods tapped")
-                }
+                DeviceButtonView(imageName: "airpodsPro", label: "AirPods Pro", action: onDeviceTap)
+                DeviceButtonView(imageName: "airpods", label: "AirPods", action: onDeviceTap)
             }
             HStack(spacing: 32) {
-                DeviceButtonView(imageName: "airpodsMax", label: "AirPods Max") {
-                    print("AirPods Max tapped")
-                }
-                DeviceButtonView(imageName: "speaker", label: "Speakers") {
-                    print("Speakers tapped")
-                }
+                DeviceButtonView(imageName: "airpodsMax", label: "AirPods Max", action: onDeviceTap)
+                DeviceButtonView(imageName: "speaker", label: "Speakers", action: onDeviceTap)
             }
         }
-        .fullScreenCover(isPresented: $showModesScreen, content: {
-            ModesView()
-        })
+
 
     }
+}
+
+extension String: Identifiable {
+    public var id: String { self }
 }
