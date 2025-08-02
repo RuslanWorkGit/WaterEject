@@ -13,50 +13,7 @@ struct ModesView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 19 / 255, green: 21 / 255, blue: 23 / 255)
-                .ignoresSafeArea()
-            
-            Ellipse()
-                .strokeBorder(Color.white.opacity(0.05), lineWidth: 1.5)
-                .background(
-                    Ellipse()
-                        .fill(Color.white.opacity(0.01))
-                )
-                .frame(width: 431, height: 80)
-                .offset(y: 210)
-            
-            
-            Ellipse()
-                .fill(Color.white.opacity(0.25)) // 25% прозорість
-                .frame(width: 343, height: 56)
-                .blur(radius: 70) // SwiftUI blur radius не зовсім 1:1 з Figma, 70–90 виглядає схоже
-                .offset(y: 210)
-            
-            Ellipse()
-                .strokeBorder(Color.white.opacity(0.05), lineWidth: 1)
-                .background(
-                    Ellipse()
-                        .fill(Color.white.opacity(0.01))
-                )
-                .frame(width: 257, height: 30)
-                .offset(y: 210)
-            
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 25/255, green: 14/255, blue: 13/255),
-                            Color(red: 81/255, green: 132/255, blue: 234/255)   // #5184EA
-                            // #190E0D
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 375, height: 161)
-                .opacity(0.5)        // 50% прозорість як у Figma
-                .blur(radius: 100)   // Blur 196 у SwiftUI виглядає схоже на 100-130, тож підбери вручну!
-                .offset(y: 240)
+            Background()
             
             VStack(spacing: 28) {
                 HStack {
@@ -90,13 +47,13 @@ struct ModesView: View {
                     emoji: "🔥",
                     title: "SonicPulse™ Clean",
                     subtitle: "vibration cleaning (the most popular)",
-                    deviceIcon: "Dynamic",
+                    deviceIcon: "SmallDynamic",
                     deviceName: "Speaker",
-                    deviceColor: Color(.sRGB, red: 41/255, green: 233/255, blue: 154/255, opacity: 1), // зелений
+                    deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
                     freq: "175HZ Vibro",
                     time: "25 seconds"
                 )
-                .padding(.horizontal, 24)
+
                 Spacer()
                 
             }
@@ -104,7 +61,7 @@ struct ModesView: View {
     }
 }
 
-import SwiftUI
+
 
 struct CleaningModeCard: View {
     // Пропси для повторного використання
@@ -122,29 +79,7 @@ struct CleaningModeCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 20 / 255, green: 23 / 255, blue: 26 / 255, opacity: 0.1),
-                                    Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.2)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        
-                    Circle()
-                        .stroke(Color.white.opacity(0.25), lineWidth: 2)
-                        .blur(radius: 0.5)
-                        .offset(x: 0, y: 1)
-                        .mask(
-                            Circle().fill(
-                                LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
-                            )
-                        )
-                        
-                    Image(icon)
+                    IconCard(icon: icon)
 
                 }
                 .frame(width: 48, height: 48)
@@ -154,38 +89,37 @@ struct CleaningModeCard: View {
                         Text(emoji)
                         Text(title)
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                     }
                     Text(subtitle)
                         .font(.system(size: 14))
                         .foregroundColor(Color.white.opacity(0.55))
                 }
-                Spacer()
+                .padding(.bottom, 16)
             }
             
             Divider().background(Color.white.opacity(0.1))
             
             HStack(spacing: 10) {
                 Image(deviceIcon)
-                    .resizable()
-                    .frame(width: 16, height: 16)
-                    .foregroundSyle(deviceColor)
+                
                 Text(deviceName)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(deviceColor)
+                    .foregroundStyle(deviceColor)
                 Text("•")
                     .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                 Text(freq)
                     .font(.system(size: 15))
-                    .foregroundColor(.white)
+                    .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                 Spacer()
                 Text(time)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.10))
+                    //.font(.system(size: 12))
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 5)
+                    .background(Color.white.opacity(0.05))
                     .clipShape(Capsule())
             }
         }
@@ -199,10 +133,15 @@ struct CleaningModeCard: View {
             RoundedRectangle(cornerRadius: 18)
                 .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 24)
         .padding(.vertical, 6)
     }
+        
 }
+
+
+
+
 
 
 #Preview {
