@@ -133,11 +133,14 @@ struct DeviceButtonView: View {
 }
 
 struct DeviceGridView: View {
+    @State private var showModesScreen = false
+    
     var body: some View {
         VStack(spacing: 32) {
             // Верхній (центральний) елемент
             DeviceButtonView(imageName: "devices", label: "iPhone") {
                 print("iPhone button tapped")
+                showModesScreen = true
             }
             
             // Два ряди по 2 елементи
@@ -158,5 +161,9 @@ struct DeviceGridView: View {
                 }
             }
         }
+        .fullScreenCover(isPresented: $showModesScreen, content: {
+            ModesView()
+        })
+
     }
 }
