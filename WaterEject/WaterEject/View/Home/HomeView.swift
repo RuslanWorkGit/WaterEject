@@ -90,18 +90,19 @@ import SwiftUI
 struct DeviceButtonView: View {
     let imageName: String
     let label: String
-    
+    let action: () -> Void
     
     var body: some View {
-        VStack(spacing: 12) {
-            Image(imageName)
-                .foregroundStyle(.white)
-            Text(label)
-                .font(.headline)
-                .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
+        Button(action: action) {
+            VStack(spacing: 12) {
+                Image(imageName)
+                    .foregroundStyle(.white)
+                Text(label)
+                    .font(.headline)
+                    .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
+            }
         }
         .frame(width: 150, height: 150)
-        
         .background(
             ZStack {
                 Circle()
@@ -135,16 +136,26 @@ struct DeviceGridView: View {
     var body: some View {
         VStack(spacing: 32) {
             // Верхній (центральний) елемент
-            DeviceButtonView(imageName: "devices", label: "iPhone")
+            DeviceButtonView(imageName: "devices", label: "iPhone") {
+                print("iPhone button tapped")
+            }
             
             // Два ряди по 2 елементи
             HStack(spacing: 32) {
-                DeviceButtonView(imageName: "airpodsPro", label: "AirPods Pro")
-                DeviceButtonView(imageName: "airpods", label: "AirPods")
+                DeviceButtonView(imageName: "airpodsPro", label: "AirPods Pro") {
+                    print("AirPods Pro tapped")
+                }
+                DeviceButtonView(imageName: "airpods", label: "AirPods") {
+                    print("AirPods tapped")
+                }
             }
             HStack(spacing: 32) {
-                DeviceButtonView(imageName: "airpodsMax", label: "AirPods Max")
-                DeviceButtonView(imageName: "speaker", label: "Speakers")
+                DeviceButtonView(imageName: "airpodsMax", label: "AirPods Max") {
+                    print("AirPods Max tapped")
+                }
+                DeviceButtonView(imageName: "speaker", label: "Speakers") {
+                    print("Speakers tapped")
+                }
             }
         }
     }
