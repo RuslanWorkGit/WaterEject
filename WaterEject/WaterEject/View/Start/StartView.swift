@@ -10,10 +10,6 @@ import SwiftUI
 struct StartView: View {
     @StateObject private var viewModel = StartViewModel()
     @Environment(\.dismiss) private var dismiss
-    @State private var startCleaning: Bool = false
-    @State private var start: String?
-    @State private var countdown: Int = 25
-    @State private var timer: Timer? = nil
     let device: String
     let mode: String
     
@@ -25,7 +21,7 @@ struct StartView: View {
                 HStack {
                     Button {
                         dismiss()
-                        startCleaning = false // Reset when going back
+                        viewModel.stopTimer()
                     } label: {
                         Image(systemName: "chevron.backward")
                         Text("Back")
@@ -46,10 +42,8 @@ struct StartView: View {
                 SelectedModeCard(
                     deviceIcon: "devices",
                     title: mode,
-                    isActive: startCleaning,
-                    onSettings: {
-                        print("Settings tapped")
-                    }
+                    isActive: viewModel.startCleaning,
+                    onSettings: { print("Settings tapped") }
                 )
                 .padding(.horizontal, 24)
                 
@@ -59,56 +53,48 @@ struct StartView: View {
                         .frame(width: 201, height: 256)
                         .padding(.top, 60)
                     
-                    if startCleaning {
+                    if viewModel.startCleaning {
                         Image("activeDrop")
                             .offset(y: -15)
-                        
                         Image("waterEllipse")
                             .offset(y: -40)
                     }
-                    
                 }
-                
                 
                 Spacer()
                 
                 ZStack {
-                    if startCleaning {
-                        Text("00:\(countdown) ")
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(.bottom, 40)
-                            .onAppear {
-                                // Запускаємо таймер лише якщо не стартував
-                                viewModel.startTimer()
-                            }
-                            .onDisappear {
-                                viewModel.stopTimer()
-                            }
+                    // Таймер
+                    Text("00:\(viewModel.countdown)")
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(.white)
+                        .opacity(viewModel.startCleaning ? 1 : 0)
+                        .animation(.easeInOut, value: viewModel.startCleaning)
+
+                    // Кнопка
+                    Button {
+                        viewModel.startTimer()
+                    } label: {
+                        Text("Start cleaning (25 sec)")
+                            .foregroundStyle(Color.white)
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, 88)
+                            .background(
+                                Capsule()
+                                    .fill(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                            )
                     }
-                    else {
-                        Button {
-                            startCleaning = true
-                            // Add logic to reset startCleaning after 25 seconds or when cleaning ends
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 25) {
-                                startCleaning = false
-                            }
-                        } label: {
-                            Text("Start cleaning (25 sec)")
-                                .foregroundStyle(Color.white)
-                                .padding(.vertical, 14)
-                                .padding(.horizontal, 88)
-                                .background(
-                                    Capsule()
-                                        .fill(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
-                                )
-                        }
-                    }
+                    .opacity(viewModel.startCleaning ? 0 : 1)
+                    .animation(.easeInOut, value: viewModel.startCleaning)
                 }
+                .frame(height: 68) // Однакова висота завжди!
+                .padding(.bottom, 24)
+
             }
         }
     }
 }
+
 
 
 

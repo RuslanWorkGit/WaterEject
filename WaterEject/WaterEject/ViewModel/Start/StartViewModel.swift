@@ -11,26 +11,29 @@ import SwiftUI
 final class StartViewModel: ObservableObject {
     
     @Published var startCleaning: Bool = false
-    @State private var timer: Timer? = nil
-    @State private var start: String?
-    @State private var countdown: Int = 25
+    @Published var countdown: Int = 25
+    
+    private var timer: Timer?
     
     func startTimer() {
         stopTimer()
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+        countdown = 25
+        startCleaning = true
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             if self.countdown > 0 {
                 self.countdown -= 1
             }
             if self.countdown == 0 {
                 self.stopTimer()
-                self.startCleaning = false
-                self.countdown = 25
             }
         }
     }
-
+    
     func stopTimer() {
         timer?.invalidate()
         timer = nil
+        startCleaning = false
+        countdown = 25
     }
 }
