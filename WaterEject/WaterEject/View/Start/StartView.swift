@@ -24,9 +24,13 @@ struct StartView: View {
                         viewModel.stopTimer()
                     } label: {
                         Image(systemName: "chevron.backward")
+                            .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
                         Text("Back")
                             .font(.system(size: 17))
+                            .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
                     }
+                    .disabled(viewModel.startCleaning)
+                    
                     
                     Spacer()
                     
@@ -48,7 +52,7 @@ struct StartView: View {
                 .padding(.horizontal, 24)
                 
                 VStack {
-                    Image("devices")
+                    Image("devicesBig")
                         .resizable()
                         .frame(width: 201, height: 256)
                         .padding(.top, 60)
@@ -65,7 +69,7 @@ struct StartView: View {
                 
                 ZStack {
                     // Таймер
-                    Text("00:\(viewModel.countdown)")
+                    Text("00:\(String(format: "%02d", viewModel.countdown))")
                         .font(.system(size: 48, weight: .bold))
                         .foregroundColor(.white)
                         .opacity(viewModel.startCleaning ? 1 : 0)

@@ -195,14 +195,9 @@ struct CleaningModeCard: View {
             .padding(.vertical, 6)
         }
 
-        
-        
     }
         
 }
-
-
-
 
 
 
