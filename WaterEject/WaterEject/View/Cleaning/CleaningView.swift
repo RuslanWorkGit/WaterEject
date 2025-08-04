@@ -10,7 +10,7 @@ import SwiftUI
 struct CleaningView: View {
     var body: some View {
         ZStack {
-            
+            Background()
         }
     }
 }
