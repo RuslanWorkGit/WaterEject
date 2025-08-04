@@ -60,6 +60,19 @@ struct StartView: View {
                 
                 Spacer()
                 
+                Button {
+                    print("action")
+                } label: {
+                    Text("Star cleaning (25 sec)")
+                        .foregroundStyle(Color.white)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 88)
+                        .background(
+                            Capsule()
+                                .fill(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                            )
+                } 
+
             }
         }
 
