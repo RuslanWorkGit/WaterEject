@@ -7,13 +7,29 @@
 
 import Foundation
 import SwiftUI
+import AVFoundation
 
 final class StartViewModel: ObservableObject {
+    
+    private var engine: AVAudioEngine?
+    private var playerNode: AVAudioPlayerNode?
+    private var sweepTimer: Timer?
+    private var player: AVAudioPlayer?
+    
+    private let audioManager = AudioManager()
+    private let seqPlayer = AudioSequencePlayer()
+    
     
     @Published var startCleaning: Bool = false
     @Published var countdown: Int = 25
     
     private var timer: Timer?
+    
+    
+    func playCleaningSequence() {
+        // Приклад: 4 файли, усі в папці проєкту (без розширення!)
+        seqPlayer.playSequence(soundNames: ["fifty-tone", "hundred-tone-v1", "hundred-tone-v2", "hundred-and-fifty-tone", "hundred-tone-v1"], duration: 5.0)
+    }
     
     func startTimer() {
         stopTimer()

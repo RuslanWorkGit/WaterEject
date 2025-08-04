@@ -73,6 +73,7 @@ struct StartView: View {
 
                     // Кнопка
                     Button {
+                        viewModel.playCleaningSequence()
                         viewModel.startTimer()
                     } label: {
                         Text("Start cleaning (25 sec)")
