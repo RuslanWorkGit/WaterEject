@@ -15,7 +15,7 @@ struct StartView: View {
     
     var body: some View {
         ZStack {
-            Background()
+            Background(startCleaning: viewModel.startCleaning)
             
             VStack(spacing: 28) {
                 HStack {
@@ -51,18 +51,14 @@ struct StartView: View {
                 )
                 .padding(.horizontal, 24)
                 
+                
                 VStack {
-                    Image("devicesBig")
-                        .resizable()
-                        .frame(width: 201, height: 256)
+                    Image("airpodsBig")
+                        //.resizable()
+                        //.frame(width: 201, height: 256)
                         .padding(.top, 60)
                     
-                    if viewModel.startCleaning {
-                        Image("activeDrop")
-                            .offset(y: -15)
-                        Image("waterEllipse")
-                            .offset(y: -40)
-                    }
+    
                 }
                 
                 Spacer()
@@ -73,6 +69,7 @@ struct StartView: View {
                         .font(.system(size: 48, weight: .bold))
                         .foregroundColor(.white)
                         .opacity(viewModel.startCleaning ? 1 : 0)
+            
                         .animation(.easeInOut, value: viewModel.startCleaning)
 
                     // Кнопка

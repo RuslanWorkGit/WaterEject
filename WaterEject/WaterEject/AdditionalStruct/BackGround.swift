@@ -7,6 +7,8 @@
 import SwiftUI
 
 struct Background: View {
+    var startCleaning: Bool = false
+    
     var body: some View {
         Color(red: 19 / 255, green: 21 / 255, blue: 23 / 255)
             .ignoresSafeArea()
@@ -36,6 +38,14 @@ struct Background: View {
             .frame(width: 257, height: 30)
             .offset(y: 210)
         
+        if startCleaning {
+            Image("activeDrop")
+                .offset(y: 160)
+            Image("waterEllipse")
+                .offset(y: 210)
+        }
+        
+        
         Rectangle()
             .fill(
                 LinearGradient(
@@ -52,5 +62,12 @@ struct Background: View {
             .opacity(0.5)        // 50% прозорість як у Figma
             .blur(radius: 100)   // Blur 196 у SwiftUI виглядає схоже на 100-130, тож підбери вручну!
             .offset(y: 240)
+    }
+}
+
+#Preview {
+    ZStack {
+        Background()
+        
     }
 }
