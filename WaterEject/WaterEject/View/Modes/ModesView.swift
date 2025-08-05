@@ -45,9 +45,7 @@ struct ModesView: View {
                 
                 CleaningModeCard(
                     icon: "Drop",
-                    emoji: "🔥",
-                    title: "SonicPulse™ Clean",
-                    subtitle: "vibration cleaning (the most popular)",
+                    mode: .sonicPulse,
                     deviceIcon: "SmallDynamic",
                     deviceName: "Speaker",
                     deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
@@ -60,9 +58,7 @@ struct ModesView: View {
                 
                 CleaningModeCard(
                     icon: "Dynamic",
-                    emoji: "",
-                    title: "NanoShake™ Frequency Modulation",
-                    subtitle: "standart",
+                    mode: .nanoShake,
                     deviceIcon: "SmallDynamic",
                     deviceName: "Speaker",
                     deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
@@ -75,9 +71,7 @@ struct ModesView: View {
                 
                 CleaningModeCard(
                     icon: "Drop",
-                    emoji: "",
-                    title: "Dynamic Eject Curve v3.4",
-                    subtitle: "new firmware of the regime",
+                    mode: .dynamicEject,
                     deviceIcon: "SmallDrop",
                     deviceName: "Water",
                     deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
@@ -90,9 +84,7 @@ struct ModesView: View {
                 
                 CleaningModeCard(
                     icon: "Drop",
-                    emoji: "",
-                    title: "HydroGuard™ Pre-Sweep",
-                    subtitle: "speaker grid preparation",
+                    mode: .hydroGuard,
                     deviceIcon: "SmallWave",
                     deviceName: "Speaker",
                     deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
@@ -118,9 +110,7 @@ struct ModesView: View {
 struct CleaningModeCard: View {
     // Пропси для повторного використання
     let icon: String
-    let emoji: String
-    let title: String
-    let subtitle: String
+    let mode: CleaningMode
     let deviceIcon: String
     let deviceName: String
     let deviceColor: Color
@@ -131,7 +121,7 @@ struct CleaningModeCard: View {
     var body: some View {
         
         Button {
-            onModeAction(title)
+            onModeAction(mode.modeName)
         } label: {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top, spacing: 12) {
@@ -143,13 +133,12 @@ struct CleaningModeCard: View {
                     
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
-                            Text(emoji)
-                            Text(title)
+                            Text(mode.modeName)
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                                 
                         }
-                        Text(subtitle)
+                        Text(mode.explainText)
                             .font(.system(size: 14))
                             .foregroundColor(Color.white.opacity(0.55))
                     }
