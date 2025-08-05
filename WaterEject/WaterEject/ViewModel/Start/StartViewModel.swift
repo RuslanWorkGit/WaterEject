@@ -32,6 +32,24 @@ final class StartViewModel: ObservableObject {
         seqPlayer.playSequence(soundNames: ["fifty-tone", "hundred-tone-v1", "hundred-tone-v2", "hundred-and-fifty-tone", "hundred-tone-v1"], duration: 5.0)
     }
     
+    func playSomeWav() {
+        setupAudioSessionForPlayback()
+        audioManager.playWav(named: "some-sound")
+    }
+    
+    func playCleaningSequenceTwo() {
+        setupAudioSessionForPlayback()
+        // Приклад: 4 файли, усі в папці проєкту (без розширення!)
+        seqPlayer.playSequence(soundNames: ["first", "fifth", "nine", "secong", "third"], duration: 5.0)
+    }
+    
+    func playCleaningSequenceThree() {
+        setupAudioSessionForPlayback()
+        // Приклад: 4 файли, усі в папці проєкту (без розширення!)
+        seqPlayer.playSequence(soundNames: ["fourth", "sixth", "merge", "twoFifty", "ten"], duration: 5.0)
+    }
+
+    
     
     func setupAudioSessionForPlayback() {
         let session = AVAudioSession.sharedInstance()
@@ -42,6 +60,8 @@ final class StartViewModel: ObservableObject {
             print("Failed to setup AVAudioSession: \(error)")
         }
     }
+    
+    
     
     func startTimer() {
         stopTimer()

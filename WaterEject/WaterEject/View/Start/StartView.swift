@@ -12,7 +12,7 @@ struct StartView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showVolumeAlert: Bool = false
     let device: CleaningDevice
-    let mode: String
+    let mode: CleaningMode
     
     var body: some View {
         ZStack {
@@ -46,7 +46,7 @@ struct StartView: View {
                 
                 SelectedModeCard(
                     deviceIcon: "devices",
-                    title: mode,
+                    title: mode.modeName,
                     isActive: viewModel.startCleaning,
                     onSettings: { print("Settings tapped") }
                 )
@@ -74,8 +74,6 @@ struct StartView: View {
 
                     // Кнопка
                     Button {
-//                        viewModel.playCleaningSequence()
-//                        viewModel.startTimer()
                         showVolumeAlert = true
 
                     } label: {
@@ -101,8 +99,20 @@ struct StartView: View {
                 title: Text("Set Volume to Max"),
                 message: Text("For the most effective cleaning, please set your device volume to maximum."),
                 primaryButton: .default(Text("OK")) {
-                    viewModel.playCleaningSequence()
-                    viewModel.startTimer()
+                    switch mode {
+                    case .sonicPulse:
+                        viewModel.playCleaningSequence()
+                        viewModel.startTimer()
+                    case .nanoShake:
+                        viewModel.playSomeWav()
+                        viewModel.startTimer()
+                    case .dynamicEject:
+                        viewModel.playCleaningSequenceTwo()
+                        viewModel.startTimer()
+                    case .hydroGuard:
+                        viewModel.playCleaningSequenceThree()
+                        viewModel.startTimer()
+                    }
                 },
                 secondaryButton: .cancel()
             )
@@ -172,5 +182,5 @@ struct SelectedModeCard: View {
 }
 
 #Preview {
-    StartView(device: .iPhone , mode: "Some Mode")
+    StartView(device: .iPhone , mode: .nanoShake)
 }

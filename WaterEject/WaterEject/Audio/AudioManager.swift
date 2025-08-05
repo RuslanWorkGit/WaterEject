@@ -368,57 +368,62 @@ class AudioManager {
     }
     
     func playCustomWaterEjectSequence(channel: String = "both") {
-            stop()
+        stop()
+        
+        let totalDuration: TimeInterval = 30.0
+        let phase1Duration: TimeInterval = 10.0 // Низькочастотні імпульси
+        let phase2Duration: TimeInterval = 10.0 // Частотний свип
+        let phase3Duration: TimeInterval = 10.0 // Швидкі вібрації
+        
+        // Налаштування аудіо-сесії
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playback, mode: .default, options: [])
+            try audioSession.setActive(true)
+        } catch {
+            print("Error configuring audio session: \(error)")
+            return
+        }
+        
+        // Фаза 1: Низькочастотні імпульси
+        playLowFreqBursts(frequency: 80.0, burstDuration: 0.3, pauseDuration: 0.2, cycles: Int(phase1Duration / (0.3 + 0.2)), channel: channel)
+        
+        // Фаза 2: Частотний свип
+        DispatchQueue.main.asyncAfter(deadline: .now() + phase1Duration) {
+            self.playSweep(startFreq: 50.0, endFreq: 20000.0, duration: phase2Duration, channel: channel)
             
-            let totalDuration: TimeInterval = 30.0
-            let phase1Duration: TimeInterval = 10.0 // Низькочастотні імпульси
-            let phase2Duration: TimeInterval = 10.0 // Частотний свип
-            let phase3Duration: TimeInterval = 10.0 // Швидкі вібрації
-            
-            // Налаштування аудіо-сесії
-            let audioSession = AVAudioSession.sharedInstance()
-            do {
-                try audioSession.setCategory(.playback, mode: .default, options: [])
-                try audioSession.setActive(true)
-            } catch {
-                print("Error configuring audio session: \(error)")
-                return
-            }
-            
-            // Фаза 1: Низькочастотні імпульси
-            playLowFreqBursts(frequency: 80.0, burstDuration: 0.3, pauseDuration: 0.2, cycles: Int(phase1Duration / (0.3 + 0.2)), channel: channel)
-            
-            // Фаза 2: Частотний свип
-            DispatchQueue.main.asyncAfter(deadline: .now() + phase1Duration) {
-                self.playSweep(startFreq: 50.0, endFreq: 20000.0, duration: phase2Duration, channel: channel)
+            // Фаза 3: Швидкі вібрації
+            DispatchQueue.main.asyncAfter(deadline: .now() + phase2Duration) {
+                self.playMultiVibration(minFreq: 50.0, maxFreq: 2000.0, burstDuration: 0.1, pauseDuration: 0.05, totalDuration: phase3Duration, channel: channel)
                 
-                // Фаза 3: Швидкі вібрації
-                DispatchQueue.main.asyncAfter(deadline: .now() + phase2Duration) {
-                    self.playMultiVibration(minFreq: 50.0, maxFreq: 2000.0, burstDuration: 0.1, pauseDuration: 0.05, totalDuration: phase3Duration, channel: channel)
-                    
-                    // Завершення
-                    DispatchQueue.main.asyncAfter(deadline: .now() + phase3Duration) {
-                        print("Custom water eject sequence finished")
-                        self.stop()
-                    }
+                // Завершення
+                DispatchQueue.main.asyncAfter(deadline: .now() + phase3Duration) {
+                    print("Custom water eject sequence finished")
+                    self.stop()
                 }
             }
         }
+    }
     
     
     func playWav(named name: String) {
-            guard let url = Bundle.main.url(forResource: name, withExtension: "wav") else {
-                print("Не знайдено файл \(name).wav")
-                return
-            }
-            do {
-                player = try AVAudioPlayer(contentsOf: url)
-                player?.prepareToPlay()
-                player?.play()
-            } catch {
-                print("Помилка відтворення: \(error)")
-            }
+        guard let url = Bundle.main.url(forResource: name, withExtension: "wav") else {
+            print("Не знайдено файл \(name).wav")
+            return
         }
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.prepareToPlay()
+            player?.play()
+            
+            // Зупинити після 25 секунд
+            DispatchQueue.main.asyncAfter(deadline: .now() + 25) { [weak self] in
+                self?.player?.stop()
+            }
+        } catch {
+            print("Помилка відтворення: \(error)")
+        }
+    }
     
     func stop() {
         playerNode?.stop()

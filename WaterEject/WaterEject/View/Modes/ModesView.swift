@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ModesView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedMode: String?
+    @State private var selectedMode: CleaningMode?
     let device: CleaningDevice
     
     var body: some View {
@@ -116,12 +116,12 @@ struct CleaningModeCard: View {
     let deviceColor: Color
     let freq: String
     let time: String
-    let onModeAction: (String) -> Void
+    let onModeAction: (CleaningMode) -> Void
     
     var body: some View {
         
         Button {
-            onModeAction(mode.modeName)
+            onModeAction(mode)
         } label: {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top, spacing: 12) {
