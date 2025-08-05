@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     //@State private var showModesScreen = false
-    @State private var selectedDevice: String?
+    @State private var selectedDevice: CleaningDevice?
     
     var body: some View {
         ZStack {
@@ -57,12 +57,12 @@ struct HomeView: View {
 import SwiftUI
 
 struct DeviceButtonView: View {
-    let imageName: String
-    let label: String
-    let action: (String) -> Void
+    
+    let device: CleaningDevice
+    let action: (CleaningDevice) -> Void
     
     var body: some View {
-        Button(action: { action(label) }) {
+        Button(action: { action(device) }) {
             ZStack {
                 // Фон та overlay — ВСЕРЕДИНІ Button!
                 Circle()
@@ -89,9 +89,9 @@ struct DeviceButtonView: View {
                     )
                 
                 VStack(spacing: 12) {
-                    Image(imageName)
+                    Image(device.imageName)
                         .foregroundStyle(.white)
-                    Text(label)
+                    Text(device.displayName)
                         .font(.headline)
                         .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                 }
@@ -103,21 +103,21 @@ struct DeviceButtonView: View {
 }
 
 struct DeviceGridView: View {
-    let onDeviceTap: (String) -> Void
+    let onDeviceTap: (CleaningDevice) -> Void
     
     var body: some View {
         VStack(spacing: 32) {
             // Верхній (центральний) елемент
-            DeviceButtonView(imageName: "devices", label: "iPhone", action: onDeviceTap)
+            DeviceButtonView(device: .iPhone, action: onDeviceTap)
             
             // Два ряди по 2 елементи
             HStack(spacing: 32) {
-                DeviceButtonView(imageName: "airpodsPro", label: "AirPods Pro", action: onDeviceTap)
-                DeviceButtonView(imageName: "airpods", label: "AirPods", action: onDeviceTap)
+                DeviceButtonView(device: .airPodsPro, action: onDeviceTap)
+                DeviceButtonView(device: .airPods, action: onDeviceTap)
             }
             HStack(spacing: 32) {
-                DeviceButtonView(imageName: "airpodsMax", label: "AirPods Max", action: onDeviceTap)
-                DeviceButtonView(imageName: "speaker", label: "Speakers", action: onDeviceTap)
+                DeviceButtonView(device: .airPodsMax, action: onDeviceTap)
+                DeviceButtonView(device: .speakers, action: onDeviceTap)
             }
         }
 

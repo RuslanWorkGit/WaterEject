@@ -27,8 +27,20 @@ final class StartViewModel: ObservableObject {
     
     
     func playCleaningSequence() {
+        setupAudioSessionForPlayback()
         // Приклад: 4 файли, усі в папці проєкту (без розширення!)
         seqPlayer.playSequence(soundNames: ["fifty-tone", "hundred-tone-v1", "hundred-tone-v2", "hundred-and-fifty-tone", "hundred-tone-v1"], duration: 5.0)
+    }
+    
+    
+    func setupAudioSessionForPlayback() {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try session.setActive(true)
+        } catch {
+            print("Failed to setup AVAudioSession: \(error)")
+        }
     }
     
     func startTimer() {

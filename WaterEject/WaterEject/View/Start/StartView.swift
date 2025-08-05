@@ -10,7 +10,8 @@ import SwiftUI
 struct StartView: View {
     @StateObject private var viewModel = StartViewModel()
     @Environment(\.dismiss) private var dismiss
-    let device: String
+    @State private var showVolumeAlert: Bool = false
+    let device: CleaningDevice
     let mode: String
     
     var body: some View {
@@ -34,7 +35,7 @@ struct StartView: View {
                     
                     Spacer()
                     
-                    Text(device)
+                    Text(device.displayName)
                         .font(.system(size: 28, weight: .bold))
                         .foregroundStyle(.white)
                     
@@ -53,9 +54,8 @@ struct StartView: View {
                 
                 
                 VStack {
-                    Image("airpodsBig")
-                        //.resizable()
-                        //.frame(width: 201, height: 256)
+                    Image(device.bigImageName)
+
                         .padding(.top, 60)
                     
     
@@ -74,8 +74,10 @@ struct StartView: View {
 
                     // Кнопка
                     Button {
-                        viewModel.playCleaningSequence()
-                        viewModel.startTimer()
+//                        viewModel.playCleaningSequence()
+//                        viewModel.startTimer()
+                        showVolumeAlert = true
+
                     } label: {
                         Text("Start cleaning (25 sec)")
                             .foregroundStyle(Color.white)
@@ -94,6 +96,18 @@ struct StartView: View {
 
             }
         }
+        .alert(isPresented: $showVolumeAlert) {
+            Alert(
+                title: Text("Set Volume to Max"),
+                message: Text("For the most effective cleaning, please set your device volume to maximum."),
+                primaryButton: .default(Text("OK")) {
+                    viewModel.playCleaningSequence()
+                    viewModel.startTimer()
+                },
+                secondaryButton: .cancel()
+            )
+        }
+
     }
 }
 
@@ -158,5 +172,5 @@ struct SelectedModeCard: View {
 }
 
 #Preview {
-    StartView(device: "Iphone", mode: "Some Mode")
+    StartView(device: .iPhone , mode: "Some Mode")
 }

@@ -10,7 +10,7 @@ import SwiftUI
 struct ModesView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMode: String?
-    let device: String
+    let device: CleaningDevice
     
     var body: some View {
         ZStack {
@@ -28,7 +28,7 @@ struct ModesView: View {
                     
                     Spacer()
                     
-                    Text(device)
+                    Text(device.displayName)
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.white)
                     Spacer()
@@ -108,7 +108,7 @@ struct ModesView: View {
             }
         }
         .fullScreenCover(item: $selectedMode) { mode in
-            StartView(device: "Iphone", mode: mode)
+            StartView(device: device, mode: mode)
         }
     }
 }
@@ -202,6 +202,6 @@ struct CleaningModeCard: View {
 
 
 #Preview {
-    ModesView(device: "Iphone")
+    ModesView(device: .iPhone)
 
 }
