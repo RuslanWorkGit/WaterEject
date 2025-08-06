@@ -14,26 +14,52 @@ struct OnboardingFlowView: View {
     
     var body: some View {
         ZStack {
-            
-            switch currentStep {
-            case .hook:     HookView()
-            case .urgency:  UrgencyView()
-            case .solution: SolutionView()
-            case .tests:    TestsView()
-            case .paywall:  PaywallView(onFinish: finishOnboarding)
-            }
-            
-            Spacer()
-            if currentStep != .paywall {
-                Button("Continue") {
-                    goToNextStep()
+            Group {
+                switch currentStep {
+                case .hook:     HookView()
+                case .urgency:  UrgencyView()
+                case .solution: SolutionView()
+                case .tests:    TestsView()
+                case .paywall:  PaywallView(onFinish: finishOnboarding)
                 }
-                .buttonStyle(.borderedProminent)
-                .padding(.bottom, 32)
             }
+
+            
+            
+            
+            VStack {
+                
+                Spacer()
+                if currentStep != .paywall {
+                                            
+                        Button {
+                            goToNextStep()
+                        } label: {
+                            Text("Continue")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(Color.white)
+                                
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                
+                                .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+   
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 26)
+                    }
+                    
+                }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            
+            
+
         }
+        
         .transition(.slide)
         .animation(.easeInOut, value: currentStep)
+
     }
     
     func goToNextStep() {
