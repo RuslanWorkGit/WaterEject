@@ -40,7 +40,7 @@ final class StartViewModel: ObservableObject {
     func playCleaningSequenceTwo() {
         setupAudioSessionForPlayback()
         // Приклад: 4 файли, усі в папці проєкту (без розширення!)
-        seqPlayer.playSequence(soundNames: ["first", "fifth", "nine", "secong", "third"], duration: 5.0)
+        seqPlayer.playSequence(soundNames: ["first", "fifth", "nine", "second", "third"], duration: 5.0)
     }
     
     func playCleaningSequenceThree() {
