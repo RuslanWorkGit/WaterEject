@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct WaterEjectApp: App {
+    @StateObject var coordinator = AppCoordinator()
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            RootView()
+                .environmentObject(coordinator)
         }
     }
 }

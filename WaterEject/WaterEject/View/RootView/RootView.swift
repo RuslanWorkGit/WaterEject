@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct RootView: View {
-    
+    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     @EnvironmentObject var coordinator: AppCoordinator
 
     var body: some View {
-        
         switch coordinator.currentScreen {
         case .paywall:
-            PaywallView()
+            // PaywallView() — якщо хочеш прямий перехід, але зазвичай онбординг веде до paywall
+            EmptyView()
         case .onboarding:
-            OnboardingFlowView()
+            OnboardingFlowView(isActive: $hasSeenOnboarding)
         case .mainTabbar:
             HomeView()
         }
