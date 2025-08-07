@@ -17,31 +17,36 @@ struct ModesView: View {
             Background()
             
             VStack(spacing: 28) {
-                HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.backward")
-                        Text("Back")
-                            .font(.system(size: 17))
-                    }
-                    
-                    Spacer()
-                    
+                
+                ZStack {
+                    // По центру завжди — displayName
                     Text(device.displayName)
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.white)
-                    Spacer()
-                    Button(action: {
-                        print("Setting pressed")
-                    }) {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 24))
-                            .foregroundStyle(Color(red: 153 / 255, green: 153 / 255, blue: 153 / 255))
+                    
+                    // Поверх — кнопки зліва і справа
+                    HStack {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "chevron.backward")
+                            Text("Back")
+                                .font(.system(size: 17))
+                        }
+
+                        Spacer()
+
+                        Button(action: {
+                            print("Setting pressed")
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 24))
+                                .foregroundStyle(Color(red: 153 / 255, green: 153 / 255, blue: 153 / 255))
+                        }
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 16)
+                .padding(.top, 8)
                 
                 CleaningModeCard(
                     icon: "Drop",
