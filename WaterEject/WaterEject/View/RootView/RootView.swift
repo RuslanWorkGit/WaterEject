@@ -19,7 +19,7 @@ struct RootView: View {
         case .onboarding:
             OnboardingFlowView()
         case .mainTabbar:
-            HomeView()
+            TabBarView()
         }
     }
 }

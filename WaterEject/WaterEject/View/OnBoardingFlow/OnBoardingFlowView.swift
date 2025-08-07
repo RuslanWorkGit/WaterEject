@@ -72,7 +72,7 @@ struct OnboardingFlowView: View {
     func finishOnboarding() {
         hasSeenOnboarding = true
         coordinator.showMainTabbar()
-        //isActive = false // Coordinator прибирає onboarding і показує HomeView
+ 
     }
 }
 
