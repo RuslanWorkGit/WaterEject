@@ -9,12 +9,19 @@ import SwiftUI
 
 struct PaywallView: View {
     @State private var selectedPlan: Int = 1
+    let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
+    var repeatedImages: [String] {
+        Array(repeating: deviceImages, count: 10).flatMap { $0 }
+    }
+    
     let onFinish: () -> Void
     
     var body: some View {
         
-        
-        ZStack {
+        ZStack(alignment: .topTrailing) {
+            
+            
+            
             
             ZStack {
                 Background()
@@ -46,10 +53,26 @@ struct PaywallView: View {
                 .padding(.top, 50)
                 
                 VStack {
-                    Image("devices")
-                        .scaleEffect(2)
-                        .padding(.top, 184)
-                        .padding(.bottom, 74)
+                    //                    Image("devices")
+                    //                        .scaleEffect(2)
+                    //                        .padding(.top, 184)
+                    //                        .padding(.bottom, 74)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 36) {
+                            ForEach(repeatedImages.indices, id: \.self) { index in
+                                Image(repeatedImages[index])
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 110, height: 110)
+                                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                    }
+                    .frame(height: 140)
+                    .padding(.top, 64)
+                    .padding(.bottom, 32)
                     
                     VStack(spacing: 24) {
                         PaywallPlanCard(
@@ -114,23 +137,28 @@ struct PaywallView: View {
                         .foregroundColor(.gray)
                     }
                     
-                    //            Button("Continue") {
-                    //                // тут або після покупки підписки, або просто для демо:
-                    //                onFinish()
-                    //            }
                 }
-                .padding(.top, 24)
+                .padding(.top, 140)
                 .padding(.horizontal, 24)
-                
-                }
-                
                 
             }
             
-
+            Button(action: {
+                onFinish()
+            }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+                    .padding(14)
+            }
+            .padding(.top, 20)
+            .padding(.trailing, 18)
+        }
     }
     
 }
+
+
 
 struct PaywallPlanCard: View {
     let title: String
@@ -138,7 +166,7 @@ struct PaywallPlanCard: View {
     let sublabel: String?
     let isSelected: Bool
     let onTap: () -> Void
-
+    
     var body: some View {
         Button(action: onTap) {
             ZStack(alignment: .leading) {
@@ -163,26 +191,26 @@ struct PaywallPlanCard: View {
                         .font(.system(size: 28, weight: .bold))
                         .padding(16)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(title)
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 246 / 255))
                         Spacer()
                         if let sublabel = sublabel {
                             Text(sublabel)
                                 .font(.system(size: 15, weight: .semibold))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 4)
-                                .background(Color(red: 43/255, green: 217/255, blue: 156/255).opacity(0.15))
+                                .background(Color(red: 43/255, green: 217/255, blue: 156/255).opacity(0.14))
                                 .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
                                 .clipShape(Capsule())
                         }
                     }
                     Text(price)
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(.white.opacity(0.75))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 196 / 255))
                 }
                 .padding(.leading, 60)
                 .padding(.vertical, 22)
