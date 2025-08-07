@@ -19,30 +19,30 @@ struct StartView: View {
             Background(startCleaning: viewModel.startCleaning)
             
             VStack(spacing: 28) {
-                HStack {
-                    Button {
-                        dismiss()
-                        viewModel.stopTimer()
-                    } label: {
-                        Image(systemName: "chevron.backward")
-                            .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
-                        Text("Back")
-                            .font(.system(size: 17))
-                            .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
-                    }
-                    .disabled(viewModel.startCleaning)
-                    
-                    
-                    Spacer()
-                    
+                
+                ZStack {
                     Text(device.displayName)
                         .font(.system(size: 28, weight: .bold))
                         .foregroundStyle(.white)
                     
-                    Spacer()
+                    HStack {
+                        Button {
+                            dismiss()
+                            viewModel.stopTimer()
+                        } label: {
+                            Image(systemName: "chevron.backward")
+                                .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
+                            Text("Back")
+                                .font(.system(size: 17))
+                                .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
+                        }
+                        .disabled(viewModel.startCleaning)
+                        
+                        Spacer()
+                    }
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 16)
+                .padding(.top, 8)
                 
                 SelectedModeCard(
                     deviceIcon: "devices",
