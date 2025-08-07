@@ -8,6 +8,24 @@
 import SwiftUI
 
 struct TestsView: View {
+    
+    @StateObject var viewModel = TestsViewModel()
+    
+    // Дані для grid
+    private let tests: [(icon: String, label: String)] = [
+        ("circle.hexagongrid", "Stereo"),
+        ("dot.radiowaves.left.and.right", "Bass"),
+        ("mic", "Micro"),
+        ("dot.radiowaves.left.and.right", "Vibro"),
+        ("circle.dotted", "Noise")
+    ]
+    
+    // Дві колонки (гнучкі)
+    private let columns = [
+        GridItem(.flexible(), spacing: 14),
+        GridItem(.flexible(), spacing: 14)
+    ]
+    
     var body: some View {
         ZStack {
             Background()
@@ -47,22 +65,21 @@ struct TestsView: View {
                     .offset(y: -20)
                 }
                 
-                VStack(spacing: 18) {
-                    HStack(spacing: 16) {
-                        TestCheckCard(icon: "circle.hexagongrid", label: "Stereo", isChecked: true)
-                        TestCheckCard(icon: "dot.radiowaves.left.and.right", label: "Bass", isChecked: true)
-                    }
-                    HStack(spacing: 16) {
-                        TestCheckCard(icon: "mic", label: "Micro", isChecked: true)
-                        TestCheckCard(icon: "dot.radiowaves.left.and.right", label: "Vibro", isChecked: true)
-                    }
-                    HStack(spacing: 16) {
-                        TestCheckCard(icon: "circle.dotted", label: "Noise", isChecked: true)
-                        Spacer() // для вирівнювання
+                
+                LazyVGrid(columns: columns, spacing: 0) {
+                    ForEach(tests, id: \.label) { test in
+                        TestCheckCard(
+                            icon: test.icon,
+                            label: test.label,
+                            isChecked: viewModel.checked[test.label] ?? false
+                        ) {
+                            viewModel.toggle(test.label)
+                        }
                     }
                 }
-                .padding(.top, 8)
-                .padding(.horizontal, 6)
+                .padding(.top, 4)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 18)
                 
                 
                 
@@ -78,34 +95,43 @@ struct TestsView: View {
 }
 
 struct TestCheckCard: View {
-    let icon: String      // systemName для SFSymbols або ім'я картинки
+    let icon: String
     let label: String
     let isChecked: Bool
-
+    let onTap: () -> Void
+    
     var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(Color(red: 56/255, green: 255/255, blue: 185/255)) // Зелено-блакитний
-            Text(label)
-                .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(Color(red: 56/255, green: 255/255, blue: 185/255))
-            Spacer()
-            if isChecked {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 26))
-                    .foregroundStyle(Color(red: 56/255, green: 255/255, blue: 185/255))
+        Button(action: onTap) {
+            ZStack(alignment: .topTrailing) {
+                // Основний контент
+                HStack(spacing: 14) {
+                    Image(systemName: icon)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
+                    Text(label)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
+                    Spacer()
+                }
+                .padding(.vertical, 18)
+                .padding(.horizontal, 18)
+                
+                // Checkmark у правому верхньому куті
+                Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 16))
+                    .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
+                    .padding(8) // змісти від країв
             }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.14))
+            )
+            .frame(height: 70)
         }
-        .padding(.vertical, 14)
-        .padding(.horizontal, 18)
-        .background(
-            RoundedRectangle(cornerRadius: 22)
-                .fill(Color(red: 8/255, green: 44/255, blue: 51/255, opacity: 0.32))
-        )
-        .frame(height: 70)
+        .buttonStyle(.plain)
     }
 }
+
 
 
 #Preview {
