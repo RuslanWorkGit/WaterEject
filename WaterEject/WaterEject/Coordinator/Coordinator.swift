@@ -29,7 +29,10 @@ final class AppCoordinator: ObservableObject {
     }
     
     func showOnboarding() {
-        currentScreen = .onboarding
+        if !hasSeenOnboarding {
+            currentScreen = .onboarding
+        }
+        
     }
     
     func showMainTabbar() {

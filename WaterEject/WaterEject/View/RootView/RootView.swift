@@ -17,7 +17,7 @@ struct RootView: View {
             // PaywallView() — якщо хочеш прямий перехід, але зазвичай онбординг веде до paywall
             EmptyView()
         case .onboarding:
-            OnboardingFlowView(isActive: $hasSeenOnboarding)
+            OnboardingFlowView()
         case .mainTabbar:
             HomeView()
         }

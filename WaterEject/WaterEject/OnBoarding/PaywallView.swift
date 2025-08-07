@@ -8,13 +8,15 @@ import SwiftUI
 
 
 struct PaywallView: View {
+    
+    @StateObject private var viewModel = PaywallViewModel()
     @State private var selectedPlan: Int = 1
+    
+    let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
     var repeatedImages: [String] {
         Array(repeating: deviceImages, count: 10).flatMap { $0 }
     }
-    
-    let onFinish: () -> Void
     
     var body: some View {
         
@@ -94,6 +96,7 @@ struct PaywallView: View {
                     .padding(.bottom, 42)
                     
                     Button {
+                        viewModel.buyWithRevenueCat()
                         onFinish()
                     } label: {
                         Text("Continue")
@@ -144,6 +147,7 @@ struct PaywallView: View {
             }
             
             Button(action: {
+                viewModel.closePaywall()
                 onFinish()
             }) {
                 Image(systemName: "xmark")

@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct OnboardingFlowView: View {
-    @Binding var isActive: Bool  // Для Coordinator, щоб закривати flow
+    //@Binding var isActive: Bool  // Для Coordinator, щоб закривати flow
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     @State private var currentStep: OnboardingStep = .hook
     @EnvironmentObject var coordinator: AppCoordinator
@@ -72,7 +72,7 @@ struct OnboardingFlowView: View {
     func finishOnboarding() {
         hasSeenOnboarding = true
         coordinator.showMainTabbar()
-        isActive = false // Coordinator прибирає onboarding і показує HomeView
+        //isActive = false // Coordinator прибирає onboarding і показує HomeView
     }
 }
 
