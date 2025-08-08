@@ -112,6 +112,8 @@ struct StartView: View {
                     case .hydroGuard:
                         viewModel.playCleaningSequenceThree()
                         viewModel.startTimer()
+                    case .microCheck:
+                        viewModel.startTimer()
                     }
                 },
                 secondaryButton: .cancel()

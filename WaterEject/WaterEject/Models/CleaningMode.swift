@@ -11,6 +11,7 @@ enum CleaningMode: String, CaseIterable, Identifiable {
     case nanoShake
     case dynamicEject
     case hydroGuard
+    case microCheck
 
 
     var id: String { rawValue }
@@ -22,6 +23,7 @@ enum CleaningMode: String, CaseIterable, Identifiable {
         case .nanoShake: return "NanoShake™ Frequency Modulation"
         case .dynamicEject: return "Dynamic Eject Curve v3.4"
         case .hydroGuard: return "HydroGuard™ Pre-Sweep"
+        case .microCheck: return "Micro Check"
         }
     }
     
@@ -31,6 +33,7 @@ enum CleaningMode: String, CaseIterable, Identifiable {
         case .nanoShake: return "standart"
         case .dynamicEject: return "new firmware of the regime"
         case .hydroGuard: return "speaker grid preparation"
+        case .microCheck: return "Micro Check"
         }
     }
     

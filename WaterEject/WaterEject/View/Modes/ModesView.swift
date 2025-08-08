@@ -48,57 +48,83 @@ struct ModesView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
                 
-                CleaningModeCard(
-                    icon: "Drop",
-                    mode: .sonicPulse,
-                    deviceIcon: "SmallDynamic",
-                    deviceName: "Speaker",
-                    deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in
-                        selectedMode = mode
-                    }
-                )
+                ScrollView {
+                    CleaningModeCard(
+                        icon: "Drop",
+                        mode: .sonicPulse,
+                        deviceIcon: "SmallDynamic",
+                        deviceName: "Speaker",
+                        deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        onModeAction: { mode in
+                            selectedMode = mode
+                        }
+                    )
+                    
+                    CleaningModeCard(
+                        icon: "Dynamic",
+                        mode: .nanoShake,
+                        deviceIcon: "SmallDynamic",
+                        deviceName: "Speaker",
+                        deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        onModeAction: { mode in
+                            selectedMode = mode
+                        }
+                    )
+                    
+                    
+                    CleaningModeCard(
+                        icon: "Drop",
+                        mode: .dynamicEject,
+                        deviceIcon: "SmallDrop",
+                        deviceName: "Water",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        onModeAction: { mode in
+                            selectedMode = mode
+                        }
+                    )
+                    
+                    CleaningModeCard(
+                        icon: "Drop",
+                        mode: .hydroGuard,
+                        deviceIcon: "SmallWave",
+                        deviceName: "Speaker",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        onModeAction: { mode in
+                            selectedMode = mode
+                        }
+                    )
+                    
+                    CleaningModeCard(
+                        icon: "Microphone",
+                        mode: .microCheck,
+                        deviceIcon: "SmallWave",
+                        deviceName: "Speaker",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        onModeAction: { mode in
+                            selectedMode = mode
+                        }
+                    )
+                    
+                    
+                    
+                }
+               
                 
-                CleaningModeCard(
-                    icon: "Dynamic",
-                    mode: .nanoShake,
-                    deviceIcon: "SmallDynamic",
-                    deviceName: "Speaker",
-                    deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in
-                        selectedMode = mode
-                    }
-                )
                 
-                CleaningModeCard(
-                    icon: "Drop",
-                    mode: .dynamicEject,
-                    deviceIcon: "SmallDrop",
-                    deviceName: "Water",
-                    deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in
-                        selectedMode = mode
-                    }
-                )
                 
-                CleaningModeCard(
-                    icon: "Drop",
-                    mode: .hydroGuard,
-                    deviceIcon: "SmallWave",
-                    deviceName: "Speaker",
-                    deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in
-                        selectedMode = mode
-                    }
-                )
+                
+                
+                
 
                 Spacer()
                 
