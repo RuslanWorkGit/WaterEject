@@ -9,9 +9,7 @@ import SwiftUI
 
 struct TestView: View {
     
-    @StateObject var viewModel = TestViewModel()
-    @State private var isLeftOn = false
-    @State private var isRightOn = true
+    @StateObject private var viewModel = TestViewModel()
     
     var body: some View {
         ZStack {
@@ -43,7 +41,10 @@ struct TestView: View {
                     HStack(spacing: 12) {
                         
                         ForEach(TestMode.allCases) { mode in
-                            FeatureCard(iconName: mode.imageName, label: mode.testName)
+                            FeatureCard(testMode: mode, onChangeCategory: { mode in
+                                viewModel.mode = mode
+                            })
+                            
                         }
                         
                     }
@@ -53,15 +54,20 @@ struct TestView: View {
                 .padding(.leading, 8)
                 .padding(.top, -10)
                 
-                HStack(spacing: 8) {
-                    SpeakerSwitchCard(title: "Left", imageName: "OneSpeaker", isOn: $isLeftOn)
-                    SpeakerSwitchCard(title: "Right", imageName: "OneSpeaker", isOn: $isRightOn)
+                switch viewModel.mode {
+                case .stereo:
+                    StereoView()
+                case .bass:
+                    BassView()
+                case .micro:
+                    MicroView()
+                case .vibro:
+                    VibroVIew()
+                case .noise:
+                    NoiseView()
                 }
-                .padding(.top, 10)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 30)
                 
-                VolumeSliderView(viewModel: viewModel)
+                
                 
                 
                 Spacer()
@@ -77,130 +83,31 @@ struct TestView: View {
 
 
 struct FeatureCard: View {
-    let iconName: String
-    let label: String
+    let testMode: TestMode
+    let onChangeCategory: (TestMode) -> Void
     
     var body: some View {
-        VStack(spacing: 8) {
-            Image(iconName)
-            
-            Text(label)
-                .font(.system(size: 15))
-                .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
-        }
-        .frame(width: 96, height: 72)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.03))
-        )
-    }
-}
-
-struct SpeakerSwitchCard: View {
-    let title: String
-    let imageName: String
-    @Binding var isOn: Bool
-    
-    var body: some View {
-        Button(action: {
-            isOn.toggle()
-        }) {
-            VStack(spacing: 18) {
-                Text(title)
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(Color.white.opacity(0.7))
-                Image(imageName)
+        
+        Button {
+            onChangeCategory(testMode)
+        } label: {
+            VStack(spacing: 8) {
+                Image(testMode.imageName)
                 
-                Toggle("", isOn: $isOn)
-                    .labelsHidden()
-                    .toggleStyle(SwitchToggleStyle(tint: .green))
-                    .scaleEffect(1.2)
-                    .padding(.top, 10)
+                Text(testMode.testName)
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
             }
-            //.frame(width: 220)
-            //.padding(.vertical, 8)
-            
-            .background(Color.clear) // якщо треба тінь або фон, можна додати тут
-            .contentShape(Rectangle()) // Щоб область натискання була на всю картку
+            .frame(width: 96, height: 72)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white.opacity(0.03))
+            )
         }
-        .buttonStyle(.plain) // Щоб не було анімації кнопки
+
         
     }
 }
-
-struct VolumeSliderView: View {
-    @ObservedObject var viewModel: TestViewModel
-    
-    var body: some View {
-        VStack {
-            HStack(alignment: .center) {
-                Text("Volume")
-                    .foregroundColor(.white)
-                    .font(.system(size: 17))
-                
-                Spacer()
-                
-                Text("\(Int(viewModel.volume * 100))%")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    .background(Color.white.opacity(0.13))
-                    .clipShape(Capsule())
-            }
-            .padding(.horizontal, 24)
-        }
-        //        Slider(
-        //            value: $viewModel.volume,
-        //            in: 0...1,
-        //            step: 0.01
-        //        )
-        //        .accentColor(Color(red: 105/255, green: 150/255, blue: 255/255))
-        //        .frame(height: 20)
-        //        .padding(.horizontal, 24)
-        
-        VStack(spacing: 24) {
-            Slider(value: $viewModel.volume, in: 0...1)
-                .accentColor(.blue)
-            // Вставляємо невидимий SystemVolumeSlider (саме він керує системною гучністю)
-            SystemVolumeSlider(volume: $viewModel.volume)
-                .frame(width: 0, height: 0) // непомітний
-        }
-        .onAppear {
-            try? AVAudioSession.sharedInstance().setActive(true)
-        }
-        
-        
-    }
-}
-
-import SwiftUI
-import MediaPlayer
-
-struct SystemVolumeSlider: UIViewRepresentable {
-    @Binding var volume: Float
-    
-    private let volumeView = MPVolumeView(frame: .zero)
-    
-    func makeUIView(context: Context) -> MPVolumeView {
-        volumeView.showsVolumeSlider = false // Слайдер не видно
-        volumeView.alpha = 0.01 // Робимо непомітним
-        return volumeView
-    }
-    
-    func updateUIView(_ uiView: MPVolumeView, context: Context) {
-        setSystemVolume(volume)
-    }
-    
-    private func setSystemVolume(_ value: Float) {
-        // Знаходимо слайдер і рухаємо його thumb
-        guard let slider = volumeView.subviews.compactMap({ $0 as? UISlider }).first else { return }
-        DispatchQueue.main.async {
-            slider.value = value
-        }
-    }
-}
-
 
 
 #Preview {
