@@ -48,7 +48,6 @@ struct ModesView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
                 
-                ScrollView {
                     CleaningModeCard(
                         icon: "Drop",
                         mode: .sonicPulse,
@@ -101,30 +100,6 @@ struct ModesView: View {
                             selectedMode = mode
                         }
                     )
-                    
-                    CleaningModeCard(
-                        icon: "Microphone",
-                        mode: .microCheck,
-                        deviceIcon: "SmallWave",
-                        deviceName: "Speaker",
-                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
-                        onModeAction: { mode in
-                            selectedMode = mode
-                        }
-                    )
-                    
-                    
-                    
-                }
-               
-                
-                
-                
-                
-                
-                
 
                 Spacer()
                 

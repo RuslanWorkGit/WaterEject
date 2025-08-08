@@ -9,7 +9,7 @@ import SwiftUI
 
 struct IconCard: View {
     let icon: String
-    let systemImage: String?
+
     
     var body: some View {
         Circle()
@@ -34,11 +34,9 @@ struct IconCard: View {
                 )
             )
             
-        if let systemImage = systemImage  {
-            Image(systemName: systemImage)
-        } else {
+
             Image(icon)
-        }
+
         
 
     }
