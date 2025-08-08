@@ -55,10 +55,6 @@ struct PaywallView: View {
                 .padding(.top, 50)
                 
                 VStack {
-                    //                    Image("devices")
-                    //                        .scaleEffect(2)
-                    //                        .padding(.top, 184)
-                    //                        .padding(.bottom, 74)
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 36) {

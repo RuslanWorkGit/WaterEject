@@ -1,0 +1,24 @@
+<svg width="135" height="135" viewBox="0 0 135 135" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="67.402" cy="67.404" r="66.402" stroke="white" stroke-width="0.395345"/>
+<circle opacity="0.15" cx="67.4024" cy="67.4043" r="56.916" stroke="white" stroke-width="0.395345"/>
+<circle cx="4.79369" cy="67.404" r="1.8972" stroke="white" stroke-width="0.395345"/>
+<circle cx="69.2995" cy="4.79662" r="1.8972" stroke="white" stroke-width="0.395345"/>
+<circle cx="69.2995" cy="130.011" r="1.8972" stroke="white" stroke-width="0.395345"/>
+<circle cx="130.01" cy="67.404" r="1.8972" stroke="white" stroke-width="0.395345"/>
+<circle opacity="0.35" cx="67.4009" cy="67.4039" r="53.1216" stroke="white" stroke-width="0.395345"/>
+<circle opacity="0.5" cx="67.4015" cy="67.4034" r="49.3272" stroke="white" stroke-width="0.395345"/>
+<circle cx="67.4027" cy="67.4047" r="11.3832" stroke="white" stroke-width="3.7944"/>
+<circle cx="67.4027" cy="67.4047" r="11.3832" stroke="url(#paint0_radial_5276_5212)" stroke-width="3.7944"/>
+<circle cx="67.4005" cy="67.4044" r="20.8692" stroke="white" stroke-width="9.48601"/>
+<circle cx="67.4005" cy="67.4044" r="20.8692" stroke="url(#paint1_radial_5276_5212)" stroke-width="9.48601"/>
+<defs>
+<radialGradient id="paint0_radial_5276_5212" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(67.4027 67.4047) rotate(90) scale(11.3832)">
+<stop stop-color="#DEE9FF"/>
+<stop offset="1" stop-color="#B2BACC"/>
+</radialGradient>
+<radialGradient id="paint1_radial_5276_5212" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(67.4005 67.4044) rotate(90) scale(20.8692)">
+<stop stop-color="#DEE9FF"/>
+<stop offset="1" stop-color="#B2BACC"/>
+</radialGradient>
+</defs>
+</svg>

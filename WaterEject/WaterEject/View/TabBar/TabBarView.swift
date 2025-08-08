@@ -26,11 +26,3 @@ struct TabBarView: View {
 
 
 
-struct TestView: View {
-    var body: some View {
-        ZStack {
-            Background()
-        }
-        
-    }
-}
