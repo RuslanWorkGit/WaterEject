@@ -45,7 +45,7 @@ struct SpeakerSwitchCard: View {
                 
                 Toggle("", isOn: $isOn)
                     .labelsHidden()
-                    .toggleStyle(SwitchToggleStyle(tint: .green))
+                    .tint(Color.blue)
                     .scaleEffect(1.2)
                     .padding(.top, 10)
             }
