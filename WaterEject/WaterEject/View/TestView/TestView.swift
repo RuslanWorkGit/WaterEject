@@ -10,6 +10,7 @@ import SwiftUI
 struct TestView: View {
     
     @StateObject private var viewModel = TestViewModel()
+    let onFinish: () -> Void
     
     var body: some View {
         ZStack {
@@ -67,17 +68,41 @@ struct TestView: View {
                     NoiseView()
                 }
                 
-                
-                
-                
-                Spacer()
+                bottomButton
             }
             .background(Color.clear)
             
         }
-
+        
         
     }
+    
+    private var bottomButton: some View {
+            VStack {
+                Spacer()
+                let isLast = viewModel.mode == TestMode.allCases.last
+                Button {
+                    if isLast {
+                        onFinish()            // ← повертаємо на Home
+                    } else {
+                        viewModel.goToNextStep()
+                    }
+                } label: {
+                    Text(isLast ? "Finish" : "Continue")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 81/255, green: 132/255, blue: 234/255))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 26) // підлаштуй під дизайн
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        }
+
+    
 }
 
 
@@ -111,5 +136,5 @@ struct FeatureCard: View {
 
 
 #Preview {
-    TestView()
+    TestView(onFinish: { print("HElllo") })
 }

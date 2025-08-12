@@ -22,6 +22,8 @@ struct CustomTabBarContainerView<Content: View>: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             CustomTabBar(selectedTab: $selectedTab)
+                .offset(y: selectedTab == .test ? 120 : 0) // ховаємо вниз
+                .animation(.easeInOut(duration: 0.25), value: selectedTab)
         }
         .edgesIgnoringSafeArea(.bottom)
     }

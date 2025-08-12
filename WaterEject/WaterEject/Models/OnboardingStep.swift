@@ -8,5 +8,9 @@
 import Foundation
 
 enum OnboardingStep: Int, CaseIterable {
-    case hook, urgency, solution, tests, paywall
+    case hook
+    case urgency
+    case solution
+    //case tests
+    case paywall
 }

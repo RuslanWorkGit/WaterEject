@@ -19,7 +19,7 @@ struct OnboardingFlowView: View {
                 case .hook:     HookView()
                 case .urgency:  UrgencyView()
                 case .solution: SolutionView()
-                case .tests:    TestsView()
+                //case .tests:    TestsView()
                 case .paywall:  PaywallView(onFinish: finishOnboarding)
                 }
             }

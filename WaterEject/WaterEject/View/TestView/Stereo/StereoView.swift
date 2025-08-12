@@ -81,14 +81,6 @@ struct VolumeSliderView: View {
             }
             .padding(.horizontal, 24)
         }
-        //        Slider(
-        //            value: $viewModel.volume,
-        //            in: 0...1,
-        //            step: 0.01
-        //        )
-        //        .accentColor(Color(red: 105/255, green: 150/255, blue: 255/255))
-        //        .frame(height: 20)
-        //        .padding(.horizontal, 24)
         
         VStack(spacing: 24) {
             Slider(value: $viewModel.volume, in: 0...1)

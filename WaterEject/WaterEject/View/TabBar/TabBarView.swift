@@ -17,7 +17,9 @@ struct TabBarView: View {
                 case .home:
                     HomeView()
                 case .test:
-                    TestView()
+                    TestView {
+                        selectedTab = .home
+                    }
                 }
             }
         }
