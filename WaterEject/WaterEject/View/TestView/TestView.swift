@@ -59,7 +59,7 @@ struct TestView: View {
                 case .stereo:
                     StereoView()
                 case .bass:
-                    BassView()
+                    BassView(onContinue: { viewModel.goToNextStep()})
                 case .micro:
                     MicroView()
                 case .vibro:
@@ -68,7 +68,12 @@ struct TestView: View {
                     NoiseView()
                 }
                 
-                bottomButton
+                if viewModel.mode == .bass {
+                    
+                } else {
+                    bottomButton
+                }
+                
             }
             .background(Color.clear)
             
@@ -97,7 +102,7 @@ struct TestView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 26) // підлаштуй під дизайн
+                .padding(.bottom, 40) // підлаштуй під дизайн
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
