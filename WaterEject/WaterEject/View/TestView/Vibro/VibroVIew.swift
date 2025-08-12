@@ -7,12 +7,73 @@
 
 import SwiftUI
 
-struct VibroVIew: View {
+struct VibroView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(spacing: 24) {
+            ZStack {
+                Image("Lines")
+                
+                VStack(spacing: 15) {
+                    Text("Vibro")
+                        .font(.system(size: 80, weight: .bold))
+                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+                    ZStack {
+                        Image("Heart")
+                    }
+                }
+                .offset(y: -20)
+            }
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    
+                    ForEach(VibroModel.allCases) { mode in
+                        VibroCard(testMode: mode, onChangeCategory: { mode in
+                            viewModel.mode = mode
+                        })
+                        
+                    }
+                    
+                }
+                .padding(.horizontal, 10)
+            }
+            .frame(height: 140)
+            .padding(.leading, 8)
+            .padding(.top, -10)
+
+            
+        }
     }
 }
 
+struct VibroCard: View {
+    let testMode: VibroModel
+    let onChangeCategory: (VibroModel) -> Void
+    
+    var body: some View {
+        
+        Button {
+            onChangeCategory(testMode)
+        } label: {
+            VStack(spacing: 8) {
+                Image(testMode.imageName)
+                
+                Text(testMode.testName)
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+            }
+            .frame(width: 96, height: 72)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white.opacity(0.03))
+            )
+        }
+
+        
+    }
+}
+
+
 #Preview {
-    VibroVIew()
+    VibroView()
 }

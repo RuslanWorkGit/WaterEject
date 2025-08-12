@@ -61,7 +61,7 @@ struct TestView: View {
                 case .bass:
                     BassView(onContinue: { viewModel.goToNextStep()})
                 case .micro:
-                    MicroView()
+                    MicroView(onContinue: { viewModel.goToNextStep()})
                 case .vibro:
                     VibroVIew()
                 case .noise:
@@ -69,6 +69,8 @@ struct TestView: View {
                 }
                 
                 if viewModel.mode == .bass {
+                    
+                } else if viewModel.mode == .micro {
                     
                 } else {
                     bottomButton
