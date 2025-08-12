@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct VibroView: View {
+    @StateObject private var viewModel = VibroViewModel()
+    
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 8) {
             ZStack {
                 Image("Lines")
                 
@@ -24,12 +26,15 @@ struct VibroView: View {
                 .offset(y: -20)
             }
             
+            Text("Pater")
+                .multilineTextAlignment(.leading)
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     
                     ForEach(VibroModel.allCases) { mode in
                         VibroCard(testMode: mode, onChangeCategory: { mode in
-                            viewModel.mode = mode
+                            viewModel.vibroMode = mode
                         })
                         
                     }
@@ -40,6 +45,8 @@ struct VibroView: View {
             .frame(height: 140)
             .padding(.leading, 8)
             .padding(.top, -10)
+            
+            Text("Intensity")
 
             
         }
@@ -56,7 +63,7 @@ struct VibroCard: View {
             onChangeCategory(testMode)
         } label: {
             VStack(spacing: 8) {
-                Image(testMode.imageName)
+                Image(systemName: testMode.imageName)
                 
                 Text(testMode.testName)
                     .font(.system(size: 15))
