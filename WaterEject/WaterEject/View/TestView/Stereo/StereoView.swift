@@ -24,6 +24,21 @@ struct StereoView: View {
             
             VolumeSliderView(viewModel: viewModel)
                 .padding(.horizontal, 24)
+            
+            // Play
+            Button {
+                viewModel.playTest(left: isLeftOn, right: isRightOn)
+            } label: {
+                Text("Play")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 12)
         }
     }
 }
@@ -49,7 +64,7 @@ struct SpeakerSwitchCard: View {
                     .scaleEffect(1.2)
                     .padding(.top, 10)
             }
-
+            
             
             .background(Color.clear) // якщо треба тінь або фон, можна додати тут
             .contentShape(Rectangle()) // Щоб область натискання була на всю картку

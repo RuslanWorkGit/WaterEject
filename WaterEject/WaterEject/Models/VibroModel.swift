@@ -33,3 +33,19 @@ enum VibroModel: String, CaseIterable, Identifiable {
         }
     }
 }
+
+// MARK: - Intensity model
+
+enum IntensityLevel: String, CaseIterable, Identifiable {
+    case soft, medium, hard
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .soft:   return "Soft"
+        case .medium: return "Medium"
+        case .hard:   return "Hard"
+        }
+    }
+}
+
