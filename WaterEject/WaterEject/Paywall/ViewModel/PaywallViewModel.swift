@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class PaywallFirstViewModel: ObservableObject {
+final class PaywallViewModel: ObservableObject {
     
     
     func buyWithRevenueCat() {

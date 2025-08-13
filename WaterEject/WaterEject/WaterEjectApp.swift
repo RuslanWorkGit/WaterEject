@@ -7,12 +7,22 @@
 
 import SwiftUI
 import RevenueCat
+import Firebase
 
 @main
 struct WaterEjectApp: App {
     
     init() {
         Purchases.configure(withAPIKey: "appl_lVJsBEhDCcyoBVhDgoyaBHruByh")
+        FirebaseApp.configure()
+        
+        if FirebaseApp.app() != nil {
+            print("✅ Firebase connected successfully")
+        } else {
+            print("❌ Firebase failed to connect")
+        }
+        
+        PaywallAB.shared.fetchRemoteConfig()
     }
     @StateObject var coordinator = AppCoordinator()
     

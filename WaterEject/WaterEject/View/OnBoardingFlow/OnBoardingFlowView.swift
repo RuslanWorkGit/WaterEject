@@ -20,7 +20,8 @@ struct OnboardingFlowView: View {
                 case .urgency:  UrgencyView()
                 case .solution: SolutionView()
                 //case .tests:    TestsView()
-                case .paywall:  PaywallFirstView(onFinish: finishOnboarding)
+                case .paywall:
+                    PaywallAB.shared.assignedPaywallView(onFinish: finishOnboarding)
                 }
             }
 

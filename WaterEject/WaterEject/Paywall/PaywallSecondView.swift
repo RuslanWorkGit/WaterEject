@@ -10,7 +10,7 @@ import SwiftUI
 
 struct PaywallSecondView: View {
     
-    @StateObject private var viewModel = PaywallFirstViewModel()
+    @StateObject private var viewModel = PaywallViewModel()
     @State private var selectedPlan: Int = 1
     
     let onFinish: () -> Void
