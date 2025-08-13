@@ -14,7 +14,7 @@ struct RootView: View {
     var body: some View {
         switch coordinator.currentScreen {
         case .paywall:
-            // PaywallView() — якщо хочеш прямий перехід, але зазвичай онбординг веде до paywall
+            // PaywallFirstView() — якщо хочеш прямий перехід, але зазвичай онбординг веде до paywall
             EmptyView()
         case .onboarding:
             OnboardingFlowView()

@@ -1,5 +1,5 @@
 //
-//  PaywallView.swift
+//  PaywallFirstView.swift
 //  WaterEject
 //
 //  Created by Ruslan Liulka on 06.08.2025.
@@ -7,9 +7,9 @@
 import SwiftUI
 
 
-struct PaywallView: View {
+struct PaywallFirstView: View {
     
-    @StateObject private var viewModel = PaywallViewModel()
+    @StateObject private var viewModel = PaywallFirstViewModel()
     @State private var selectedPlan: Int = 1
     
     let onFinish: () -> Void

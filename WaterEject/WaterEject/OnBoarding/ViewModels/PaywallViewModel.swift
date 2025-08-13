@@ -1,5 +1,5 @@
 //
-//  PaywallViewModel.swift
+//  PaywallFirstViewModel.swift
 //  WaterEject
 //
 //  Created by Ruslan Liulka on 07.08.2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class PaywallViewModel: ObservableObject {
+final class PaywallFirstViewModel: ObservableObject {
     
     
     func buyWithRevenueCat() {
