@@ -5,7 +5,7 @@
 //  Created by Ruslan Liulka on 12.08.2025.
 //
 
-enum VibroModel: String, CaseIterable, Identifiable {
+enum VibroModel: String, CaseIterable, Identifiable, Hashable {
     case waves
     case heart
     case volcano

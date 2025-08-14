@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAnalytics
 
 
 struct PaywallSecondView: View {
@@ -22,8 +23,6 @@ struct PaywallSecondView: View {
     var body: some View {
         
         ZStack(alignment: .topTrailing) {
-            
-            
             
             
             ZStack {
@@ -78,8 +77,14 @@ struct PaywallSecondView: View {
                     .padding(.bottom, 42)
                     
                     Button {
-                        viewModel.buyWithRevenueCat()
-                        onFinish()
+                        let v = PaywallAB.shared.variant()
+                        Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
+                        
+                        let plan: PaywallPlan = (selectedPlan == 0) ? .weekly : .yearly
+                                                Task {
+                                                    await viewModel.buyWithRevenueCat(plan: plan)
+                                                    if viewModel.purchaseSucceeded { onFinish() }
+                                                }
                     } label: {
                         Text("Continue")
                             .font(.system(size: 16, weight: .semibold))
@@ -149,6 +154,10 @@ struct PaywallSecondView: View {
             }
             .padding(.top, 20)
             .padding(.trailing, 18)
+        }
+        .onAppear {
+            let v = PaywallAB.shared.variant()
+            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
     }
     

@@ -5,6 +5,7 @@
 //  Created by Ruslan Liulka on 06.08.2025.
 //
 import SwiftUI
+import FirebaseAnalytics
 
 
 struct PaywallFirstView: View {
@@ -92,8 +93,14 @@ struct PaywallFirstView: View {
                     .padding(.bottom, 42)
                     
                     Button {
-                        viewModel.buyWithRevenueCat()
-                        onFinish()
+                        let v = PaywallAB.shared.variant()
+                        Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
+                        
+                        let plan: PaywallPlan = (selectedPlan == 0) ? .weekly : .yearly
+                                                Task {
+                                                    await viewModel.buyWithRevenueCat(plan: plan)
+                                                    if viewModel.purchaseSucceeded { onFinish() }
+                                                }
                     } label: {
                         Text("Continue")
                             .font(.system(size: 16, weight: .semibold))
@@ -153,6 +160,10 @@ struct PaywallFirstView: View {
             }
             .padding(.top, 20)
             .padding(.trailing, 18)
+        }
+        .onAppear {
+            let v = PaywallAB.shared.variant()
+            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
     }
     

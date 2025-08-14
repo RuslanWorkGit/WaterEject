@@ -73,7 +73,7 @@ struct ComparisonTable: View {
                         Image(systemName: "exclamationmark.circle.fill")
                             .foregroundStyle(Color(red: 247/255, green: 192/255, blue: 67/255))
                         Text(row.broken)
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(Color(red: 247/255, green: 192/255, blue: 67/255))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -83,7 +83,7 @@ struct ComparisonTable: View {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
                         Text(row.normal)
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

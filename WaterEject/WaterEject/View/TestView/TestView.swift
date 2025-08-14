@@ -63,20 +63,18 @@ struct TestView: View {
                 case .micro:
                     MicroView(onContinue: { viewModel.goToNextStep()})
                 case .vibro:
-                    VibroView()
+                    VibroView(onContinue: { viewModel.goToNextStep()})
                 case .noise:
                     NoiseView()
                 }
+                    
                 
-                if viewModel.mode == .bass {
-                    
-                } else if viewModel.mode == .micro {
-                    
-                } else {
+                if viewModel.mode == .stereo || viewModel.mode == .noise {
                     bottomButton
                 }
                 
             }
+            .padding(.horizontal, 14)
             .background(Color.clear)
             
         }

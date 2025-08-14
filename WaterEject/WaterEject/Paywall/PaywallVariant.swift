@@ -15,14 +15,14 @@ enum PaywallVariant: String { case A, B } // A = PaywallFirstView, B = PaywallSe
 
 final class PaywallAB {
     static let shared = PaywallAB()
+
     private init() {
-        // RC дефолти
         let settings = RemoteConfigSettings()
         settings.minimumFetchInterval = 0 // на проді зроби 3600+
         rc.configSettings = settings
         rc.setDefaults([
-            "paywall_share_A": 50 as NSObject,   // % користувачів у варіант A
-            "paywall_force": "" as NSObject       // "A" або "B" щоб форснути, або "" щоб вимкнено
+            "paywall_share_A": 50 as NSObject,   // % у варіант A
+            "paywall_force": "" as NSObject      // "A"/"B" або ""
         ])
     }
 
@@ -33,7 +33,6 @@ final class PaywallAB {
         rc.fetchAndActivate { _, _ in completion?() }
     }
 
-    /// Стабільний ID (однаковий для користувача між сесіями)
     private func stableUserID() -> String {
         let id = Purchases.shared.appUserID
         return id.isEmpty
@@ -41,27 +40,44 @@ final class PaywallAB {
             : id
     }
 
-    /// Отримати призначений варіант (кешується у UserDefaults)
-    func variant() -> PaywallVariant {
-        if let raw = UserDefaults.standard.string(forKey: storageKey),
-           let v = PaywallVariant(rawValue: raw) { return v }
+    // ❗️Єдина точка, що ставить user property + RC attributes
+    private func applyTracking(_ v: PaywallVariant) {
+        Analytics.setUserProperty(v.rawValue, forName: "paywall_variant")
+        Purchases.shared.attribution.setAttributes(["paywall_variant": v.rawValue])
+        
+        let key = "variant_assigned_logged_v1"
+            if !UserDefaults.standard.bool(forKey: key) {
+                Analytics.logEvent("variant_assigned", parameters: ["variant": v.rawValue])
+                UserDefaults.standard.set(true, forKey: key)
+            }
+    }
 
-        // 1) перевіряємо форс із RC
+    func variant() -> PaywallVariant {
+        // 1) уже є в кеші
+        if let raw = UserDefaults.standard.string(forKey: storageKey),
+           let v = PaywallVariant(rawValue: raw) {
+            applyTracking(v) // <-- не забуваємо
+            return v
+        }
+
+        // 2) форс із RC
         if let forced = PaywallVariant(rawValue: rc["paywall_force"].stringValue) {
             UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
+            applyTracking(forced)
             return forced
         }
 
-        // 2) 50/50 (або інший %) за RC
-        let shareA = rc["paywall_share_A"].numberValue.intValue  // 0..100
+        // 3) спліт за RC
+        let rawShare = rc["paywall_share_A"].numberValue.intValue
+        let shareA = min(max(rawShare, 0), 100) // clamp 0...100
         let bucket = abs(stableUserID().hashValue) % 100
         let v: PaywallVariant = (bucket < shareA) ? .A : .B
 
         UserDefaults.standard.set(v.rawValue, forKey: storageKey)
+        applyTracking(v)
         return v
     }
 
-    /// Готовий SwiftUI-в’ю для призначеного пейвола
     func assignedPaywallView(onFinish: @escaping () -> Void) -> AnyView {
         switch variant() {
         case .A: return AnyView(PaywallFirstView(onFinish: onFinish))
@@ -69,6 +85,7 @@ final class PaywallAB {
         }
     }
 }
+
 
 enum PaywallRouter {
     static func presentAssigned(from presenter: UIViewController, onFinish: @escaping () -> Void = {}) {
