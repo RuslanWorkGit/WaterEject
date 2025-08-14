@@ -11,6 +11,7 @@ struct StereoView: View {
     @StateObject var viewModel = StereoViewModel()
     @State private var isLeftOn = false
     @State private var isRightOn = true
+    var onContinue: () -> Void
     
     var body: some View {
         VStack {
@@ -25,20 +26,37 @@ struct StereoView: View {
             VolumeSliderView(viewModel: viewModel)
                 .padding(.horizontal, 24)
             
-            // Play
-            Button {
-                viewModel.playTest(left: isLeftOn, right: isRightOn)
-            } label: {
-                Text("Play")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.blue)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            Spacer()
+            
+            HStack {
+                Button {
+                    viewModel.playTest(left: isLeftOn, right: isRightOn)
+                } label: {
+                    Text("Test Stereo")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                    
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                
+                Button {
+                    onContinue()
+                } label: {
+                    Text("Continue")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255).opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
             }
             .padding(.horizontal, 24)
             .padding(.top, 12)
+            .padding(.bottom, 40)
         }
     }
 }
@@ -140,5 +158,7 @@ struct SystemVolumeSlider: UIViewRepresentable {
 }
 
 #Preview {
-    StereoView()
+    StereoView {
+        print("hello")
+    }
 }

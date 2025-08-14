@@ -104,39 +104,88 @@ struct TestClipCard: View {
     
     var body: some View {
         Button(action: action) {
-            ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(LinearGradient(colors: [
-                        Color.white.opacity(isFinished ? 0.10 : 0.06),
-                        Color.white.opacity(isFinished ? 0.18 : 0.08)
-                    ], startPoint: .topLeading, endPoint: .bottomTrailing))
+            ZStack(alignment: .center) {
+                
+                if (isPlaying && isFinished) == false {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: Color(red: 222/255, green: 233/255, blue: 255/255).opacity(0.35), location: 0.0), // 0% @ 35%
+                                    .init(color: Color(red: 222/255, green: 233/255, blue: 255/255).opacity(1.0),  location: 1.0)  // 100% @ 100%
+                                ]),
+                                startPoint: .top,   // зліва
+                                endPoint: .bottom     // направо
+                            )
+                        )
+                        .opacity(1)
+                    
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.white.opacity(0.25), lineWidth: 2)
+                        .blur(radius: 0.5)
+                        .offset(x: 0, y: 1)
+                        .mask(
+                            RoundedRectangle(cornerRadius: 14).fill(
+                                LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+                            )
+                        )
+                    
+                }
+                
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(
+                        isPlaying
+                        ? Color(red: 81/255, green: 132/255, blue: 234/255).opacity(0.14)
+                        : isFinished
+                        ? Color(red: 43/255, green: 217/255, blue: 156/255).opacity(0.14)
+                        : Color.clear
+                    )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18)
-                            .stroke(isFinished ? Color.green.opacity(0.6) : Color.white.opacity(0.12), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(
+                                isPlaying
+                                ? Color.blue.opacity(0.6)
+                                : (isFinished
+                                   ? Color(red: 43/255, green: 217/255, blue: 156/255)
+                                   : Color.white.opacity(0.12)),
+                                lineWidth: isPlaying ? 2 : 1
+                            )
                     )
                 
-                // чек праворуч-угорі, коли завершено
                 if isFinished {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color.green)
+                        .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
                         .padding(10)
                 }
                 
                 VStack(spacing: 10) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(isFinished ? .green : Color(red: 81/255, green: 132/255, blue: 234/255))
+                        .foregroundStyle(
+                            isFinished
+                            ? Color(red: 43/255, green: 217/255, blue: 156/255)
+                            : Color(red: 81/255, green: 132/255, blue: 234/255)
+                        )
                     
                     Text(title)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.9))
+                        .foregroundStyle(
+                            isFinished ? Color(red: 247/255, green: 247/255, blue: 247/255)
+                            : isPlaying ? Color(red: 81/255, green: 132/255, blue: 234/255)
+                            : Color(red: 247/255, green: 247/255, blue: 247/255)
+                        )
                 }
                 .padding(18)
-                .frame(maxWidth: .infinity, minHeight: 84)
             }
+            // ВАЖЛИВО: робимо клікабельною всю картку
+            .frame(maxWidth: .infinity, minHeight: 84)
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .animation(.easeInOut(duration: 0.2), value: isPlaying)
         }
         .buttonStyle(.plain)
+        // Якщо хочеш, щоб і зовнішні відступи теж були клікабельні:
+        // .padding(.horizontal, 16)
     }
 }
 

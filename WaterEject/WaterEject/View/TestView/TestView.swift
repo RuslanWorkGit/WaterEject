@@ -42,7 +42,10 @@ struct TestView: View {
                     HStack(spacing: 12) {
                         
                         ForEach(TestMode.allCases) { mode in
-                            FeatureCard(testMode: mode, onChangeCategory: { mode in
+                            FeatureCard(testMode: mode,
+                                        isSelected: viewModel.mode == mode,
+                                        isCompleted: viewModel.completedModesTest.contains(mode),
+                                        onChangeCategory: { mode in
                                 viewModel.mode = mode
                             })
                             
@@ -57,7 +60,7 @@ struct TestView: View {
                 
                 switch viewModel.mode {
                 case .stereo:
-                    StereoView()
+                    StereoView(onContinue: { viewModel.goToNextStep()})
                 case .bass:
                     BassView(onContinue: { viewModel.goToNextStep()})
                 case .micro:
@@ -69,7 +72,7 @@ struct TestView: View {
                 }
                     
                 
-                if viewModel.mode == .stereo || viewModel.mode == .noise {
+                if viewModel.mode == .noise {
                     bottomButton
                 }
                 
@@ -114,6 +117,8 @@ struct TestView: View {
 
 struct FeatureCard: View {
     let testMode: TestMode
+    let isSelected: Bool
+    let isCompleted: Bool
     let onChangeCategory: (TestMode) -> Void
     
     var body: some View {
@@ -131,9 +136,24 @@ struct FeatureCard: View {
             .frame(width: 96, height: 72)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.03))
+                    .fill(isCompleted ? Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255).opacity(0.14) : isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255).opacity(0.14) : Color.white.opacity(0.03))
             )
         }
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isCompleted ? Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255) : Color.clear, lineWidth: 1)
+        )
+        .overlay(alignment: .topTrailing) {
+            if isCompleted {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.green)
+                    .padding(6)
+            }
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 16))
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
+        .animation(.easeInOut(duration: 0.15), value: isCompleted)
 
         
     }

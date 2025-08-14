@@ -75,28 +75,34 @@ struct VibroView: View {
             .padding(.horizontal, 12)
             .padding(.top, 6)
             
-            Button {
-                viewModel.playVibro()
-            } label: {
-                Label("Play Vibro", systemImage: "play.fill")
-                    .font(.system(size: 17, weight: .semibold))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.blue)
-            .padding(.top, 12)
+            Spacer()
             
-            Button(action: onContinue) {
-                Text("Continue")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 81/255, green: 132/255, blue: 234/255))
-                    )
+            
+            HStack {
+                Button {
+                    viewModel.playVibro()
+                } label: {
+                    Text("Test Vibration")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                    
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                
+                Button {
+                    onContinue()
+                } label: {
+                    Text("Continue")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255).opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 40)

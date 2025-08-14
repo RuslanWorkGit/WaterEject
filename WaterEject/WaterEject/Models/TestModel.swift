@@ -5,7 +5,7 @@
 //  Created by Ruslan Liulka on 08.08.2025.
 //
 
-enum TestMode: String, CaseIterable, Identifiable {
+enum TestMode: String, CaseIterable, Identifiable, Hashable {
     case stereo
     case bass
     case micro
