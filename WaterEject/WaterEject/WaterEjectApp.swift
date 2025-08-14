@@ -30,6 +30,7 @@ struct WaterEjectApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(coordinator)
+                .environmentObject(PaywallGate.shared)
         }
     }
 }

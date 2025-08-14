@@ -11,7 +11,10 @@ import FirebaseAnalytics
 import RevenueCat
 import SwiftUI
 
-enum PaywallVariant: String { case A, B } // A = PaywallFirstView, B = PaywallSecondView
+enum PaywallVariant: String, Identifiable {
+    case A, B
+    var id: String { rawValue }
+}
 
 final class PaywallAB {
     static let shared = PaywallAB()

@@ -16,6 +16,7 @@ struct TabBarView: View {
                 switch selectedTab {
                 case .home:
                     HomeView()
+                        .environmentObject(PaywallGate.shared)
                 case .test:
                     TestView {
                         selectedTab = .home

@@ -10,6 +10,7 @@ import SwiftUI
 struct StartView: View {
     @StateObject private var viewModel = StartViewModel()
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var paywallGate: PaywallGate
     @State private var showVolumeAlert: Bool = false
     let device: CleaningDevice
     let mode: CleaningMode
@@ -55,10 +56,10 @@ struct StartView: View {
                 
                 VStack {
                     Image(device.bigImageName)
-
+                    
                         .padding(.top, 60)
                     
-    
+                    
                 }
                 
                 Spacer()
@@ -69,13 +70,13 @@ struct StartView: View {
                         .font(.system(size: 48, weight: .bold))
                         .foregroundColor(.white)
                         .opacity(viewModel.startCleaning ? 1 : 0)
-            
+                    
                         .animation(.easeInOut, value: viewModel.startCleaning)
-
+                    
                     // Кнопка
                     Button {
                         showVolumeAlert = true
-
+                        
                     } label: {
                         Text("Start cleaning (25 sec)")
                             .foregroundStyle(Color.white)
@@ -91,9 +92,23 @@ struct StartView: View {
                 }
                 .frame(height: 68) // Однакова висота завжди!
                 .padding(.bottom, 24)
-
+                
+            }
+            
+        }
+        .onAppear {
+            Task { await paywallGate.presentPaywallIfNeeded(context: .startViewAuto) }
+        }
+        // Єдина презентація A/B пейволів
+        .fullScreenCover(item: $paywallGate.presentedVariant) { variant in
+            switch variant {
+            case .A:
+                PaywallFirstView(onFinish: { paywallGate.dismissPaywall() })
+            case .B:
+                PaywallSecondView(onFinish: { paywallGate.dismissPaywall() })
             }
         }
+        
         .alert(isPresented: $showVolumeAlert) {
             Alert(
                 title: Text("Set Volume to Max"),
@@ -119,7 +134,7 @@ struct StartView: View {
                 secondaryButton: .cancel()
             )
         }
-
+        
     }
 }
 
@@ -174,10 +189,7 @@ struct SelectedModeCard: View {
                 .stroke(isActive ? Color(red: 81/255, green: 132/255, blue: 234/255) : Color.clear, lineWidth: 1)
             
         )
-        //        .overlay(
-        //            RoundedRectangle(cornerRadius: 12)
-        //                .shadow(color: isActive ? Color(red: 81/255, green: 132/255, blue: 234/255, opacity: 1) : .clear, radius: 24, x: 0, y: 0)
-        //        )
+        
         
         .animation(.easeInOut(duration: 0.3), value: isActive)
     }

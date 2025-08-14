@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct ModesView: View {
+    @EnvironmentObject private var paywallGate: PaywallGate
     @Environment(\.dismiss) private var dismiss
+    
     @State private var selectedMode: CleaningMode?
+    @State private var pendingMode: CleaningMode?
     let device: CleaningDevice
     
     var body: some View {
@@ -33,9 +36,9 @@ struct ModesView: View {
                             Text("Back")
                                 .font(.system(size: 17))
                         }
-
+                        
                         Spacer()
-
+                        
                         Button(action: {
                             print("Setting pressed")
                         }) {
@@ -48,59 +51,92 @@ struct ModesView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
                 
-                    CleaningModeCard(
-                        icon: "Drop",
-                        mode: .sonicPulse,
-                        deviceIcon: "SmallDynamic",
-                        deviceName: "Speaker",
-                        deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
-                        onModeAction: { mode in
-                            selectedMode = mode
+                CleaningModeCard(
+                    icon: "Drop",
+                    mode: .sonicPulse,
+                    deviceIcon: "SmallDynamic",
+                    deviceName: "Speaker",
+                    deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
+                    freq: "175HZ Vibro",
+                    time: "25 seconds",
+                    onModeAction: { mode in
+                        Task {
+                            pendingMode = mode
+                            let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
+                            if allowed {
+                                selectedMode = mode      // Pro → одразу відкриваємо
+                                pendingMode = nil
+                            }
+                            // Не Pro → відкрився пейвол. Продовжимо після його закриття в onDismiss нижче.
                         }
-                    )
-                    
-                    CleaningModeCard(
-                        icon: "Dynamic",
-                        mode: .nanoShake,
-                        deviceIcon: "SmallDynamic",
-                        deviceName: "Speaker",
-                        deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
-                        onModeAction: { mode in
-                            selectedMode = mode
+                        
+                    }
+                )
+                
+                CleaningModeCard(
+                    icon: "Dynamic",
+                    mode: .nanoShake,
+                    deviceIcon: "SmallDynamic",
+                    deviceName: "Speaker",
+                    deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255), // зелений
+                    freq: "175HZ Vibro",
+                    time: "25 seconds",
+                    onModeAction: { mode in
+                        Task {
+                            pendingMode = mode
+                            let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
+                            if allowed {
+                                selectedMode = mode      // Pro → одразу відкриваємо
+                                pendingMode = nil
+                            }
+                            // Не Pro → відкрився пейвол. Продовжимо після його закриття в onDismiss нижче.
                         }
-                    )
-                    
-                    
-                    CleaningModeCard(
-                        icon: "Drop",
-                        mode: .dynamicEject,
-                        deviceIcon: "SmallDrop",
-                        deviceName: "Water",
-                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
-                        onModeAction: { mode in
-                            selectedMode = mode
+                    }
+                )
+                
+                
+                CleaningModeCard(
+                    icon: "Drop",
+                    mode: .dynamicEject,
+                    deviceIcon: "SmallDrop",
+                    deviceName: "Water",
+                    deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
+                    freq: "175HZ Vibro",
+                    time: "25 seconds",
+                    onModeAction: { mode in
+                        Task {
+                            pendingMode = mode
+                            let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
+                            if allowed {
+                                selectedMode = mode      // Pro → одразу відкриваємо
+                                pendingMode = nil
+                            }
+                            // Не Pro → відкрився пейвол. Продовжимо після його закриття в onDismiss нижче.
                         }
-                    )
-                    
-                    CleaningModeCard(
-                        icon: "Drop",
-                        mode: .hydroGuard,
-                        deviceIcon: "SmallWave",
-                        deviceName: "Speaker",
-                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
-                        onModeAction: { mode in
-                            selectedMode = mode
+                    }
+                )
+                
+                CleaningModeCard(
+                    icon: "Drop",
+                    mode: .hydroGuard,
+                    deviceIcon: "SmallWave",
+                    deviceName: "Speaker",
+                    deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), // зелений
+                    freq: "175HZ Vibro",
+                    time: "25 seconds",
+                    onModeAction: { mode in
+                        Task {
+                            pendingMode = mode
+                            let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
+                            if allowed {
+                                selectedMode = mode      // Pro → одразу відкриваємо
+                                pendingMode = nil
+                            }
+                            // Не Pro → відкрився пейвол. Продовжимо після його закриття в onDismiss нижче.
                         }
-                    )
-
+                    }
+                )
+                
                 Spacer()
                 
             }
@@ -108,6 +144,39 @@ struct ModesView: View {
         .fullScreenCover(item: $selectedMode) { mode in
             StartView(device: device, mode: mode)
         }
+        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
+            // Після закриття пейвола: якщо юзер став Pro — відкриваємо те, на що він тиснув
+            Task {
+                if let pending = pendingMode, await paywallGate.isPro() {
+                    selectedMode = pending
+                    pendingMode = nil
+                }
+                paywallGate.dismissPaywall() // скинути state (на випадок свайп-закриття)
+            }
+        }, content: { variant in
+            switch variant {
+            case .A:
+                PaywallFirstView(onFinish: {
+                    paywallGate.dismissPaywall()
+                    Task {
+                        if let pending = pendingMode, await paywallGate.isPro() {
+                            selectedMode = pending
+                            pendingMode = nil
+                        }
+                    }
+                })
+            case .B:
+                PaywallSecondView(onFinish: {
+                    paywallGate.dismissPaywall()
+                    Task {
+                        if let pending = pendingMode, await paywallGate.isPro() {
+                            selectedMode = pending
+                            pendingMode = nil
+                        }
+                    }
+                })
+            }
+        })
     }
 }
 
@@ -133,7 +202,7 @@ struct CleaningModeCard: View {
                 HStack(alignment: .top, spacing: 12) {
                     ZStack {
                         IconCard(icon: icon)
-
+                        
                     }
                     .frame(width: 48, height: 48)
                     
@@ -142,7 +211,7 @@ struct CleaningModeCard: View {
                             Text(mode.modeName)
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
-                                
+                            
                         }
                         Text(mode.explainText)
                             .font(.system(size: 14))
@@ -167,7 +236,7 @@ struct CleaningModeCard: View {
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                     Spacer()
                     Text(time)
-                        //.font(.system(size: 12))
+                    //.font(.system(size: 12))
                         .font(.system(size: 12, weight: .regular))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .padding(.horizontal, 6)
@@ -189,14 +258,14 @@ struct CleaningModeCard: View {
             .padding(.horizontal, 24)
             .padding(.vertical, 6)
         }
-
-    }
         
+    }
+    
 }
 
 
 
 #Preview {
     ModesView(device: .iPhone)
-
+    
 }

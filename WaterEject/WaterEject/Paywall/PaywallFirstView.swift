@@ -23,9 +23,6 @@ struct PaywallFirstView: View {
         
         ZStack(alignment: .topTrailing) {
             
-            
-            
-            
             ZStack {
                 Background()
                 
@@ -168,7 +165,6 @@ struct PaywallFirstView: View {
     }
     
 }
-
 
 
 struct PaywallPlanCard: View {
