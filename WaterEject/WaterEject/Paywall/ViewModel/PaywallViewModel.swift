@@ -18,6 +18,24 @@ enum PaywallPlan {
         case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
         }
     }
+    
+    var price: String {
+        switch self {
+        case .weekly:
+            return " $0.57/day"
+        case .yearly:
+            return " $0.03/day"
+        }
+    }
+    
+    var onlyPrice: String {
+        switch self {
+        case .weekly:
+            return "only $0.57/day"
+        case .yearly:
+            return "only $0.03/day"
+        }
+    }
 }
 
 @MainActor
@@ -27,6 +45,7 @@ final class PaywallViewModel: ObservableObject {
     @Published var isPurchasing = false
     @Published var purchaseSucceeded = false
     @Published var errorMessage: String?
+    @Published var selectedPlan: PaywallPlan = .yearly
 
     private let entitlementID = "pro_user"
 

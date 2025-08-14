@@ -11,7 +11,7 @@ import FirebaseAnalytics
 struct PaywallFirstView: View {
     
     @StateObject private var viewModel = PaywallViewModel()
-    @State private var selectedPlan: Int = 1
+    //@State private var selectedPlan: Int = 1
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -75,18 +75,18 @@ struct PaywallFirstView: View {
                     
                     VStack(spacing: 24) {
                         PaywallPlanCard(
-                            title: "1 Month",
-                            price: "$7.99 per month",
+                            title: "7 days",
+                            price: "$3.99 per week",
                             sublabel: nil,
-                            isSelected: selectedPlan == 0,
-                            onTap: { selectedPlan = 0 }
+                            isSelected: viewModel.selectedPlan == .weekly,
+                            onTap: { viewModel.selectedPlan = .weekly }
                         )
                         PaywallPlanCard(
                             title: "12 Month",
-                            price: "$6.99 per month",
-                            sublabel: "Save $37.01",
-                            isSelected: selectedPlan == 1,
-                            onTap: { selectedPlan = 1 }
+                            price: "$12.99 per year",
+                            sublabel: "Best Value",
+                            isSelected: viewModel.selectedPlan == .yearly,
+                            onTap: { viewModel.selectedPlan = .yearly }
                         )
                     }
                     .padding(.top, 40)
@@ -96,13 +96,13 @@ struct PaywallFirstView: View {
                         let v = PaywallAB.shared.variant()
                         Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
                         
-                        let plan: PaywallPlan = (selectedPlan == 0) ? .weekly : .yearly
+                        let plan: PaywallPlan = viewModel.selectedPlan
                                                 Task {
                                                     await viewModel.buyWithRevenueCat(plan: plan)
                                                     if viewModel.purchaseSucceeded { onFinish() }
                                                 }
                     } label: {
-                        Text("Continue")
+                        Text("Continue \(viewModel.selectedPlan.price)")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
                         
@@ -194,12 +194,12 @@ struct PaywallPlanCard: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(Color(red: 43/255, green: 217/255, blue: 156/255))
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 28))
                         .padding(16)
                 } else {
                     Image(systemName: "circle")
                         .foregroundColor(Color.gray.opacity(0.3))
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 28, weight: .light))
                         .padding(16)
                 }
                 
@@ -216,7 +216,7 @@ struct PaywallPlanCard: View {
                                 .padding(.vertical, 4)
                                 .background(Color(red: 43/255, green: 217/255, blue: 156/255).opacity(0.14))
                                 .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
-                                .clipShape(Capsule())
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                     }
                     Text(price)
@@ -224,13 +224,16 @@ struct PaywallPlanCard: View {
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 196 / 255))
                 }
                 .padding(.leading, 60)
-                .padding(.vertical, 22)
                 .padding(.trailing, 18)
             }
-            .frame(height: 80)
+
         }
+        .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
         .buttonStyle(.plain)
         .padding(.horizontal, 4)
     }
 }
 
+#Preview(body: {
+    PaywallFirstView(onFinish: {print("hello")})
+})

@@ -12,7 +12,6 @@ import FirebaseAnalytics
 struct PaywallSecondView: View {
     
     @StateObject private var viewModel = PaywallViewModel()
-    @State private var selectedPlan: Int = 1
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -31,10 +30,10 @@ struct PaywallSecondView: View {
                 VStack(alignment: .center) {
                     
                     AutoScrollingDevicesSquare(images: deviceImages)
-                                       .padding(.top, 8)
-                                       .padding(.bottom, 42)
+                        .padding(.top, 8)
+                        .padding(.bottom, 42)
                     
-
+                    
                     
                     (
                         Text("Premium Access")
@@ -60,17 +59,17 @@ struct PaywallSecondView: View {
                             title: "7 days",
                             price: "$3.99/week",
                             sublabel: nil,
-                            saveText: "only $0.57/day",
-                            isSelected: selectedPlan == 0,
-                            onTap: { selectedPlan = 0 }
+                            saveText: PaywallPlan.weekly.onlyPrice,
+                            isSelected: viewModel.selectedPlan == .weekly,
+                            onTap: { viewModel.selectedPlan = .weekly }
                         )
                         PaywallSecondPlanCard(
                             title: "12 months",
                             price: "$12.99/year",
                             sublabel: "Best Value",
-                            saveText: "only $0.03/day",
-                            isSelected: selectedPlan == 1,
-                            onTap: { selectedPlan = 1 }
+                            saveText: PaywallPlan.yearly.onlyPrice,
+                            isSelected: viewModel.selectedPlan == .yearly,
+                            onTap: { viewModel.selectedPlan = .yearly }
                         )
                     }
                     .padding(.top, 40)
@@ -80,13 +79,13 @@ struct PaywallSecondView: View {
                         let v = PaywallAB.shared.variant()
                         Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
                         
-                        let plan: PaywallPlan = (selectedPlan == 0) ? .weekly : .yearly
-                                                Task {
-                                                    await viewModel.buyWithRevenueCat(plan: plan)
-                                                    if viewModel.purchaseSucceeded { onFinish() }
-                                                }
+                        let plan: PaywallPlan = viewModel.selectedPlan
+                        Task {
+                            await viewModel.buyWithRevenueCat(plan: plan)
+                            if viewModel.purchaseSucceeded { onFinish() }
+                        }
                     } label: {
-                        Text("Continue")
+                        Text("Continue \(viewModel.selectedPlan.price)")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
                         
@@ -132,14 +131,14 @@ struct PaywallSecondView: View {
                         .font(.footnote)
                         .foregroundColor(.gray)
                     }
-
+                    
                     
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.horizontal, 12)
                 .padding(.top, 50)
                 
-
+                
                 
             }
             
@@ -202,14 +201,14 @@ struct PaywallSecondPlanCard: View {
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(Color(red: 238/255, green: 255/255, blue: 246/255))
                         Spacer()
-
+                        
                     }
                     Text(price)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Color(red: 196/255, green: 196/255, blue: 196/255))
                 }
                 
-      
+                
                 
                 VStack {
                     if let sublabel = sublabel {
@@ -225,7 +224,7 @@ struct PaywallSecondPlanCard: View {
                     Text(saveText)
                         .font(.system(size: 10))
                         .foregroundStyle(Color(red: 196/255, green: 196/255, blue: 197/255))
-
+                    
                 }
             }
             .padding(.horizontal, 16)
@@ -250,16 +249,16 @@ struct PaywallSecondPlanCard: View {
 /// Квадрат 124×124 з автоматичним горизонтальним скролом девайсів
 struct AutoScrollingDevicesSquare: View {
     let images: [String]
-
+    
     // Тюнінг
     private let boxSize: CGFloat = 124
     private let corner: CGFloat  = 24
     private let itemSize: CGFloat = 92     // розмір картинок всередині
     private let spacing: CGFloat  = 12
     private let speed: CGFloat    = 22     // точки/сек (змінюй під себе)
-
+    
     @State private var start = Date()
-
+    
     var body: some View {
         ZStack {
             // Бекграунд та обводки як на макеті
@@ -273,7 +272,7 @@ struct AutoScrollingDevicesSquare: View {
                         startPoint: .top,
                         endPoint: .bottom
                     )
-
+                    
                 )
                 .frame(width: boxSize, height: boxSize)
             
@@ -288,29 +287,29 @@ struct AutoScrollingDevicesSquare: View {
                 )
             
                 .frame(width: boxSize, height: boxSize)
-
+            
             RoundedRectangle(cornerRadius: corner + 8)
                 .stroke(Color.white.opacity(0.5), lineWidth: 1)
                 .frame(width: boxSize + 24, height: boxSize + 24)
-
+            
             RoundedRectangle(cornerRadius: corner + 4)
                 .stroke(Color(red: 43/255, green: 217/255, blue: 156/255), lineWidth: 2)
                 .frame(width: boxSize + 8, height: boxSize + 8)
-                
-
-
+            
+            
+            
             // Контент з автоскролом
             TimelineView(.animation) { context in
                 let elapsed = CGFloat(context.date.timeIntervalSince(start))
                 let contentWidth = (itemSize + spacing) * CGFloat(images.count)
                 // Зсув вліво; модуль по ширині блоку — безшовний цикл
                 let x = -((elapsed * speed).truncatingRemainder(dividingBy: contentWidth))
-
+                
                 HStack(spacing: spacing) {
                     // Дублюємо масив для безперервності
                     ForEach(images + images, id: \.self) { name in
                         Image(name)
-         
+                        
                     }
                 }
                 .offset(x: x)
