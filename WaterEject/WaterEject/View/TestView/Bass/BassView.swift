@@ -102,23 +102,26 @@ struct TestClipCard: View {
     let isFinished: Bool
     let action: () -> Void
     
+    private let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+    private let base = Color(red: 222/255, green: 233/255, blue: 255/255)
+    
     var body: some View {
         Button(action: action) {
             ZStack(alignment: .center) {
                 
                 if (isPlaying && isFinished) == false {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(stops: [
-                                    .init(color: Color(red: 222/255, green: 233/255, blue: 255/255).opacity(0.35), location: 0.0), // 0% @ 35%
-                                    .init(color: Color(red: 222/255, green: 233/255, blue: 255/255).opacity(1.0),  location: 1.0)  // 100% @ 100%
-                                ]),
-                                startPoint: .top,   // зліва
-                                endPoint: .bottom     // направо
-                            )
+                    
+                    shape.fill(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: base.opacity(0.35), location: 0.0),
+                                .init(color: base.opacity(1.00), location: 1.0)
+                            ]),
+                            startPoint: .top, endPoint: .bottom
                         )
-                        .opacity(1)
+                    )
+                    .opacity(0.15)
+                    
                     
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(Color.white.opacity(0.25), lineWidth: 2)
@@ -151,13 +154,7 @@ struct TestClipCard: View {
                                 lineWidth: isPlaying ? 2 : 1
                             )
                     )
-                
-                if isFinished {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
-                        .padding(10)
-                }
+            
                 
                 VStack(spacing: 10) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
@@ -181,11 +178,19 @@ struct TestClipCard: View {
             // ВАЖЛИВО: робимо клікабельною всю картку
             .frame(maxWidth: .infinity, minHeight: 84)
             .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(alignment: .topTrailing) {
+                if isFinished {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
+                        .padding(8)
+                }
+            }
             .animation(.easeInOut(duration: 0.2), value: isPlaying)
+            
         }
         .buttonStyle(.plain)
-        // Якщо хочеш, щоб і зовнішні відступи теж були клікабельні:
-        // .padding(.horizontal, 16)
+        
     }
 }
 
