@@ -33,8 +33,9 @@ struct ModesView: View {
                             dismiss()
                         } label: {
                             Image(systemName: "chevron.backward")
-                            Text("Back")
-                                .font(.system(size: 17))
+                                .foregroundStyle(Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
+                                .font(.system(size: 23))
+ 
                         }
                         
                         Spacer()

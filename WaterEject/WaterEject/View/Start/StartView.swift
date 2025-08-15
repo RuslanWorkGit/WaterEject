@@ -33,9 +33,7 @@ struct StartView: View {
                         } label: {
                             Image(systemName: "chevron.backward")
                                 .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
-                            Text("Back")
-                                .font(.system(size: 17))
-                                .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
+                                .font(.system(size: 23))
                         }
                         .disabled(viewModel.startCleaning)
                         

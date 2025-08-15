@@ -12,6 +12,8 @@ import FirebaseAnalytics
 struct PaywallSecondView: View {
     
     @StateObject private var viewModel = PaywallViewModel()
+    @State private var webViewURL: URL?
+    @State private var isPresentingWebView = false
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -73,6 +75,7 @@ struct PaywallSecondView: View {
                         )
                     }
                     .padding(.top, 40)
+                    .padding(.horizontal, 14)
                     .padding(.bottom, 42)
                     
                     Button {
@@ -112,21 +115,21 @@ struct PaywallSecondView: View {
                     
                     HStack(spacing: 30) {
                         Button("Restore") {
-                            //                    webViewURL = URL(string: "https://shorturl.at/GbC20")
-                            //                    isPresentingWebView = true
+                            Task { await viewModel.restorePurchases() }
                         }
                         .font(.footnote)
                         .foregroundColor(.gray)
                         
                         Button("Terms") {
-                            //                    webViewURL = URL(string: "https://shorturl.at/3pyRn")
-                            //                    isPresentingWebView = true
+                            webViewURL = URL(string: "https://docs.google.com/document/d/1-ypvp3L8VAHKolbxipFoEJyuFLr06k8ZkPBAsQonzvU/edit?tab=t.0#heading=h.y4u64r1siox0")
+                                isPresentingWebView = true
                         }
                         .font(.footnote)
                         .foregroundColor(.gray)
                         
                         Button("Privacy") {
-                            //Task { await viewModel.restorePurchases() }
+                            webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
+                            isPresentingWebView = true
                         }
                         .font(.footnote)
                         .foregroundColor(.gray)
@@ -153,6 +156,11 @@ struct PaywallSecondView: View {
             }
             .padding(.top, 20)
             .padding(.trailing, 18)
+        }
+        .sheet(isPresented: $isPresentingWebView) {
+            if let url = webViewURL {
+                SafariView(url: url)
+            }
         }
         .onAppear {
             let v = PaywallAB.shared.variant()
