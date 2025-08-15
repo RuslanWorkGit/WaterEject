@@ -9,11 +9,16 @@ import SwiftUI
 
 struct CustomTabBarContainerView<Content: View>: View {
     @Binding var selectedTab: TabBarTab
+    @EnvironmentObject private var tabBarState: TabBarState   // ⟵ додали
     let content: Content
 
     init(selectedTab: Binding<TabBarTab>, @ViewBuilder content: () -> Content) {
         self._selectedTab = selectedTab
         self.content = content()
+    }
+
+    private var shouldHide: Bool {
+        tabBarState.isHidden || selectedTab == .test            // ⟵ можна лишити/прибрати .test
     }
 
     var body: some View {
@@ -22,12 +27,14 @@ struct CustomTabBarContainerView<Content: View>: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             CustomTabBar(selectedTab: $selectedTab)
-                .offset(y: selectedTab == .test ? 120 : 0) // ховаємо вниз
-                .animation(.easeInOut(duration: 0.25), value: selectedTab)
+                .offset(y: shouldHide ? 120 : 0)                 // ⟵ ховаємо вниз
+                .opacity(shouldHide ? 0 : 1)
+                .animation(.easeInOut(duration: 0.25), value: shouldHide)
         }
         .edgesIgnoringSafeArea(.bottom)
     }
 }
+
 
 enum TabBarTab {
     case home

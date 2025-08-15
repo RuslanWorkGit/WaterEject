@@ -11,6 +11,7 @@ struct StartView: View {
     @StateObject private var viewModel = StartViewModel()
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var paywallGate: PaywallGate
+    @EnvironmentObject private var tabBarState: TabBarState
     @State private var showVolumeAlert: Bool = false
     let device: CleaningDevice
     let mode: CleaningMode
@@ -42,6 +43,8 @@ struct StartView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
+                .navigationBarBackButtonHidden(true)
+                .background(NavigationControllerCoordinator()) // Enable swipe gesture
                 
                 SelectedModeCard(
                     deviceIcon: "devices",
@@ -94,9 +97,11 @@ struct StartView: View {
             }
             
         }
+     
         .onAppear {
             Task { await paywallGate.presentPaywallIfNeeded(context: .startViewAuto) }
         }
+
         // Єдина презентація A/B пейволів
         .fullScreenCover(item: $paywallGate.presentedVariant) { variant in
             switch variant {

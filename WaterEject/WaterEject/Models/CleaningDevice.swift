@@ -6,7 +6,7 @@
 //
 import Foundation
 
-enum CleaningDevice: String, CaseIterable, Identifiable {
+enum CleaningDevice: String, CaseIterable, Hashable, Identifiable {
     case iPhone
     case airPodsPro
     case airPods

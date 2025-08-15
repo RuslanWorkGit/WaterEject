@@ -7,46 +7,67 @@
 
 import SwiftUI
 
+enum Route: Hashable {
+    case modes(CleaningDevice)
+    case start(CleaningDevice, CleaningMode)
+}
+
 struct HomeView: View {
     //@State private var showModesScreen = false
+    @EnvironmentObject private var tabBarState: TabBarState
     @State private var selectedDevice: CleaningDevice?
+    @State private var path: [Route] = []
     
     var body: some View {
-        ZStack {
-            
-            Background()
-            
-            VStack(spacing: 28) {
-                HStack {
-                    Text("Speaker Cleaner")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                    Spacer()
-                    Button(action: {
-                        print("Setting pressed")
-                    }) {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 24))
-                            .foregroundStyle(Color(red: 153 / 255, green: 153 / 255, blue: 153 / 255))
+        NavigationStack(path: $path) {
+            ZStack {
+                
+                Background()
+                
+                VStack(spacing: 28) {
+                    HStack {
+                        Text("Speaker Cleaner")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button(action: {
+                            print("Setting pressed")
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 24))
+                                .foregroundStyle(Color(red: 153 / 255, green: 153 / 255, blue: 153 / 255))
+                        }
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                    
+                    DeviceGridView { device in
+                        //                        selectedDevice = device
+                        path.append(.modes(device))
+                        //showModesScreen = true
+                    }
+                    
+                    
+                    Spacer()
+                    
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                
-                DeviceGridView { device in
-                    selectedDevice = device
-                    //showModesScreen = true
-                }
-                
-                
-                Spacer()
-
             }
+            .onAppear { tabBarState.isHidden = false }   // ⟵ сховати
+            .onDisappear { tabBarState.isHidden = true }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .modes(let device):
+                    // Передаємо колбек, який пушне StartView
+                    ModesView(device: device) { mode in
+                        path.append(.start(device, mode))
+                    }
+                    
+                case .start(let device, let mode):
+                    StartView(device: device, mode: mode)
+                }
+            }
+            
         }
-        .fullScreenCover(item: $selectedDevice, content: { device in
-            ModesView(device: device)
-        })
-
     }
 }
 
@@ -120,8 +141,8 @@ struct DeviceGridView: View {
                 DeviceButtonView(device: .speakers, action: onDeviceTap)
             }
         }
-
-
+        
+        
     }
 }
 

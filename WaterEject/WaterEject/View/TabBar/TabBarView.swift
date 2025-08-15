@@ -7,8 +7,13 @@
 
 import SwiftUI
 
+final class TabBarState: ObservableObject {
+    @Published var isHidden: Bool = false
+}
+
 struct TabBarView: View {
     @State private var selectedTab: TabBarTab = .home
+    @StateObject private var tabBarState = TabBarState()
 
     var body: some View {
         CustomTabBarContainerView(selectedTab: $selectedTab) {
@@ -23,7 +28,9 @@ struct TabBarView: View {
                     }
                 }
             }
+            
         }
+        .environmentObject(tabBarState)
     }
 }
 
