@@ -19,7 +19,7 @@ struct HookView: View {
                     Text("💦 stuck in your speakers, iPhone, or AirPods?")
                         .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
                 )
-                .font(.system(size: 32, weight: .bold))
+                .font(.system(size: 30, weight: .bold))
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 96)
                 
@@ -45,7 +45,7 @@ struct HookView: View {
                 
             }
             .frame(maxHeight: .infinity, alignment: .top)
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 18)
             .padding(.top, 50)
             
         }

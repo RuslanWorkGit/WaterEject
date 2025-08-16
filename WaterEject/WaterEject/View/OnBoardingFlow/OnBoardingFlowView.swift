@@ -47,7 +47,7 @@ struct OnboardingFlowView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
    
                         }
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 36)
                         .padding(.bottom, 26)
                     }
                     
@@ -57,7 +57,7 @@ struct OnboardingFlowView: View {
             
 
         }
-        
+
         .transition(.slide)
         .animation(.easeInOut, value: currentStep)
 

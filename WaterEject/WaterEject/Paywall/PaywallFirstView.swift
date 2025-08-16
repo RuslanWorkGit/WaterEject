@@ -129,7 +129,7 @@ struct PaywallFirstView: View {
                         .foregroundColor(.gray)
                         
                         Button("Terms") {
-                            webViewURL = URL(string: "https://docs.google.com/document/d/1-ypvp3L8VAHKolbxipFoEJyuFLr06k8ZkPBAsQonzvU/edit?tab=t.0#heading=h.y4u64r1siox0")
+                            webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
                                 isPresentingWebView = true
                         }
                         .font(.footnote)
