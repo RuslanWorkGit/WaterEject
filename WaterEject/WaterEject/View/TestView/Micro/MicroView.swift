@@ -18,11 +18,11 @@ struct MicroView: View {
     var body: some View {
         ZStack {
             Background()
-
+            
             // Основний контент
             content
 
-            // Dim підкладка під шторкою
+
             if viewModel.showSheet {
                 Color.black.opacity(0.35)
                     .ignoresSafeArea()
@@ -64,12 +64,14 @@ struct MicroView: View {
                     .offset(y: topY - micSize/2)
                     .allowsHitTesting(false)   // кліки йдуть у панель
                 }
-                .ignoresSafeArea()
+                //.ignoresSafeArea()
                 .animation(.easeOut(duration: 0.25), value: viewModel.showSheet)
             }
         }
         //.padding(.horizontal, 24)
     }
+    
+
 
     // MARK: - Основний контент списку + кнопка
     private var content: some View {
@@ -123,7 +125,7 @@ struct MicroView: View {
                     )
             }
             .disabled(viewModel.isRecording)
-            .padding(.horizontal, 32)
+            .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
         .padding(.horizontal, 8)
