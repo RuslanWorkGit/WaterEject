@@ -174,12 +174,12 @@ struct SelectedModeCard: View {
             Spacer()
             
             // Кнопка-іконка
-            Button(action: onSettings) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 26))
-                    .foregroundStyle(.white.opacity(0.45))
-                    .padding(2)
-            }
+//            Button(action: onSettings) {
+//                Image(systemName: "gearshape")
+//                    .font(.system(size: 26))
+//                    .foregroundStyle(.white.opacity(0.45))
+//                    .padding(2)
+//            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 18)

@@ -121,7 +121,7 @@ struct PaywallSecondView: View {
                         .foregroundColor(.gray)
                         
                         Button("Terms") {
-                            webViewURL = URL(string: "https://docs.google.com/document/d/1-ypvp3L8VAHKolbxipFoEJyuFLr06k8ZkPBAsQonzvU/edit?tab=t.0#heading=h.y4u64r1siox0")
+                            webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
                                 isPresentingWebView = true
                         }
                         .font(.footnote)
@@ -252,75 +252,67 @@ struct PaywallSecondPlanCard: View {
     }
 }
 
-
-
-/// Квадрат 124×124 з автоматичним горизонтальним скролом девайсів
+/// Квадрат 124×124 з безшовним горизонтальним автоскролом
 struct AutoScrollingDevicesSquare: View {
     let images: [String]
-    
+
     // Тюнінг
-    private let boxSize: CGFloat = 124
-    private let corner: CGFloat  = 24
-    private let itemSize: CGFloat = 92     // розмір картинок всередині
+    private let boxSize: CGFloat  = 124
+    private let corner: CGFloat   = 24
+    private let itemSize: CGFloat = 92
     private let spacing: CGFloat  = 12
-    private let speed: CGFloat    = 22     // точки/сек (змінюй під себе)
-    
+    private let speed: CGFloat    = 22      // points/second
+
     @State private var start = Date()
-    
+
     var body: some View {
         ZStack {
-            // Бекграунд та обводки як на макеті
+            // фон/рамки
             RoundedRectangle(cornerRadius: corner)
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color(red: 20 / 255, green: 23 / 255, blue: 26 / 255, opacity: 0.1),
-                            Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.2)
+                            Color(red: 20/255, green: 23/255, blue: 26/255, opacity: 0.1),
+                            Color(red: 222/255, green: 233/255, blue: 255/255, opacity: 0.2)
                         ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                        startPoint: .top, endPoint: .bottom
                     )
-                    
                 )
                 .frame(width: boxSize, height: boxSize)
-            
-            RoundedRectangle(cornerRadius: corner )
+
+            RoundedRectangle(cornerRadius: corner)
                 .stroke(Color.white.opacity(0.25), lineWidth: 2)
                 .blur(radius: 0.5)
-                .offset(x: 0, y: 1)
+                .offset(y: 1)
                 .mask(
-                    RoundedRectangle(cornerRadius: corner).fill(
-                        LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
-                    )
+                    RoundedRectangle(cornerRadius: corner)
+                        .fill(LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom))
                 )
-            
                 .frame(width: boxSize, height: boxSize)
-            
+
             RoundedRectangle(cornerRadius: corner + 8)
                 .stroke(Color.white.opacity(0.5), lineWidth: 1)
                 .frame(width: boxSize + 24, height: boxSize + 24)
-            
+
             RoundedRectangle(cornerRadius: corner + 4)
                 .stroke(Color(red: 43/255, green: 217/255, blue: 156/255), lineWidth: 2)
                 .frame(width: boxSize + 8, height: boxSize + 8)
-            
-            
-            
-            // Контент з автоскролом
+
+            // контент з автоскролом
             TimelineView(.animation) { context in
                 let elapsed = CGFloat(context.date.timeIntervalSince(start))
-                let contentWidth = (itemSize + spacing) * CGFloat(images.count)
-                // Зсув вліво; модуль по ширині блоку — безшовний цикл
-                let x = -((elapsed * speed).truncatingRemainder(dividingBy: contentWidth))
-                
+                let unit = itemSize + spacing                // ширина одного елемента з відступом
+                let tileWidth = unit * CGFloat(images.count) // ширина «однієї плитки»
+                let x = -((elapsed * speed).truncatingRemainder(dividingBy: tileWidth))
+
                 HStack(spacing: spacing) {
-                    // Дублюємо масив для безперервності
-                    ForEach(images + images, id: \.self) { name in
+                    // дублюємо масив, але з УНІКАЛЬНИМИ ID (індекс), щоб прибрати warning
+                    ForEach(Array((images + images).enumerated()), id: \.offset) { _, name in
                         Image(name)
-                        
+
                     }
                 }
-                .offset(x: x)
+                .offset(x: x)                                // зсув за часом
                 .frame(width: boxSize, height: boxSize, alignment: .leading)
                 .clipped()
             }
@@ -330,6 +322,7 @@ struct AutoScrollingDevicesSquare: View {
         .frame(width: boxSize, height: boxSize)
     }
 }
+
 
 
 #Preview(body: {

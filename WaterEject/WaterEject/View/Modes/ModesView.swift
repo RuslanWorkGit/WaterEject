@@ -197,13 +197,13 @@ struct ModesView: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: { print("Setting pressed") }) {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 24))
-                        .foregroundStyle(Color(red: 153/255, green: 153/255, blue: 153/255))
-                }
-            }
+//            ToolbarItem(placement: .topBarTrailing) {
+//                Button(action: { print("Setting pressed") }) {
+//                    Image(systemName: "gearshape")
+//                        .font(.system(size: 24))
+//                        .foregroundStyle(Color(red: 153/255, green: 153/255, blue: 153/255))
+//                }
+//            }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
                     dismiss()

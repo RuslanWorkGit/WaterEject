@@ -30,13 +30,13 @@ struct HomeView: View {
                             .font(.system(size: 28, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: {
-                            print("Setting pressed")
-                        }) {
-                            Image(systemName: "gearshape")
-                                .font(.system(size: 24))
-                                .foregroundStyle(Color(red: 153 / 255, green: 153 / 255, blue: 153 / 255))
-                        }
+//                        Button(action: {
+//                            print("Setting pressed")
+//                        }) {
+//                            Image(systemName: "gearshape")
+//                                .font(.system(size: 24))
+//                                .foregroundStyle(Color(red: 153 / 255, green: 153 / 255, blue: 153 / 255))
+//                        }
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 16)

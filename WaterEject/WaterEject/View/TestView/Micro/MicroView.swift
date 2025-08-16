@@ -34,7 +34,7 @@ struct MicroView: View {
             if viewModel.showSheet {
                 GeometryReader { geo in
                     let screenH = geo.size.height
-                    let panelH  = screenH * detent
+                    let panelH  = screenH * detent - 20
                     let topY    = screenH - panelH      // y верхнього краю панелі
                     let micSize: CGFloat = 140
 
@@ -44,7 +44,7 @@ struct MicroView: View {
                             viewModel.closeSheet()
                         }
                     }
-                    .frame(width: geo.size.width, height: panelH)
+                    .frame(width: geo.size.width - 25, height: panelH)
                     .background(
                         RoundedRectangle(cornerRadius: 24)
                             .fill(LinearGradient(colors: [Color(red: 31 / 255, green: 33 / 255, blue: 35 / 255),
@@ -68,6 +68,7 @@ struct MicroView: View {
                 .animation(.easeOut(duration: 0.25), value: viewModel.showSheet)
             }
         }
+        //.padding(.horizontal, 24)
     }
 
     // MARK: - Основний контент списку + кнопка
@@ -122,9 +123,10 @@ struct MicroView: View {
                     )
             }
             .disabled(viewModel.isRecording)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .padding(.horizontal, 32)
+            .padding(.bottom, 40)
         }
+        .padding(.horizontal, 8)
         .onAppear {
             Task {
                 await viewModel.loadRecordings()
