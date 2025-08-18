@@ -57,7 +57,7 @@ struct CustomTabBar: View {
             Spacer()
 
             TabBarButton(
-                icon: "powermeter", // Для Test
+                icon: "gauge.open.with.lines.needle.33percent", // Для Test
                 label: "Test",
                 isSelected: selectedTab == .test
             ) {
