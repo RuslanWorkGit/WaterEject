@@ -9,7 +9,36 @@ import Foundation
 import RevenueCat
 import StoreKit
 
-enum PaywallPlan {
+//enum PaywallPlan {
+//    case weekly, yearly
+//
+//    var productID: String {
+//        switch self {
+//        case .weekly: return "kyryloVoinov.WaterEject.subscription.weekly"
+//        case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
+//        }
+//    }
+//    
+//    var price: String {
+//        switch self {
+//        case .weekly:
+//            return " $0.57/day"
+//        case .yearly:
+//            return " $0.03/day"
+//        }
+//    }
+//    
+//    var onlyPrice: String {
+//        switch self {
+//        case .weekly:
+//            return "for $3.59"
+//        case .yearly:
+//            return "for $12.99"
+//        }
+//    }
+//}
+
+enum PaywallPlan: CaseIterable, Hashable {
     case weekly, yearly
 
     var productID: String {
@@ -18,68 +47,94 @@ enum PaywallPlan {
         case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
         }
     }
-    
-    var price: String {
-        switch self {
-        case .weekly:
-            return " $0.57/day"
-        case .yearly:
-            return " $0.03/day"
-        }
-    }
-    
-    var onlyPrice: String {
-        switch self {
-        case .weekly:
-            return "only $0.57/day"
-        case .yearly:
-            return "only $0.03/day"
-        }
+
+    var title: String {
+        switch self { case .weekly: "7 days"; case .yearly: "12 months" }
     }
 }
 
+import Foundation
+import RevenueCat
+
 @MainActor
 final class PaywallViewModel: ObservableObject {
-
-    // опційно: для UX у кнопці
     @Published var isPurchasing = false
     @Published var purchaseSucceeded = false
     @Published var errorMessage: String?
     @Published var selectedPlan: PaywallPlan = .yearly
 
+    // Мапа план → Package/StoreProduct
+    @Published private(set) var packageByPlan: [PaywallPlan: Package] = [:]
+
+    // Готові рядки для UI
+    @Published private(set) var pricePerPeriod: [PaywallPlan: String] = [:] // "$3.99/week", "$12.99/year"
+    @Published private(set) var onlyPrice: [PaywallPlan: String] = [:]      // "for $3.99", "for $12.99"
+
     private let entitlementID = "pro_user"
 
-    /// Купівля обраного плану через RevenueCat
+    // Виклич на .onAppear пейвола
+    func loadPricing() async {
+        do {
+            let offerings = try await Purchases.shared.offerings()
+            guard let current = offerings.current else { return }
+
+            var map: [PaywallPlan: Package] = [:]
+            let wantedIDs = Set(PaywallPlan.allCases.map { $0.productID })
+            for pkg in current.availablePackages {
+                let id = pkg.storeProduct.productIdentifier
+                if wantedIDs.contains(id) {
+                    if id == PaywallPlan.weekly.productID { map[.weekly] = pkg }
+                    if id == PaywallPlan.yearly.productID  { map[.yearly]  = pkg }
+                }
+            }
+            self.packageByPlan = map
+
+            // заповнюємо локальні словники
+            var period: [PaywallPlan: String] = [:]
+            var only:   [PaywallPlan: String] = [:]
+
+
+            for (plan, pkg) in map {
+                let p = pkg.storeProduct
+                let localized = p.localizedPriceString
+                switch plan {
+                case .weekly: period[plan] = "\(localized)/week"
+                case .yearly: period[plan] = "\(localized)/year"
+                }
+                only[plan]   = "for \(localized)"
+            }
+
+            // 👇 тепер ОДНИМ махом присвоюємо у @Published
+            self.pricePerPeriod = period
+            self.onlyPrice      = only
+        } catch {
+            self.errorMessage = (error as NSError).localizedDescription
+        }
+    }
+
+
+    // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
     func buyWithRevenueCat(plan: PaywallPlan) async {
+        guard let pkg = packageByPlan[plan] else {
+            errorMessage = "Product not found"
+            return
+        }
         isPurchasing = true
         errorMessage = nil
         purchaseSucceeded = false
         defer { isPurchasing = false }
 
         do {
-            // products() у RC не кидає — без try
-            let products = await Purchases.shared.products([plan.productID])
-            guard let product = products.first else {
-                errorMessage = "Product not found"
-                return
-            }
-
-            let result = try await Purchases.shared.purchase(product: product)
+            let result = try await Purchases.shared.purchase(package: pkg)
             purchaseSucceeded = result.customerInfo.entitlements[entitlementID]?.isActive == true
             if !purchaseSucceeded { errorMessage = "Subscription not active" }
         } catch {
-            let nsError = error as NSError
-
-            // користувач скасував — не показуємо помилку
-            if let rc = RevenueCat.ErrorCode(_bridgedNSError: nsError), rc == .purchaseCancelledError { return }
-            if let sk1 = error as? SKError, sk1.code == .paymentCancelled { return }
-            if #available(iOS 15.0, *), let sk2 = error as? StoreKitError, case .userCancelled = sk2 { return }
-
-            errorMessage = nsError.localizedDescription
+            let ns = error as NSError
+            if let rc = RevenueCat.ErrorCode(_bridgedNSError: ns), rc == .purchaseCancelledError { return }
+            errorMessage = ns.localizedDescription
         }
     }
 
-    /// Відновлення покупок (щоб кнопка Restore працювала)
     func restorePurchases() async {
         isPurchasing = true
         defer { isPurchasing = false }
@@ -92,8 +147,8 @@ final class PaywallViewModel: ObservableObject {
         }
     }
 
-    func closePaywall() {
-        print("Close paywall")
-    }
-}
+    // MARK: - Helpers
 
+
+
+}

@@ -7,7 +7,7 @@
 
 import SwiftUI
 import FirebaseAnalytics
-
+import RevenueCat
 
 struct PaywallSecondView: View {
     
@@ -58,18 +58,18 @@ struct PaywallSecondView: View {
                     
                     VStack(spacing: 24) {
                         PaywallSecondPlanCard(
-                            title: "7 days",
-                            price: "$3.99/week",
+                            title: PaywallPlan.weekly.title,
+                            price: viewModel.pricePerPeriod[.weekly] ?? "...",
                             sublabel: nil,
-                            saveText: PaywallPlan.weekly.onlyPrice,
+                            saveText: viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: { viewModel.selectedPlan = .weekly }
                         )
                         PaywallSecondPlanCard(
-                            title: "12 months",
-                            price: "$12.99/year",
+                            title: PaywallPlan.yearly.title,
+                            price: viewModel.pricePerPeriod[.yearly] ?? "…",
                             sublabel: "Best Value",
-                            saveText: PaywallPlan.yearly.onlyPrice,
+                            saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: { viewModel.selectedPlan = .yearly }
                         )
@@ -88,7 +88,8 @@ struct PaywallSecondView: View {
                             if viewModel.purchaseSucceeded { onFinish() }
                         }
                     } label: {
-                        Text("Continue \(viewModel.selectedPlan.price)")
+                        let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
+                        Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
                         
@@ -150,7 +151,7 @@ struct PaywallSecondView: View {
             }
             
             Button(action: {
-                viewModel.closePaywall()
+
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -170,6 +171,8 @@ struct PaywallSecondView: View {
 //            }
 //        }
         .onAppear {
+            Purchases.logLevel = .debug
+            Task { await viewModel.loadPricing()  }
             let v = PaywallAB.shared.variant()
             Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }

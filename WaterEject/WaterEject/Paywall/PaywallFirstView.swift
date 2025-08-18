@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import FirebaseAnalytics
+import RevenueCat
 
 
 struct PaywallFirstView: View {
@@ -73,15 +74,15 @@ struct PaywallFirstView: View {
                     
                     VStack(spacing: 24) {
                         PaywallPlanCard(
-                            title: "7 days",
-                            price: "$3.99 per week",
+                            title: PaywallPlan.weekly.title,
+                            price: viewModel.pricePerPeriod[.weekly] ?? "...",
                             sublabel: nil,
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: { viewModel.selectedPlan = .weekly }
                         )
                         PaywallPlanCard(
-                            title: "12 Month",
-                            price: "$12.99 per year",
+                            title: PaywallPlan.yearly.title,
+                            price: viewModel.pricePerPeriod[.yearly] ?? "...",
                             sublabel: "Best Value",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: { viewModel.selectedPlan = .yearly }
@@ -101,7 +102,8 @@ struct PaywallFirstView: View {
                                                     if viewModel.purchaseSucceeded { onFinish() }
                                                 }
                     } label: {
-                        Text("Continue \(viewModel.selectedPlan.price)")
+                        let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
+                        Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
                         
@@ -149,7 +151,7 @@ struct PaywallFirstView: View {
             }
             
             Button(action: {
-                viewModel.closePaywall()
+                
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -165,6 +167,8 @@ struct PaywallFirstView: View {
         })
 
         .onAppear {
+            Purchases.logLevel = .debug  
+            Task { await viewModel.loadPricing()  }
             let v = PaywallAB.shared.variant()
             Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
