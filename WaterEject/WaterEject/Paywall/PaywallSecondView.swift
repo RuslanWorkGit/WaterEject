@@ -13,7 +13,7 @@ struct PaywallSecondView: View {
     
     @StateObject private var viewModel = PaywallViewModel()
     @State private var webViewURL: URL?
-    @State private var isPresentingWebView = false
+//    @State private var isPresentingWebView = false
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -121,15 +121,19 @@ struct PaywallSecondView: View {
                         .foregroundColor(.gray)
                         
                         Button("Terms") {
+                            
                             webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
-                                isPresentingWebView = true
+//                            isPresentingWebView = true
+                            
                         }
                         .font(.footnote)
                         .foregroundColor(.gray)
                         
                         Button("Privacy") {
+                            
                             webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
-                            isPresentingWebView = true
+//                            isPresentingWebView = true
+                            
                         }
                         .font(.footnote)
                         .foregroundColor(.gray)
@@ -157,11 +161,14 @@ struct PaywallSecondView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
-        .sheet(isPresented: $isPresentingWebView) {
-            if let url = webViewURL {
-                SafariView(url: url)
-            }
+        .sheet(item: $webViewURL) { url in
+            SafariView(url: url)
         }
+//        .sheet(isPresented: $isPresentingWebView) {
+//            if let url = webViewURL {
+//                SafariView(url: url)
+//            }
+//        }
         .onAppear {
             let v = PaywallAB.shared.variant()
             Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
@@ -323,7 +330,7 @@ struct AutoScrollingDevicesSquare: View {
     }
 }
 
-
+extension URL: Identifiable { public var id: String { absoluteString } }
 
 #Preview(body: {
     PaywallSecondView(onFinish: {print("hello")})
