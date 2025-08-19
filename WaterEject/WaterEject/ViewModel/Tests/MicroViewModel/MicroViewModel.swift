@@ -16,7 +16,7 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var showSheet = false
     @Published var canContinue = false
     
-    //@Published var liveSamples: [Float] = Array(repeating: 0, count: 60)
+
     @Published var recordings: [Recording] = []
     @Published var currentlyPlaying: Recording? = nil
     @Published var elapsed: TimeInterval = 0
@@ -30,7 +30,7 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private var elapsedTimer: Timer?
     
     // 👉 налаштування хвилі
-    private let barCount = 60
+    private let barCount = 90
     private let totalDuration: TimeInterval = 20
     private var bucketDuration: TimeInterval { totalDuration / Double(barCount) } // ~0.333c
     

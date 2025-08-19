@@ -26,10 +26,10 @@ struct RecordingRow: View {
             }
 
             // Хвиля з файлу
-            WaveformView(samples: samples)
-                .frame(height: 56)
+            WaveformView(samples: samples, barWidth: 2, barSpacing: 2, maxBars: 90)
+                .frame(height: 60)
                 .clipped() // обрізає все, що виходить за межі
-                .background(.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 10))
+                //.background(.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 10))
             
             Divider().background(.white.opacity(0.08))
 
