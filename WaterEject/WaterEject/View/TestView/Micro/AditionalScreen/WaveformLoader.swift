@@ -46,4 +46,25 @@ enum WaveformLoader {
         }
         return out
     }
+    
+    // 👉 де лежить json із хвилею
+        static func storedWaveURL(forAudioURL url: URL) -> URL {
+            url.deletingPathExtension().appendingPathExtension("wf.json")
+        }
+
+        // 👉 зберегти 0...1 масив у json
+        static func saveStoredSamples(_ samples: [Float], forAudioURL url: URL) throws {
+            let data = try JSONEncoder().encode(samples)
+            try data.write(to: storedWaveURL(forAudioURL: url), options: .atomic)
+        }
+
+        // 👉 завантажити, якщо є
+        static func loadStoredSamples(forAudioURL url: URL) -> [Float]? {
+            let wf = storedWaveURL(forAudioURL: url)
+            guard FileManager.default.fileExists(atPath: wf.path),
+                  let data = try? Data(contentsOf: wf),
+                  let arr = try? JSONDecoder().decode([Float].self, from: data)
+            else { return nil }
+            return arr
+        }
 }

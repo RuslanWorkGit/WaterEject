@@ -69,10 +69,13 @@ struct RecordingRow: View {
         .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 20))
         .onAppear {
             Task {
-                
-                samples = (try? await WaveformLoader.loadSamples(url: rec.url , targetSamples: 90)) ?? []
-                
-            }
+                    if let saved = WaveformLoader.loadStoredSamples(forAudioURL: rec.url) {
+                        samples = saved                   // вже нормалізовано
+                    } else {
+                        // fallback: побудувати з файлу (20 c ≈ 60 бінів)
+                        samples = (try? await WaveformLoader.loadSamples(url: rec.url, targetSamples: 60)) ?? []
+                    }
+                }
         }
     }
 
