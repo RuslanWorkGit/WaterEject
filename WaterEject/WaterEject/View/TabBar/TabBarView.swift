@@ -23,9 +23,14 @@ struct TabBarView: View {
                     HomeView()
                         .environmentObject(PaywallGate.shared)
                 case .test:
-                    TestView {
-                        selectedTab = .home
+                    NavigationStack {
+                        TestView {
+                            selectedTab = .home
+                        } onFinish: {
+                            selectedTab = .home
+                        }
                     }
+                    
                 }
             }
             

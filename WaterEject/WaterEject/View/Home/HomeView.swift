@@ -38,7 +38,7 @@ struct HomeView: View {
 //                                .foregroundStyle(Color(red: 153 / 255, green: 153 / 255, blue: 153 / 255))
 //                        }
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 34)
                     .padding(.top, 16)
                     
                     DeviceGridView { device in
@@ -52,6 +52,7 @@ struct HomeView: View {
                     
                 }
             }
+            
             .onAppear { tabBarState.isHidden = false }   // ⟵ сховати
             .onDisappear { tabBarState.isHidden = true }
             .navigationDestination(for: Route.self) { route in
