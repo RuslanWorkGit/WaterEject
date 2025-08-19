@@ -19,9 +19,12 @@ struct RecordingRow: View {
         VStack(alignment: .leading, spacing: 12) {
             // шапка
             HStack {
-                Label(rec.title, systemImage: "bolt.horizontal.fill")
+                Label(rec.title, image: "SmallDynamic")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
                 Spacer()
             }
 

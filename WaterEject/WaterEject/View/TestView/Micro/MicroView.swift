@@ -68,7 +68,7 @@ struct MicroView: View {
                 .animation(.easeOut(duration: 0.25), value: viewModel.showSheet)
             }
         }
-        //.padding(.horizontal, 24)
+        .padding(.horizontal, -12)
     }
     
 

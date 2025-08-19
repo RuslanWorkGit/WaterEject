@@ -25,9 +25,21 @@ struct RecordingSheetView: View {
                 .padding(.horizontal, 16)
                 .clipped()
 
-            Text(vm.isRecording ? timeString(vm.elapsed) + " / 00:20" : "Ready")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.8))
+            HStack {
+                Text(vm.isRecording ? "Say somthing..." : "")
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
+                if vm.isRecording {
+                    Spacer()
+                }
+                Image(systemName: "record.circle")
+                    .foregroundStyle(Color(red: 248 / 255, green: 97 / 255, blue: 97 / 255))
+                Text(vm.isRecording ? timeString(vm.elapsed) + " / 00:20" : "Ready")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
+            }
+           
+            Spacer()
 
             if vm.isRecording {
                 HStack(spacing: 16) {
