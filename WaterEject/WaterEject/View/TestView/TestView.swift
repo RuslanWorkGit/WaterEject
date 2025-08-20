@@ -72,7 +72,7 @@ struct TestView: View {
                 case .micro:
                     MicroView(onContinue: { viewModel.goToNextStep()})
                 case .vibro:
-                    VibroView(onContinue: { viewModel.goToNextStep()})
+                    VibroView(onContinue: { onFinish() })
                 case .noise:
                     NoiseView()
                 }
