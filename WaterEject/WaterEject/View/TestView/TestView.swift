@@ -88,7 +88,7 @@ struct TestView: View {
             
         }
         .navigationBarBackButtonHidden(true)
-        .background(NavigationControllerCoordinator())
+        .background(BackSwipeEnabler(onBack: onBack)) 
         
         
     }
