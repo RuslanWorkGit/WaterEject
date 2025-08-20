@@ -9,6 +9,7 @@
 import AVFoundation
 import Combine
 
+@MainActor
 final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     // UI/state
     @Published var isRecording = false
@@ -16,6 +17,7 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var showSheet = false
     @Published var canContinue = false
     
+    @Published var playableURL: URL? = nil
     
     @Published var recordings: [Recording] = []
     @Published var currentlyPlaying: Recording? = nil
@@ -107,6 +109,7 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
         ensureRecordingsFolder()
         
         do {
+            try session.setActive(false)
             try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
             try session.setActive(true)
             
@@ -127,6 +130,7 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
             
             try engine.start()
             await MainActor.run {
+                playableURL = nil
                 isRecording = true
                 isPaused = false
                 elapsed = 0
@@ -170,20 +174,29 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
         stopElapsedTimer()
         try? session.setActive(false, options: .notifyOthersOnDeactivation)
         
-        guard save, let url = outputURL else { return }
+        let url = outputURL
+           Task { @MainActor in
+               isRecording = false
+               isPaused = false
+               if save, let u = url {
+                   playableURL = u           // ⟵ тригерить оновлення UI й показ «Play»
+               }
+           }
         
-        
-        // 👉 фіналізуємо останній бін
-        let avg = bucketN > 0 ? bucketSum / Float(bucketN) : 0
-        if bucketIndex < barCount { liveSamples[bucketIndex] = avg }
-        
-        // 👉 нормалізуємо та зберігаємо в json поруч із аудіо
-        var normalized = liveSamples
-        if let m = normalized.max(), m > 0 { normalized = normalized.map { $0 / m } }
-        do { try WaveformLoader.saveStoredSamples(normalized, forAudioURL: url) } catch {
-            print("Save waveform error:", error)
+        guard save, let url = outputURL else {
+            // якщо не зберігаємо — видалимо тимчасовий файл
+            if !save, let tmp = outputURL { try? FileManager.default.removeItem(at: tmp) }
+            outputURL = nil
+            file = nil
+            return
         }
         
+        // фіналізація біну + збереження хвилі ...
+        let avg = bucketN > 0 ? bucketSum / Float(bucketN) : 0
+        if bucketIndex < barCount { liveSamples[bucketIndex] = avg }
+        var normalized = liveSamples
+        if let m = normalized.max(), m > 0 { normalized = normalized.map { $0 / m } }
+        try? WaveformLoader.saveStoredSamples(normalized, forAudioURL: url)
         
         Task {
             let asset = AVURLAsset(url: url)
@@ -195,7 +208,11 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 canContinue = true
             }
         }
+        // важливо: обнулити хендли після завершення
+        outputURL = nil
+        file = nil
     }
+    
     
     // MARK: - Delete
     @MainActor
@@ -219,9 +236,9 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func play(url: URL) {
         
         if engine.isRunning {
-                engine.inputNode.removeTap(onBus: 0)
-                engine.stop()
-            }
+            engine.inputNode.removeTap(onBus: 0)
+            engine.stop()
+        }
         // зупинити, якщо вже щось грає
         if let p = player, p.isPlaying {
             p.stop()
@@ -231,8 +248,8 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
             //    • .playback = грає навіть у беззвучному режимі
             //    • .allowAirPlay/.allowBluetooth (за бажанням)
             try session.setActive(false) // безпечно перевстановити категорію
-                   try session.setCategory(.playback, mode: .default, options: []) // БЕЗ .allowBluetooth/.allowAirPlay
-                   try session.setActive(true)
+            try session.setCategory(.playback, mode: .default, options: []) // БЕЗ .allowBluetooth/.allowAirPlay
+            try session.setActive(true)
             
             // 2) Створюю плеєр
             let p = try AVAudioPlayer(contentsOf: url)
@@ -264,11 +281,49 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     // MARK: - Sheet helpers
     func openSheetAndStart() {
         showSheet = true
-        Task { await startRecording() }
+        Task { await startFreshRecording() }
     }
-    func closeSheet() {
-        showSheet = false
-    }
+
+    
+    
+    func dismissSheetAndReset(discardUnsaved: Bool = true) {
+            // зупинити програвач
+            if let p = player, p.isPlaying { p.stop() }
+            player = nil
+            currentlyPlaying = nil
+
+            // зупинити запис/таймер
+            if engine.isRunning {
+                engine.inputNode.removeTap(onBus: 0)
+                engine.stop()
+            }
+            stopElapsedTimer()
+
+            // видалити незбережений файл, якщо потрібно
+            if discardUnsaved, isRecording, let tmp = outputURL {
+                try? FileManager.default.removeItem(at: tmp)
+            }
+
+            // скинути сесію (не обов’язково, але акуратно)
+            try? session.setActive(false, options: .notifyOthersOnDeactivation)
+
+            // очистити стани
+            isRecording = false
+            isPaused = false
+            elapsed = 0
+            playableURL = nil
+            outputURL = nil
+            file = nil
+
+            // очистити хвилю
+            liveSamples = Array(repeating: 0, count: barCount)
+            bucketIndex = 0
+            bucketSum = 0
+            bucketN = 0
+
+            // прибрати шторку
+            showSheet = false
+        }
     
     
     
@@ -288,6 +343,43 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
         elapsedTimer?.invalidate()
         elapsedTimer = nil
     }
+    
+    // MARK: - Fresh start for a new attempt
+    func startFreshRecording() async {
+        // 1) зупинити відтворення, якщо було
+        if let p = player, p.isPlaying { p.stop() }
+        player = nil
+        currentlyPlaying = nil
+        
+        // 2) зупинити engine / прибрати tap
+        if engine.isRunning {
+            engine.inputNode.removeTap(onBus: 0)
+            engine.stop()
+        }
+        stopElapsedTimer()
+        
+        // 3) якщо перезапускали під час запису — прибрати сирий файл (не збережений)
+        if isRecording, let url = outputURL {
+            try? FileManager.default.removeItem(at: url)
+        }
+        
+        // 4) скинути стани та буфери хвилі
+        await MainActor.run {
+            isRecording = false
+            isPaused = false
+            elapsed = 0
+            liveSamples = Array(repeating: 0, count: barCount)
+            bucketIndex = 0
+            bucketSum = 0
+            bucketN = 0
+        }
+        
+        // 5) перевстановити аудіосесію під запис
+        try? session.setActive(false)
+        // далі нормально запустити звичайний пайплайн запису
+        await startRecording()
+    }
+    
     
     private func push(_ v: Float) {
         let clamped = min(1, max(0, v))

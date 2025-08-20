@@ -27,7 +27,7 @@ struct MicroView: View {
                 Color.black.opacity(0.35)
                     .ignoresSafeArea()
                     .transition(.opacity)
-                    .onTapGesture { viewModel.closeSheet() }
+                    .onTapGesture { viewModel.dismissSheetAndReset() }
             }
 
             // Кастомна нижня шторка + мікрофон поверх
@@ -41,7 +41,7 @@ struct MicroView: View {
                     // САМА ПАНЕЛЬ
                     VStack {
                         RecordingSheetView(vm: viewModel) {
-                            viewModel.closeSheet()
+                            viewModel.dismissSheetAndReset()
                         }
                     }
                     .frame(width: geo.size.width - 25, height: panelH)
@@ -104,29 +104,37 @@ struct MicroView: View {
             }
 
             Spacer()
-
-            Button {
-                if viewModel.canContinue {
-                    onContinue()
-                } else {
+            
+            HStack {
+                Button {
                     viewModel.openSheetAndStart()
+                } label: {
+                    Text("Test Microphone")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                    
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-            } label: {
-                Text(viewModel.canContinue ? "Continue" : "Start Test")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(viewModel.canContinue
-                                  ? Color(red: 81/255, green: 132/255, blue: 234/255)
-                                  : Color.white.opacity(0.12))
-                    )
+                
+                Button {
+                    onContinue()
+                } label: {
+                    Text("Continue")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255).opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
             }
-            .disabled(viewModel.isRecording)
             .padding(.horizontal, 24)
+            .padding(.top, 12)
             .padding(.bottom, 40)
+
         }
         .padding(.horizontal, 8)
         .onAppear {

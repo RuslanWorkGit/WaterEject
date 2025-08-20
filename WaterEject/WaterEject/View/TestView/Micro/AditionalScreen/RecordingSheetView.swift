@@ -63,7 +63,7 @@ struct RecordingSheetView: View {
                     }
                 }
                 .foregroundStyle(.white)
-            } else if let url = vm.lastRecordedURL {
+            } else if let url = vm.playableURL {
                 Button { vm.play(url: url) } label: {
                     Label("Play", systemImage: "play.fill")
                         .frame(maxWidth: .infinity)

@@ -85,7 +85,7 @@ struct BassView: View {
                             .fill(vm.allDone ? Color(red: 81/255, green: 132/255, blue: 234/255) : Color.white.opacity(0.12))
                     )
             }
-            .disabled(!vm.allDone)
+            //.disabled(!vm.allDone)
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
