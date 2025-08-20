@@ -16,7 +16,7 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var showSheet = false
     @Published var canContinue = false
     
-
+    
     @Published var recordings: [Recording] = []
     @Published var currentlyPlaying: Recording? = nil
     @Published var elapsed: TimeInterval = 0
@@ -217,15 +217,31 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     // MARK: - Player
     func play(url: URL) {
+        
+        if engine.isRunning {
+                engine.inputNode.removeTap(onBus: 0)
+                engine.stop()
+            }
         // зупинити, якщо вже щось грає
         if let p = player, p.isPlaying {
             p.stop()
         }
         do {
+            // 1) Готую сесію під ВІДТВОРЕННЯ:
+            //    • .playback = грає навіть у беззвучному режимі
+            //    • .allowAirPlay/.allowBluetooth (за бажанням)
+            try session.setActive(false) // безпечно перевстановити категорію
+                   try session.setCategory(.playback, mode: .default, options: []) // БЕЗ .allowBluetooth/.allowAirPlay
+                   try session.setActive(true)
+            
+            // 2) Створюю плеєр
             let p = try AVAudioPlayer(contentsOf: url)
             p.delegate = self
+            p.numberOfLoops = 0
+            p.pan = 0                      // центр → обидва канали
             p.prepareToPlay()
             p.play()
+            
             player = p
             currentlyPlaying = recordings.first(where: { $0.url == url })
         } catch {
@@ -241,6 +257,7 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         DispatchQueue.main.async {
             self.currentlyPlaying = nil
+            do { try self.session.setActive(false, options: .notifyOthersOnDeactivation) } catch { }
         }
     }
     
@@ -252,6 +269,8 @@ final class MicroViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func closeSheet() {
         showSheet = false
     }
+    
+    
     
     // MARK: - Wave helpers
     private func startElapsedTimer() {

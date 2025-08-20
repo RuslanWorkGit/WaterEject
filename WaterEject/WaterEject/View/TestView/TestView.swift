@@ -31,7 +31,7 @@ struct TestView: View {
                     
                     Spacer()
                     
-                    Text("0/5 passed")
+                    Text("\(viewModel.completedModesTest.count) / 5 passed")
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .font(.system(size: 12))
                         .padding(5)
@@ -88,7 +88,7 @@ struct TestView: View {
             
         }
         .navigationBarBackButtonHidden(true)
-        .background(BackSwipeEnabler(onBack: onBack)) 
+        .background(BackSwipeEnabler(onBack: onBack))
         
         
     }
