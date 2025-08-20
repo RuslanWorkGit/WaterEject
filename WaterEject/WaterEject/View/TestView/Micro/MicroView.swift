@@ -124,7 +124,7 @@ struct MicroView: View {
                 } label: {
                     Text("Continue")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+                        .foregroundStyle(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255).opacity(0.08))
