@@ -13,11 +13,21 @@ import StoreKit
 enum TelemetryEvent: String {
     case paywallExposure   = "paywall_exposure"
     case paywallClose      = "paywall_close"
+
+    case purchaseStart     = "purchase_start"
     case purchaseSuccess   = "purchase_success"
     case purchaseError     = "purchase_error"
     case purchaseCancelled = "purchase_cancelled"
+
+    case restoreStart      = "restore_start"
     case restoreSuccess    = "restore_success"
     case restoreError      = "restore_error"
+}
+
+enum PaywallCloseSource: String {
+    case closeButton   = "close_button"
+    case systemDismiss = "system_dismiss"
+    case backSwipe     = "back_swipe"
 }
 
 /// Обгортка над Firebase Analytics
@@ -25,11 +35,9 @@ final class Telemetry {
     static let shared = Telemetry()
     private init() {}
 
-    /// Все, що хочемо підмішувати автоматично у КОЖНУ подію
+    /// Все, що підмішуємо у кожну подію (напр., AB-варіант)
     private func baseParams() -> [String: Any] {
-        [
-            "variant": PaywallAB.shared.variant().rawValue // AB-варіант пейволу
-        ]
+        ["variant": PaywallAB.shared.variant().rawValue]
     }
 
     /// Низькорівневий логер
@@ -40,26 +48,37 @@ final class Telemetry {
     }
 }
 
+
+// MARK: - Спеціалізовані хелпери
 // MARK: - Спеціалізовані хелпери
 extension Telemetry {
 
+    // PAYWALL
     func paywallExposure(source: String? = nil) {
         var p: [String: Any] = [:]
         if let source { p["source"] = source }
         log(.paywallExposure, params: p)
     }
 
-    func paywallClosed(source: String) {
-        log(.paywallClose, params: ["source": source])
+    func paywallClosed(source: PaywallCloseSource) {
+        log(.paywallClose, params: ["source": source.rawValue])
     }
 
-    func purchaseSuccess(plan: PaywallPlan, product: StoreProduct, transactionId: String?) {
+    // PURCHASE
+    func purchaseStart(plan: PaywallPlan) {
+        log(.purchaseStart, params: ["plan": plan.analyticsValue])
+    }
+
+    func purchaseSuccess(plan: PaywallPlan,
+                         product: StoreProduct,
+                         transactionId: String?)
+    {
         let price = NSDecimalNumber(decimal: product.price).doubleValue
         log(.purchaseSuccess, params: [
             "plan"          : plan.analyticsValue,
             "product_id"    : product.productIdentifier,
-            "price"         : price,                       // numeric
-            "currency"      : product.currencyCode ?? "",  // ISO 4217
+            "price"         : price,                          // numeric
+            "currency"      : product.currencyCode ?? "",     // ISO 4217
             "transaction_id": transactionId ?? ""
         ])
     }
@@ -69,7 +88,7 @@ extension Telemetry {
                        error: Error? = nil)
     {
         var p: [String: Any] = [:]
-        if let plan { p["plan"] = plan.analyticsValue }
+        if let plan   { p["plan"]   = plan.analyticsValue }
         if let reason { p["reason"] = reason }
         if let ns = error as NSError? {
             p["domain"]  = ns.domain
@@ -83,8 +102,13 @@ extension Telemetry {
         log(.purchaseCancelled, params: ["plan": plan.analyticsValue])
     }
 
-    func restoreSuccess() {
-        log(.restoreSuccess)
+    // RESTORE
+    func restoreStart() {
+        log(.restoreStart)
+    }
+
+    func restoreSuccess(entitlementActive: Bool) {
+        log(.restoreSuccess, params: ["entitlement_active": entitlementActive])
     }
 
     func restoreError(_ error: Error) {

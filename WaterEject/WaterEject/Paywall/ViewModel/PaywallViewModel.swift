@@ -120,45 +120,58 @@ final class PaywallViewModel: ObservableObject {
     func buyWithRevenueCat(plan: PaywallPlan) async {
         guard let pkg = packageByPlan[plan] else {
             errorMessage = "Product not found"
-            
-            Analytics.logEvent("purchase_error", parameters: [
-                "variant": PaywallAB.shared.variant().rawValue,
-                "plan": plan.analyticsValue,
-                "reason": "product_not_found"
-            ])
-            
+            Telemetry.shared.purchaseError(plan: plan, reason: "product_not_found", error: nil)
             return
         }
+        
         isPurchasing = true
         errorMessage = nil
         purchaseSucceeded = false
+        Telemetry.shared.purchaseStart(plan: plan)
         defer { isPurchasing = false }
         
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
-            purchaseSucceeded = result.customerInfo.entitlements[entitlementID]?.isActive == true
-            if !purchaseSucceeded { errorMessage = "Subscription not active" }
+            let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
+            purchaseSucceeded = active
+            if active {
+                let txId = result.transaction?.transactionIdentifier
+                Telemetry.shared.purchaseSuccess(
+                    plan: plan,
+                    product: pkg.storeProduct,
+                    transactionId: txId
+                )
+            } else {
+                errorMessage = "Subscription not active"
+                Telemetry.shared.purchaseError(plan: plan, reason: "entitlement_inactive", error: nil)
+            }
         } catch {
             let ns = error as NSError
-            if let rc = RevenueCat.ErrorCode(_bridgedNSError: ns), rc == .purchaseCancelledError { return }
+            if let rc = RevenueCat.ErrorCode(_bridgedNSError: ns), rc == .purchaseCancelledError {
+                Telemetry.shared.purchaseCancelled(plan: plan)
+                return
+            }
             errorMessage = ns.localizedDescription
+            Telemetry.shared.purchaseError(plan: plan, reason: "revenuecat_error", error: ns)
         }
     }
+    
     
     func restorePurchases() async {
         isPurchasing = true
+        Telemetry.shared.restoreStart()
         defer { isPurchasing = false }
+        
         do {
             let info = try await Purchases.shared.restorePurchases()
-            purchaseSucceeded = info.entitlements[entitlementID]?.isActive == true
-            if !purchaseSucceeded { errorMessage = "No previous purchases found." }
+            let active = info.entitlements[entitlementID]?.isActive == true
+            purchaseSucceeded = active
+            if !active { errorMessage = "No previous purchases found." }
+            Telemetry.shared.restoreSuccess(entitlementActive: active)
         } catch {
-            errorMessage = (error as NSError).localizedDescription
+            let ns = error as NSError
+            errorMessage = ns.localizedDescription
+            Telemetry.shared.restoreError(ns)
         }
     }
-    
-    // MARK: - Helpers
-    
-    
-    
 }
