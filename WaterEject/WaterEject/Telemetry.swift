@@ -26,6 +26,13 @@ enum TelemetryEvent: String {
     case homeExposure      = "home_exposure"
     case homeDeviceTap     = "home_device_tap"
     case homeNavigateModes = "home_navigate_modes"
+    
+    case modesExposure        = "modes_exposure"
+    case modesModeTap         = "modes_mode_tap"
+    case modesStartNavigate   = "modes_start_navigate"
+    case modesPaywallRequested = "modes_paywall_requested"
+    case modesPaywallDismissed = "modes_paywall_dismissed"
+    case modesBackTap         = "modes_back_tap"
 }
 
 enum PaywallCloseSource: String {
@@ -136,4 +143,43 @@ extension Telemetry {
     func homeNavigateToModes(device: CleaningDevice) {
         log(.homeNavigateModes, params: ["device": device.analyticsValue])
     }
+    
+    
+    func modesExposure(device: CleaningDevice) {
+            log(.modesExposure, params: ["device": device.analyticsValue])
+        }
+
+        func modesModeTap(device: CleaningDevice, mode: CleaningMode) {
+            log(.modesModeTap, params: [
+                "device": device.analyticsValue,
+                "mode"  : mode.analyticsValue
+            ])
+        }
+
+        func modesStartNavigate(device: CleaningDevice, mode: CleaningMode) {
+            log(.modesStartNavigate, params: [
+                "device": device.analyticsValue,
+                "mode"  : mode.analyticsValue
+            ])
+        }
+
+        func modesPaywallRequested(device: CleaningDevice, mode: CleaningMode) {
+            log(.modesPaywallRequested, params: [
+                "device": device.analyticsValue,
+                "mode"  : mode.analyticsValue
+            ])
+        }
+
+        /// converted = true, якщо після закриття пейволу у юзера з’явився Entitlement
+        func modesPaywallDismissed(device: CleaningDevice, mode: CleaningMode, converted: Bool) {
+            log(.modesPaywallDismissed, params: [
+                "device": device.analyticsValue,
+                "mode"  : mode.analyticsValue,
+                "converted": converted
+            ])
+        }
+
+        func modesBackTap(device: CleaningDevice) {
+            log(.modesBackTap, params: ["device": device.analyticsValue])
+        }
 }

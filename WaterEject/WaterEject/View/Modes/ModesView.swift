@@ -199,6 +199,7 @@ struct ModesView: View {
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
+                    Telemetry.shared.modesBackTap(device: device)
                     dismiss()
                 } label: {
                     Image(systemName: "chevron.backward")
@@ -209,6 +210,9 @@ struct ModesView: View {
                 
             }
         }
+        .onAppear {
+            Telemetry.shared.modesExposure(device: device)          // ← лог показу екрана
+        }
         // Колір системної стрілки
         .tint(Color(red: 161/255, green: 192/255, blue: 255/255))
         // Лише стрілка без тексту "Back", якщо доступно (iOS 15+)
@@ -216,7 +220,10 @@ struct ModesView: View {
         // Пейвол лишається як модалка; після закриття відкриваємо StartView, якщо юзер став Pro
         .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
             Task {
+                let converted = await paywallGate.isPro()
                 if let pending = pendingMode, await paywallGate.isPro() {
+                    Telemetry.shared.modesPaywallDismissed(device: device, mode: pending, converted: converted)
+                            
                     onStart(pending)
                     pendingMode = nil
                 }
@@ -253,10 +260,14 @@ struct ModesView: View {
     private func startIfAllowed(_ mode: CleaningMode) {
         Task {
             pendingMode = mode
+            Telemetry.shared.modesModeTap(device: device, mode: mode)
             let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
             if allowed {
+                Telemetry.shared.modesStartNavigate(device: device, mode: mode)
                 onStart(mode)          // пушимо StartView через Route у HomeView
                 pendingMode = nil
+            } else {
+                Telemetry.shared.modesPaywallRequested(device: device, mode: mode)
             }
         }
     }
