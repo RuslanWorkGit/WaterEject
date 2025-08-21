@@ -17,6 +17,7 @@ struct HomeView: View {
     @EnvironmentObject private var tabBarState: TabBarState
     @State private var selectedDevice: CleaningDevice?
     @State private var path: [Route] = []
+    @State private var didLogExposure = false
     
     var body: some View {
         NavigationStack(path: $path) {
@@ -42,7 +43,10 @@ struct HomeView: View {
                     .padding(.top, 16)
                     
                     DeviceGridView { device in
-                        //                        selectedDevice = device
+                        Telemetry.shared.homeDeviceTap(device: device)
+                                                // 2) лог навігації
+                        Telemetry.shared.homeNavigateToModes(device: device)
+                        
                         path.append(.modes(device))
                         //showModesScreen = true
                     }
@@ -53,7 +57,10 @@ struct HomeView: View {
                 }
             }
             
-            .onAppear { tabBarState.isHidden = false }   // ⟵ сховати
+            .onAppear {
+                Telemetry.shared.homeExposure()
+                tabBarState.isHidden = false
+            }   // ⟵ сховати
             .onDisappear { tabBarState.isHidden = true }
             .navigationDestination(for: Route.self) { route in
                 switch route {
