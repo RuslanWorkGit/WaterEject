@@ -31,7 +31,7 @@ struct TestView: View {
                     
                     Spacer()
                     
-                    Text("\(viewModel.completedModesTest.count) / 5 passed")
+                    Text("\(viewModel.completedModesTest.count) / 4 passed")
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .font(.system(size: 12))
                         .padding(5)

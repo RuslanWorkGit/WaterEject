@@ -30,9 +30,13 @@ struct StereoView: View {
             
             HStack {
                 Button {
-                    viewModel.playTest(left: isLeftOn, right: isRightOn)
+                    if viewModel.isPlaying {
+                        viewModel.pause()
+                    } else {
+                        viewModel.playTest(leftOn: isLeftOn, rightOn: isRightOn)
+                    }
                 } label: {
-                    Text("Test Stereo")
+                    Text(viewModel.isPlaying ? "Pause" : "Start Stereo")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
                     
@@ -58,6 +62,13 @@ struct StereoView: View {
             .padding(.top, 12)
             .padding(.bottom, 40)
         }
+        .onChange(of: isLeftOn) { _, _ in
+            viewModel.updateRouting(leftOn: isLeftOn, rightOn: isRightOn)
+        }
+        .onChange(of: isRightOn) { _, _ in
+            viewModel.updateRouting(leftOn: isLeftOn, rightOn: isRightOn)
+        }
+        .onDisappear { viewModel.stop() }
     }
 }
 
