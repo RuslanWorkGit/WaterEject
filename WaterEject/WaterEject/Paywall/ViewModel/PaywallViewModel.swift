@@ -18,7 +18,7 @@ import StoreKit
 //        case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
 //        }
 //    }
-//    
+//
 //    var price: String {
 //        switch self {
 //        case .weekly:
@@ -27,7 +27,7 @@ import StoreKit
 //            return " $0.03/day"
 //        }
 //    }
-//    
+//
 //    var onlyPrice: String {
 //        switch self {
 //        case .weekly:
@@ -38,23 +38,26 @@ import StoreKit
 //    }
 //}
 
-enum PaywallPlan: CaseIterable, Hashable {
+enum PaywallPlan: String, CaseIterable, Hashable {
     case weekly, yearly
-
+    
     var productID: String {
         switch self {
         case .weekly: return "kyryloVoinov.WaterEject.subscription.weekly"
         case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
         }
     }
-
+    
     var title: String {
         switch self { case .weekly: "7 days"; case .yearly: "12 months" }
     }
+    
+    var analyticsValue: String { rawValue }
 }
 
 import Foundation
 import RevenueCat
+import FirebaseAnalytics
 
 @MainActor
 final class PaywallViewModel: ObservableObject {
@@ -62,22 +65,22 @@ final class PaywallViewModel: ObservableObject {
     @Published var purchaseSucceeded = false
     @Published var errorMessage: String?
     @Published var selectedPlan: PaywallPlan = .yearly
-
+    
     // Мапа план → Package/StoreProduct
     @Published private(set) var packageByPlan: [PaywallPlan: Package] = [:]
-
+    
     // Готові рядки для UI
     @Published private(set) var pricePerPeriod: [PaywallPlan: String] = [:] // "$3.99/week", "$12.99/year"
     @Published private(set) var onlyPrice: [PaywallPlan: String] = [:]      // "for $3.99", "for $12.99"
-
+    
     private let entitlementID = "pro_user"
-
+    
     // Виклич на .onAppear пейвола
     func loadPricing() async {
         do {
             let offerings = try await Purchases.shared.offerings()
             guard let current = offerings.current else { return }
-
+            
             var map: [PaywallPlan: Package] = [:]
             let wantedIDs = Set(PaywallPlan.allCases.map { $0.productID })
             for pkg in current.availablePackages {
@@ -88,12 +91,12 @@ final class PaywallViewModel: ObservableObject {
                 }
             }
             self.packageByPlan = map
-
+            
             // заповнюємо локальні словники
             var period: [PaywallPlan: String] = [:]
             var only:   [PaywallPlan: String] = [:]
-
-
+            
+            
             for (plan, pkg) in map {
                 let p = pkg.storeProduct
                 let localized = p.localizedPriceString
@@ -103,7 +106,7 @@ final class PaywallViewModel: ObservableObject {
                 }
                 only[plan]   = "for \(localized)"
             }
-
+            
             // 👇 тепер ОДНИМ махом присвоюємо у @Published
             self.pricePerPeriod = period
             self.onlyPrice      = only
@@ -111,19 +114,26 @@ final class PaywallViewModel: ObservableObject {
             self.errorMessage = (error as NSError).localizedDescription
         }
     }
-
-
+    
+    
     // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
     func buyWithRevenueCat(plan: PaywallPlan) async {
         guard let pkg = packageByPlan[plan] else {
             errorMessage = "Product not found"
+            
+            Analytics.logEvent("purchase_error", parameters: [
+                "variant": PaywallAB.shared.variant().rawValue,
+                "plan": plan.analyticsValue,
+                "reason": "product_not_found"
+            ])
+            
             return
         }
         isPurchasing = true
         errorMessage = nil
         purchaseSucceeded = false
         defer { isPurchasing = false }
-
+        
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
             purchaseSucceeded = result.customerInfo.entitlements[entitlementID]?.isActive == true
@@ -134,7 +144,7 @@ final class PaywallViewModel: ObservableObject {
             errorMessage = ns.localizedDescription
         }
     }
-
+    
     func restorePurchases() async {
         isPurchasing = true
         defer { isPurchasing = false }
@@ -146,9 +156,9 @@ final class PaywallViewModel: ObservableObject {
             errorMessage = (error as NSError).localizedDescription
         }
     }
-
+    
     // MARK: - Helpers
-
-
-
+    
+    
+    
 }
