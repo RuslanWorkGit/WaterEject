@@ -48,3 +48,15 @@ enum CleaningDevice: String, CaseIterable, Hashable, Identifiable {
     }
 
 }
+
+extension CleaningDevice {
+    var analyticsValue: String {
+        switch self {
+        case .iPhone:     return "iphone"
+        case .airPodsPro: return "airpods_pro"
+        case .airPods:    return "airpods"
+        case .airPodsMax: return "airpods_max"
+        case .speakers:   return "speakers"
+        }
+    }
+}

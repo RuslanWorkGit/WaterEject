@@ -13,15 +13,19 @@ import StoreKit
 enum TelemetryEvent: String {
     case paywallExposure   = "paywall_exposure"
     case paywallClose      = "paywall_close"
-
+    
     case purchaseStart     = "purchase_start"
     case purchaseSuccess   = "purchase_success"
     case purchaseError     = "purchase_error"
     case purchaseCancelled = "purchase_cancelled"
-
+    
     case restoreStart      = "restore_start"
     case restoreSuccess    = "restore_success"
     case restoreError      = "restore_error"
+    
+    case homeExposure      = "home_exposure"
+    case homeDeviceTap     = "home_device_tap"
+    case homeNavigateModes = "home_navigate_modes"
 }
 
 enum PaywallCloseSource: String {
@@ -34,12 +38,12 @@ enum PaywallCloseSource: String {
 final class Telemetry {
     static let shared = Telemetry()
     private init() {}
-
+    
     /// Все, що підмішуємо у кожну подію (напр., AB-варіант)
     private func baseParams() -> [String: Any] {
         ["variant": PaywallAB.shared.variant().rawValue]
     }
-
+    
     /// Низькорівневий логер
     func log(_ event: TelemetryEvent, params: [String: Any] = [:]) {
         var merged = baseParams()
@@ -52,23 +56,23 @@ final class Telemetry {
 // MARK: - Спеціалізовані хелпери
 // MARK: - Спеціалізовані хелпери
 extension Telemetry {
-
+    
     // PAYWALL
     func paywallExposure(source: String? = nil) {
         var p: [String: Any] = [:]
         if let source { p["source"] = source }
         log(.paywallExposure, params: p)
     }
-
+    
     func paywallClosed(source: PaywallCloseSource) {
         log(.paywallClose, params: ["source": source.rawValue])
     }
-
+    
     // PURCHASE
     func purchaseStart(plan: PaywallPlan) {
         log(.purchaseStart, params: ["plan": plan.analyticsValue])
     }
-
+    
     func purchaseSuccess(plan: PaywallPlan,
                          product: StoreProduct,
                          transactionId: String?)
@@ -82,7 +86,7 @@ extension Telemetry {
             "transaction_id": transactionId ?? ""
         ])
     }
-
+    
     func purchaseError(plan: PaywallPlan?,
                        reason: String? = nil,
                        error: Error? = nil)
@@ -97,20 +101,20 @@ extension Telemetry {
         }
         log(.purchaseError, params: p)
     }
-
+    
     func purchaseCancelled(plan: PaywallPlan) {
         log(.purchaseCancelled, params: ["plan": plan.analyticsValue])
     }
-
+    
     // RESTORE
     func restoreStart() {
         log(.restoreStart)
     }
-
+    
     func restoreSuccess(entitlementActive: Bool) {
         log(.restoreSuccess, params: ["entitlement_active": entitlementActive])
     }
-
+    
     func restoreError(_ error: Error) {
         let ns = error as NSError
         log(.restoreError, params: [
@@ -118,5 +122,18 @@ extension Telemetry {
             "code"  : ns.code,
             "message": ns.localizedDescription
         ])
+    }
+    
+    
+    func homeExposure() {
+        log(.homeExposure)
+    }
+    
+    func homeDeviceTap(device: CleaningDevice) {
+        log(.homeDeviceTap, params: ["device": device.analyticsValue])
+    }
+    
+    func homeNavigateToModes(device: CleaningDevice) {
+        log(.homeNavigateModes, params: ["device": device.analyticsValue])
     }
 }

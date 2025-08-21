@@ -151,7 +151,7 @@ struct PaywallSecondView: View {
             }
             
             Button(action: {
-                Telemetry.shared.paywallClosed(source: .paywallClose)
+                Telemetry.shared.paywallClosed(source: .closeButton)
                 onFinish()
             }) {
                 Image(systemName: "xmark")
