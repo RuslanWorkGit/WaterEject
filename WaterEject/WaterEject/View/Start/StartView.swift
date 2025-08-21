@@ -29,8 +29,10 @@ struct StartView: View {
                     
                     HStack {
                         Button {
+                            Telemetry.shared.startBackTap(device: device, mode: mode, disabled: viewModel.startCleaning)
                             dismiss()
                             viewModel.stopTimer()
+                            Telemetry.shared.startCleaningEnd(device: device, mode: mode, reason: "back")
                         } label: {
                             Image(systemName: "chevron.backward")
                                 .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
@@ -76,7 +78,9 @@ struct StartView: View {
                     
                     // Кнопка
                     Button {
+                        Telemetry.shared.startPrimaryTap(device: device, mode: mode)
                         showVolumeAlert = true
+                        Telemetry.shared.startPromptShown(device: device, mode: mode)
                         
                     } label: {
                         Text("Start cleaning (25 sec)")
@@ -97,13 +101,26 @@ struct StartView: View {
             }
             
         }
-     
+        
         .onAppear {
+            Telemetry.shared.startExposure(device: device, mode: mode)
             Task { await paywallGate.presentPaywallIfNeeded(context: .startViewAuto) }
         }
+        
+        .onChange(of: paywallGate.presentedVariant) { oldValue, newValue in
+            guard oldValue == nil, newValue != nil else { return }
+            Telemetry.shared.startPaywallRequested(auto: true)
+        }
+        
+        
 
         // Єдина презентація A/B пейволів
-        .fullScreenCover(item: $paywallGate.presentedVariant) { variant in
+        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
+            Task {
+                            let converted = await paywallGate.isPro()
+                            Telemetry.shared.startPaywallDismissed(converted: converted)
+                        }
+        }) { variant in
             switch variant {
             case .A:
                 PaywallFirstView(onFinish: { paywallGate.dismissPaywall() })
@@ -112,11 +129,17 @@ struct StartView: View {
             }
         }
         
+        
         .alert(isPresented: $showVolumeAlert) {
             Alert(
                 title: Text("Set Volume to Max"),
                 message: Text("For the most effective cleaning, please set your device volume to maximum."),
                 primaryButton: .default(Text("OK")) {
+                    
+                    Telemetry.shared.startPromptConfirm(device: device, mode: mode)
+
+                                       // початок очищення (лог до запуску/після — на твій вибір; тут — до)
+                                       Telemetry.shared.startCleaningBegin(device: device, mode: mode, duration: 25)
                     switch mode {
                     case .sonicPulse:
                         viewModel.playCleaningSequence()
@@ -130,11 +153,11 @@ struct StartView: View {
                     case .hydroGuard:
                         viewModel.playCleaningSequenceThree()
                         viewModel.startTimer()
-                    case .microCheck:
-                        viewModel.startTimer()
                     }
                 },
-                secondaryButton: .cancel()
+                secondaryButton: .cancel({
+                    Telemetry.shared.startPromptCancel(device: device, mode: mode)
+                })
             )
         }
         
@@ -174,12 +197,12 @@ struct SelectedModeCard: View {
             Spacer()
             
             // Кнопка-іконка
-//            Button(action: onSettings) {
-//                Image(systemName: "gearshape")
-//                    .font(.system(size: 26))
-//                    .foregroundStyle(.white.opacity(0.45))
-//                    .padding(2)
-//            }
+            //            Button(action: onSettings) {
+            //                Image(systemName: "gearshape")
+            //                    .font(.system(size: 26))
+            //                    .foregroundStyle(.white.opacity(0.45))
+            //                    .padding(2)
+            //            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 18)

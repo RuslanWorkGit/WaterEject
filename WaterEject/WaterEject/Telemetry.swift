@@ -33,6 +33,22 @@ enum TelemetryEvent: String {
     case modesPaywallRequested = "modes_paywall_requested"
     case modesPaywallDismissed = "modes_paywall_dismissed"
     case modesBackTap         = "modes_back_tap"
+    
+    
+    case startExposure          = "start_exposure"
+    case startBackTap           = "start_back_tap"
+    case startPrimaryTap        = "start_primary_tap"      // натиск на “Start cleaning”
+    case startPromptShown       = "start_prompt_shown"     // показали Alert про гучність
+    case startPromptConfirm     = "start_prompt_confirm"   // OK в Alert
+    case startPromptCancel      = "start_prompt_cancel"    // Cancel в Alert
+    case startCleaningBegin     = "start_cleaning_begin"
+    case startCleaningEnd       = "start_cleaning_end"     // reason: finished/cancelled/back
+    case startTimerStart        = "start_timer_start"
+    case startTimerEnd          = "start_timer_end"
+    
+    // Пейвол з цього екрана
+    case startPaywallRequested  = "start_paywall_requested"
+    case startPaywallDismissed  = "start_paywall_dismissed"
 }
 
 enum PaywallCloseSource: String {
@@ -146,40 +162,123 @@ extension Telemetry {
     
     
     func modesExposure(device: CleaningDevice) {
-            log(.modesExposure, params: ["device": device.analyticsValue])
-        }
-
-        func modesModeTap(device: CleaningDevice, mode: CleaningMode) {
-            log(.modesModeTap, params: [
-                "device": device.analyticsValue,
-                "mode"  : mode.analyticsValue
-            ])
-        }
-
-        func modesStartNavigate(device: CleaningDevice, mode: CleaningMode) {
-            log(.modesStartNavigate, params: [
-                "device": device.analyticsValue,
-                "mode"  : mode.analyticsValue
-            ])
-        }
-
-        func modesPaywallRequested(device: CleaningDevice, mode: CleaningMode) {
-            log(.modesPaywallRequested, params: [
-                "device": device.analyticsValue,
-                "mode"  : mode.analyticsValue
-            ])
-        }
-
-        /// converted = true, якщо після закриття пейволу у юзера з’явився Entitlement
-        func modesPaywallDismissed(device: CleaningDevice, mode: CleaningMode, converted: Bool) {
-            log(.modesPaywallDismissed, params: [
-                "device": device.analyticsValue,
-                "mode"  : mode.analyticsValue,
-                "converted": converted
-            ])
-        }
-
-        func modesBackTap(device: CleaningDevice) {
-            log(.modesBackTap, params: ["device": device.analyticsValue])
-        }
+        log(.modesExposure, params: ["device": device.analyticsValue])
+    }
+    
+    func modesModeTap(device: CleaningDevice, mode: CleaningMode) {
+        log(.modesModeTap, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func modesStartNavigate(device: CleaningDevice, mode: CleaningMode) {
+        log(.modesStartNavigate, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func modesPaywallRequested(device: CleaningDevice, mode: CleaningMode) {
+        log(.modesPaywallRequested, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    /// converted = true, якщо після закриття пейволу у юзера з’явився Entitlement
+    func modesPaywallDismissed(device: CleaningDevice, mode: CleaningMode, converted: Bool) {
+        log(.modesPaywallDismissed, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue,
+            "converted": converted
+        ])
+    }
+    
+    func modesBackTap(device: CleaningDevice) {
+        log(.modesBackTap, params: ["device": device.analyticsValue])
+    }
+    
+    func startExposure(device: CleaningDevice, mode: CleaningMode) {
+        log(.startExposure, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func startBackTap(device: CleaningDevice, mode: CleaningMode, disabled: Bool) {
+        log(.startBackTap, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue,
+            "disabled": disabled
+        ])
+    }
+    
+    func startPrimaryTap(device: CleaningDevice, mode: CleaningMode) {
+        log(.startPrimaryTap, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func startPromptShown(device: CleaningDevice, mode: CleaningMode) {
+        log(.startPromptShown, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func startPromptConfirm(device: CleaningDevice, mode: CleaningMode) {
+        log(.startPromptConfirm, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func startPromptCancel(device: CleaningDevice, mode: CleaningMode) {
+        log(.startPromptCancel, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func startCleaningBegin(device: CleaningDevice, mode: CleaningMode, duration: Int) {
+        log(.startCleaningBegin, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue,
+            "duration_sec": duration
+        ])
+    }
+    
+    /// reason: finished / cancelled / back
+    func startCleaningEnd(device: CleaningDevice, mode: CleaningMode, reason: String) {
+        log(.startCleaningEnd, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue,
+            "reason": reason
+        ])
+    }
+    
+    func startTimerStart(device: CleaningDevice, mode: CleaningMode, duration: Int) {
+        log(.startTimerStart, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue,
+            "duration_sec": duration
+        ])
+    }
+    
+    func startTimerEnd(device: CleaningDevice, mode: CleaningMode) {
+        log(.startTimerEnd, params: [
+            "device": device.analyticsValue,
+            "mode"  : mode.analyticsValue
+        ])
+    }
+    
+    func startPaywallRequested(auto: Bool) {
+        log(.startPaywallRequested, params: ["auto": auto])
+    }
+    
+    func startPaywallDismissed(converted: Bool) {
+        log(.startPaywallDismissed, params: ["converted": converted])
+    }
 }

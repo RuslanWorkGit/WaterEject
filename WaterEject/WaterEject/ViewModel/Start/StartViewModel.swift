@@ -16,6 +16,9 @@ final class StartViewModel: ObservableObject {
     private var sweepTimer: Timer?
     private var player: AVAudioPlayer?
     
+    private(set) var device: CleaningDevice!
+    private(set) var mode: CleaningMode!
+    
     private let audioManager = AudioManager()
     private let seqPlayer = AudioSequencePlayer()
     
@@ -66,6 +69,8 @@ final class StartViewModel: ObservableObject {
     func startTimer() {
         stopTimer()
         countdown = 25
+        
+        
         startCleaning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
