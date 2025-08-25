@@ -83,6 +83,14 @@ final class StartViewModel: ObservableObject {
         }
     }
     
+    func stopAllPlayback(reason: String? = nil) {
+            seqPlayer.stop()
+            audioManager.stop()
+            stopTimer()
+            try? AVAudioSession.sharedInstance()
+                .setActive(false, options: .notifyOthersOnDeactivation)
+        }
+    
     func stopTimer() {
         timer?.invalidate()
         timer = nil

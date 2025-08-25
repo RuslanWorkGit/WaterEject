@@ -30,9 +30,9 @@ struct StartView: View {
                     HStack {
                         Button {
                             Telemetry.shared.startBackTap(device: device, mode: mode, disabled: viewModel.startCleaning)
+                                viewModel.stopAllPlayback(reason: "back")
+                                Telemetry.shared.startCleaningEnd(device: device, mode: mode, reason: "back")
                             dismiss()
-                            viewModel.stopTimer()
-                            Telemetry.shared.startCleaningEnd(device: device, mode: mode, reason: "back")
                         } label: {
                             Image(systemName: "chevron.backward")
 //                                .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
@@ -111,6 +111,9 @@ struct StartView: View {
         .onChange(of: paywallGate.presentedVariant) { oldValue, newValue in
             guard oldValue == nil, newValue != nil else { return }
             Telemetry.shared.startPaywallRequested(auto: true)
+        }
+        .onDisappear {
+            viewModel.stopAllPlayback(reason: "disappear")
         }
         
         

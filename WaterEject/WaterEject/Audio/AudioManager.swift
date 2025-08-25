@@ -12,11 +12,6 @@ class AudioManager {
     private var playerNode: AVAudioPlayerNode?
     private var sweepTimer: Timer?
     private var player: AVAudioPlayer?
-
-    
-    
-    
-  
     
     func playWav(named name: String) {
         guard let url = Bundle.main.url(forResource: name, withExtension: "wav") else {
@@ -38,11 +33,18 @@ class AudioManager {
     }
     
     func stop() {
-        playerNode?.stop()
-        engine?.stop()
-        player?.stop()
         sweepTimer?.invalidate()
         sweepTimer = nil
+        
+        player?.stop()
+        player = nil
+        
+        playerNode?.stop()
+        playerNode = nil
+        
+        engine?.stop()
+        engine?.reset()
+        engine = nil
     }
     
 }
@@ -63,26 +65,31 @@ class AudioSequencePlayer: NSObject, AVAudioPlayerDelegate {
     }
     
     private func playNext(duration: TimeInterval) {
-        guard currentIndex < soundNames.count else { return }
+        guard currentIndex < soundNames.count else {
+            stop() // повне очищення після завершення
+            return
+        }
         guard let url = Bundle.main.url(forResource: soundNames[currentIndex], withExtension: "wav") else {
-            print("Файл не знайдено")
             currentIndex += 1
             playNext(duration: duration)
             return
         }
         do {
-            let player = try AVAudioPlayer(contentsOf: url)
-            players.append(player)
-            player.delegate = self
-            player.play()
-            // Зупиняємо через 5 секунд, навіть якщо файл довший
-            timer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
-                player.stop()
+            let p = try AVAudioPlayer(contentsOf: url)
+            p.delegate = self
+            p.prepareToPlay()
+            p.play()
+            players.append(p)
+            
+            timer?.invalidate()
+            let t = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self, weak p] _ in
+                p?.stop()
                 self?.currentIndex += 1
                 self?.playNext(duration: duration)
             }
+            RunLoop.main.add(t, forMode: .common) // щоб не «зависав» під час жестів/скролу
+            timer = t
         } catch {
-            print("Помилка відтворення: \(error)")
             currentIndex += 1
             playNext(duration: duration)
         }
@@ -90,8 +97,10 @@ class AudioSequencePlayer: NSObject, AVAudioPlayerDelegate {
     
     func stop() {
         timer?.invalidate()
+        timer = nil
         players.forEach { $0.stop() }
         players.removeAll()
+        soundNames.removeAll()
         currentIndex = 0
     }
 }
