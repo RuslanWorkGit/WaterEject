@@ -50,6 +50,12 @@
             ReferencedContainer = "container:WaterEject.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-FIRAnalyticsDebugEnabled"
+            isEnabled = "NO">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <StoreKitConfigurationFileReference
          identifier = "../../WaterEject/WaterEjectClearSoundSub.storekit">
       </StoreKitConfigurationFileReference>
