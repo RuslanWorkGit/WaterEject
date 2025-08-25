@@ -35,10 +35,11 @@ struct StartView: View {
                             Telemetry.shared.startCleaningEnd(device: device, mode: mode, reason: "back")
                         } label: {
                             Image(systemName: "chevron.backward")
-                                .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
+//                                .foregroundStyle(viewModel.startCleaning ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255, opacity: 0.35) : Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
+                                .foregroundStyle(Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255))
                                 .font(.system(size: 23))
                         }
-                        .disabled(viewModel.startCleaning)
+                        //.disabled(viewModel.startCleaning)
                         
                         Spacer()
                     }

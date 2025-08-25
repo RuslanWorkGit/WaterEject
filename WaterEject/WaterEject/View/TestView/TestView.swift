@@ -73,14 +73,14 @@ struct TestView: View {
                     MicroView(onContinue: { viewModel.goToNextStep()})
                 case .vibro:
                     VibroView(onContinue: { onFinish() })
-                case .noise:
-                    NoiseView()
+//                case .noise:
+//                    NoiseView()
                 }
                 
                 
-                if viewModel.mode == .noise {
-                    bottomButton
-                }
+//                if viewModel.mode == .noise {
+//                    bottomButton
+//                }
                 
             }
             .padding(.horizontal, 14)
