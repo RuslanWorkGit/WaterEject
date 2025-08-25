@@ -10,7 +10,7 @@ enum TestMode: String, CaseIterable, Identifiable, Hashable {
     case bass
     case micro
     case vibro
-    case noise
+//    case noise
 
 
     var id: String { rawValue }
@@ -21,7 +21,7 @@ enum TestMode: String, CaseIterable, Identifiable, Hashable {
         case .bass: return "Bass"
         case .micro: return "Micro"
         case .vibro: return "Vibro"
-        case .noise: return "Noise"
+//        case .noise: return "Noise"
         }
     }
     
@@ -31,7 +31,7 @@ enum TestMode: String, CaseIterable, Identifiable, Hashable {
         case .bass: return "Bass"
         case .micro: return "Micro"
         case .vibro: return "Bass"
-        case .noise: return "Noise"
+//        case .noise: return "Noise"
         }
     }
 }

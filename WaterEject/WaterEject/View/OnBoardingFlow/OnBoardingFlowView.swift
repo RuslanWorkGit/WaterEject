@@ -19,12 +19,12 @@ struct OnboardingFlowView: View {
                 case .hook:     HookView()
                 case .urgency:  UrgencyView()
                 case .solution: SolutionView()
-                //case .tests:    TestsView()
+                    //case .tests:    TestsView()
                 case .paywall:
                     PaywallAB.shared.assignedPaywallView(onFinish: finishOnboarding)
                 }
             }
-
+            
             
             
             
@@ -32,35 +32,50 @@ struct OnboardingFlowView: View {
                 
                 Spacer()
                 if currentStep != .paywall {
-                                            
-                        Button {
-                            goToNextStep()
-                        } label: {
-                            Text("Continue")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(Color.white)
-                                
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                
-                                .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-   
-                        }
-                        .padding(.horizontal, 36)
-                        .padding(.bottom, 26)
-                    }
                     
+                    Button {
+                        goToNextStep()
+                    } label: {
+                        Text("Continue")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.white)
+                        
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                        
+                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        
+                    }
+                    .padding(.horizontal, 36)
+                    .padding(.bottom, 26)
                 }
+                
+            }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             
             
-
+            
         }
-
+        
         .transition(.slide)
         .animation(.easeInOut, value: currentStep)
-
+        .task {
+            Telemetry.shared.onboardingStart()
+        }
+        .onAppear {
+            Telemetry.shared.onboardingExposure(step: currentStep)
+        }
+        .onChange(of: currentStep) { oldStep, newStep in
+            Telemetry.shared.onboardingStepChange(from: oldStep, to: newStep)
+            Telemetry.shared.onboardingExposure(step: newStep)
+            
+            if newStep == .paywall {
+                // джерело експожера пейволу — онбординг
+                Telemetry.shared.paywallExposure(source: "onboarding")
+            }
+        }
+        
     }
     
     func goToNextStep() {
@@ -73,7 +88,7 @@ struct OnboardingFlowView: View {
     func finishOnboarding() {
         hasSeenOnboarding = true
         coordinator.showMainTabbar()
- 
+        
     }
 }
 

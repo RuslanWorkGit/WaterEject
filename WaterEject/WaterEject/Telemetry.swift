@@ -49,6 +49,12 @@ enum TelemetryEvent: String {
     // Пейвол з цього екрана
     case startPaywallRequested  = "start_paywall_requested"
     case startPaywallDismissed  = "start_paywall_dismissed"
+    
+    case onboardingStart     = "onboarding_start"
+    case onboardingExposure  = "onboarding_exposure"
+    case onboardingContinue  = "onboarding_continue"
+    case onboardingFinish    = "onboarding_finish"
+    case onboardingStepChange = "onboarding_step_change"
 }
 
 enum PaywallCloseSource: String {
@@ -280,5 +286,26 @@ extension Telemetry {
     
     func startPaywallDismissed(converted: Bool) {
         log(.startPaywallDismissed, params: ["converted": converted])
+    }
+    
+    //MARK: - Onboarding
+    func onboardingStart() {
+        log(.onboardingStart)
+    }
+    
+    func onboardingExposure(step: OnboardingStep) {
+        log(.onboardingExposure, params: ["step": step.analyticsValue])
+    }
+    
+    func onboardingContinue(step: OnboardingStep) {
+        log(.onboardingContinue, params: ["step": step.analyticsValue])
+    }
+    
+    func onboardingFinish() {
+        log(.onboardingFinish)
+    }
+    
+    func onboardingStepChange(from: OnboardingStep, to: OnboardingStep) {
+        log(.onboardingStepChange, params: ["from": from.analyticsValue, "to": to.analyticsValue])
     }
 }

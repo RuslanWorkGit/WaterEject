@@ -14,3 +14,14 @@ enum OnboardingStep: Int, CaseIterable {
     //case tests
     case paywall
 }
+
+extension OnboardingStep {
+    var analyticsValue: String {
+        switch self {
+        case .hook: "hook"
+        case .urgency: "urgency"
+        case .solution: "solution"
+        case .paywall: "paywall"
+        }
+    }
+}
