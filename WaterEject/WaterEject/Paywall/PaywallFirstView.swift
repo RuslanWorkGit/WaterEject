@@ -23,130 +23,145 @@ struct PaywallFirstView: View {
     
     var body: some View {
         
+        let isSmall = UIScreen.main.bounds.height < 700
+        let isLarge = UIScreen.main.bounds.height > 900
+
+        
         ZStack(alignment: .topTrailing) {
             
             ZStack {
                 Background()
-                
-                VStack(alignment: .center) {
-                    (
-                        Text("Unlock Full Device Care")
-                            .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
-                        
-                    )
-                    .font(.system(size: 32, weight: .bold))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 20)
+                //ScrollView {
                     
-                    Text("Access all cleaning modes, 5 pro-level sound tests,and future features. Keep your device in peak condition.")
-                        .font(.system(size: 14))
-                        .padding(.horizontal, 32)
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
-                        .padding(.bottom, 32)
-                    
-                    
-                    
-                    
-                }
-                .frame(maxHeight: .infinity, alignment: .top)
-                .padding(.horizontal, 12)
-                .padding(.top, 50)
-                
                 VStack {
                     
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 36) {
-                            ForEach(repeatedImages.indices, id: \.self) { index in
-                                Image(repeatedImages[index])
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 110, height: 110)
-                                    .clipShape(RoundedRectangle(cornerRadius: 24))
-                            }
-                        }
-                        .padding(.horizontal, 10)
-                    }
-                    .frame(height: 140)
-                    .padding(.top, 64)
-                    .padding(.bottom, 32)
-                    
-                    VStack(spacing: 24) {
-                        PaywallPlanCard(
-                            title: PaywallPlan.weekly.title,
-                            price: viewModel.pricePerPeriod[.weekly] ?? "...",
-                            sublabel: nil,
-                            isSelected: viewModel.selectedPlan == .weekly,
-                            onTap: { viewModel.selectedPlan = .weekly }
+                    VStack(alignment: .center) {
+                        (
+                            Text("Unlock Full Device Care")
+                                .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+                            
                         )
-                        PaywallPlanCard(
-                            title: PaywallPlan.yearly.title,
-                            price: viewModel.pricePerPeriod[.yearly] ?? "...",
-                            sublabel: "Best Value",
-                            isSelected: viewModel.selectedPlan == .yearly,
-                            onTap: { viewModel.selectedPlan = .yearly }
-                        )
-                    }
-                    .padding(.top, 40)
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 42)
-                    
-                    Button {
-                        let v = PaywallAB.shared.variant()
-                        Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
-                        
-                        let plan: PaywallPlan = viewModel.selectedPlan
-                                                Task {
-                                                    await viewModel.buyWithRevenueCat(plan: plan)
-                                                    if viewModel.purchaseSucceeded { onFinish() }
-                                                }
-                    } label: {
-                        let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
-                        Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
-                        
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                        
-                            .background(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                        
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 26)
-                    
-                    Text("Cancel Anytime. Secure with App Store.")
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(.gray))
+                        .font(.system(size: 32, weight: .bold))
                         .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 20)
+                        
+                        Text("Access all cleaning modes, 5 pro-level sound tests,and future features. Keep your device in peak condition.")
+                            .font(.system(size: 14))
+                            .padding(.horizontal, 32)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+                            .padding(.bottom, 32)
+                        
+                        
+                        
+                        
+                    }
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 50)
                     
-                    HStack(spacing: 12) {
-                        Button("Restore") {
-                            Task { await viewModel.restorePurchases() }
-                        }
-                        .font(.footnote)
-                        .foregroundColor(.gray)
+                    Spacer(minLength: isSmall ? 16 : isLarge ? 60 : 48)
+                    
+                    
+                    VStack {
                         
-                        Button("Terms") {
-                            webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
-
-                        }
-                        .font(.footnote)
-                        .foregroundColor(.gray)
                         
-                        Button("Privacy") {
-                            webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 36) {
+                                ForEach(repeatedImages.indices, id: \.self) { index in
+                                    Image(repeatedImages[index])
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 110, height: 110)
+                                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                                }
+                            }
+                            .padding(.horizontal, 10)
+                        }
+                        .padding(.bottom, isSmall ? 8 : isLarge ? 46 : 32)
+                        
+                        Spacer(minLength: isSmall ? 0 : isLarge ? 36 : 24)
+                        
+                        VStack(spacing: 12) {
+                            PaywallPlanCard(
+                                title: PaywallPlan.weekly.title,
+                                price: viewModel.pricePerPeriod[.weekly] ?? "...",
+                                sublabel: nil,
+                                isSelected: viewModel.selectedPlan == .weekly,
+                                onTap: { viewModel.selectedPlan = .weekly }
+                            )
+                            PaywallPlanCard(
+                                title: PaywallPlan.yearly.title,
+                                price: viewModel.pricePerPeriod[.yearly] ?? "...",
+                                sublabel: "Best Value",
+                                isSelected: viewModel.selectedPlan == .yearly,
+                                onTap: { viewModel.selectedPlan = .yearly }
+                            )
+                        }
+                        .padding(.top, isSmall ? 20 : isLarge ? 50 : 40)
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, isSmall ? 16 : isLarge ? 46 : 36)
+                        
+                        Button {
+                            let v = PaywallAB.shared.variant()
+                            Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
+                            
+                            let plan: PaywallPlan = viewModel.selectedPlan
+                            Task {
+                                await viewModel.buyWithRevenueCat(plan: plan)
+                                if viewModel.purchaseSucceeded { onFinish() }
+                            }
+                        } label: {
+                            let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
+                            Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
+                            
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                            
+                                .background(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
                             
                         }
-                        .font(.footnote)
-                        .foregroundColor(.gray)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 8)
+                        
+                        Text("Cancel Anytime. Secure with App Store.")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(.gray))
+                            .multilineTextAlignment(.center)
+                        
+                        HStack(spacing: 12) {
+                            Button("Restore") {
+                                Task { await viewModel.restorePurchases() }
+                            }
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                            
+                            Button("Terms") {
+                                webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
+                                
+                            }
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                            
+                            Button("Privacy") {
+                                webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
+                                
+                            }
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                        }
+                        
                     }
-                    
+                    //                    .padding(.top, 140)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                    //}
                 }
-                .padding(.top, 140)
-                .padding(.horizontal, 24)
                 
             }
             
@@ -165,16 +180,18 @@ struct PaywallFirstView: View {
         .sheet(item: $webViewURL, content: { url in
             SafariView(url: url)
         })
-
+        
         .onAppear {
-            Purchases.logLevel = .debug  
+            print(UIScreen.main.bounds.height)
+            Purchases.logLevel = .debug
             Task { await viewModel.loadPricing()  }
-            let v = PaywallAB.shared.variant()
-//            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
+            //let v = PaywallAB.shared.variant()
+            //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
     }
-    
+
 }
+
 
 
 struct PaywallPlanCard: View {

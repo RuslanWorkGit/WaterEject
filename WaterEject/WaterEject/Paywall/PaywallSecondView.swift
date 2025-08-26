@@ -23,17 +23,21 @@ struct PaywallSecondView: View {
     
     var body: some View {
         
+        let isSmall = UIScreen.main.bounds.height < 700
+        let isLarge = UIScreen.main.bounds.height > 900
+        
         ZStack(alignment: .topTrailing) {
             
             
             ZStack {
                 Background()
                 
+       
                 VStack(alignment: .center) {
                     
                     AutoScrollingDevicesSquare(images: deviceImages)
                         .padding(.top, 8)
-                        .padding(.bottom, 42)
+                        .padding(.bottom, isSmall ? 16 : isLarge ? 60 : 42)
                     
                     
                     
@@ -47,7 +51,7 @@ struct PaywallSecondView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 20)
                     
-                    VStack(spacing: 11) {
+                    VStack(spacing: isSmall ? 8 : 12) {
                         HorizontalText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3")
                         HorizontalText(title: "5 pro-level sound tests", image: "powermeter")
                         HorizontalText(title: "Scientifically proven methods", image: "graduationcap")
@@ -56,7 +60,7 @@ struct PaywallSecondView: View {
                     
                     .padding(.leading, 90)
                     
-                    VStack(spacing: 24) {
+                    VStack(spacing: 12) {
                         PaywallSecondPlanCard(
                             title: PaywallPlan.weekly.title,
                             price: viewModel.pricePerPeriod[.weekly] ?? "...",
@@ -74,9 +78,9 @@ struct PaywallSecondView: View {
                             onTap: { viewModel.selectedPlan = .yearly }
                         )
                     }
-                    .padding(.top, 40)
+                    .padding(.top, isSmall ? 12 : isLarge ? 60 : 40)
                     .padding(.horizontal, 14)
-                    .padding(.bottom, 42)
+                    .padding(.bottom, isSmall ? 12 : isLarge ? 48 : 36)
                     
                     Button {
                         let v = PaywallAB.shared.variant()
@@ -101,7 +105,7 @@ struct PaywallSecondView: View {
                         
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 26)
+                    .padding(.bottom, 8)
                     
                     HStack {
                         Image(systemName: "checkmark.shield")
@@ -124,7 +128,7 @@ struct PaywallSecondView: View {
                         Button("Terms") {
                             
                             webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
-//                            isPresentingWebView = true
+                            //                            isPresentingWebView = true
                             
                         }
                         .font(.footnote)
@@ -133,7 +137,7 @@ struct PaywallSecondView: View {
                         Button("Privacy") {
                             
                             webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
-//                            isPresentingWebView = true
+                            //                            isPresentingWebView = true
                             
                         }
                         .font(.footnote)
@@ -141,13 +145,15 @@ struct PaywallSecondView: View {
                     }
                     
                     
+                    
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
-                .padding(.horizontal, 12)
-                .padding(.top, 50)
+                .padding(.horizontal, 16)
+                .padding(.top, isSmall ? 30 : isLarge ? 60 : 50)
+                .padding(.bottom, 24)
                 
                 
-                
+            
             }
             
             Button(action: {
@@ -171,6 +177,7 @@ struct PaywallSecondView: View {
 //            }
 //        }
         .onAppear {
+            print(UIScreen.main.bounds.height)
             Purchases.logLevel = .debug
             Task { await viewModel.loadPricing()  }
             let v = PaywallAB.shared.variant()
