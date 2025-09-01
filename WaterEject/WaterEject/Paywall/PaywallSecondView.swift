@@ -13,7 +13,8 @@ struct PaywallSecondView: View {
     
     @StateObject private var viewModel = PaywallViewModel()
     @State private var webViewURL: URL?
-//    @State private var isPresentingWebView = false
+    @State private var didLogOpen = false
+    //    @State private var isPresentingWebView = false
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -32,7 +33,7 @@ struct PaywallSecondView: View {
             ZStack {
                 Background()
                 
-       
+                
                 VStack(alignment: .center) {
                     
                     AutoScrollingDevicesSquare(images: deviceImages)
@@ -153,7 +154,7 @@ struct PaywallSecondView: View {
                 .padding(.bottom, 24)
                 
                 
-            
+                
             }
             
             Button(action: {
@@ -171,17 +172,20 @@ struct PaywallSecondView: View {
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
-//        .sheet(isPresented: $isPresentingWebView) {
-//            if let url = webViewURL {
-//                SafariView(url: url)
-//            }
-//        }
+        //        .sheet(isPresented: $isPresentingWebView) {
+        //            if let url = webViewURL {
+        //                SafariView(url: url)
+        //            }
+        //        }
         .onAppear {
-            print(UIScreen.main.bounds.height)
+            if !didLogOpen {
+                Telemetry.shared.paywallBOpen()   // ⬅️ головний івент
+                didLogOpen = true
+            }
             Purchases.logLevel = .debug
             Task { await viewModel.loadPricing()  }
             let v = PaywallAB.shared.variant()
-//            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
+            //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
     }
     
@@ -272,16 +276,16 @@ struct PaywallSecondPlanCard: View {
 /// Квадрат 124×124 з безшовним горизонтальним автоскролом
 struct AutoScrollingDevicesSquare: View {
     let images: [String]
-
+    
     // Тюнінг
     private let boxSize: CGFloat  = 124
     private let corner: CGFloat   = 24
     private let itemSize: CGFloat = 92
     private let spacing: CGFloat  = 12
     private let speed: CGFloat    = 22      // points/second
-
+    
     @State private var start = Date()
-
+    
     var body: some View {
         ZStack {
             // фон/рамки
@@ -296,7 +300,7 @@ struct AutoScrollingDevicesSquare: View {
                     )
                 )
                 .frame(width: boxSize, height: boxSize)
-
+            
             RoundedRectangle(cornerRadius: corner)
                 .stroke(Color.white.opacity(0.25), lineWidth: 2)
                 .blur(radius: 0.5)
@@ -306,27 +310,27 @@ struct AutoScrollingDevicesSquare: View {
                         .fill(LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom))
                 )
                 .frame(width: boxSize, height: boxSize)
-
+            
             RoundedRectangle(cornerRadius: corner + 8)
                 .stroke(Color.white.opacity(0.5), lineWidth: 1)
                 .frame(width: boxSize + 24, height: boxSize + 24)
-
+            
             RoundedRectangle(cornerRadius: corner + 4)
                 .stroke(Color(red: 43/255, green: 217/255, blue: 156/255), lineWidth: 2)
                 .frame(width: boxSize + 8, height: boxSize + 8)
-
+            
             // контент з автоскролом
             TimelineView(.animation) { context in
                 let elapsed = CGFloat(context.date.timeIntervalSince(start))
                 let unit = itemSize + spacing                // ширина одного елемента з відступом
                 let tileWidth = unit * CGFloat(images.count) // ширина «однієї плитки»
                 let x = -((elapsed * speed).truncatingRemainder(dividingBy: tileWidth))
-
+                
                 HStack(spacing: spacing) {
                     // дублюємо масив, але з УНІКАЛЬНИМИ ID (індекс), щоб прибрати warning
                     ForEach(Array((images + images).enumerated()), id: \.offset) { _, name in
                         Image(name)
-
+                        
                     }
                 }
                 .offset(x: x)                                // зсув за часом

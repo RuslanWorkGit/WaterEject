@@ -14,6 +14,7 @@ struct PaywallFirstView: View {
     @StateObject private var viewModel = PaywallViewModel()
     @State private var webViewURL: URL?
     //@State private var selectedPlan: Int = 1
+    @State private var didLogOpen = false
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -25,14 +26,14 @@ struct PaywallFirstView: View {
         
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
-
+        
         
         ZStack(alignment: .topTrailing) {
             
             ZStack {
                 Background()
                 //ScrollView {
-                    
+                
                 VStack {
                     
                     VStack(alignment: .center) {
@@ -182,14 +183,15 @@ struct PaywallFirstView: View {
         })
         
         .onAppear {
-            print(UIScreen.main.bounds.height)
+            if !didLogOpen {
+                Telemetry.shared.paywallAOpen()   // ⬅️ головний івент
+                didLogOpen = true
+            }
             Purchases.logLevel = .debug
             Task { await viewModel.loadPricing()  }
-            //let v = PaywallAB.shared.variant()
-            //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
     }
-
+    
 }
 
 
@@ -249,7 +251,7 @@ struct PaywallPlanCard: View {
                 .padding(.leading, 60)
                 .padding(.trailing, 18)
             }
-
+            
         }
         .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
         .buttonStyle(.plain)

@@ -355,3 +355,8 @@ extension Telemetry {
         }
     }
 }
+
+extension Telemetry {
+    func paywallAOpen() { logRaw("Paywall_A_Open") }
+    func paywallBOpen() { logRaw("Paywall_B_Open") }
+}
