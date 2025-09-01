@@ -13,6 +13,9 @@ struct TestView: View {
     let onBack: () -> Void       // ← новий колбек
     let onFinish: () -> Void
     
+    @State private var loggedModes: Set<TestMode> = []
+    @State private var didLogStart = false
+    
     var body: some View {
         ZStack {
             Background()
@@ -73,14 +76,11 @@ struct TestView: View {
                     MicroView(onContinue: { viewModel.goToNextStep()})
                 case .vibro:
                     VibroView(onContinue: { onFinish() })
-//                case .noise:
-//                    NoiseView()
+                    
                 }
                 
                 
-//                if viewModel.mode == .noise {
-//                    bottomButton
-//                }
+                
                 
             }
             .padding(.horizontal, 14)
@@ -89,8 +89,28 @@ struct TestView: View {
         }
         .navigationBarBackButtonHidden(true)
         .background(BackSwipeEnabler(onBack: onBack))
+        .onAppear {
+            // Старт усієї сесії тестів
+            if !didLogStart {
+                Telemetry.shared.testStart()
+                didLogStart = true
+            }
+            // Лог для поточного екрану (першого)
+            logCurrentModeIfNeeded()
+        }
+        .onChange(of: viewModel.mode) { _, _ in
+            // Лог при переході між екранами
+            logCurrentModeIfNeeded()
+        }
         
         
+    }
+    
+    private func logCurrentModeIfNeeded() {
+        let mode = viewModel.mode
+        guard !loggedModes.contains(mode) else { return }
+        Telemetry.shared.testScreenOpen(mode)
+        loggedModes.insert(mode)
     }
     
     private var bottomButton: some View {

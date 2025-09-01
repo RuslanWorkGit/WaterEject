@@ -83,7 +83,6 @@ final class Telemetry {
 
 
 // MARK: - Спеціалізовані хелпери
-// MARK: - Спеціалізовані хелпери
 extension Telemetry {
     
     // PAYWALL
@@ -307,5 +306,52 @@ extension Telemetry {
     
     func onboardingStepChange(from: OnboardingStep, to: OnboardingStep) {
         log(.onboardingStepChange, params: ["from": from.analyticsValue, "to": to.analyticsValue])
+    }
+}
+
+
+extension Telemetry {
+    /// Лог події з довільною назвою (для screen-маркерів)
+    func logRaw(_ name: String, params: [String: Any] = [:]) {
+        var merged = baseParams()
+        params.forEach { merged[$0.key] = $0.value }
+        Analytics.logEvent(name, parameters: merged)
+    }
+
+    /// Мапимо крок онбордингу у потрібну назву події
+    private func onboardingRawEventName(_ step: OnboardingStep) -> String {
+        switch step {
+        case .hook:     return "onboarding_step_1"
+        case .urgency:  return "onboarding_step_2"
+        case .solution: return "onboarding_step_3"
+        case .paywall:  return "paywall"
+        }
+    }
+
+    /// Єдиний вхід: кинути «екранну» подію для поточного кроку
+    func onboardingScreenMarker(step: OnboardingStep) {
+        logRaw(onboardingRawEventName(step), params: ["step": step.analyticsValue])
+    }
+}
+
+
+extension Telemetry {
+    // Одноразовий маркер старту тестів
+    func testStart() {
+        logRaw("Test_Start")
+    }
+
+    // Маркер відкриття конкретного екрану тесту
+    func testScreenOpen(_ mode: TestMode) {
+        logRaw(testEventName(for: mode))
+    }
+
+    private func testEventName(for mode: TestMode) -> String {
+        switch mode {
+        case .stereo: return "Test_StereoView"
+        case .bass:   return "Test_BassView"
+        case .micro:  return "Test_MicroView"
+        case .vibro:  return "Test_VibroView"
+        }
     }
 }

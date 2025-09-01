@@ -64,11 +64,11 @@ struct OnboardingFlowView: View {
             Telemetry.shared.onboardingStart()
         }
         .onAppear {
-            Telemetry.shared.onboardingExposure(step: currentStep)
+            Telemetry.shared.onboardingScreenMarker(step: currentStep)
         }
         .onChange(of: currentStep) { oldStep, newStep in
             Telemetry.shared.onboardingStepChange(from: oldStep, to: newStep)
-            Telemetry.shared.onboardingExposure(step: newStep)
+            Telemetry.shared.onboardingScreenMarker(step: newStep)
             
             if newStep == .paywall {
                 // джерело експожера пейволу — онбординг
