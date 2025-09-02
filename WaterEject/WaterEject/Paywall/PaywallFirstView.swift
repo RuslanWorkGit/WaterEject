@@ -15,6 +15,8 @@ struct PaywallFirstView: View {
     @State private var webViewURL: URL?
     //@State private var selectedPlan: Int = 1
     @State private var didLogOpen = false
+    @EnvironmentObject private var paywallGate: PaywallGate
+    @State private var sessionId = UUID().uuidString
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -109,11 +111,19 @@ struct PaywallFirstView: View {
                             let v = PaywallAB.shared.variant()
                             Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
                             
-                            let plan: PaywallPlan = viewModel.selectedPlan
-                            Task {
-                                await viewModel.buyWithRevenueCat(plan: plan)
-                                if viewModel.purchaseSucceeded { onFinish() }
-                            }
+                            let variant = PaywallAB.shared.variant().rawValue
+                                    let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
+                                    let plan = viewModel.selectedPlan
+                                    Task {
+                                        await viewModel.buyWithRevenueCat(
+                                            plan: plan,
+                                            variant: variant,
+                                            entryPoint: entryPoint,
+                                            sessionId: sessionId
+                                        )
+                                        if viewModel.purchaseSucceeded { onFinish() }
+                                    }
+
                         } label: {
                             let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
                             Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
@@ -167,7 +177,14 @@ struct PaywallFirstView: View {
             }
             
             Button(action: {
-                Telemetry.shared.paywallClosed(source: .closeButton)
+                let variant = PaywallAB.shared.variant().rawValue
+                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
+                Telemetry.shared.paywallClose(
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    reason: "close_button",
+                    sessionId: sessionId
+                )
                 onFinish()
             }) {
                 Image(systemName: "xmark")

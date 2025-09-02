@@ -15,6 +15,9 @@ struct PaywallSecondView: View {
     @State private var webViewURL: URL?
     @State private var didLogOpen = false
     //    @State private var isPresentingWebView = false
+    @EnvironmentObject private var paywallGate: PaywallGate
+    @State private var sessionId = UUID().uuidString
+    
     
     let onFinish: () -> Void
     let deviceImages = ["devices", "airpods", "airpodsPro", "airpodsMax", "speaker"]
@@ -88,8 +91,14 @@ struct PaywallSecondView: View {
                         Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
                         
                         let plan: PaywallPlan = viewModel.selectedPlan
+                        let variant = PaywallAB.shared.variant().rawValue
+                        let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
+                        //let plan = viewModel.selectedPlan
                         Task {
-                            await viewModel.buyWithRevenueCat(plan: plan)
+                            await viewModel.buyWithRevenueCat(
+                                plan: plan, variant: variant,
+                                entryPoint: entryPoint, sessionId: sessionId
+                            )
                             if viewModel.purchaseSucceeded { onFinish() }
                         }
                     } label: {
@@ -158,7 +167,12 @@ struct PaywallSecondView: View {
             }
             
             Button(action: {
-                Telemetry.shared.paywallClosed(source: .closeButton)
+                let variant = PaywallAB.shared.variant().rawValue
+                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
+                Telemetry.shared.paywallClose(
+                    variant: variant, entryPoint: entryPoint,
+                    reason: "close_button", sessionId: sessionId
+                )
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -349,3 +363,4 @@ extension URL: Identifiable { public var id: String { absoluteString } }
 #Preview(body: {
     PaywallSecondView(onFinish: {print("hello")})
 })
+ 

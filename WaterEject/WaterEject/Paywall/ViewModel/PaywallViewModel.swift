@@ -117,18 +117,36 @@ final class PaywallViewModel: ObservableObject {
     
     
     // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
-    func buyWithRevenueCat(plan: PaywallPlan) async {
+    func buyWithRevenueCat(plan: PaywallPlan, variant: String, entryPoint: String, sessionId: String) async {
         guard let pkg = packageByPlan[plan] else {
             errorMessage = "Product not found"
-            Telemetry.shared.purchaseError(plan: plan, reason: "product_not_found", error: nil)
+            Telemetry.shared.purchaseResult(
+                variant: variant, status: "error", rcCode: -2,
+                packageId: plan.productID, pricePaid: nil, currency: nil, sessionId: sessionId
+            )
             return
         }
         
         isPurchasing = true
         errorMessage = nil
         purchaseSucceeded = false
-        Telemetry.shared.purchaseStart(plan: plan)
+        //Telemetry.shared.purchaseStart(plan: plan)
         defer { isPurchasing = false }
+        
+        let p = pkg.storeProduct
+        let price = (p.price as? NSNumber)?.doubleValue
+        ?? (p.price as? NSDecimalNumber)?.doubleValue
+        ?? 0
+        let currency = p.currencyCode
+        
+        Telemetry.shared.purchaseStart(
+            variant: variant,
+            packageId: p.productIdentifier,
+            offeringId: pkg.identifier,
+            price: price,
+            currency: currency,
+            sessionId: sessionId
+        )
         
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
@@ -136,23 +154,58 @@ final class PaywallViewModel: ObservableObject {
             purchaseSucceeded = active
             if active {
                 let txId = result.transaction?.transactionIdentifier
-                Telemetry.shared.purchaseSuccess(
-                    plan: plan,
-                    product: pkg.storeProduct,
-                    transactionId: txId
+                Telemetry.shared.purchaseResult(
+                    variant: variant, status: "success", rcCode: nil,
+                    packageId: p.productIdentifier, pricePaid: price, currency: currency,
+                    sessionId: sessionId
                 )
+                
+                Telemetry.shared.paywallPurchaseSuccess(   // НОВИЙ яскравий івент
+                        variant: variant,
+                        entryPoint: entryPoint,
+                        packageId: p.productIdentifier,
+                        price: price,
+                        currency: currency,
+                        transactionId: txId,
+                        sessionId: sessionId
+                    )
             } else {
                 errorMessage = "Subscription not active"
-                Telemetry.shared.purchaseError(plan: plan, reason: "entitlement_inactive", error: nil)
+                Telemetry.shared.purchaseResult(
+                    variant: variant, status: "error", rcCode: -3,
+                    packageId: p.productIdentifier, pricePaid: nil, currency: currency,
+                    sessionId: sessionId
+                )
+                
+                Telemetry.shared.paywallPurchaseError(     // НОВИЙ для помилки
+                        variant: variant,
+                        entryPoint: entryPoint,
+                        packageId: p.productIdentifier,
+                        rcCode: -3,
+                        message: "Subscription not active",
+                        sessionId: sessionId
+                    )
             }
         } catch {
             let ns = error as NSError
-            if let rc = RevenueCat.ErrorCode(_bridgedNSError: ns), rc == .purchaseCancelledError {
-                Telemetry.shared.purchaseCancelled(plan: plan)
-                return
-            }
+            let rcCode = ns.userInfo["RCErrorCodeKey"] as? Int
+            let status = (rcCode == 1) ? "user_cancelled" : "error"
             errorMessage = ns.localizedDescription
-            Telemetry.shared.purchaseError(plan: plan, reason: "revenuecat_error", error: ns)
+            Telemetry.shared.purchaseResult(
+                variant: variant, status: status, rcCode: rcCode,
+                packageId: p.productIdentifier, pricePaid: nil, currency: currency,
+                sessionId: sessionId
+            )
+            if status == "error" {
+                Telemetry.shared.paywallPurchaseError(
+                        variant: variant,
+                        entryPoint: entryPoint,
+                        packageId: p.productIdentifier,
+                        rcCode: rcCode,
+                        message: ns.localizedDescription,
+                        sessionId: sessionId
+                    )
+            }
         }
     }
     

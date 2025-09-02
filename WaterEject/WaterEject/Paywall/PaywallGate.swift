@@ -18,6 +18,7 @@ final class PaywallGate: ObservableObject {
 
     // що саме показати (A/B). Використовується для .fullScreenCover
     @Published var presentedVariant: PaywallVariant?   // ваш тип із PaywallVariant.swift
+    @Published var currentContext: PaywallContext?
 
     private let entitlementID = "pro_user"
     private let variantKey    = "paywall_variant"      // зберігаємо обраний варіант
@@ -64,22 +65,39 @@ final class PaywallGate: ObservableObject {
         return true
     }
 
-    /// Автопоказ (викликати в onAppear)
+//    /// Автопоказ (викликати в onAppear)
+//    func presentPaywallIfNeeded(context: PaywallContext) async {
+//        guard await shouldShowPaywall(context: context) else { return }
+//        presentedVariant = assignedVariant()
+//        shownThisSession = true
+//        UserDefaults.standard.set(Date(), forKey: lastShownKey)
+//    }
+//
+//    /// Форсований показ (коли користувач тисне на pro-фічу)
+//    func requireProOrPresentPaywall(context: PaywallContext) async -> Bool {
+//        if await isPro() { return true }
+//        presentedVariant = assignedVariant()
+//        shownThisSession = true
+//        UserDefaults.standard.set(Date(), forKey: lastShownKey)
+//        return false
+//    }
+
+    func dismissPaywall() { presentedVariant = nil }
+    
     func presentPaywallIfNeeded(context: PaywallContext) async {
         guard await shouldShowPaywall(context: context) else { return }
+        currentContext = context
         presentedVariant = assignedVariant()
         shownThisSession = true
         UserDefaults.standard.set(Date(), forKey: lastShownKey)
     }
 
-    /// Форсований показ (коли користувач тисне на pro-фічу)
     func requireProOrPresentPaywall(context: PaywallContext) async -> Bool {
         if await isPro() { return true }
+        currentContext = context
         presentedVariant = assignedVariant()
         shownThisSession = true
         UserDefaults.standard.set(Date(), forKey: lastShownKey)
         return false
     }
-
-    func dismissPaywall() { presentedVariant = nil }
 }

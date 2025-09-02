@@ -97,9 +97,9 @@ extension Telemetry {
     }
     
     // PURCHASE
-    func purchaseStart(plan: PaywallPlan) {
-        log(.purchaseStart, params: ["plan": plan.analyticsValue])
-    }
+//    func purchaseStart(plan: PaywallPlan) {
+//        log(.purchaseStart, params: ["plan": plan.analyticsValue])
+//    }
     
     func purchaseSuccess(plan: PaywallPlan,
                          product: StoreProduct,
@@ -359,4 +359,68 @@ extension Telemetry {
 extension Telemetry {
     func paywallAOpen() { logRaw("Paywall_A_Open") }
     func paywallBOpen() { logRaw("Paywall_B_Open") }
+}
+
+extension Telemetry {
+    func paywallClose(variant: String, entryPoint: String, reason: String, sessionId: String) {
+        logRaw("Paywall_Close", params: [
+            "variant": variant, "entry_point": entryPoint,
+            "reason": reason, "paywall_session_id": sessionId
+        ])
+    }
+    func purchaseStart(variant: String, packageId: String, offeringId: String?,
+                       price: Double?, currency: String?, sessionId: String) {
+        logRaw("Purchase_Start", params: [
+            "variant": variant, "package_id": packageId, "offering_id": offeringId ?? "na",
+            "price_shown": price ?? 0, "paywall_currency": currency ?? "NA", "paywall_session_id": sessionId
+        ])
+    }
+    func purchaseResult(variant: String, status: String, rcCode: Int?, packageId: String,
+                        pricePaid: Double?, currency: String?, sessionId: String) {
+        logRaw("Purchase_Result", params: [
+            "variant": variant, "status": status, "rc_code": rcCode ?? -1,
+            "package_id": packageId, "price_paid": pricePaid ?? 0,
+            "currency": currency ?? "NA", "paywall_session_id": sessionId
+        ])
+        if status == "success", let value = pricePaid, let cur = currency {
+            // стандартний GA4 purchase (дає revenue-метрики)
+            Analytics.logEvent("purchase", parameters: ["value": value, "currency": cur])
+        }
+    }
+}
+
+extension Telemetry {
+    func paywallPurchaseSuccess(variant: String,
+                                entryPoint: String,
+                                packageId: String,
+                                price: Double?,            // показана/сплачена ціна
+                                currency: String?,         // ISO 4217
+                                transactionId: String?,    // якщо є
+                                sessionId: String) {
+        logRaw("Paywall_Purchase_Success", params: [
+            "variant": variant,
+            "entry_point": entryPoint,
+            "package_id": packageId,
+            "price_paid": price ?? 0,
+            "currency": currency ?? "NA",
+            "transaction_id": transactionId ?? "",
+            "paywall_session_id": sessionId
+        ])
+    }
+
+    func paywallPurchaseError(variant: String,
+                              entryPoint: String,
+                              packageId: String,
+                              rcCode: Int?,
+                              message: String?,
+                              sessionId: String) {
+        logRaw("Paywall_Purchase_Error", params: [
+            "variant": variant,
+            "entry_point": entryPoint,
+            "package_id": packageId,
+            "rc_code": rcCode ?? -1,
+            "message": message ?? "",
+            "paywall_session_id": sessionId
+        ])
+    }
 }
