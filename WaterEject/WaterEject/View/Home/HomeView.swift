@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 enum Route: Hashable {
     case modes(CleaningDevice)
     case start(CleaningDevice, CleaningMode)

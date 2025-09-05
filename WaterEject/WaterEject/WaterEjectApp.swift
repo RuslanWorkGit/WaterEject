@@ -8,6 +8,7 @@
 import SwiftUI
 import RevenueCat
 import Firebase
+import FirebaseFirestore
 
 @main
 struct WaterEjectApp: App {
@@ -20,6 +21,18 @@ struct WaterEjectApp: App {
             print("✅ Firebase connected successfully")
         } else {
             print("❌ Firebase failed to connect")
+        }
+        
+        if let path = Bundle.main.path(forResource: "GoogleService-Info-Shared", ofType: "plist"),
+               let opts = FirebaseOptions(contentsOfFile: path) {
+                FirebaseApp.configure(name: "SharedCatalog", options: opts)
+            }
+        
+        let sharedApp = FirebaseApp.app(name: "SharedCatalog")
+        let sharedDB  = Firestore.firestore(app: sharedApp!)
+
+        sharedDB.collection("apps").getDocuments { snap, err in
+            print("shared apps ids =", snap?.documents.map{$0.documentID} ?? [], "err:", err as Any)
         }
         
         PaywallAB.shared.fetchRemoteConfig()

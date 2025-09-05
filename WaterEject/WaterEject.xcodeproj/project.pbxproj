@@ -11,10 +11,13 @@
 		9B1B800F2E4CD8A20049CE33 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 9B1B800E2E4CD8A20049CE33 /* FirebaseRemoteConfig */; };
 		9B57ECAE2E4CCC66005D4850 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 9B57ECAD2E4CCC66005D4850 /* RevenueCat */; };
 		9B57ECB02E4CCC66005D4850 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9B57ECAF2E4CCC66005D4850 /* RevenueCatUI */; };
+		9BB69F192E6B304500FF583E /* GoogleService-Info-Shared.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BB69F182E6B304500FF583E /* GoogleService-Info-Shared.plist */; };
+		9BB6A0E32E6B434200FF583E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BB6A0E22E6B434200FF583E /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		9BA1E0652E328F970027AD07 /* WaterEject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WaterEject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BB69F182E6B304500FF583E /* GoogleService-Info-Shared.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-Shared.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,6 +36,7 @@
 				9B57ECB02E4CCC66005D4850 /* RevenueCatUI in Frameworks */,
 				9B57ECAE2E4CCC66005D4850 /* RevenueCat in Frameworks */,
 				9B1B800D2E4CD8A20049CE33 /* FirebaseAnalytics in Frameworks */,
+				9BB6A0E32E6B434200FF583E /* FirebaseFirestore in Frameworks */,
 				9B1B800F2E4CD8A20049CE33 /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -43,7 +47,9 @@
 		9BA1E05C2E328F970027AD07 = {
 			isa = PBXGroup;
 			children = (
+				9BB69F182E6B304500FF583E /* GoogleService-Info-Shared.plist */,
 				9BA1E0672E328F970027AD07 /* WaterEject */,
+				9BB6A0E12E6B434200FF583E /* Frameworks */,
 				9BA1E0662E328F970027AD07 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +60,13 @@
 				9BA1E0652E328F970027AD07 /* WaterEject.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9BB6A0E12E6B434200FF583E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -80,6 +93,7 @@
 				9B57ECAF2E4CCC66005D4850 /* RevenueCatUI */,
 				9B1B800C2E4CD8A20049CE33 /* FirebaseAnalytics */,
 				9B1B800E2E4CD8A20049CE33 /* FirebaseRemoteConfig */,
+				9BB6A0E22E6B434200FF583E /* FirebaseFirestore */,
 			);
 			productName = WaterEject;
 			productReference = 9BA1E0652E328F970027AD07 /* WaterEject.app */;
@@ -128,6 +142,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BB69F192E6B304500FF583E /* GoogleService-Info-Shared.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -389,6 +404,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9BBB1B282E4CCC3D00C15E8C /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCatUI;
+		};
+		9BB6A0E22E6B434200FF583E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
