@@ -26,6 +26,7 @@ enum TelemetryEvent: String {
     case homeExposure      = "home_exposure"
     case homeDeviceTap     = "home_device_tap"
     case homeNavigateModes = "home_navigate_modes"
+    case settimgExpose     = "setting_exposure"
     
     case modesExposure        = "modes_exposure"
     case modesModeTap         = "modes_mode_tap"
@@ -155,6 +156,10 @@ extension Telemetry {
     
     func homeExposure() {
         log(.homeExposure)
+    }
+    
+    func settingExposure() {
+        log(.settimgExpose)
     }
     
     func homeDeviceTap(device: CleaningDevice) {

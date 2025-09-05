@@ -55,6 +55,9 @@ struct SettingView: View {
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
+        .onAppear {
+            Telemetry.shared.settingExposure()
+        }
         .sheet(item: $webViewURL, content: { url in
             SafariView(url: url)
         })
@@ -106,7 +109,9 @@ struct OurAppsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Our Apps").font(.headline)
+            Text("Our Apps")
+                .font(.headline)
+                .foregroundStyle(Color.gray)
             LazyVGrid(columns: [.init(.flexible())], spacing: 12) {
                 ForEach(vm.apps) { app in
                     Button {
