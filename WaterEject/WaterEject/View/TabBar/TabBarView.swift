@@ -30,6 +30,8 @@ struct TabBarView: View {
                             selectedTab = .home
                         }
                     }
+                case .setting:
+                    SettingView()
                     
                 }
             }

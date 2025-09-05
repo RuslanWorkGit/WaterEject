@@ -39,13 +39,14 @@ struct CustomTabBarContainerView<Content: View>: View {
 enum TabBarTab {
     case home
     case test
+    case setting
 }
 
 struct CustomTabBar: View {
     @Binding var selectedTab: TabBarTab
 
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             TabBarButton(
                 icon: "house", // Свою SFSymbol або кастомну іконку
                 label: "Home",
@@ -53,8 +54,9 @@ struct CustomTabBar: View {
             ) {
                 selectedTab = .home
             }
+            .frame(minWidth: 0, maxWidth: .infinity)
 
-            Spacer()
+
 
             TabBarButton(
                 icon: "gauge.open.with.lines.needle.33percent", // Для Test
@@ -63,10 +65,22 @@ struct CustomTabBar: View {
             ) {
                 selectedTab = .test
             }
+            .frame(minWidth: 0, maxWidth: .infinity)
+            
+
+
+            TabBarButton(
+                icon: "gearshape", // Для Test
+                label: "Setting",
+                isSelected: selectedTab == .setting
+            ) {
+                selectedTab = .setting
+            }
+            .frame(minWidth: 0, maxWidth: .infinity)
+
         }
-        .padding(.horizontal, 32)
-        .padding(.top, 10)
-        .padding(.bottom, 28) // для імітації safe area
+        .padding(.horizontal, 26)
+        .padding(.vertical, 16)
         .background(
             Color(red: 35/255, green: 37/255, blue: 41/255)
                 .ignoresSafeArea(.container, edges: .bottom)
@@ -88,17 +102,22 @@ struct TabBarButton: View {
                     .foregroundColor(isSelected ? Color(red: 161/255, green: 192/255, blue: 255/255) : .gray)
                 Text(label)
                     .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)                   // ← не даємо розриватися
+                    .minimumScaleFactor(0.9)
                     .foregroundColor(isSelected ? Color(red: 161/255, green: 192/255, blue: 255/255) : .gray)
             }
-            .padding(.horizontal, 50)
-            .padding(.vertical, 10)
-            .background(
-                isSelected ? Color(red: 31/255, green: 42/255, blue: 66/255).opacity(0.45) : .clear
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .contentShape(Rectangle())
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .padding(.vertical, 16)
+            
+            
         }
-        
         .buttonStyle(.plain)
+        .background(
+            isSelected ? Color(red: 31/255, green: 42/255, blue: 66/255).opacity(0.45) : .clear
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .contentShape(Rectangle())
+        .animation(nil, value: isSelected)
+        
     }
 }

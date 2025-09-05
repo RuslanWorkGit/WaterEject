@@ -61,7 +61,7 @@ struct HomeView: View {
                 Telemetry.shared.homeExposure()
                 tabBarState.isHidden = false
             }   // ⟵ сховати
-            .onDisappear { tabBarState.isHidden = true }
+            //.onDisappear { tabBarState.isHidden = true }
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .modes(let device):
