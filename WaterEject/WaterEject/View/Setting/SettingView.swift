@@ -120,11 +120,41 @@ struct OurAppsSection: View {
                         if let url = vm.link(for: app) { UIApplication.shared.open(url) }
                     } label: {
                         VStack(spacing: 8) {
-                            AsyncImage(url: URL(string: app.icon_url)) { img in
-                                img.resizable().scaledToFill()
-                            } placeholder: { Color.gray.opacity(0.15) }
+                            AsyncImage(
+                                url: URL(string: app.icon_url),
+                                transaction: .init(animation: .easeInOut)
+                            ) { phase in
+                                switch phase {
+                                case .empty:
+                                    // ⏳ Лоадер на фоні сірого квадрата
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .fill(Color.gray.opacity(0.2))
+                                        .overlay(
+                                            ProgressView().scaleEffect(0.9)
+                                        )
+
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .transition(.opacity) // приємний фейд-ін
+
+                                case .failure:
+                                    // 🔁 Фолбек, якщо картинку не вдалося завантажити
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .fill(Color.gray.opacity(0.2))
+                                        .overlay(
+                                            Image(systemName: "photo")
+                                                .font(.title2)
+                                                .foregroundColor(.gray)
+                                        )
+
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
                             .frame(width: 56, height: 56)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                             Text(app.name)
                                 .foregroundStyle(Color.gray)
