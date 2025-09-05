@@ -10,6 +10,8 @@ import FirebaseCore
 import FirebaseFirestore
 
 struct SettingView: View {
+    @State private var webViewURL: URL?
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -27,16 +29,64 @@ struct SettingView: View {
                         // 👇 Тут з’явиться грід з вашими апками
                         OurAppsSection()
 
-                        // ...інші секції налаштувань
+                        Text("Help center")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(Color.gray)
+                        
+                        VStack(spacing: 12) {
+                            Button("Terms") {
+                                webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
+                            Button("Privacy") {
+                                webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                        }
+   
+
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 32)
                     .padding(.top, 16)
                 }
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
+        .sheet(item: $webViewURL, content: { url in
+            SafariView(url: url)
+        })
     }
 }
+
+struct PillButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.label
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.gray)
+            Spacer()
+            Image(systemName: "chevron.right") // опційно
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.gray.opacity(0.9))
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading) // ✅ на всю ширину
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.gray.opacity(0.2))                           // ✅ сірий напівпрозорий фон
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.08))                       // тонка обводка (опц.)
+        )
+        .opacity(configuration.isPressed ? 0.85 : 1)
+        .contentShape(RoundedRectangle(cornerRadius: 16))                // коректна зона тапа
+    }
+}
+
 
 
 import SwiftUI
@@ -61,12 +111,12 @@ struct OurAppsSection: View {
                 ForEach(vm.apps) { app in
                     Button {
                         // лог кліку через той самий db
-//                        db.collection("clicks").addDocument(data: [
-//                            "src_bundle": Bundle.main.bundleIdentifier ?? "",
-//                            "dst_bundle": app.bundle_id,
-//                            "ts": FieldValue.serverTimestamp(),
-//                            "screen": "settings"
-//                        ])
+                        db.collection("clicks").addDocument(data: [
+                            "src_bundle": Bundle.main.bundleIdentifier ?? "",
+                            "dst_bundle": app.bundle_id,
+                            "ts": FieldValue.serverTimestamp(),
+                            "screen": "settings"
+                        ])
                         if let url = vm.link(for: app) { UIApplication.shared.open(url) }
                     } label: {
                         VStack(spacing: 8) {
