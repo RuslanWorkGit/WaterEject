@@ -292,36 +292,57 @@ extension Telemetry {
         log(.startPaywallDismissed, params: ["converted": converted])
     }
     
-    //MARK: - Onboarding
-    func onboardingStart() {
-        log(.onboardingStart)
-    }
-    
-    func onboardingExposure(step: OnboardingStep) {
-        log(.onboardingExposure, params: ["step": step.analyticsValue])
-    }
-    
-    func onboardingContinue(step: OnboardingStep) {
-        log(.onboardingContinue, params: ["step": step.analyticsValue])
-    }
-    
-    func onboardingFinish() {
-        log(.onboardingFinish)
-    }
-    
-    func onboardingStepChange(from: OnboardingStep, to: OnboardingStep) {
-        log(.onboardingStepChange, params: ["from": from.analyticsValue, "to": to.analyticsValue])
-    }
+
 }
 
 
 extension Telemetry {
-    /// Лог події з довільною назвою (для screen-маркерів)
-    func logRaw(_ name: String, params: [String: Any] = [:]) {
-        var merged = baseParams()
-        params.forEach { merged[$0.key] = $0.value }
-        Analytics.logEvent(name, parameters: merged)
+    //MARK: - Onboarding
+    func onboardingStart(flow: String = "default") {
+            var p = baseParams(); p["onboarding_flow"] = flow
+            Analytics.logEvent("onboarding_start", parameters: p)
+        }
+
+    func onboardingExposure(step: OnboardingStep, flow: String = "default") {
+        logOnboarding(action: "screen", extra: [
+            "onboarding_step": stepName(step),
+            "onboarding_flow": flow
+        ])
     }
+
+    func onboardingContinue(step: OnboardingStep, flow: String = "default") {
+            var p = baseParams()
+            p["onboarding_step"] = stepName(step)
+            p["onboarding_flow"] = flow
+            Analytics.logEvent("onboarding_continue", parameters: p)
+        }
+
+    func onboardingFinish(flow: String = "default") {
+            var p = baseParams(); p["onboarding_flow"] = flow
+            Analytics.logEvent("onboarding_finish", parameters: p)
+        }
+    
+    
+    /// Лог події з довільною назвою (для screen-маркерів)
+    func onboardingStepChange(from: OnboardingStep, to: OnboardingStep, flow: String = "default") {
+            var p = baseParams()
+            p["onboarding_from_step"] = stepName(from)
+            p["onboarding_to_step"]   = stepName(to)
+            p["onboarding_flow"]      = flow
+            Analytics.logEvent("onboarding_step_change", parameters: p)
+        }
+    
+    func onboardingScreenMarker(step: OnboardingStep, flow: String = "default") {
+            // 1) новий єдиний івент
+            var p = baseParams()
+            p["onboarding_action"] = "screen"
+            p["onboarding_step"]   = stepName(step)
+            p["onboarding_flow"]   = flow
+            Analytics.logEvent("onboarding", parameters: p)
+
+            // 2) legacy-івент для старих звітів
+            Analytics.logEvent(onboardingRawEventName(step), parameters: baseParams())
+        }
 
     /// Мапимо крок онбордингу у потрібну назву події
     private func onboardingRawEventName(_ step: OnboardingStep) -> String {
@@ -332,15 +353,35 @@ extension Telemetry {
         case .paywall:  return "paywall"
         }
     }
-
-    /// Єдиний вхід: кинути «екранну» подію для поточного кроку
-    func onboardingScreenMarker(step: OnboardingStep) {
-        logRaw(onboardingRawEventName(step), params: ["step": step.analyticsValue])
+    
+    private func logOnboarding(action: String, extra: [String: Any] = [:]) {
+        var params = baseParams()                // якщо у тебе є базові параметри — лишаємо
+        params["onboarding_action"] = action     // start | screen | step_change | continue_tap | finish
+        extra.forEach { params[$0.key] = $0.value }
+        Analytics.logEvent("onboarding", parameters: params)
+    }
+    
+    private func stepName(_ s: OnboardingStep) -> String {
+        switch s {
+        case .hook:     return "hook"
+        case .urgency:  return "urgency"
+        case .solution: return "solution"
+        case .paywall:  return "paywall"
+        }
     }
 }
 
 
 extension Telemetry {
+    
+    /// Лог події з довільною назвою (для screen-маркерів) func logRaw(_ name: String, params: [String: Any] = [:]) { var merged = baseParams() params.forEach { merged[$0.key] = $0.value } Analytics.logEvent(name, parameters: merged) }
+     func logRaw(_ name: String, params: [String: Any] = [:]) {
+         var merged = baseParams()
+         params.forEach {
+             merged[$0.key] = $0.value
+         }
+         Analytics.logEvent(name, parameters: merged)
+     }
     // Одноразовий маркер старту тестів
     func testStart() {
         logRaw("Test_Start")

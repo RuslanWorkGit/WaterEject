@@ -34,6 +34,7 @@ struct OnboardingFlowView: View {
                 if currentStep != .paywall {
                     
                     Button {
+                        Telemetry.shared.onboardingContinue(step: currentStep)
                         goToNextStep()
                     } label: {
                         Text("Continue")
@@ -67,7 +68,7 @@ struct OnboardingFlowView: View {
             Telemetry.shared.onboardingScreenMarker(step: currentStep)
         }
         .onChange(of: currentStep) { oldStep, newStep in
-            Telemetry.shared.onboardingStepChange(from: oldStep, to: newStep)
+
             Telemetry.shared.onboardingScreenMarker(step: newStep)
             
             if newStep == .paywall {
@@ -86,6 +87,7 @@ struct OnboardingFlowView: View {
     }
     
     func finishOnboarding() {
+        Telemetry.shared.onboardingFinish()
         hasSeenOnboarding = true
         coordinator.showMainTabbar()
         
