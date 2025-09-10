@@ -350,6 +350,7 @@ extension Telemetry {
         case .hook:     return "onboarding_step_1"
         case .urgency:  return "onboarding_step_2"
         case .solution: return "onboarding_step_3"
+        case .tests:    return "onboarding_step_4"
         case .paywall:  return "paywall"
         }
     }
@@ -366,6 +367,7 @@ extension Telemetry {
         case .hook:     return "hook"
         case .urgency:  return "urgency"
         case .solution: return "solution"
+        case .tests:    return "tests"
         case .paywall:  return "paywall"
         }
     }

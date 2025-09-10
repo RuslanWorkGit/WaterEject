@@ -11,7 +11,7 @@ enum OnboardingStep: Int, CaseIterable {
     case hook
     case urgency
     case solution
-    //case tests
+    case tests
     case paywall
 }
 
@@ -21,6 +21,7 @@ extension OnboardingStep {
         case .hook: "hook"
         case .urgency: "urgency"
         case .solution: "solution"
+        case .tests: "tests"
         case .paywall: "paywall"
         }
     }
