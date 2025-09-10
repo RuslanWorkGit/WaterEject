@@ -9,31 +9,84 @@ import SwiftUI
 
 struct UrgencyView: View {
     var body: some View {
+        let isLarge = UIScreen.main.bounds.height > 900
+        
         ZStack {
             Background()
             
             VStack(alignment: .center) {
                 (
-                    Text("Left untreated, water can")
-                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255)) +
-                    Text(" permanently ")
-                        .foregroundStyle(Color(red: 247 / 255, green: 192 / 255, blue: 67 / 255)) +
-                    Text("damage sound!")
+                    Text("Trusted ")
+                        .foregroundStyle(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255)) +
+                    Text("by millions worldwide")
                         .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
                 )
-                .font(.system(size: 32, weight: .bold))
+                .font(.system(size: 30, weight: .bold))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 54)
+                .padding(.bottom, 12)
+                .padding(.horizontal, 40)
                 
-                ComparisonTable()
+                
+                Text("Engineers and users confirm: it works safely and effectively")
+                    .font(.system(size: 16))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+                    .padding(.bottom, 60)
+                    .padding(.horizontal, 92)
+                
+                ZStack {
+                    Image("Lines")
+                    
+                    VStack(spacing: 15) {
+                        Text("32dB")
+                            .font(.system(size: 80, weight: .bold))
+                            .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+                        ZStack {
+                            Image("BlueWave")
+                            Image("BlackWave")
+                        }
+                    }
+                    .offset(y: -20)
+                }
+                .padding(.bottom, 20)
+                
+                Image("Recomended")
+                    .scaleEffect(isLarge ? 1.2 : 1)
+                    .padding(.bottom, 24)
+                
+                Image("Best")
+                    .scaleEffect(isLarge ? 1.2 : 1)
 
+                
                 
                 
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .padding(.horizontal, 12)
-            .padding(.top, 50)
+            .padding(.top, 60)
+            
+//            VStack(alignment: .center) {
+//                (
+//                    Text("Left untreated, water can")
+//                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255)) +
+//                    Text(" permanently ")
+//                        .foregroundStyle(Color(red: 247 / 255, green: 192 / 255, blue: 67 / 255)) +
+//                    Text("damage sound!")
+//                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+//                )
+//                .font(.system(size: 32, weight: .bold))
+//                .multilineTextAlignment(.center)
+//                .padding(.horizontal, 24)
+//                .padding(.bottom, 54)
+//                
+//                ComparisonTable()
+//
+//                
+//                
+//            }
+//            .frame(maxHeight: .infinity, alignment: .top)
+//            .padding(.horizontal, 12)
+//            .padding(.top, 50)
             
         }
     }
