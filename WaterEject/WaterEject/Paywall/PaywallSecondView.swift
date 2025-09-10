@@ -61,7 +61,6 @@ struct PaywallSecondView: View {
                         HorizontalText(title: "Scientifically proven methods", image: "graduationcap")
                         HorizontalText(title: "All future features + No Ads", image: "sparkles")
                     }
-                    
                     .padding(.leading, 90)
                     
                     VStack(spacing: 12) {

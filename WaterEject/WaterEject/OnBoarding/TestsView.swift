@@ -66,20 +66,20 @@ struct TestsView: View {
                 }
                 
                 
-                LazyVGrid(columns: columns, spacing: 0) {
-                    ForEach(tests, id: \.label) { test in
-                        TestCheckCard(
-                            icon: test.icon,
-                            label: test.label,
-                            isChecked: viewModel.checked[test.label] ?? false
-                        ) {
-                            viewModel.toggle(test.label)
-                        }
-                    }
-                }
-                .padding(.top, 4)
-                .padding(.horizontal, 12)
-                .padding(.bottom, 18)
+//                LazyVGrid(columns: columns, spacing: 0) {
+//                    ForEach(tests, id: \.label) { test in
+//                        TestCheckCard(
+//                            icon: test.icon,
+//                            label: test.label,
+//                            isChecked: viewModel.checked[test.label] ?? false
+//                        ) {
+//                            viewModel.toggle(test.label)
+//                        }
+//                    }
+//                }
+//                .padding(.top, 4)
+//                .padding(.horizontal, 12)
+//                .padding(.bottom, 18)
                 
                 
                 
@@ -98,10 +98,10 @@ struct TestCheckCard: View {
     let icon: String
     let label: String
     let isChecked: Bool
-    let onTap: () -> Void
+//    let onTap: () -> Void
     
     var body: some View {
-        Button(action: onTap) {
+  
             ZStack(alignment: .topTrailing) {
                 // Основний контент
                 HStack(spacing: 14) {
@@ -128,8 +128,8 @@ struct TestCheckCard: View {
             )
             .frame(height: 70)
         }
-        .buttonStyle(.plain)
-    }
+
+    
 }
 
 
