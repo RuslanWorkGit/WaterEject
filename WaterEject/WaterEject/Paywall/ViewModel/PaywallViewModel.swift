@@ -130,7 +130,7 @@ final class PaywallViewModel: ObservableObject {
         isPurchasing = true
         errorMessage = nil
         purchaseSucceeded = false
-        //Telemetry.shared.purchaseStart(plan: plan)
+
         defer { isPurchasing = false }
         
         let p = pkg.storeProduct

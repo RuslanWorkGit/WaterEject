@@ -44,9 +44,9 @@ struct HomeView: View {
                     .padding(.top, 16)
                     
                     DeviceGridView { device in
-                        Telemetry.shared.homeDeviceTap(device: device)
-                                                // 2) лог навігації
-                        Telemetry.shared.homeNavigateToModes(device: device)
+//                        Telemetry.shared.homeDeviceTap(device: device)
+//                                                // 2) лог навігації
+//                        Telemetry.shared.homeNavigateToModes(device: device)
                         
                         path.append(.modes(device))
                         //showModesScreen = true
@@ -59,7 +59,7 @@ struct HomeView: View {
             }
             
             .onAppear {
-                Telemetry.shared.homeExposure()
+//                Telemetry.shared.homeExposure()
                 tabBarState.isHidden = false
             }   // ⟵ сховати
             //.onDisappear { tabBarState.isHidden = true }

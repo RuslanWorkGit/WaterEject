@@ -29,9 +29,9 @@ struct StartView: View {
                     
                     HStack {
                         Button {
-                            Telemetry.shared.startBackTap(device: device, mode: mode, disabled: viewModel.startCleaning)
-                                viewModel.stopAllPlayback(reason: "back")
-                                Telemetry.shared.startCleaningEnd(device: device, mode: mode, reason: "back")
+//                            Telemetry.shared.startBackTap(device: device, mode: mode, disabled: viewModel.startCleaning)
+//                                viewModel.stopAllPlayback(reason: "back")
+//                                Telemetry.shared.startCleaningEnd(device: device, mode: mode, reason: "back")
                             dismiss()
                         } label: {
                             Image(systemName: "chevron.backward")
@@ -79,9 +79,9 @@ struct StartView: View {
                     
                     // Кнопка
                     Button {
-                        Telemetry.shared.startPrimaryTap(device: device, mode: mode)
+//                        Telemetry.shared.startPrimaryTap(device: device, mode: mode)
                         showVolumeAlert = true
-                        Telemetry.shared.startPromptShown(device: device, mode: mode)
+//                        Telemetry.shared.startPromptShown(device: device, mode: mode)
                         
                     } label: {
                         Text("Start cleaning (25 sec)")
@@ -104,13 +104,13 @@ struct StartView: View {
         }
         
         .onAppear {
-            Telemetry.shared.startExposure(device: device, mode: mode)
+//            Telemetry.shared.startExposure(device: device, mode: mode)
             Task { await paywallGate.presentPaywallIfNeeded(context: .startViewAuto) }
         }
         
         .onChange(of: paywallGate.presentedVariant) { oldValue, newValue in
             guard oldValue == nil, newValue != nil else { return }
-            Telemetry.shared.startPaywallRequested(auto: true)
+//            Telemetry.shared.startPaywallRequested(auto: true)
         }
         .onDisappear {
             viewModel.stopAllPlayback(reason: "disappear")
@@ -122,7 +122,7 @@ struct StartView: View {
         .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
             Task {
                             let converted = await paywallGate.isPro()
-                            Telemetry.shared.startPaywallDismissed(converted: converted)
+//                            Telemetry.shared.startPaywallDismissed(converted: converted)
                         }
         }) { variant in
             switch variant {
@@ -140,10 +140,10 @@ struct StartView: View {
                 message: Text("For the most effective cleaning, please set your device volume to maximum."),
                 primaryButton: .default(Text("OK")) {
                     
-                    Telemetry.shared.startPromptConfirm(device: device, mode: mode)
+//                    Telemetry.shared.startPromptConfirm(device: device, mode: mode)
 
                                        // початок очищення (лог до запуску/після — на твій вибір; тут — до)
-                                       Telemetry.shared.startCleaningBegin(device: device, mode: mode, duration: 25)
+//                                       Telemetry.shared.startCleaningBegin(device: device, mode: mode, duration: 25)
                     switch mode {
                     case .sonicPulse:
                         viewModel.playCleaningSequence()
@@ -160,7 +160,7 @@ struct StartView: View {
                     }
                 },
                 secondaryButton: .cancel({
-                    Telemetry.shared.startPromptCancel(device: device, mode: mode)
+//                    Telemetry.shared.startPromptCancel(device: device, mode: mode)
                 })
             )
         }

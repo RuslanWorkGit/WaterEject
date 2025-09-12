@@ -56,7 +56,7 @@ struct SettingView: View {
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .onAppear {
-            Telemetry.shared.settingExposure()
+//            Telemetry.shared.settingExposure()
         }
         .sheet(item: $webViewURL, content: { url in
             SafariView(url: url)

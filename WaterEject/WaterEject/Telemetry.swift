@@ -300,7 +300,7 @@ extension Telemetry {
     //MARK: - Onboarding
     func onboardingStart(flow: String = "default") {
             var p = baseParams(); p["onboarding_flow"] = flow
-            Analytics.logEvent("onboarding_start", parameters: p)
+            Analytics.logEvent("onboarding_start_1.2", parameters: p)
         }
 
     func onboardingExposure(step: OnboardingStep, flow: String = "default") {
@@ -314,12 +314,12 @@ extension Telemetry {
             var p = baseParams()
             p["onboarding_step"] = stepName(step)
             p["onboarding_flow"] = flow
-            Analytics.logEvent("onboarding_continue", parameters: p)
+            Analytics.logEvent("onboarding_continue_1.2", parameters: p)
         }
 
     func onboardingFinish(flow: String = "default") {
             var p = baseParams(); p["onboarding_flow"] = flow
-            Analytics.logEvent("onboarding_finish", parameters: p)
+            Analytics.logEvent("onboarding_finish_1.2", parameters: p)
         }
     
     
@@ -329,7 +329,7 @@ extension Telemetry {
             p["onboarding_from_step"] = stepName(from)
             p["onboarding_to_step"]   = stepName(to)
             p["onboarding_flow"]      = flow
-            Analytics.logEvent("onboarding_step_change", parameters: p)
+            Analytics.logEvent("onboarding_step_change_1.2", parameters: p)
         }
     
     func onboardingScreenMarker(step: OnboardingStep, flow: String = "default") {
@@ -338,7 +338,7 @@ extension Telemetry {
             p["onboarding_action"] = "screen"
             p["onboarding_step"]   = stepName(step)
             p["onboarding_flow"]   = flow
-            Analytics.logEvent("onboarding", parameters: p)
+            Analytics.logEvent("onboarding_1.2", parameters: p)
 
             // 2) legacy-івент для старих звітів
             Analytics.logEvent(onboardingRawEventName(step), parameters: baseParams())
@@ -359,7 +359,7 @@ extension Telemetry {
         var params = baseParams()                // якщо у тебе є базові параметри — лишаємо
         params["onboarding_action"] = action     // start | screen | step_change | continue_tap | finish
         extra.forEach { params[$0.key] = $0.value }
-        Analytics.logEvent("onboarding", parameters: params)
+        Analytics.logEvent("onboarding_1.2", parameters: params)
     }
     
     private func stepName(_ s: OnboardingStep) -> String {

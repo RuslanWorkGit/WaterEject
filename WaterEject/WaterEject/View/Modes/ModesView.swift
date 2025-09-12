@@ -199,7 +199,7 @@ struct ModesView: View {
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    Telemetry.shared.modesBackTap(device: device)
+//                    Telemetry.shared.modesBackTap(device: device)
                     dismiss()
                 } label: {
                     Image(systemName: "chevron.backward")
@@ -211,7 +211,7 @@ struct ModesView: View {
             }
         }
         .onAppear {
-            Telemetry.shared.modesExposure(device: device)          // ← лог показу екрана
+/*            Telemetry.shared.modesExposure(device: device) */         // ← лог показу екрана
         }
         // Колір системної стрілки
         .tint(Color(red: 161/255, green: 192/255, blue: 255/255))
@@ -222,7 +222,7 @@ struct ModesView: View {
             Task {
                 let converted = await paywallGate.isPro()
                 if let pending = pendingMode, await paywallGate.isPro() {
-                    Telemetry.shared.modesPaywallDismissed(device: device, mode: pending, converted: converted)
+//                    Telemetry.shared.modesPaywallDismissed(device: device, mode: pending, converted: converted)
                             
                     onStart(pending)
                     pendingMode = nil
@@ -260,14 +260,14 @@ struct ModesView: View {
     private func startIfAllowed(_ mode: CleaningMode) {
         Task {
             pendingMode = mode
-            Telemetry.shared.modesModeTap(device: device, mode: mode)
+//            Telemetry.shared.modesModeTap(device: device, mode: mode)
             let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
             if allowed {
-                Telemetry.shared.modesStartNavigate(device: device, mode: mode)
+//                Telemetry.shared.modesStartNavigate(device: device, mode: mode)
                 onStart(mode)          // пушимо StartView через Route у HomeView
                 pendingMode = nil
             } else {
-                Telemetry.shared.modesPaywallRequested(device: device, mode: mode)
+//                Telemetry.shared.modesPaywallRequested(device: device, mode: mode)
             }
         }
     }

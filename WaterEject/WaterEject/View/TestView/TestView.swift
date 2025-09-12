@@ -92,7 +92,7 @@ struct TestView: View {
         .onAppear {
             // Старт усієї сесії тестів
             if !didLogStart {
-                Telemetry.shared.testStart()
+//                Telemetry.shared.testStart()
                 didLogStart = true
             }
             // Лог для поточного екрану (першого)
@@ -109,7 +109,7 @@ struct TestView: View {
     private func logCurrentModeIfNeeded() {
         let mode = viewModel.mode
         guard !loggedModes.contains(mode) else { return }
-        Telemetry.shared.testScreenOpen(mode)
+//        Telemetry.shared.testScreenOpen(mode)
         loggedModes.insert(mode)
     }
     
