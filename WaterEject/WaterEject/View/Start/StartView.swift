@@ -121,7 +121,7 @@ struct StartView: View {
         // Єдина презентація A/B пейволів
         .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
             Task {
-                            let converted = await paywallGate.isPro()
+            let converted = await paywallGate.isPro()
 //                            Telemetry.shared.startPaywallDismissed(converted: converted)
                         }
         }) { variant in

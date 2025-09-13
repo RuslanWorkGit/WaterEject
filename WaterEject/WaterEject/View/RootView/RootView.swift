@@ -10,12 +10,16 @@ import SwiftUI
 struct RootView: View {
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     @EnvironmentObject var coordinator: AppCoordinator
+    @EnvironmentObject var paywallGate: PaywallGate
 
     var body: some View {
         switch coordinator.currentScreen {
         case .paywall:
-            // PaywallFirstView() — якщо хочеш прямий перехід, але зазвичай онбординг веде до paywall
-            EmptyView()
+            PaywallAB.shared
+                .assignedPaywallView(onFinish: {
+                    coordinator.showMainTabbar()       // ✅ закрили пейвол → таббар
+                })
+                .onAppear { paywallGate.currentContext = .startViewAuto }
         case .onboarding:
             OnboardingFlowView()
         case .mainTabbar:

@@ -8,6 +8,7 @@
 import Combine
 import SwiftUI
 
+@MainActor
 final class AppCoordinator: ObservableObject {
     
     enum Screen {
@@ -22,7 +23,13 @@ final class AppCoordinator: ObservableObject {
     init() {
         // Якщо користувач не бачив онбординг — показати його, інакше Home
         if hasSeenOnboarding {
-            currentScreen = .mainTabbar
+            Task { [weak self] in
+                if await PaywallGate.shared.isPro() {
+                    self?.currentScreen = .mainTabbar   // ✅ підписка є — одразу в таббар
+                } else {
+                    self?.currentScreen = .paywall      // ❌ підписки нема — показуємо пейвол
+                }
+            }
         } else {
             currentScreen = .onboarding
         }

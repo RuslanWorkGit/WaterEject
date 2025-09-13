@@ -29,7 +29,7 @@ struct CustomTabBarContainerView<Content: View>: View {
             CustomTabBar(selectedTab: $selectedTab)
                 .offset(y: shouldHide ? 120 : 0)                 // ⟵ ховаємо вниз
                 .opacity(shouldHide ? 0 : 1)
-                .animation(.easeInOut(duration: 0.25), value: shouldHide)
+                .animation(.easeInOut(duration: 0.1), value: shouldHide)
         }
         .edgesIgnoringSafeArea(.bottom)
     }
