@@ -19,20 +19,30 @@ final class AppCoordinator: ObservableObject {
     
     @Published var currentScreen: Screen = .mainTabbar
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
+    @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
     
     init() {
         // Якщо користувач не бачив онбординг — показати його, інакше Home
-        if hasSeenOnboarding {
-            Task { [weak self] in
-                if await PaywallGate.shared.isPro() {
-                    self?.currentScreen = .mainTabbar   // ✅ підписка є — одразу в таббар
-                } else {
-                    self?.currentScreen = .paywall      // ❌ підписки нема — показуємо пейвол
-                }
+        Task { [weak self] in
+            guard let self else { return }
+            if await PaywallGate.shared.isPro() {
+                self.currentScreen = .mainTabbar
+                return
             }
-        } else {
-            currentScreen = .onboarding
+
+            // показати онбординг, якщо його ще не бачили або сплив «cooldown»
+            if !hasSeenOnboarding || self.shouldResurfaceOnboarding() {
+                self.currentScreen = .onboarding
+            } else {
+                self.currentScreen = .paywall
+            }
         }
+    }
+    
+    private func shouldResurfaceOnboarding(now: Date = .init()) -> Bool {
+        guard onbLastShownTS > 0 else { return true } // ще жодного показу – показати
+        let elapsed = now.timeIntervalSince1970 - onbLastShownTS
+        return elapsed >= OnboardingConfig.cooldown
     }
     
     func showOnboarding() {
@@ -46,3 +56,5 @@ final class AppCoordinator: ObservableObject {
         currentScreen = .mainTabbar
     }
 }
+
+

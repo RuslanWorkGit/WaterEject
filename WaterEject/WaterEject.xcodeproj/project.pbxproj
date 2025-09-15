@@ -20,9 +20,22 @@
 		9BB69F182E6B304500FF583E /* GoogleService-Info-Shared.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-Shared.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		9B5C66352E7893440081914E /* Exceptions for "WaterEject" folder in "WaterEject" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9BA1E0642E328F970027AD07 /* WaterEject */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9BA1E0672E328F970027AD07 /* WaterEject */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9B5C66352E7893440081914E /* Exceptions for "WaterEject" folder in "WaterEject" target */,
+			);
 			path = WaterEject;
 			sourceTree = "<group>";
 		};
@@ -290,6 +303,7 @@
 				DEVELOPMENT_TEAM = LBA86YKHYN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WaterEject/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Water Eject Clear Sound";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to perform the audio test";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -321,6 +335,7 @@
 				DEVELOPMENT_TEAM = LBA86YKHYN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WaterEject/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Water Eject Clear Sound";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to perform the audio test";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
