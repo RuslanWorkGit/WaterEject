@@ -62,7 +62,13 @@ struct HomeView: View {
 //                Telemetry.shared.homeExposure()
                 tabBarState.isHidden = false
             }   // ⟵ сховати
-            .onDisappear { tabBarState.isHidden = true }
+            
+            .onChange(of: path) { _, newPath in
+                // ховаємо таб-бар лише коли ми НА СТЕКУ Home (є пуш у Modes/Start)
+                tabBarState.isHidden = !newPath.isEmpty
+            }
+
+//            .onDisappear { tabBarState.isHidden = true }
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .modes(let device):

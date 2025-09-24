@@ -11,6 +11,7 @@ import FirebaseFirestore
 
 struct SettingView: View {
     @State private var webViewURL: URL?
+    @EnvironmentObject private var tabBarState: TabBarState
     
     var body: some View {
         NavigationStack {
@@ -56,6 +57,7 @@ struct SettingView: View {
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .onAppear {
+            tabBarState.isHidden = false 
 //            Telemetry.shared.settingExposure()
         }
         .sheet(item: $webViewURL, content: { url in

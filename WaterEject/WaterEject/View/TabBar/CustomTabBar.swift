@@ -20,7 +20,7 @@ struct CustomTabBarContainerView<Content: View>: View {
     private var shouldHide: Bool {
         tabBarState.isHidden || selectedTab == .test            // ⟵ можна лишити/прибрати .test
     }
-
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             content
