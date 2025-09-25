@@ -44,23 +44,6 @@ struct HookView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                         .frame(height: 400)
                 
-                // висота області під зображення (щоб GeometryReader не займав увесь екран)
-                
-                
-                //                ZStack {
-                //                    Image("HookImage")
-                //                        .resizable()
-                //
-                //
-                //
-                //                }
-                //
-                //                Text("We found water in your device!")
-                //                    .padding(12)
-                //                    .font(.system(size: 14, weight: .semibold))
-                //                    .foregroundStyle(Color(red: 247 / 255, green: 192 / 255, blue: 67 / 255))
-                //                    .background(Color(red: 61 / 255, green: 56 / 255, blue: 42 / 255))
-                //                    .clipShape(Capsule())
                 
             }
             .frame(maxHeight: .infinity, alignment: .top)
