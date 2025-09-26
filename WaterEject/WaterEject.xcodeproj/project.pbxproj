@@ -139,6 +139,7 @@
 			packageReferences = (
 				9BBB1B282E4CCC3D00C15E8C /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				9BDEB9A62E872AD80027F4CA /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9BA1E0662E328F970027AD07 /* Products */;
@@ -395,6 +396,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.34.0;
+			};
+		};
+		9BDEB9A62E872AD80027F4CA /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

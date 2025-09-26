@@ -65,28 +65,6 @@ struct UrgencyView: View {
             .padding(.horizontal, 12)
             .padding(.top, 60)
             
-//            VStack(alignment: .center) {
-//                (
-//                    Text("Left untreated, water can")
-//                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255)) +
-//                    Text(" permanently ")
-//                        .foregroundStyle(Color(red: 247 / 255, green: 192 / 255, blue: 67 / 255)) +
-//                    Text("damage sound!")
-//                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
-//                )
-//                .font(.system(size: 32, weight: .bold))
-//                .multilineTextAlignment(.center)
-//                .padding(.horizontal, 24)
-//                .padding(.bottom, 54)
-//                
-//                ComparisonTable()
-//
-//                
-//                
-//            }
-//            .frame(maxHeight: .infinity, alignment: .top)
-//            .padding(.horizontal, 12)
-//            .padding(.top, 50)
             
         }
     }
