@@ -9,6 +9,7 @@
 import SwiftUI
 import FirebaseAnalytics
 import RevenueCat
+import AVFoundation
 
 struct PaywallThirdView: View {
     
@@ -17,6 +18,10 @@ struct PaywallThirdView: View {
     @State private var didLogOpen = false
     @EnvironmentObject private var paywallGate: PaywallGate
     @State private var sessionId = UUID().uuidString
+    @State private var player: AVPlayer = {
+        let url = Bundle.main.url(forResource: "Video", withExtension: "mp4")!
+        return AVPlayer(url: url)
+    }()
     
     
     let onFinish: () -> Void
@@ -35,6 +40,18 @@ struct PaywallThirdView: View {
                 
                 VStack(alignment: .center) {
                     
+                    AspectFillPlayerView(player: player)
+                        .onAppear {
+                            AudioSessionManager.activatePlayback(duckOthers: true)
+                            player.isMuted = true
+                            player.play()
+                        }
+                    
+                        .frame(maxWidth: .infinity, maxHeight: 300)
+                        .allowsHitTesting(false)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .ignoresSafeArea()
+                        .offset(y: -20)
                     
                     (
                         Text("Premium Access")
@@ -284,6 +301,47 @@ struct PaywallThirdPlanCard: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 4)
+    }
+}
+
+final class PlayerView: UIView {
+    override static var layerClass: AnyClass { AVPlayerLayer.self }
+    var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+}
+
+struct AspectFillPlayerView: UIViewRepresentable {
+    let player: AVPlayer
+
+    func makeUIView(context: Context) -> PlayerView {
+        let v = PlayerView()
+        v.playerLayer.player = player
+        v.playerLayer.videoGravity = .resizeAspectFill   // ключова строка — без чорних рамок
+        v.playerLayer.masksToBounds = true
+        return v
+    }
+    func updateUIView(_ uiView: PlayerView, context: Context) {
+        uiView.playerLayer.player = player
+    }
+}
+
+enum AudioSessionManager {
+    static func activatePlayback(duckOthers: Bool = true) {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            try session.setCategory(
+                .playback,                    // ігнорує тумблер беззвучного режиму
+                mode: .moviePlayback,
+                options: duckOthers ? [.duckOthers] : [] // або [.mixWithOthers]
+            )
+            try session.setActive(true)
+        } catch {
+            print("Audio session error:", error)
+        }
+    }
+
+    static func deactivate() {
+        do { try AVAudioSession.sharedInstance().setActive(false) }
+        catch { print("Deactivate error:", error) }
     }
 }
 

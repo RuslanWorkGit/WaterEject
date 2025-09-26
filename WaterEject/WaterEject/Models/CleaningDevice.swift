@@ -46,6 +46,18 @@ enum CleaningDevice: String, CaseIterable, Hashable, Identifiable {
         case .speakers: return "Speakers"
         }
     }
+    
+    var onboardImage: String {
+        switch self {
+        case .iPhone: return "OnboardIphone"
+        case .airPodsPro: return "OnboardAirpodsPro"
+        case .airPods: return "OnboardAirpods"
+        case .airPodsMax: return "OnboardAirpodsMax"
+        case .speakers: return "OnboardSpeaker"
+        }
+    }
+    
+    
 
 }
 
