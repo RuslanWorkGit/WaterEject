@@ -15,7 +15,6 @@ struct PaywallThirdView: View {
     @StateObject private var viewModel = PaywallViewModel()
     @State private var webViewURL: URL?
     @State private var didLogOpen = false
-    //    @State private var isPresentingWebView = false
     @EnvironmentObject private var paywallGate: PaywallGate
     @State private var sessionId = UUID().uuidString
     
@@ -56,7 +55,7 @@ struct PaywallThirdView: View {
                     .padding(.leading, 90)
                     
                     VStack(spacing: 12) {
-                        PaywallSecondPlanCard(
+                        PaywallThirdPlanCard(
                             title: PaywallPlan.weekly.title,
                             price: viewModel.pricePerPeriod[.weekly] ?? "...",
                             sublabel: nil,
@@ -64,7 +63,7 @@ struct PaywallThirdView: View {
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: { viewModel.selectedPlan = .weekly }
                         )
-                        PaywallSecondPlanCard(
+                        PaywallThirdPlanCard(
                             title: PaywallPlan.yearly.title,
                             price: viewModel.pricePerPeriod[.yearly] ?? "…",
                             sublabel: "Best Value",
@@ -101,7 +100,7 @@ struct PaywallThirdView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                         
-                            .background(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
+                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         
                     }
@@ -199,16 +198,25 @@ struct PaywallThirdView: View {
 struct HorizontalThirdText: View {
     let title: String
     let image: String
+    private let color = Color(red: 81/255, green: 132/255, blue: 234/255)
     
     var body: some View {
         HStack {
             Image(systemName: image)
                 .resizable()
                 .frame(width: 16, height: 16)
-                .foregroundStyle(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
+                .foregroundStyle(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                .padding(6)                                // розмір “піллюлі”
+                .background(
+                    Circle()
+                        .fill(color.opacity(0.15))         // напівпрозорий круг
+//                        .overlay(
+//                            Circle().stroke(color.opacity(0.25), lineWidth: 1) // тонка обводка (опц.)
+//                        )
+                )
             Text(title)
                 .font(.system(size: 15))
-                .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 246 / 255))
+                .foregroundStyle(Color(red: 170 / 255, green: 178 / 255, blue: 191 / 255))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -250,10 +258,11 @@ struct PaywallThirdPlanCard: View {
                             .font(.system(size: 12))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
-                            .background(Color(red: 43/255, green: 217/255, blue: 156/255).opacity(0.14))
-                            .foregroundStyle(Color(red: 43/255, green: 217/255, blue: 156/255))
+                            .background(Color(red: 81/255, green: 132/255, blue: 234/255).opacity(0.14))
+                            .foregroundStyle(Color(red: 81/255, green: 132/255, blue: 234/255))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
+                    
                     
                     Text(saveText)
                         .font(.system(size: 10))
