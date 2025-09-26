@@ -13,7 +13,8 @@ struct SettingView: View {
     @State private var webViewURL: URL?
     @EnvironmentObject private var tabBarState: TabBarState
     @EnvironmentObject private var coordinator: AppCoordinator        // ← додай
-    @State private var showOnboarding = false
+    @State private var showFirstOnboarding = false
+    @State private var showSecondOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -55,9 +56,16 @@ struct SettingView: View {
                             .foregroundStyle(Color.gray)
                         
                         VStack(spacing: 12) {
-                            Button("FirstPaywall") {
+                            Button("FirstOnboard") {
                                 tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showOnboarding = true
+                                showFirstOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
+                            Button("SecondOnboard") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showSecondOnboarding = true
                                 
                             }
                             .buttonStyle(PillButtonStyle())
@@ -80,10 +88,17 @@ struct SettingView: View {
             SafariView(url: url)
         })
         
-        .fullScreenCover(isPresented: $showOnboarding, onDismiss: {
+        .fullScreenCover(isPresented: $showFirstOnboarding, onDismiss: {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)
         }) {
             OnboardingFlowViewOne()
+                .environmentObject(coordinator)    // пробросимо координатор
+        }
+        
+        .fullScreenCover(isPresented: $showSecondOnboarding, onDismiss: {
+            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        }) {
+            OnboardingFlowViewTwo()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
     }
