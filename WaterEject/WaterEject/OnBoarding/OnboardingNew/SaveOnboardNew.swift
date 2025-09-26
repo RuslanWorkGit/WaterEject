@@ -53,6 +53,7 @@ struct SaveOnboardNew: View {
                         .offset(y: 122)
                     
                     AppImg()
+                        .padding(.trailing, 12)
 
     
                 }
@@ -117,7 +118,7 @@ struct WalletImg: View {
 //                .resizable()
 //                .scaledToFit()
                 .frame(width: 294, alignment: .leading) // ← ключ
-                .offset(x: -40, y: -12)
+                .offset(x: -50, y: -12)
                 .scaleEffect(0.9)
         }
     }
@@ -132,18 +133,10 @@ struct PillButton: View {
         Button(action: action) {
             Spacer()
             Text(title)
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, minHeight: 60)
                 .contentShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-  
-
-//            if arrow == true {
-//                Image(systemName: "chevron.right")
-//                    .foregroundStyle(Color.white)
-//                    .padding(.trailing, 16)
-//                    .fontWeight(.bold)
-//            }
             
         }
         .buttonStyle(.plain)
