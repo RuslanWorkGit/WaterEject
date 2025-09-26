@@ -26,13 +26,6 @@ struct StartOnboardView: View {
                 Image("WaterDrop")
                     .padding(.bottom, 16)
                 
-                //                ZStack {
-                //                    LinearGradient(
-                //                        colors: [Color.white, Color(red: 201 / 255, green: 214 / 255, blue: 238 / 255)],
-                //                        startPoint: .top, endPoint: .bottom
-                //                    ).ignoresSafeArea()
-                
-                
                 
                 VStack {
                     (
@@ -139,6 +132,7 @@ struct StartOnboardView: View {
 struct PrimaryPillButton: View {
     let title: String
     let action: () -> Void
+
     
     var body: some View {
         Button(action: action) {
@@ -147,6 +141,9 @@ struct PrimaryPillButton: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, minHeight: 60)
                 .contentShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+
+            
+            
         }
         .buttonStyle(.plain)
         .background(
