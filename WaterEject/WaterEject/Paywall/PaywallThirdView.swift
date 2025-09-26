@@ -166,7 +166,8 @@ struct PaywallThirdView: View {
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.horizontal, 16)
-                .padding(.top, isSmall ? 30 : isLarge ? 60 : 50)
+                .padding(.top, 16)
+                //.padding(.top, isSmall ? 30 : isLarge ? 60 : 50)
                 .padding(.bottom, 24)
                 
                 
