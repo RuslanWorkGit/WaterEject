@@ -176,10 +176,10 @@ struct PaywallThirdView: View {
             Button(action: {
                 let variant = PaywallAB.shared.variant().rawValue
                 let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
-                Telemetry.shared.paywallClose(
-                    variant: variant, entryPoint: entryPoint,
-                    reason: "close_button", sessionId: sessionId
-                )
+//                Telemetry.shared.paywallClose(
+//                    variant: variant, entryPoint: entryPoint,
+//                    reason: "close_button", sessionId: sessionId
+//                )
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -193,11 +193,6 @@ struct PaywallThirdView: View {
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
-        //        .sheet(isPresented: $isPresentingWebView) {
-        //            if let url = webViewURL {
-        //                SafariView(url: url)
-        //            }
-        //        }
         .onAppear {
             if !didLogOpen {
                 Telemetry.shared.paywallBOpen()   // ⬅️ головний івент
@@ -205,7 +200,7 @@ struct PaywallThirdView: View {
             }
             Purchases.logLevel = .debug
             Task { await viewModel.loadPricing()  }
-            let v = PaywallAB.shared.variant()
+            //let v = PaywallAB.shared.variant()
             //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
     }

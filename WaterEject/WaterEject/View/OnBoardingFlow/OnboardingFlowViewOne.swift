@@ -13,6 +13,8 @@ struct OnboardingFlowViewOne: View {
     @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
     @State private var currentStep: OnboardingStepOne = .start
     @EnvironmentObject var coordinator: AppCoordinator
+    @Environment(\.dismiss) private var dismiss   // ← додай
+
     
     var body: some View {
         ZStack {
@@ -60,6 +62,7 @@ struct OnboardingFlowViewOne: View {
     func finishOnboarding() {
         Telemetry.shared.onboardingFinish()
         hasSeenOnboarding = true
+        dismiss()
         coordinator.showMainTabbar()
         
     }

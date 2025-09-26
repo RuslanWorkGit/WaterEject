@@ -67,8 +67,9 @@ struct SaveOnboardNew: View {
                     .font(.system(size: 14, weight: .bold))
                 
                 PillButton(title: "Continue", action: action, arrow: true)
+                    .frame(width: 260)
                     .padding(.top, 8)
-                    .padding(.horizontal, 90)
+                    
                     .padding(.bottom, 24)
 
             }
@@ -129,6 +130,7 @@ struct PillButton: View {
     let title: String
     let action: () -> Void
     var arrow: Bool = false
+
     
     var body: some View {
         Button(action: action) {
@@ -160,6 +162,7 @@ struct PillButton: View {
             RoundedRectangle(cornerRadius: 32, style: .continuous)
                 .stroke(Color.white.opacity(0.08), lineWidth: 1) // тонка обводка (опційно)
         )
+
     }
 }
 
