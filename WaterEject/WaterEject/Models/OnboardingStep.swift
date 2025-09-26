@@ -26,3 +26,26 @@ extension OnboardingStep {
         }
     }
 }
+
+enum OnboardingStepOne: Int, CaseIterable {
+    case start
+    case wallet
+    case women
+    case paywall
+}
+
+enum OnboardingStepTwo: Int, CaseIterable {
+    case start
+    case women
+    case wallet
+    case paywall
+}
+
+enum OnboardingStepThree: Int, CaseIterable {
+    case device
+    case start
+    case test
+    case women
+    case paywall
+}
+

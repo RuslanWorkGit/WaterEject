@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		9B1B800D2E4CD8A20049CE33 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 9B1B800C2E4CD8A20049CE33 /* FirebaseAnalytics */; };
 		9B1B800F2E4CD8A20049CE33 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 9B1B800E2E4CD8A20049CE33 /* FirebaseRemoteConfig */; };
+		9B1FFD7C2E872B0E00441BAD /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9B1FFD7B2E872B0E00441BAD /* Lottie */; };
 		9B57ECAE2E4CCC66005D4850 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 9B57ECAD2E4CCC66005D4850 /* RevenueCat */; };
 		9B57ECB02E4CCC66005D4850 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9B57ECAF2E4CCC66005D4850 /* RevenueCatUI */; };
 		9BB69F192E6B304500FF583E /* GoogleService-Info-Shared.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BB69F182E6B304500FF583E /* GoogleService-Info-Shared.plist */; };
@@ -51,6 +52,7 @@
 				9B1B800D2E4CD8A20049CE33 /* FirebaseAnalytics in Frameworks */,
 				9BB6A0E32E6B434200FF583E /* FirebaseFirestore in Frameworks */,
 				9B1B800F2E4CD8A20049CE33 /* FirebaseRemoteConfig in Frameworks */,
+				9B1FFD7C2E872B0E00441BAD /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,6 +109,7 @@
 				9B1B800C2E4CD8A20049CE33 /* FirebaseAnalytics */,
 				9B1B800E2E4CD8A20049CE33 /* FirebaseRemoteConfig */,
 				9BB6A0E22E6B434200FF583E /* FirebaseFirestore */,
+				9B1FFD7B2E872B0E00441BAD /* Lottie */,
 			);
 			productName = WaterEject;
 			productReference = 9BA1E0652E328F970027AD07 /* WaterEject.app */;
@@ -418,6 +421,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
+		};
+		9B1FFD7B2E872B0E00441BAD /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BDEB9A62E872AD80027F4CA /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
 		};
 		9B57ECAD2E4CCC66005D4850 /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;

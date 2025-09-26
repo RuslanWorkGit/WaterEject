@@ -68,7 +68,8 @@ struct SaveOnboardNew: View {
                 
                 PillButton(title: "Continue", action: action, arrow: true)
                     .padding(.top, 8)
-                    .padding(.horizontal, 94)
+                    .padding(.horizontal, 90)
+                    .padding(.bottom, 24)
 
             }
             

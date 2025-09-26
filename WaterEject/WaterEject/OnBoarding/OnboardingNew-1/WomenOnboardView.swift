@@ -74,7 +74,8 @@ struct WomenOnboardView: View {
                
                 
                 PillButton(title: "Continue", action: action, arrow: true)
-                    .padding(.horizontal, 80)
+                    .padding(.horizontal, 90)
+                    .padding(.bottom, 24)
                 
             }
             

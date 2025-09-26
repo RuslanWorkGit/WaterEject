@@ -23,7 +23,10 @@ struct StartOnboardView: View {
                     .resizable()
                     .scaledToFit()
                 
-                Image("WaterDrop")
+//                Image("WaterDrop")
+//                    .padding(.bottom, 16)
+                LottieView(name: "Water")           // success.json у Bundle
+                    .frame(width: 60, height: 50)
                     .padding(.bottom, 16)
                 
                 
@@ -31,27 +34,27 @@ struct StartOnboardView: View {
                     (
                         Text("Get ")
                             .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
-                            .font(.system(size: 34, weight: .regular))
+                            .font(.system(size: 30, weight: .regular))
                         +
                         Text("water")
                             .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
-                            .font(.system(size: 34, weight: .medium))
+                            .font(.system(size: 30, weight: .medium))
                         +
                         Text("💦")
                             .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
-                            .font(.system(size: 34, weight: .medium))
+                            .font(.system(size: 30, weight: .medium))
                         +
                         Text("out ")
                             .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
-                            .font(.system(size: 34, weight: .medium))
+                            .font(.system(size: 30, weight: .medium))
                         +
                         Text("of your iPhone & AirPods in ")
                             .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
-                            .font(.system(size: 34, weight: .regular))
+                            .font(.system(size: 30, weight: .regular))
                         +
                         Text("30 seconds!")
                             .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
-                            .font(.system(size: 34, weight: .medium))
+                            .font(.system(size: 30, weight: .medium))
                         
                     )
                     .multilineTextAlignment(.center)
@@ -63,9 +66,12 @@ struct StartOnboardView: View {
                         .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
                     //.padding(.bottom, isLarge ? 80 : 42)
                     
+                    Spacer()
+                    
                     PrimaryPillButton(title: "Get Started", action: action)
                         .padding(.top, 8)
-                        .padding(.horizontal, 64)
+                        .padding(.horizontal, 90)
+                        .padding(.bottom, 8)
                     
                     HStack(spacing: 0) {
                         
@@ -100,6 +106,7 @@ struct StartOnboardView: View {
                         
                         
                     }
+                    .padding(.bottom, 16)
                 }
                 .padding(.vertical, 32)
                 .background(

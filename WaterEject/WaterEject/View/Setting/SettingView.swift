@@ -12,6 +12,8 @@ import FirebaseFirestore
 struct SettingView: View {
     @State private var webViewURL: URL?
     @EnvironmentObject private var tabBarState: TabBarState
+    @EnvironmentObject private var coordinator: AppCoordinator        // ← додай
+    @State private var showOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -47,6 +49,20 @@ struct SettingView: View {
                             }
                             .buttonStyle(PillButtonStyle())
                         }
+                        
+                        Text("Help center")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(Color.gray)
+                        
+                        VStack(spacing: 12) {
+                            Button("FirstPaywall") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
+                        }
    
 
                     }
@@ -63,6 +79,13 @@ struct SettingView: View {
         .sheet(item: $webViewURL, content: { url in
             SafariView(url: url)
         })
+        
+        .fullScreenCover(isPresented: $showOnboarding, onDismiss: {
+            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        }) {
+            OnboardingFlowViewOne()
+                .environmentObject(coordinator)    // пробросимо координатор
+        }
     }
 }
 
