@@ -15,6 +15,7 @@ struct SettingView: View {
     @EnvironmentObject private var coordinator: AppCoordinator        // ← додай
     @State private var showFirstOnboarding = false
     @State private var showSecondOnboarding = false
+    @State private var showThirdOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -70,6 +71,13 @@ struct SettingView: View {
                             }
                             .buttonStyle(PillButtonStyle())
                             
+                            Button("ThirdOnboard") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showThirdOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
                         }
    
 
@@ -99,6 +107,13 @@ struct SettingView: View {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)
         }) {
             OnboardingFlowViewTwo()
+                .environmentObject(coordinator)    // пробросимо координатор
+        }
+        
+        .fullScreenCover(isPresented: $showThirdOnboarding, onDismiss: {
+            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        }) {
+            OnboardingFlowViewThree()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
     }
