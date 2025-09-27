@@ -34,24 +34,31 @@ struct PaywallThirdView: View {
         ZStack(alignment: .topTrailing) {
             
             
-            ZStack {
-                Background()
+            ZStack(alignment: .top) {
+                //Background()
                 
+                Color.black
+                    .ignoresSafeArea()
+                
+                
+                AspectFillPlayerView(player: player)
+                    .onAppear {
+                        AudioSessionManager.activatePlayback(duckOthers: true)
+                        player.isMuted = true
+                        player.play()
+                    }
+                
+                    .frame(maxWidth: .infinity, maxHeight: 320)
+                    .allowsHitTesting(false)
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .ignoresSafeArea()
+                    .offset(y: 40)
                 
                 VStack(alignment: .center) {
                     
-                    AspectFillPlayerView(player: player)
-                        .onAppear {
-                            AudioSessionManager.activatePlayback(duckOthers: true)
-                            player.isMuted = true
-                            player.play()
-                        }
+
                     
-                        .frame(maxWidth: .infinity, maxHeight: 300)
-                        .allowsHitTesting(false)
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                        .ignoresSafeArea()
-                        .offset(y: -20)
+                    Spacer()
                     
                     (
                         Text("Premium Access")
@@ -92,6 +99,8 @@ struct PaywallThirdView: View {
                     .padding(.top, isSmall ? 12 : isLarge ? 60 : 40)
                     .padding(.horizontal, 14)
                     .padding(.bottom, isSmall ? 12 : isLarge ? 48 : 36)
+                    
+                    
                     
                     Button {
                         let v = PaywallAB.shared.variant()
@@ -290,7 +299,7 @@ struct PaywallThirdPlanCard: View {
                     .stroke(isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255) : Color.clear, lineWidth: 1)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.05))
+                            .fill(Color.white.opacity(0.15))
                     )
                     .shadow(color: isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.08) : .clear, radius: 8, x: 0, y: 4)
             )

@@ -11,7 +11,7 @@ import Lottie
 struct LottieView: UIViewRepresentable {
     let name: String
     var loopMode: LottieLoopMode = .loop
-    var speed: CGFloat = 0.5
+    var speed: CGFloat = 0.8
 
     func makeUIView(context: Context) -> LottieAnimationView {
         let v = LottieAnimationView(name: name)   // шукає JSON у Bundle
