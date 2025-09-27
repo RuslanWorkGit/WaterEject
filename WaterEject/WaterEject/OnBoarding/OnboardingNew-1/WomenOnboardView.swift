@@ -12,17 +12,17 @@ struct WomenOnboardView: View {
     var body: some View {
         let isLarge = UIScreen.main.bounds.height > 900
         
-        ZStack {
+        OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
+            // увесь твій контент екрану, БЕЗ кнопки!
             LinearGradient(
                 colors: [Color.white,
                          Color(red: 201/255, green: 214/255, blue: 238/255)],
                 startPoint: .top, endPoint: .bottom
             )
             .ignoresSafeArea()
-            
             Image("Women")
             //.zIndex(1)
-//                .colorMultiply(.black)
+            //                .colorMultiply(.black)
                 .offset(y: 70)
             
             VStack {
@@ -33,24 +33,24 @@ struct WomenOnboardView: View {
                 ZStack {
                     Image("GreyLines")
                     
-
-                        ZStack {
-                            Image("WhiteWave")
-                                .scaleEffect(1.1)
-                            
-                            Image("BlueWave")
-                                .scaleEffect(1.1)
-                                .offset(y: 8)
-
-                        }
+                    
+                    ZStack {
+                        Image("WhiteWave")
+                            .scaleEffect(1.1)
+                        
+                        Image("BlueWave")
+                            .scaleEffect(1.1)
+                            .offset(y: 8)
+                        
+                    }
                     
                     .offset(y: -20)
                 }
                 .padding(.bottom, 150)
                 
                 ZStack {
-
-//      
+                    
+                    //
                     Image("SquareBack-2")
                         .offset(y: -50)
                         .opacity(0.6)
@@ -58,7 +58,7 @@ struct WomenOnboardView: View {
                     Image("SquareBack-1")
                         .offset(y: -25)
                         .opacity(0.7)
-
+                    
                     
                     
                     ReviewCard(
@@ -69,13 +69,9 @@ struct WomenOnboardView: View {
                     )
                     .padding(.horizontal, 16)
                     
-                }
-                .padding(.bottom, 24)
-               
+                    Spacer()
+                }                
                 
-                PillButton(title: "Continue", action: action, arrow: true)
-                    .frame(width: 260)
-                    .padding(.bottom, 24)
                 
             }
         }
@@ -89,7 +85,7 @@ struct ReviewCard: View {
     let title: String
     let text: String
     let rating: Int
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
@@ -105,10 +101,10 @@ struct ReviewCard: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.primary)
             }
-
+            
             Text(title)
                 .font(.system(size: 16, weight: .heavy))
-
+            
             Text(text)
                 .font(.system(size: 14))
                 .lineSpacing(3)
@@ -116,7 +112,7 @@ struct ReviewCard: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-
+            
                 .fill(
                     LinearGradient(
                         colors: [Color.white.opacity(0.65), Color.white.opacity(0.15)],
@@ -124,11 +120,11 @@ struct ReviewCard: View {
                         endPoint: .bottom
                     )
                 )
-                
-
-                
+            
+            
+            
         )
-        .padding(.horizontal, 16)
+        //.padding(.horizontal, 16)
         
     }
 }
