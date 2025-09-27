@@ -130,7 +130,7 @@ struct PillButton: View {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
-                .frame(minHeight: 60)
+                .frame(minHeight: 52)
                 .frame(maxWidth: .infinity)
                 .contentShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
             
@@ -176,7 +176,7 @@ struct OnboardScaffold<Content: View>: View {
                     Spacer()
                 }
                 
-                .padding(.bottom, 24)
+                .padding(.bottom, 30)
 
             }
     }

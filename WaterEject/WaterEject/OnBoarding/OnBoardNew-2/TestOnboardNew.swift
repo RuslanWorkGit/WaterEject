@@ -24,7 +24,8 @@ struct TestOnboardNew: View {
     let action: () -> Void
     
     var body: some View {
-        ZStack {
+        OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
+            // увесь твій контент екрану, БЕЗ кнопки!
             LinearGradient(
                 colors: [Color.white,
                          Color(red: 201/255, green: 214/255, blue: 238/255)],
@@ -88,9 +89,6 @@ struct TestOnboardNew: View {
                 
                 Spacer()
                 
-                PillButton(title: "Continue", action: action, arrow: true)
-                    .padding(.top, 42)
-                    .padding(.horizontal, 80)
             }
         }
     }
