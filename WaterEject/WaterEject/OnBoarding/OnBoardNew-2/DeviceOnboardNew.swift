@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct DeviceOnboardNew: View {
+    let onDeviceSelect: (OnboardDeviceModel) -> Void   // ← нове
     let action: () -> Void
+    
     var body: some View {
         
         OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
@@ -42,7 +44,7 @@ struct DeviceOnboardNew: View {
                     .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
                 
                 DeviceOnboardGridView { device in
-                    
+                    onDeviceSelect(device)  // ← передаємо вибір назовні
                 }
                 .padding(.top, 44)
                 
@@ -60,8 +62,8 @@ struct DeviceOnboardNew: View {
 
 struct DeviceOnboardButtonView: View {
     
-    let device: CleaningDevice
-    let action: (CleaningDevice) -> Void
+    let device: OnboardDeviceModel
+    let action: (OnboardDeviceModel) -> Void
     
     var body: some View {
         Button(action: { action(device) }) {
@@ -104,7 +106,7 @@ struct DeviceOnboardButtonView: View {
 }
 
 struct DeviceOnboardGridView: View {
-    let onDeviceTap: (CleaningDevice) -> Void
+    let onDeviceTap: (OnboardDeviceModel) -> Void
     
     var body: some View {
         VStack(spacing: 32) {
@@ -127,6 +129,6 @@ struct DeviceOnboardGridView: View {
 }
 
 
-#Preview {
-    DeviceOnboardNew(action: {print("hello")})
-}
+//#Preview {
+//    DeviceOnboardNew(onDeviceSelect: , action: {print("hello")})
+//}

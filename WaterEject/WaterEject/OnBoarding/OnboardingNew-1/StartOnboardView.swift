@@ -10,6 +10,7 @@ import SwiftUI
 struct StartOnboardView: View {
     @State private var webViewURL: URL?
     let action: () -> Void
+    var device: OnboardDeviceModel? = nil   // ← нове
 
     var body: some View {
         ZStack {
@@ -22,10 +23,10 @@ struct StartOnboardView: View {
             
             LightPanelScaffold(ctaTitle: "Get Started", ctaAction: action, ctaWidth: 260) {
 
-                Image("IphoneNewOnboard")
-                    .resizable()
-                    .scaledToFit()
-
+                Image(device?.imageName ?? "IphoneNewOnboard")  // ← ключ
+                                        .resizable()
+                                        .scaledToFit()
+                
                 LottieView(name: "Water")
                     .frame(width: 60, height: 50)
                     .padding(.bottom, 16)
@@ -41,8 +42,9 @@ struct StartOnboardView: View {
                 )
                 .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 52)
-                .padding(.bottom, 4)
+                .padding(.horizontal, 40)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
 
                 Text("Safe sound frequencies push liquid out instantly")
                     .font(.system(size: 16))
@@ -129,8 +131,7 @@ struct LightPanelScaffold<Top: View, Main: View, Footer: View>: View {
             VStack(spacing: 2) {
                 // верхня частина панелі (твій контент)
                 contentOne()
-                
-                Spacer(minLength: 0)
+                    .padding(.bottom, 18)
                 
                 // кнопка на тій самій панелі
                 HStack {

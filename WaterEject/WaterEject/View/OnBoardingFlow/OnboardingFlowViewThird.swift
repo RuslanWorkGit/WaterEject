@@ -11,6 +11,7 @@ struct OnboardingFlowViewThree: View {
     //@Binding var isActive: Bool  // Для Coordinator, щоб закривати flow
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
+    @State private var pickedDevice: OnboardDeviceModel? = nil
     @State private var currentStep: OnboardingStepThree = .device
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss   // ← додай
@@ -20,8 +21,20 @@ struct OnboardingFlowViewThree: View {
         ZStack {
             Group {
                 switch currentStep {
-                case .device:  DeviceOnboardNew(action: {goToNextStep()})
-                case .start:     StartOnboardView(action: { goToNextStep() })
+                case .device:
+                    DeviceOnboardNew(
+                    onDeviceSelect: { model in
+                        pickedDevice = model            // ← зберегли вибір
+                        currentStep = .start            // ← переходимо далі
+                    },
+                    action: { /* якщо треба окремо обробити Continue */ }
+                )
+                    
+                case .start:
+                    StartOnboardView(
+                        action: { goToNextStep() },
+                        device: pickedDevice               // ← підставляємо у стартовий екран
+                    )
                 case .test: TestOnboardNew(action: { goToNextStep()})
                 case .women: WomenOnboardView(action: { goToNextStep() })
                 case .paywall:
