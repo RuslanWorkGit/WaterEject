@@ -6,14 +6,25 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct DeviceOnboardNew: View {
     let onDeviceSelect: (OnboardDeviceModel) -> Void   // ← нове
     let action: () -> Void
     
+    @State private var selected: OnboardDeviceModel? = nil
+    
     var body: some View {
         
-        OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
+        OnboardScaffold(ctaTitle: "Continue", ctaAction: {
+            guard let picked = selected else {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                return
+            }
+            onDeviceSelect(picked)   // віддаємо вибір
+            action()                 // переходимо далі
+        }, fixedWidth: 260) {
+            
             // увесь твій контент екрану, БЕЗ кнопки!
             LinearGradient(
                 colors: [Color.white,
@@ -43,16 +54,12 @@ struct DeviceOnboardNew: View {
                     .font(.system(size: 16))
                     .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
                 
-                DeviceOnboardGridView { device in
-                    onDeviceSelect(device)  // ← передаємо вибір назовні
-                }
-                .padding(.top, 44)
-                
+                DeviceOnboardGridView(selected: $selected)
+                                    .padding(.top, 44)
+
                 Spacer()
                 
-//                PillButton(title: "Continue", action: action, arrow: true)
-//                    .padding(.top, 42)
-//                    .padding(.horizontal, 80)
+
             }
             
 
@@ -61,72 +68,98 @@ struct DeviceOnboardNew: View {
 }
 
 struct DeviceOnboardButtonView: View {
-    
     let device: OnboardDeviceModel
-    let action: (OnboardDeviceModel) -> Void
-    
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    private let highlight = Color(red: 81/255, green: 132/255, blue: 234/255)
+
     var body: some View {
-        Button(action: { action(device) }) {
+        ZStack(alignment: .top) {
+            // База
             ZStack {
-                // Фон та overlay — ВСЕРЕДИНІ Button!
-                Circle()
-                    .fill(Color(red: 19 / 255, green: 21 / 255, blue: 23 / 255))
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.white,
-                                     Color(red: 201/255, green: 214/255, blue: 238/255)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
+                Circle().fill(Color(red: 19/255, green: 21/255, blue: 23/255))
+                Circle().fill(
+//                    LinearGradient(colors: [.white, Color(red: 201/255, green: 214/255, blue: 238/255)],
+//                                   startPoint: .top, endPoint: .bottom)
+                    LinearGradient(colors: [Color(red: 222/255, green: 233/255, blue: 255/255).opacity(0.8), Color(red: 178/255, green: 186/255, blue: 204/255).opacity(0.8)],
+                                   startPoint: .top, endPoint: .bottom)
+                )
+                Circle().fill(
+                    LinearGradient(colors: [.white.opacity(0.4), Color(red: 201/255, green: 214/255, blue: 238/255).opacity(0.35)],
+                                   startPoint: .top, endPoint: .bottom)
+//                    LinearGradient(colors: [Color(red: 222/255, green: 233/255, blue: 255/255), Color(red: 178/255, green: 186/255, blue: 204/255)],
+//                                   startPoint: .top, endPoint: .bottom)
+                )
                 Circle()
                     .stroke(Color.white.opacity(0.25), lineWidth: 2)
                     .blur(radius: 0.5)
-                    .offset(x: 0, y: 1)
+                    .offset(y: 1)
                     .mask(
                         Circle().fill(
-                            LinearGradient(colors: [Color.white.opacity(0.35),
-                                                    Color.white.opacity(0.15)], startPoint: .top, endPoint: .bottom)
+                            LinearGradient(colors: [Color.white.opacity(0.35), Color.white.opacity(0.15)],
+                                           startPoint: .top, endPoint: .bottom)
                         )
                     )
-                
+
                 VStack(spacing: 12) {
                     Image(device.onboardImage)
                         .foregroundStyle(.white)
                     Text(device.displayName)
                         .font(.headline)
-                        .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
+                        .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
                 }
             }
-            .frame(width: 150, height: 150)
+            .overlay(
+                Circle()
+                    .stroke(isSelected ? highlight : .clear, lineWidth: 1)
+                    .animation(.easeInOut(duration: 0.15), value: isSelected)
+            )
+
+            // Чекмарк у правому верхньому
+            if isSelected {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(highlight)
+                    .background(Circle().fill(.white)) // тонкий білий підклад
+                    .clipShape(Circle())
+                    .font(.system(size: 20, weight: .semibold))
+                    .transition(.scale.combined(with: .opacity))
+            }
         }
-        .buttonStyle(.plain) // Щоб не було сірого ефекту system button
+        .frame(width: 150, height: 150)
+        .contentShape(Circle())
+        .onTapGesture { onTap() }         // тільки вибір, без переходу
     }
 }
 
+
 struct DeviceOnboardGridView: View {
-    let onDeviceTap: (OnboardDeviceModel) -> Void
-    
+    @Binding var selected: OnboardDeviceModel?
+
+    private let spacing: CGFloat = 32
+
     var body: some View {
-        VStack(spacing: 32) {
-            // Верхній (центральний) елемент
-            DeviceOnboardButtonView(device: .iPhone, action: onDeviceTap)
-            
-            // Два ряди по 2 елементи
-            HStack(spacing: 32) {
-                DeviceOnboardButtonView(device: .airPodsPro, action: onDeviceTap)
-                DeviceOnboardButtonView(device: .airPods, action: onDeviceTap)
+        VStack(spacing: spacing) {
+            // Верхній (центральний)
+            DeviceOnboardButtonView(
+                device: .iPhone,
+                isSelected: selected == .iPhone,
+                onTap: { selected = .iPhone }
+            )
+
+            // 2×2
+            HStack(spacing: spacing) {
+                DeviceOnboardButtonView(device: .airPodsPro, isSelected: selected == .airPodsPro) { selected = .airPodsPro }
+                DeviceOnboardButtonView(device: .airPods,    isSelected: selected == .airPods)    { selected = .airPods }
             }
-            HStack(spacing: 32) {
-                DeviceOnboardButtonView(device: .airPodsMax, action: onDeviceTap)
-                DeviceOnboardButtonView(device: .speakers, action: onDeviceTap)
+            HStack(spacing: spacing) {
+                DeviceOnboardButtonView(device: .airPodsMax, isSelected: selected == .airPodsMax) { selected = .airPodsMax }
+                DeviceOnboardButtonView(device: .speakers,   isSelected: selected == .speakers)   { selected = .speakers }
             }
         }
-        
-        
     }
 }
+
 
 
 //#Preview {
