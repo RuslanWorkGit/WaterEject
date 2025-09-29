@@ -27,7 +27,7 @@ struct OnboardingFlowViewThree: View {
                         pickedDevice = model            // ← зберегли вибір
                         currentStep = .start            // ← переходимо далі
                     },
-                    action: { goToNextStep() }
+                    action: { /*goToNextStep()*/ }
                 )
                     
                 case .start:

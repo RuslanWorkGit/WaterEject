@@ -30,8 +30,11 @@ struct StartOnboardView: View {
                 LottieView(name: "Water")
                     .frame(width: 60, height: 50)
                     .padding(.bottom, 16)
+                Spacer()
                 
             } contentOne: {
+                
+                
                 (
                     Text("Get ").font(.system(size: 30, weight: .regular))
                     + Text("water").font(.system(size: 30, weight: .medium))
@@ -80,6 +83,7 @@ struct StartOnboardView: View {
                     .buttonStyle(.plain)
                 }
             }
+            
             //.padding(.horizontal, 16) // поля від країв екрана
         }
         .sheet(item: $webViewURL) { url in
