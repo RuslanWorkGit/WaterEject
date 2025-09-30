@@ -14,12 +14,12 @@ struct WomenOnboardView: View {
         
         OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
-//            LinearGradient(
-//                colors: [Color.white,
-//                         Color(red: 201/255, green: 214/255, blue: 238/255)],
-//                startPoint: .top, endPoint: .bottom
-//            )
-//            .ignoresSafeArea()
+            LinearGradient(
+                colors: [Color.white,
+                         Color(red: 201/255, green: 214/255, blue: 238/255)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .ignoresSafeArea()
             Image("Women")
             //.zIndex(1)
             //                .colorMultiply(.black)
@@ -68,9 +68,10 @@ struct WomenOnboardView: View {
                         rating: 5
                     )
                     .padding(.horizontal, 16)
+                    .padding(.bottom, 50)
                     
                     Spacer()
-                }                
+                }
                 
                 
             }

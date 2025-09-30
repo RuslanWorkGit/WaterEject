@@ -132,7 +132,7 @@ struct OnboardingFlowViewOne: View {
     // ⬇︎ як на макеті: новий екран в'їжджає справа, старий — гасне
     private let contentTransition = AnyTransition
         .asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal:   .opacity)
+                    removal:   .move(edge: .leading))
 
     var body: some View {
         ZStack {
