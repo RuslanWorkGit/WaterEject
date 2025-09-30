@@ -27,7 +27,7 @@ extension OnboardingStep {
     }
 }
 
-enum OnboardingStepOne: Int, CaseIterable {
+enum OnboardingStepOne: Int, CaseIterable, Hashable {
     case start
     case wallet
     case women

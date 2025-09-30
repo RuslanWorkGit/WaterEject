@@ -14,12 +14,12 @@ struct StartOnboardView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
-                         Color(red: 56/255, green: 114/255, blue: 229/255)],
-                startPoint: .top, endPoint: .bottom
-            )
-            .ignoresSafeArea()
+//            LinearGradient(
+//                colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
+//                         Color(red: 56/255, green: 114/255, blue: 229/255)],
+//                startPoint: .top, endPoint: .bottom
+//            )
+//            .ignoresSafeArea()
             
             LightPanelScaffold(ctaTitle: "Get Started", ctaAction: action, ctaWidth: 260) {
 

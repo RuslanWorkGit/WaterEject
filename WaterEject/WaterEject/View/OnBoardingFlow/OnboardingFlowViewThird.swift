@@ -15,56 +15,93 @@ struct OnboardingFlowViewThree: View {
     @State private var currentStep: OnboardingStepThree = .device
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss   // ← додай
-
     
+    @State private var isForward = true
+    private var stepTransition: AnyTransition {
+        isForward ? .push(from: .trailing) : .push(from: .leading)
+    }
     var body: some View {
+        //        ZStack {
+        //            Group {
+        //                switch currentStep {
+        //                case .device:
+        //                    DeviceOnboardNew(
+        //                    onDeviceSelect: { model in
+        //                        pickedDevice = model            // ← зберегли вибір
+        //                        currentStep = .start            // ← переходимо далі
+        //                    },
+        //                    action: { /*goToNextStep()*/ }
+        //                )
+        //
+        //                case .start:
+        //                    StartOnboardView(
+        //                        action: { goToNextStep() },
+        //                        device: pickedDevice               // ← підставляємо у стартовий екран
+        //                    )
+        //                case .test: TestOnboardNew(action: { goToNextStep()})
+        //                case .women: WomenOnboardView(action: { goToNextStep() })
+        //                case .paywall:
+        //                    PaywallThirdView(onFinish: { finishOnboarding() })
+        //                }
+        //            }
+        //
+        //
+        //        }
+        
+        
         ZStack {
-            Group {
-                switch currentStep {
-                case .device:
-                    DeviceOnboardNew(
-                    onDeviceSelect: { model in
-                        pickedDevice = model            // ← зберегли вибір
-                        currentStep = .start            // ← переходимо далі
-                    },
-                    action: { /*goToNextStep()*/ }
-                )
-                    
-                case .start:
-                    StartOnboardView(
-                        action: { goToNextStep() },
-                        device: pickedDevice               // ← підставляємо у стартовий екран
-                    )
-                case .test: TestOnboardNew(action: { goToNextStep()})
-                case .women: WomenOnboardView(action: { goToNextStep() })
-                case .paywall:
-                    PaywallThirdView(onFinish: { finishOnboarding() })
-                }
-            }
-                
             
+            CrossfadeBackgroundThree(step: currentStep)
+                .ignoresSafeArea()
+            
+            switch currentStep {
+                
+            case .device:
+                DeviceOnboardNew(
+                    onDeviceSelect: { model in
+                        pickedDevice = model
+                        goTo(.start, forward: true)
+                    },
+                    action: { }
+                )
+                .transition(stepTransition)
+                
+            case .start:
+                StartOnboardView(
+                    action: { goTo(.test, forward: true) },
+                    device: pickedDevice
+                )
+                .transition(stepTransition)
+                
+            case .test:
+                TestOnboardNew(action: { goTo(.women, forward: true) })
+                    .transition(stepTransition)
+                
+            case .women:
+                WomenOnboardView(action: { goTo(.paywall, forward: true) })
+                    .transition(stepTransition)
+                
+            case .paywall:
+                PaywallThirdView(onFinish: { finishOnboarding() })
+                    .transition(stepTransition)
+            }
         }
         
-        .transition(.slide)
-        .animation(.easeInOut, value: currentStep)
+        .animation(.snappy(duration: 0.6), value: currentStep)
+        // Або так: .animation(.interactiveSpring(response: 0.45, dampingFraction: 0.9), value: currentStep)
         .task {
             onbLastShownTS = Date().timeIntervalSince1970
             Telemetry.shared.onboardingStart()
-        }
-        .onAppear {
-            //Telemetry.shared.onboardingScreenMarker(step: currentStep)
-        }
-        .onChange(of: currentStep) { oldStep, newStep in
-
-            //Telemetry.shared.onboardingScreenMarker(step: newStep)
             
-            if newStep == .paywall {
-                // джерело експожера пейволу — онбординг
-                Telemetry.shared.paywallExposure(source: "onboarding")
+        }
+    }
+        
+        private func goTo(_ step: OnboardingStepThree, forward: Bool) {
+            isForward = forward
+            withAnimation {
+                currentStep = step
             }
         }
-        
-    }
     
     func goToNextStep() {
         if let nextIndex = OnboardingStepThree.allCases.firstIndex(of: currentStep)?.advanced(by: 1),
@@ -79,5 +116,45 @@ struct OnboardingFlowViewThree: View {
         dismiss()
         coordinator.showMainTabbar()
         
+    }
+}
+
+
+private struct CrossfadeBackgroundThree: View {
+    let step: OnboardingStepThree
+
+    @ViewBuilder
+    private func bg(for s: OnboardingStepThree) -> some View {
+        switch s {
+        case .device:
+            LinearGradient(colors: [Color.white,
+                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
+                           startPoint: .top, endPoint: .bottom)
+        case .start:
+            LinearGradient(colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
+                                    Color(red: 56/255, green: 114/255, blue: 229/255)],
+                           startPoint: .top, endPoint: .bottom)
+        case .test:
+            LinearGradient(colors: [Color.white,
+                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
+                           startPoint: .top, endPoint: .bottom)
+        case .women:
+            LinearGradient(colors: [Color.white,
+                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
+                           startPoint: .top, endPoint: .bottom)
+        case .paywall:
+            LinearGradient(colors: [Color.black, Color.black],
+                           startPoint: .top, endPoint: .bottom)
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            ForEach(OnboardingStepThree.allCases, id: \.self) { s in
+                bg(for: s)
+                    .opacity(s == step ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.4), value: step)
+            }
+        }
     }
 }

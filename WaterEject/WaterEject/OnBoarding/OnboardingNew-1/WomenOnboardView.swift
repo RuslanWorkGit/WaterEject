@@ -14,12 +14,12 @@ struct WomenOnboardView: View {
         
         OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
-            LinearGradient(
-                colors: [Color.white,
-                         Color(red: 201/255, green: 214/255, blue: 238/255)],
-                startPoint: .top, endPoint: .bottom
-            )
-            .ignoresSafeArea()
+//            LinearGradient(
+//                colors: [Color.white,
+//                         Color(red: 201/255, green: 214/255, blue: 238/255)],
+//                startPoint: .top, endPoint: .bottom
+//            )
+//            .ignoresSafeArea()
             Image("Women")
             //.zIndex(1)
             //                .colorMultiply(.black)
@@ -99,15 +99,19 @@ struct ReviewCard: View {
                 Spacer()
                 Text(name)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
             }
             
             Text(title)
                 .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
+
             
             Text(text)
                 .font(.system(size: 14))
                 .lineSpacing(3)
+                .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
+
         }
         .padding(20)
         .background(
