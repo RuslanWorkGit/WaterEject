@@ -13,6 +13,21 @@ struct StereoView: View {
     @State private var isRightOn = true
     var onContinue: () -> Void
     
+    @State private var isExiting = false
+    @State private var appearScreen = false
+    private func handleCTA() {
+        guard !isExiting else { return }
+        withAnimation(.easeOut(duration: 0.25)) { isExiting = true }
+//        isExiting = true
+        // Після завершення локальної анімації — викликаємо перехід нагору
+  
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            onContinue()
+        }
+        
+    }
+    private let exitDuration: Double = 0.35
+    
     var body: some View {
         VStack {
             HStack(spacing: 8) {
@@ -47,7 +62,7 @@ struct StereoView: View {
                 }
                 
                 Button {
-                    onContinue()
+                    handleCTA()
                 } label: {
                     Text("Continue")
                         .font(.system(size: 16, weight: .semibold))
@@ -62,6 +77,17 @@ struct StereoView: View {
             .padding(.top, 12)
             .padding(.bottom, 40)
         }
+        .opacity(appearScreen && !isExiting ? 1 : 0)
+        
+        .opacity(isExiting ? 0 : 1)
+        .offset(x: isExiting ? -20 : 0)
+        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
+        .animation(.easeInOut(duration: exitDuration), value: isExiting)
+        .onAppear {
+            appearScreen = false
+            withAnimation(.easeOut(duration: 0.35)) { appearScreen = true }
+        }
+        
         .onChange(of: isLeftOn) { _, _ in
             viewModel.updateRouting(leftOn: isLeftOn, rightOn: isRightOn)
         }

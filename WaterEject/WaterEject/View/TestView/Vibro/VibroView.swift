@@ -11,6 +11,22 @@ struct VibroView: View {
     @StateObject private var viewModel = VibroViewModel()
     var onContinue: () -> Void
     
+    @State private var isExiting = false
+    @State private var appearScreen = false
+    
+    private func handleCTA() {
+        guard !isExiting else { return }
+        withAnimation(.easeOut(duration: 0.25)) { isExiting = true }
+//        isExiting = true
+        // Після завершення локальної анімації — викликаємо перехід нагору
+  
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            onContinue()
+        }
+        
+    }
+    private let exitDuration: Double = 0.35
+    
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
@@ -93,7 +109,7 @@ struct VibroView: View {
                 }
                 
                 Button {
-                    onContinue()
+                    handleCTA()
                 } label: {
                     Text("Finish")
                         .font(.system(size: 16, weight: .semibold))
@@ -108,6 +124,17 @@ struct VibroView: View {
             .padding(.bottom, 40)
             
             
+        }
+        .opacity(appearScreen && !isExiting ? 1 : 0)
+        
+        .opacity(isExiting ? 0 : 1)
+        .offset(x: isExiting ? -20 : 0)
+        .offset(x: (appearScreen ? 0 : 20))
+        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
+        .animation(.easeInOut(duration: exitDuration), value: isExiting)
+        .onAppear {
+            appearScreen = false
+            withAnimation(.easeOut(duration: 0.35)) { appearScreen = true }
         }
     }
 }
