@@ -9,21 +9,43 @@ import SwiftUI
 
 struct WomenOnboardView: View {
     let action: () -> Void
+    
+    @State private var isExiting = false
+    private func handleCTA() {
+        guard !isExiting else { return }
+        isExiting = true
+        // Після завершення локальної анімації — викликаємо перехід нагору
+        DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
+            action()
+        }
+    }
+    private let exitDuration: Double = 0.35
+    
+    // enter-анімації
+    @State private var appearHero   = false
+    @State private var appearHeader = false
+    @State private var appearWaves  = false
+    @State private var appearCard   = false
+    
     var body: some View {
         let isLarge = UIScreen.main.bounds.height > 900
         
-        OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
+        OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
-            LinearGradient(
-                colors: [Color.white,
-                         Color(red: 201/255, green: 214/255, blue: 238/255)],
-                startPoint: .top, endPoint: .bottom
-            )
-            .ignoresSafeArea()
+//            LinearGradient(
+//                colors: [Color.white,
+//                         Color(red: 201/255, green: 214/255, blue: 238/255)],
+//                startPoint: .top, endPoint: .bottom
+//            )
+//            .ignoresSafeArea()
             Image("Women")
-            //.zIndex(1)
-            //                .colorMultiply(.black)
-                .offset(y: 70)
+                .offset(y: (appearHero ? 70 : 90))
+                .opacity(appearHero && !isExiting ? 1 : 0)
+                .opacity(isExiting ? 0 : 1)
+                .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHero)
+
+                .animation(.easeInOut(duration: exitDuration), value: isExiting)
+            
             
             VStack {
                 Image("Recomend")
@@ -75,6 +97,12 @@ struct WomenOnboardView: View {
                 
                 
             }
+            .opacity(isExiting ? 0 : 1)
+            .animation(.easeInOut(duration: exitDuration), value: isExiting)
+        }
+        .onAppear {
+            appearHero = false
+            withAnimation(.easeOut(duration: 0.45)) { appearHero = true }
         }
     }
 }

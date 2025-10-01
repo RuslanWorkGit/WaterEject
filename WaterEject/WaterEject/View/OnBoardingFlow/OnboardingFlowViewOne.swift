@@ -130,9 +130,7 @@ struct OnboardingFlowViewOne: View {
     @Environment(\.dismiss) private var dismiss
 
     // ⬇︎ як на макеті: новий екран в'їжджає справа, старий — гасне
-    private let contentTransition = AnyTransition
-        .asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal:   .move(edge: .leading))
+
 
     var body: some View {
         ZStack {
@@ -143,26 +141,24 @@ struct OnboardingFlowViewOne: View {
             CrossfadeBackgroundOne(step: currentStep)
 
             // 2) Контент кроків з анімаційним переходом
-            switch currentStep {
-            case .start:
-                StartOnboardView(action: goToNextStep)
-                    .transition(contentTransition)
 
-            case .wallet:
-                SaveOnboardNew(action: goToNextStep)
-                    .transition(contentTransition)
+            Group {
+                switch currentStep {
+                case .start:   StartOnboardView(action: goToNextStep)
 
-            case .women:
-                WomenOnboardView(action: goToNextStep)
-                    .transition(contentTransition)
+                case .wallet:  SaveOnboardNew(action: goToNextStep)
+                case .women:   WomenOnboardView(action: goToNextStep)
 
-            case .paywall:
-                PaywallThirdView(onFinish: finishOnboarding)
-                    .transition(contentTransition)
+                case .paywall: PaywallThirdView(onFinish: finishOnboarding)
+                }
             }
+            // м’який перехід між екранами
+
+            
         }
-        // м’яка, “не різка” крива як на відео/скріншоті
-        .animation(.easeInOut(duration: 0.8), value: currentStep)
+
+        //.transition(.slide)
+//        .animation(.easeInOut(duration: 0.7), value: currentStep)
         .task {
             onbLastShownTS = Date().timeIntervalSince1970
             Telemetry.shared.onboardingStart()
@@ -173,6 +169,10 @@ struct OnboardingFlowViewOne: View {
     private func goToNextStep() {
         if let i = OnboardingStepOne.allCases.firstIndex(of: currentStep),
            i + 1 < OnboardingStepOne.allCases.count {
+//            withAnimation(.easeInOut(duration: 0.6)) {           // ← Анімація ТІЛЬКИ тут
+//
+//                       }
+            
             currentStep = OnboardingStepOne.allCases[i + 1]
         }
     }
@@ -185,7 +185,7 @@ struct OnboardingFlowViewOne: View {
     }
 }
 
-/// Фон, що плавно міняється між кроками (градієнт/картинка — на твій смак)
+/// Один шар фону з кросфейдом без ForEach
 private struct CrossfadeBackgroundOne: View {
     let step: OnboardingStepOne
 
@@ -193,35 +193,28 @@ private struct CrossfadeBackgroundOne: View {
     private func bg(for s: OnboardingStepOne) -> some View {
         switch s {
         case .start:
-            LinearGradient(colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
+            LinearGradient(colors: [Color(red: 94/255, green: 148/255, blue: 1),
                                     Color(red: 56/255, green: 114/255, blue: 229/255)],
                            startPoint: .top, endPoint: .bottom)
-        case .women:
-            LinearGradient(colors: [Color.white,
-                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
-                           startPoint: .top, endPoint: .bottom)
-        case .wallet:
-            LinearGradient(colors: [Color.white,
+        case .women, .wallet:
+            LinearGradient(colors: [.white,
                                     Color(red: 201/255, green: 214/255, blue: 238/255)],
                            startPoint: .top, endPoint: .bottom)
         case .paywall:
-            LinearGradient(colors: [Color.black, Color.black],
+            LinearGradient(colors: [.black, .black],
                            startPoint: .top, endPoint: .bottom)
         }
     }
 
     var body: some View {
-        ZStack {
-            ForEach(OnboardingStepOne.allCases, id: \.self) { s in
-                bg(for: s)
-                    .opacity(s == step ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.6), value: step)
-            }
-        }
-        .ignoresSafeArea()
+        bg(for: step)
+            .id(step)                                     // нова ідентичність — тригер для transition
+            .transition(.opacity)                         // чистий кросфейд
+            .animation(.easeInOut(duration: 0.6), value: step)
+            .ignoresSafeArea()
+            .compositingGroup()                           // інколи прибирає мерехтіння градієнтів
     }
 }
-
 
 ///// Плавний перехід фонів між кроками
 //struct CrossfadeBackground<S: Hashable>: View {

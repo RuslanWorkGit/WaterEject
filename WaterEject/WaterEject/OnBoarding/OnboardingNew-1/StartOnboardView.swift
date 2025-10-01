@@ -11,6 +11,19 @@ struct StartOnboardView: View {
     @State private var webViewURL: URL?
     let action: () -> Void
     var device: OnboardDeviceModel? = nil   // ← нове
+    @State private var isExiting = false
+    
+    private func handleCTA() {
+        guard !isExiting else { return }
+        isExiting = true
+        // Після завершення локальної анімації — викликаємо перехід нагору
+        DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
+            action()
+        }
+    }
+    
+    // Один параметр, щоб легко змінювати час
+    private let exitDuration: Double = 0.35
 
     var body: some View {
         ZStack {
@@ -21,37 +34,48 @@ struct StartOnboardView: View {
 //            )
 //            .ignoresSafeArea()
             
-            LightPanelScaffold(ctaTitle: "Get Started", ctaAction: action, ctaWidth: 260) {
+            LightPanelScaffold(ctaTitle: "Get Started", ctaAction: handleCTA, ctaWidth: 260) {
 
                 Image(device?.imageName ?? "IphoneNewOnboard")  // ← ключ
                                         .resizable()
                                         .scaledToFit()
+                                        .opacity(isExiting ? 0 : 1)
+                                        .offset(y: isExiting ? 16 : 0)
+                                        .animation(.easeInOut(duration: exitDuration), value: isExiting)
                 
                 LottieView(name: "Water")
                     .frame(width: 60, height: 50)
                     .padding(.bottom, 16)
+                    .opacity(isExiting ? 0 : 1)
+                    .offset(y: isExiting ? 12 : 0)
+                    .animation(.easeInOut(duration: exitDuration), value: isExiting)
                 Spacer()
                 
             } contentOne: {
+                Group {
+                    
+                    (
+                        Text("Get ").font(.system(size: 30, weight: .regular))
+                        + Text("water").font(.system(size: 30, weight: .medium))
+                        + Text("💦").font(.system(size: 30, weight: .medium))
+                        + Text("out ").font(.system(size: 30, weight: .medium))
+                        + Text("of your iPhone & AirPods in ").font(.system(size: 30, weight: .regular))
+                        + Text("30 seconds!").font(.system(size: 30, weight: .medium))
+                    )
+                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                    .padding(.top, 16)
+                    .padding(.bottom, 12)
+                    
+                    Text("Safe sound frequencies push liquid out instantly")
+                        .font(.system(size: 16))
+                        .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
+                }
+                .opacity(isExiting ? 0 : 1)
+//                .offset(y: isExiting ? 20 : 0)
+                .animation(.easeInOut(duration: exitDuration), value: isExiting)
                 
-                
-                (
-                    Text("Get ").font(.system(size: 30, weight: .regular))
-                    + Text("water").font(.system(size: 30, weight: .medium))
-                    + Text("💦").font(.system(size: 30, weight: .medium))
-                    + Text("out ").font(.system(size: 30, weight: .medium))
-                    + Text("of your iPhone & AirPods in ").font(.system(size: 30, weight: .regular))
-                    + Text("30 seconds!").font(.system(size: 30, weight: .medium))
-                )
-                .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-                .padding(.top, 16)
-                .padding(.bottom, 12)
-
-                Text("Safe sound frequencies push liquid out instantly")
-                    .font(.system(size: 16))
-                    .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
             } footer: {
                 HStack(spacing: 0) {
                     Text("By proceeding you accept our ")
@@ -82,8 +106,12 @@ struct StartOnboardView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                
+                .opacity(isExiting ? 0 : 1)
+//                .offset(y: isExiting ? 8 : 0)
+                .animation(.easeInOut(duration: exitDuration), value: isExiting)
             }
-            
+            .allowsHitTesting(!isExiting)
             //.padding(.horizontal, 16) // поля від країв екрана
         }
         .sheet(item: $webViewURL) { url in

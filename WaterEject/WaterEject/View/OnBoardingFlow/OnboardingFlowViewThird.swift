@@ -16,10 +16,10 @@ struct OnboardingFlowViewThree: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss   // ← додай
     
-    @State private var isForward = true
-    private var stepTransition: AnyTransition {
-        isForward ? .push(from: .trailing) : .push(from: .leading)
-    }
+//    @State private var isForward = true
+//    private var stepTransition: AnyTransition {
+//        isForward ? .push(from: .trailing) : .push(from: .leading)
+//    }
     var body: some View {
         //        ZStack {
         //            Group {
@@ -60,34 +60,36 @@ struct OnboardingFlowViewThree: View {
                 DeviceOnboardNew(
                     onDeviceSelect: { model in
                         pickedDevice = model
-                        goTo(.start, forward: true)
+                        goToNextStep()
                     },
                     action: { }
                 )
-                .transition(stepTransition)
+//                .transition(stepTransition)
                 
             case .start:
                 StartOnboardView(
-                    action: { goTo(.test, forward: true) },
+                    action: { goToNextStep() },
                     device: pickedDevice
                 )
-                .transition(stepTransition)
+//                .transition(stepTransition)
                 
             case .test:
-                TestOnboardNew(action: { goTo(.women, forward: true) })
-                    .transition(stepTransition)
+                TestOnboardNew(action: { goToNextStep() })
+//                    .transition(stepTransition)
                 
             case .women:
-                WomenOnboardView(action: { goTo(.paywall, forward: true) })
-                    .transition(stepTransition)
+                WomenOnboardView(action: { goToNextStep() })
+//                    .transition(stepTransition)
                 
             case .paywall:
                 PaywallThirdView(onFinish: { finishOnboarding() })
-                    .transition(stepTransition)
+//                    .transition(stepTransition)
             }
         }
         
-        .animation(.snappy(duration: 0.6), value: currentStep)
+        .transition(.slide)
+        .animation(.easeInOut, value: currentStep)
+//        .animation(.snappy(duration: 0.6), value: currentStep)
         // Або так: .animation(.interactiveSpring(response: 0.45, dampingFraction: 0.9), value: currentStep)
         .task {
             onbLastShownTS = Date().timeIntervalSince1970
@@ -96,12 +98,12 @@ struct OnboardingFlowViewThree: View {
         }
     }
         
-        private func goTo(_ step: OnboardingStepThree, forward: Bool) {
-            isForward = forward
-            withAnimation {
-                currentStep = step
-            }
-        }
+//        private func goTo(_ step: OnboardingStepThree, forward: Bool) {
+//            isForward = forward
+//            withAnimation {
+//                currentStep = step
+//            }
+//        }
     
     func goToNextStep() {
         if let nextIndex = OnboardingStepThree.allCases.firstIndex(of: currentStep)?.advanced(by: 1),

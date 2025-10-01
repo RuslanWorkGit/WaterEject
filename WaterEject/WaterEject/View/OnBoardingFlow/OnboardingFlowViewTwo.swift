@@ -54,14 +54,14 @@ struct OnboardingFlowViewTwo: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss   // ← додай
     
-    private var depthTransition: AnyTransition {
-        .asymmetric(
-            insertion: .scale(scale: 0.96).combined(with: .opacity),
-            removal:   .scale(scale: 1.02).combined(with: .opacity)
-        )
-    }
-
-    
+//    private var depthTransition: AnyTransition {
+//        .asymmetric(
+//            insertion: .scale(scale: 0.96).combined(with: .opacity),
+//            removal:   .scale(scale: 1.02).combined(with: .opacity)
+//        )
+//    }
+//
+//    
     var body: some View {
         ZStack {
 
@@ -71,22 +71,23 @@ struct OnboardingFlowViewTwo: View {
                 switch currentStep {
                 case .start:
                     StartOnboardView(action: { goToNextStep() })
-                        .transition(.blurLift)
+//                        .transition(.blurLift)
                 case .women:
                     WomenOnboardView(action: { goToNextStep() })
-                        .transition(.blurLift)
+//                        .transition(.blurLift)
                 case .wallet:
                     SaveOnboardNew(action: { goToNextStep() })
-                        .transition(.blurLift)
+//                        .transition(.blurLift)
                 case .paywall:
                     PaywallThirdView(onFinish: { finishOnboarding() })
-                        .transition(.blurLift)
+//                        .transition(.blurLift)
                 }
             }
                 
             
         }
-        .animation(.easeInOut(duration: 0.6), value: currentStep)
+//        .animation(.easeInOut(duration: 0.6), value: currentStep)
+                .animation(.snappy(duration: 0.4), value: currentStep)
         .task {
             onbLastShownTS = Date().timeIntervalSince1970
             Telemetry.shared.onboardingStart()

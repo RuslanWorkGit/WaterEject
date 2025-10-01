@@ -9,10 +9,22 @@ import SwiftUI
 
 struct SaveOnboardNew: View {
     let action: () -> Void
+    
+    @State private var isExiting = false
+    private func handleCTA() {
+        guard !isExiting else { return }
+        isExiting = true
+        // Після завершення локальної анімації — викликаємо перехід нагору
+        DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
+            action()
+        }
+    }
+    private let exitDuration: Double = 0.35
+    
     var body: some View {
         
         
-        OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
+        OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
 //            LinearGradient(
 //                colors: [Color.white,
@@ -70,6 +82,8 @@ struct SaveOnboardNew: View {
                 
                 
             }
+            .opacity(isExiting ? 0 : 1)
+            .animation(.easeInOut(duration: exitDuration), value: isExiting)
         }
     }
 }
