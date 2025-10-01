@@ -13,13 +13,19 @@ struct SaveOnboardNew: View {
     @State private var isExiting = false
     private func handleCTA() {
         guard !isExiting else { return }
-        isExiting = true
+        withAnimation(.easeOut(duration: 0.25)) { isExiting = true }
+//        isExiting = true
         // Після завершення локальної анімації — викликаємо перехід нагору
-        DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
+  
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             action()
         }
+        
     }
     private let exitDuration: Double = 0.35
+    
+    @State private var appearHand   = false
+    @State private var appearLogo = false
     
     var body: some View {
         
@@ -65,9 +71,15 @@ struct SaveOnboardNew: View {
                 HStack(spacing: 0) {
                     WalletImg()
                         .offset(y: 122)
+                        .offset(x: (appearHand ? -20 : -30))
+                        .opacity(appearHand && !isExiting ? 1 : 0)
+                        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHand)
                     
                     AppImg()
                         .padding(.trailing, 12)
+                        .offset(x: (appearLogo ? -10 : 20))
+                        .opacity(appearLogo && !isExiting ? 1 : 0)
+                        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearLogo)
                     
                     
                 }
@@ -84,6 +96,14 @@ struct SaveOnboardNew: View {
             }
             .opacity(isExiting ? 0 : 1)
             .animation(.easeInOut(duration: exitDuration), value: isExiting)
+            
+        }
+        .onAppear {
+            appearHand = false
+            withAnimation(.easeOut(duration: 0.35)) { appearHand = true }
+            
+            appearLogo = false
+            withAnimation(.easeOut(duration: 0.35)) { appearLogo = true }
         }
     }
 }

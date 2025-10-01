@@ -16,37 +16,9 @@ struct OnboardingFlowViewThree: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss   // ← додай
     
-//    @State private var isForward = true
-//    private var stepTransition: AnyTransition {
-//        isForward ? .push(from: .trailing) : .push(from: .leading)
-//    }
+
     var body: some View {
-        //        ZStack {
-        //            Group {
-        //                switch currentStep {
-        //                case .device:
-        //                    DeviceOnboardNew(
-        //                    onDeviceSelect: { model in
-        //                        pickedDevice = model            // ← зберегли вибір
-        //                        currentStep = .start            // ← переходимо далі
-        //                    },
-        //                    action: { /*goToNextStep()*/ }
-        //                )
-        //
-        //                case .start:
-        //                    StartOnboardView(
-        //                        action: { goToNextStep() },
-        //                        device: pickedDevice               // ← підставляємо у стартовий екран
-        //                    )
-        //                case .test: TestOnboardNew(action: { goToNextStep()})
-        //                case .women: WomenOnboardView(action: { goToNextStep() })
-        //                case .paywall:
-        //                    PaywallThirdView(onFinish: { finishOnboarding() })
-        //                }
-        //            }
-        //
-        //
-        //        }
+
         
         
         ZStack {
@@ -64,46 +36,36 @@ struct OnboardingFlowViewThree: View {
                     },
                     action: { }
                 )
-//                .transition(stepTransition)
+
                 
             case .start:
                 StartOnboardView(
                     action: { goToNextStep() },
                     device: pickedDevice
                 )
-//                .transition(stepTransition)
+
                 
             case .test:
                 TestOnboardNew(action: { goToNextStep() })
-//                    .transition(stepTransition)
+
                 
             case .women:
                 WomenOnboardView(action: { goToNextStep() })
-//                    .transition(stepTransition)
+
                 
             case .paywall:
                 PaywallThirdView(onFinish: { finishOnboarding() })
-//                    .transition(stepTransition)
+
             }
         }
         
-        .transition(.slide)
-        .animation(.easeInOut, value: currentStep)
-//        .animation(.snappy(duration: 0.6), value: currentStep)
-        // Або так: .animation(.interactiveSpring(response: 0.45, dampingFraction: 0.9), value: currentStep)
         .task {
             onbLastShownTS = Date().timeIntervalSince1970
             Telemetry.shared.onboardingStart()
             
         }
     }
-        
-//        private func goTo(_ step: OnboardingStepThree, forward: Bool) {
-//            isForward = forward
-//            withAnimation {
-//                currentStep = step
-//            }
-//        }
+
     
     func goToNextStep() {
         if let nextIndex = OnboardingStepThree.allCases.firstIndex(of: currentStep)?.advanced(by: 1),
@@ -120,6 +82,7 @@ struct OnboardingFlowViewThree: View {
         
     }
 }
+
 
 
 private struct CrossfadeBackgroundThree: View {
@@ -151,12 +114,11 @@ private struct CrossfadeBackgroundThree: View {
     }
 
     var body: some View {
-        ZStack {
-            ForEach(OnboardingStepThree.allCases, id: \.self) { s in
-                bg(for: s)
-                    .opacity(s == step ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.4), value: step)
-            }
-        }
+        bg(for: step)
+            .id(step)                                     // нова ідентичність — тригер для transition
+            .transition(.opacity)                         // чистий кросфейд
+            .animation(.easeInOut(duration: 0.6), value: step)
+            .ignoresSafeArea()
+            .compositingGroup()                           // інколи прибирає мерехтіння градієнтів
     }
 }

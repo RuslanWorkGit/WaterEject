@@ -13,11 +13,14 @@ struct WomenOnboardView: View {
     @State private var isExiting = false
     private func handleCTA() {
         guard !isExiting else { return }
-        isExiting = true
+        withAnimation(.easeOut(duration: 0.25)) { isExiting = true }
+//        isExiting = true
         // Після завершення локальної анімації — викликаємо перехід нагору
-        DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             action()
         }
+        
     }
     private let exitDuration: Double = 0.35
     
@@ -43,7 +46,6 @@ struct WomenOnboardView: View {
                 .opacity(appearHero && !isExiting ? 1 : 0)
                 .opacity(isExiting ? 0 : 1)
                 .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHero)
-
                 .animation(.easeInOut(duration: exitDuration), value: isExiting)
             
             
@@ -90,11 +92,11 @@ struct WomenOnboardView: View {
                         rating: 5
                     )
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 50)
+//                    .padding(.bottom, 50)
                     
-                    Spacer()
+
                 }
-                
+                Spacer()
                 
             }
             .opacity(isExiting ? 0 : 1)
@@ -157,7 +159,6 @@ struct ReviewCard: View {
             
             
         )
-        //.padding(.horizontal, 16)
         
     }
 }

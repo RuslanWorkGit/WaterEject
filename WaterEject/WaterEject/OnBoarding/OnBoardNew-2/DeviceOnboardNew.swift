@@ -14,6 +14,20 @@ struct DeviceOnboardNew: View {
     
     @State private var selected: OnboardDeviceModel? = nil
     
+    @State private var isExiting = false
+    
+    private func handleCTA() {
+        guard !isExiting else { return }
+        withAnimation(.easeOut(duration: 0.2)) { isExiting = true }
+        // Після завершення локальної анімації — викликаємо перехід нагору
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            action()
+        }
+    }
+    
+    // Один параметр, щоб легко змінювати час
+    private let exitDuration: Double = 0.35
+    
     var body: some View {
         
         OnboardScaffold(ctaTitle: "Continue", ctaAction: {
@@ -22,7 +36,7 @@ struct DeviceOnboardNew: View {
                 return
             }
             onDeviceSelect(picked)   // віддаємо вибір
-            action()                 // переходимо далі
+            handleCTA()                // переходимо далі
         }, fixedWidth: 260) {
             
             // увесь твій контент екрану, БЕЗ кнопки!
@@ -61,9 +75,13 @@ struct DeviceOnboardNew: View {
                 
 
             }
-            
+            .opacity(isExiting ? 0 : 1)
+            .offset(y: isExiting ? 100 : 0)
+            .animation(.easeInOut(duration: exitDuration), value: isExiting)
+
 
         }
+
     }
 }
 

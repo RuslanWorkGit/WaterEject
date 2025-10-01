@@ -87,7 +87,7 @@ struct OnboardingFlowViewTwo: View {
             
         }
 //        .animation(.easeInOut(duration: 0.6), value: currentStep)
-                .animation(.snappy(duration: 0.4), value: currentStep)
+//                .animation(.snappy(duration: 0.4), value: currentStep)
         .task {
             onbLastShownTS = Date().timeIntervalSince1970
             Telemetry.shared.onboardingStart()
@@ -124,6 +124,42 @@ struct OnboardingFlowViewTwo: View {
 }
 
 /// Фон, що плавно міняється між кроками (градієнт/картинка — на твій смак)
+//private struct CrossfadeBackgroundTwo: View {
+//    let step: OnboardingStepTwo
+//
+//    @ViewBuilder
+//    private func bg(for s: OnboardingStepTwo) -> some View {
+//        switch s {
+//        case .start:
+//            LinearGradient(colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
+//                                    Color(red: 56/255, green: 114/255, blue: 229/255)],
+//                           startPoint: .top, endPoint: .bottom)
+//        case .women:
+//            LinearGradient(colors: [Color.white,
+//                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
+//                           startPoint: .top, endPoint: .bottom)
+//        case .wallet:
+//            LinearGradient(colors: [Color.white,
+//                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
+//                           startPoint: .top, endPoint: .bottom)
+//        case .paywall:
+//            LinearGradient(colors: [Color.black, Color.black],
+//                           startPoint: .top, endPoint: .bottom)
+//        }
+//    }
+//
+//    var body: some View {
+//        ZStack {
+//            ForEach(OnboardingStepTwo.allCases, id: \.self) { s in
+//                bg(for: s)
+//                    .opacity(s == step ? 1 : 0)
+////                    .animation(.easeInOut(duration: 0.6), value: step)
+//            }
+//        }
+//        .ignoresSafeArea()
+//    }
+//}
+
 private struct CrossfadeBackgroundTwo: View {
     let step: OnboardingStepTwo
 
@@ -131,32 +167,26 @@ private struct CrossfadeBackgroundTwo: View {
     private func bg(for s: OnboardingStepTwo) -> some View {
         switch s {
         case .start:
-            LinearGradient(colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
+            LinearGradient(colors: [Color(red: 94/255, green: 148/255, blue: 1),
                                     Color(red: 56/255, green: 114/255, blue: 229/255)],
                            startPoint: .top, endPoint: .bottom)
-        case .women:
-            LinearGradient(colors: [Color.white,
-                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
-                           startPoint: .top, endPoint: .bottom)
-        case .wallet:
-            LinearGradient(colors: [Color.white,
+        case .women, .wallet:
+            LinearGradient(colors: [.white,
                                     Color(red: 201/255, green: 214/255, blue: 238/255)],
                            startPoint: .top, endPoint: .bottom)
         case .paywall:
-            LinearGradient(colors: [Color.black, Color.black],
+            LinearGradient(colors: [.black, .black],
                            startPoint: .top, endPoint: .bottom)
         }
     }
 
     var body: some View {
-        ZStack {
-            ForEach(OnboardingStepTwo.allCases, id: \.self) { s in
-                bg(for: s)
-                    .opacity(s == step ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.6), value: step)
-            }
-        }
-        .ignoresSafeArea()
+        bg(for: step)
+            .id(step)                                     // нова ідентичність — тригер для transition
+            .transition(.opacity)                         // чистий кросфейд
+            .animation(.easeInOut(duration: 0.6), value: step)
+            .ignoresSafeArea()
+            .compositingGroup()                           // інколи прибирає мерехтіння градієнтів
     }
 }
 

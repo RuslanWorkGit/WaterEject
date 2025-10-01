@@ -23,8 +23,22 @@ struct TestOnboardNew: View {
     
     let action: () -> Void
     
+    @State private var isExiting = false
+    
+    private func handleCTA() {
+        guard !isExiting else { return }
+        withAnimation(.easeOut(duration: 0.25)) { isExiting = true }
+        // Після завершення локальної анімації — викликаємо перехід нагору
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            action()
+        }
+    }
+    
+    // Один параметр, щоб легко змінювати час
+    private let exitDuration: Double = 0.35
+    
     var body: some View {
-        OnboardScaffold(ctaTitle: "Continue", ctaAction: action, fixedWidth: 260) {
+        OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
 //            LinearGradient(
 //                colors: [Color.white,
@@ -90,6 +104,9 @@ struct TestOnboardNew: View {
                 Spacer()
                 
             }
+            .opacity(isExiting ? 0 : 1)
+            .offset(y: isExiting ? 16 : 0)
+            .animation(.easeInOut(duration: exitDuration), value: isExiting)
         }
     }
 }

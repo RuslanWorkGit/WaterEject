@@ -12,18 +12,21 @@ struct StartOnboardView: View {
     let action: () -> Void
     var device: OnboardDeviceModel? = nil   // ← нове
     @State private var isExiting = false
+    @State private var appearScreen   = false
     
     private func handleCTA() {
         guard !isExiting else { return }
-        isExiting = true
+        withAnimation(.easeOut(duration: 0.3)) { isExiting = true }
+//        isExiting = true
         // Після завершення локальної анімації — викликаємо перехід нагору
-        DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             action()
         }
     }
     
     // Один параметр, щоб легко змінювати час
-    private let exitDuration: Double = 0.35
+    private let exitDuration: Double = 0.45
+    
 
     var body: some View {
         ZStack {
@@ -113,7 +116,16 @@ struct StartOnboardView: View {
             }
             .allowsHitTesting(!isExiting)
             //.padding(.horizontal, 16) // поля від країв екрана
+            .offset(y: (appearScreen ? 0 : 20))
+            .opacity(appearScreen && !isExiting ? 1 : 0)
+            .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
         }
+
+        .onAppear {
+            appearScreen = false
+            withAnimation(.easeOut(duration: 0.45)) { appearScreen = true }
+        }
+        
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }

@@ -22,9 +22,12 @@ struct PaywallThirdView: View {
         let url = Bundle.main.url(forResource: "Video", withExtension: "mp4")!
         return AVPlayer(url: url)
     }()
+    @State private var isExiting = false
     
     
     let onFinish: () -> Void
+    private let exitDuration: Double = 0.35
+    
     
     var body: some View {
         
@@ -48,7 +51,7 @@ struct PaywallThirdView: View {
                         player.play()
                     }
                 
-                    .frame(maxWidth: .infinity, maxHeight: 320)
+                    .frame(maxWidth: .infinity, maxHeight: isLarge ? 400 : 370)
                     .allowsHitTesting(false)
                     .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .ignoresSafeArea()
@@ -200,10 +203,16 @@ struct PaywallThirdView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
+        .opacity(isExiting ? 1 : 0)
+        .animation(.easeInOut(duration: exitDuration), value: isExiting)
+        
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
         .onAppear {
+            isExiting = false
+            withAnimation(.easeOut(duration: 0.4)) { isExiting = true }
+            
             if !didLogOpen {
                 Telemetry.shared.paywallBOpen()   // ⬅️ головний івент
                 didLogOpen = true
