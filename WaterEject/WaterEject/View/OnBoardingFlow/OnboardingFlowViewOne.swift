@@ -151,7 +151,7 @@ struct OnboardingFlowViewOne: View {
 
                 case .paywall:
                     
-                    withAnimation(.easeInOut(duration: 2.6)) {        // узгоджено з фоном
+                    withAnimation(.easeInOut(duration: 0.6)) {        // узгоджено з фоном
                         PaywallThirdView(onFinish: finishOnboarding)
                             .transition(.asymmetric(
                                insertion: .opacity

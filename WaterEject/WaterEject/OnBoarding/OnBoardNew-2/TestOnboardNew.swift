@@ -24,6 +24,7 @@ struct TestOnboardNew: View {
     let action: () -> Void
     
     @State private var isExiting = false
+    @State private var appearScreen   = false
     
     private func handleCTA() {
         guard !isExiting else { return }
@@ -104,9 +105,16 @@ struct TestOnboardNew: View {
                 Spacer()
                 
             }
+            .offset(y: (appearScreen ? 00 : 30))
+            .opacity(appearScreen && !isExiting ? 1 : 0)
             .opacity(isExiting ? 0 : 1)
             .offset(y: isExiting ? 16 : 0)
+            .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
             .animation(.easeInOut(duration: exitDuration), value: isExiting)
+        }
+        .onAppear {
+            appearScreen = false
+            withAnimation(.easeOut(duration: 0.45)) { appearScreen = true }
         }
     }
 }
