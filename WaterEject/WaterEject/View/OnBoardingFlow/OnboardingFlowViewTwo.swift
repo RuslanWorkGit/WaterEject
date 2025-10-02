@@ -79,7 +79,14 @@ struct OnboardingFlowViewTwo: View {
                     SaveOnboardNew(action: { goToNextStep() })
 //                        .transition(.blurLift)
                 case .paywall:
-                    PaywallThirdView(onFinish: { finishOnboarding() })
+                    withAnimation(.easeInOut(duration: 0.6)) {        // узгоджено з фоном
+                        PaywallThirdView(onFinish: { finishOnboarding() })
+                            .transition(.asymmetric(
+                               insertion: .opacity,
+                               removal:   .opacity.combined(with: .move(edge: .leading))
+                            ))
+                    }
+
 //                        .transition(.blurLift)
                 }
             }
@@ -110,7 +117,11 @@ struct OnboardingFlowViewTwo: View {
     func goToNextStep() {
         if let nextIndex = OnboardingStepTwo.allCases.firstIndex(of: currentStep)?.advanced(by: 1),
            nextIndex < OnboardingStepTwo.allCases.count {
+
+
+            
             currentStep = OnboardingStepTwo.allCases[nextIndex]
+            
         }
     }
     

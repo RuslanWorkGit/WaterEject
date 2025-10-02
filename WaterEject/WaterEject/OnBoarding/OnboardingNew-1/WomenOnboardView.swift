@@ -13,11 +13,11 @@ struct WomenOnboardView: View {
     @State private var isExiting = false
     private func handleCTA() {
         guard !isExiting else { return }
-        withAnimation(.easeOut(duration: 0.25)) { isExiting = true }
+        withAnimation(.easeOut(duration: 0.35)) { isExiting = true }
 //        isExiting = true
         // Після завершення локальної анімації — викликаємо перехід нагору
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
             action()
         }
         

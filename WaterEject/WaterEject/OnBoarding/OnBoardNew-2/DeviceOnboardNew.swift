@@ -18,9 +18,9 @@ struct DeviceOnboardNew: View {
     
     private func handleCTA() {
         guard !isExiting else { return }
-        withAnimation(.easeOut(duration: 0.2)) { isExiting = true }
+        withAnimation(.easeOut(duration: 0.3)) { isExiting = true }
         // Після завершення локальної анімації — викликаємо перехід нагору
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             action()
         }
     }
@@ -35,8 +35,9 @@ struct DeviceOnboardNew: View {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 return
             }
+            handleCTA()
             onDeviceSelect(picked)   // віддаємо вибір
-            handleCTA()                // переходимо далі
+                            // переходимо далі
         }, fixedWidth: 260) {
             
             // увесь твій контент екрану, БЕЗ кнопки!

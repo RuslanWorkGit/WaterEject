@@ -149,7 +149,17 @@ struct OnboardingFlowViewOne: View {
                 case .wallet:  SaveOnboardNew(action: goToNextStep)
                 case .women:   WomenOnboardView(action: goToNextStep)
 
-                case .paywall: PaywallThirdView(onFinish: finishOnboarding)
+                case .paywall:
+                    
+                    withAnimation(.easeInOut(duration: 2.6)) {        // узгоджено з фоном
+                        PaywallThirdView(onFinish: finishOnboarding)
+                            .transition(.asymmetric(
+                               insertion: .opacity
+    ,
+                               removal:   .opacity
+                            ))
+                    }
+
                 }
             }
             // м’який перехід між екранами
@@ -173,8 +183,16 @@ struct OnboardingFlowViewOne: View {
 //
 //                       }
             
+            if currentStep == .paywall {
+                            withAnimation(.easeInOut(duration: 0.6)) {           // ← Анімація ТІЛЬКИ тут
+                                currentStep = OnboardingStepOne.allCases[i + 1]
+                    }
+            }
+            
             currentStep = OnboardingStepOne.allCases[i + 1]
         }
+        
+
     }
 
     private func finishOnboarding() {
@@ -210,7 +228,7 @@ private struct CrossfadeBackgroundOne: View {
         bg(for: step)
             .id(step)                                     // нова ідентичність — тригер для transition
             .transition(.opacity)                         // чистий кросфейд
-            .animation(.easeInOut(duration: 0.6), value: step)
+            .animation(.easeInOut(duration: 2.6), value: step)
             .ignoresSafeArea()
             .compositingGroup()                           // інколи прибирає мерехтіння градієнтів
     }

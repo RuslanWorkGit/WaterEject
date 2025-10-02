@@ -54,7 +54,15 @@ struct OnboardingFlowViewThree: View {
 
                 
             case .paywall:
-                PaywallThirdView(onFinish: { finishOnboarding() })
+                
+                withAnimation(.easeInOut(duration: 0.6)) {        // узгоджено з фоном
+                    PaywallThirdView(onFinish: { finishOnboarding() })
+                        .transition(.asymmetric(
+                           insertion: .opacity,
+                           removal:   .opacity.combined(with: .move(edge: .leading))
+                        ))
+                }
+
 
             }
         }
@@ -70,6 +78,8 @@ struct OnboardingFlowViewThree: View {
     func goToNextStep() {
         if let nextIndex = OnboardingStepThree.allCases.firstIndex(of: currentStep)?.advanced(by: 1),
            nextIndex < OnboardingStepThree.allCases.count {
+
+
             currentStep = OnboardingStepThree.allCases[nextIndex]
         }
     }

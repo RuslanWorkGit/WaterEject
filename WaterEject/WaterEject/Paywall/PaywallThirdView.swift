@@ -24,9 +24,14 @@ struct PaywallThirdView: View {
     }()
     @State private var isExiting = false
     
+    @State private var appearVideo = false
+    @State private var appearTitle = false
+    @State private var appearList  = false
+    @State private var appearCards = false
+    
     
     let onFinish: () -> Void
-    private let exitDuration: Double = 0.35
+    private let exitDuration: Double = 0.6
     
     
     var body: some View {
@@ -57,6 +62,11 @@ struct PaywallThirdView: View {
                     .ignoresSafeArea()
                     .offset(y: 40)
                 
+                    .opacity(appearVideo ? 1 : 0)
+                    .scaleEffect(appearVideo ? 1.0 : 0.985)
+                    .blur(radius: appearVideo ? 0 : 2)
+                    .animation(.easeOut(duration: 0.45), value: appearVideo)
+                
                 VStack(alignment: .center) {
                     
 
@@ -73,6 +83,10 @@ struct PaywallThirdView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 20)
                     
+                    .opacity(appearTitle ? 1 : 0)
+                    .offset(y: appearTitle ? 0 : 8)
+                    .animation(.easeOut(duration: 0.45), value: appearTitle)
+                    
                     VStack(spacing: isSmall ? 8 : 12) {
                         HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3")
                         HorizontalThirdText(title: "5 pro-level sound tests", image: "powermeter")
@@ -80,6 +94,10 @@ struct PaywallThirdView: View {
                         HorizontalThirdText(title: "All future features + No Ads", image: "sparkles")
                     }
                     .padding(.leading, 90)
+                    
+                    .opacity(appearList ? 1 : 0)
+                    .offset(y: appearList ? 0 : 10)
+                    .animation(.easeOut(duration: 0.5), value: appearList)
                     
                     VStack(spacing: 12) {
                         PaywallThirdPlanCard(
@@ -102,6 +120,10 @@ struct PaywallThirdView: View {
                     .padding(.top, isSmall ? 12 : isLarge ? 60 : 40)
                     .padding(.horizontal, 14)
                     .padding(.bottom, isSmall ? 12 : isLarge ? 48 : 36)
+                    
+                    .opacity(appearCards ? 1 : 0)
+                    .scaleEffect(appearCards ? 1.0 : 0.99)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.85), value: appearCards)
                     
                     
                     
@@ -210,8 +232,6 @@ struct PaywallThirdView: View {
             SafariView(url: url)
         }
         .onAppear {
-            isExiting = false
-            withAnimation(.easeOut(duration: 0.4)) { isExiting = true }
             
             if !didLogOpen {
                 Telemetry.shared.paywallBOpen()   // ⬅️ головний івент
@@ -221,6 +241,26 @@ struct PaywallThirdView: View {
             Task { await viewModel.loadPricing()  }
             //let v = PaywallAB.shared.variant()
             //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
+        }
+        
+        // onAppear
+        .onAppear {
+            // основний фейд контейнера можеш лишити як є:
+            isExiting = false
+            withAnimation(.easeOut(duration: 0.6)) { isExiting = true }
+
+            // стагер всередині:
+            appearVideo = false; appearTitle = false; appearList = false; appearCards = false
+            withAnimation(.easeOut(duration: 0.45)) { appearVideo = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
+                withAnimation(.easeOut(duration: 0.45)) { appearTitle = true }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                withAnimation(.easeOut(duration: 0.5)) { appearList = true }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.20) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { appearCards = true }
+            }
         }
     }
     

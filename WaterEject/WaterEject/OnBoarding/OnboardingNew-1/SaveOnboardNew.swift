@@ -13,11 +13,11 @@ struct SaveOnboardNew: View {
     @State private var isExiting = false
     private func handleCTA() {
         guard !isExiting else { return }
-        withAnimation(.easeOut(duration: 0.25)) { isExiting = true }
+        withAnimation(.easeOut(duration: 0.3)) { isExiting = true }
 //        isExiting = true
         // Після завершення локальної анімації — викликаємо перехід нагору
   
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             action()
         }
         
@@ -100,10 +100,10 @@ struct SaveOnboardNew: View {
         }
         .onAppear {
             appearHand = false
-            withAnimation(.easeOut(duration: 0.35)) { appearHand = true }
+            withAnimation(.easeOut(duration: 0.45)) { appearHand = true }
             
             appearLogo = false
-            withAnimation(.easeOut(duration: 0.35)) { appearLogo = true }
+            withAnimation(.easeOut(duration: 0.45)) { appearLogo = true }
         }
     }
 }
