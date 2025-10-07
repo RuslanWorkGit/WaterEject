@@ -35,18 +35,18 @@ struct WomenOnboardView: View {
         
         OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
-//            LinearGradient(
-//                colors: [Color.white,
-//                         Color(red: 201/255, green: 214/255, blue: 238/255)],
-//                startPoint: .top, endPoint: .bottom
-//            )
-//            .ignoresSafeArea()
+            LinearGradient(
+                colors: [Color.white,
+                         Color(red: 201/255, green: 214/255, blue: 238/255)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .ignoresSafeArea()
             Image("Women")
                 .offset(y: (appearHero ? 70 : 90))
-                .opacity(appearHero && !isExiting ? 1 : 0)
-                .opacity(isExiting ? 0 : 1)
-                .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHero)
-                .animation(.easeInOut(duration: exitDuration), value: isExiting)
+                //.opacity(appearHero && !isExiting ? 1 : 0)
+                //.opacity(isExiting ? 0 : 1)
+               // .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHero)
+               // .animation(.easeInOut(duration: exitDuration), value: isExiting)
             
             
             VStack {
@@ -99,8 +99,8 @@ struct WomenOnboardView: View {
                 Spacer()
                 
             }
-            .opacity(isExiting ? 0 : 1)
-            .animation(.easeInOut(duration: exitDuration), value: isExiting)
+            //.opacity(isExiting ? 0 : 1)
+            //.animation(.easeInOut(duration: exitDuration), value: isExiting)
         }
         .onAppear {
             appearHero = false

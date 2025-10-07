@@ -41,12 +41,12 @@ struct TestOnboardNew: View {
     var body: some View {
         OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
-//            LinearGradient(
-//                colors: [Color.white,
-//                         Color(red: 201/255, green: 214/255, blue: 238/255)],
-//                startPoint: .top, endPoint: .bottom
-//            )
-//            .ignoresSafeArea()
+            LinearGradient(
+                colors: [Color.white,
+                         Color(red: 201/255, green: 214/255, blue: 238/255)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
             VStack {
                 (

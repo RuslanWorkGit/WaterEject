@@ -43,7 +43,7 @@ struct PaywallThirdView: View {
             
             
             ZStack(alignment: .top) {
-                //Background()
+                Background()
                 
                 Color.black
                     .ignoresSafeArea()
@@ -62,10 +62,10 @@ struct PaywallThirdView: View {
                     .ignoresSafeArea()
                     .offset(y: 40)
                 
-                    .opacity(appearVideo ? 1 : 0)
-                    .scaleEffect(appearVideo ? 1.0 : 0.985)
-                    .blur(radius: appearVideo ? 0 : 2)
-                    .animation(.easeOut(duration: 0.45), value: appearVideo)
+//                    .opacity(appearVideo ? 1 : 0)
+//                    .scaleEffect(appearVideo ? 1.0 : 0.985)
+//                    .blur(radius: appearVideo ? 0 : 2)
+//                    .animation(.easeOut(duration: 0.45), value: appearVideo)
                 
                 VStack(alignment: .center) {
                     
@@ -83,9 +83,9 @@ struct PaywallThirdView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 20)
                     
-                    .opacity(appearTitle ? 1 : 0)
-                    .offset(y: appearTitle ? 0 : 8)
-                    .animation(.easeOut(duration: 0.45), value: appearTitle)
+                    //.opacity(appearTitle ? 1 : 0)
+//                    .offset(y: appearTitle ? 0 : 8)
+//                    .animation(.easeOut(duration: 0.45), value: appearTitle)
                     
                     VStack(spacing: isSmall ? 8 : 12) {
                         HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3")
@@ -95,7 +95,7 @@ struct PaywallThirdView: View {
                     }
                     .padding(.leading, 90)
                     
-                    .opacity(appearList ? 1 : 0)
+//                    .opacity(appearList ? 1 : 0)
                     .offset(y: appearList ? 0 : 10)
                     .animation(.easeOut(duration: 0.5), value: appearList)
                     
@@ -121,9 +121,9 @@ struct PaywallThirdView: View {
                     .padding(.horizontal, 14)
                     .padding(.bottom, isSmall ? 12 : isLarge ? 48 : 36)
                     
-                    .opacity(appearCards ? 1 : 0)
-                    .scaleEffect(appearCards ? 1.0 : 0.99)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.85), value: appearCards)
+//                    .opacity(appearCards ? 1 : 0)
+                    //.scaleEffect(appearCards ? 1.0 : 0.99)
+                    //.animation(.spring(response: 0.5, dampingFraction: 0.85), value: appearCards)
                     
                     
                     
@@ -225,8 +225,8 @@ struct PaywallThirdView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
-        .opacity(isExiting ? 1 : 0)
-        .animation(.easeInOut(duration: exitDuration), value: isExiting)
+        //.opacity(isExiting ? 1 : 0)
+        //.animation(.easeInOut(duration: exitDuration), value: isExiting)
         
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
@@ -246,21 +246,21 @@ struct PaywallThirdView: View {
         // onAppear
         .onAppear {
             // основний фейд контейнера можеш лишити як є:
-            isExiting = false
-            withAnimation(.easeOut(duration: 0.6)) { isExiting = true }
-
-            // стагер всередині:
-            appearVideo = false; appearTitle = false; appearList = false; appearCards = false
-            withAnimation(.easeOut(duration: 0.45)) { appearVideo = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
-                withAnimation(.easeOut(duration: 0.45)) { appearTitle = true }
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-                withAnimation(.easeOut(duration: 0.5)) { appearList = true }
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.20) {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { appearCards = true }
-            }
+//            isExiting = false
+//            withAnimation(.easeOut(duration: 0.6)) { isExiting = true }
+//
+//            // стагер всередині:
+//            appearVideo = false; appearTitle = false; appearList = false; appearCards = false
+//            withAnimation(.easeOut(duration: 0.45)) { appearVideo = true }
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
+//                withAnimation(.easeOut(duration: 0.45)) { appearTitle = true }
+//            }
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+//                withAnimation(.easeOut(duration: 0.5)) { appearList = true }
+//            }
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+//                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { appearCards = true }
+//            }
         }
     }
     

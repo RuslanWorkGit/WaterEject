@@ -32,12 +32,12 @@ struct SaveOnboardNew: View {
         
         OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
-//            LinearGradient(
-//                colors: [Color.white,
-//                         Color(red: 201/255, green: 214/255, blue: 238/255)],
-//                startPoint: .top, endPoint: .bottom
-//            )
-//            .ignoresSafeArea()
+            LinearGradient(
+                colors: [Color.white,
+                         Color(red: 201/255, green: 214/255, blue: 238/255)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .ignoresSafeArea()
             VStack {
                 (
                     Text("Save ")
@@ -71,15 +71,15 @@ struct SaveOnboardNew: View {
                 HStack(spacing: 0) {
                     WalletImg()
                         .offset(y: 122)
-                        .offset(x: (appearHand ? -20 : -30))
-                        .opacity(appearHand && !isExiting ? 1 : 0)
-                        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHand)
+                        //.offset(x: (appearHand ? -20 : -30))
+                    //.opacity(appearHand && !isExiting ? 1 : 0)
+                        //.animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHand)
                     
                     AppImg()
                         .padding(.trailing, 12)
-                        .offset(x: (appearLogo ? -10 : 20))
-                        .opacity(appearLogo && !isExiting ? 1 : 0)
-                        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearLogo)
+                        //.offset(x: (appearLogo ? -10 : 20))
+                        //.opacity(appearLogo && !isExiting ? 1 : 0)
+                        //.animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearLogo)
                     
                     
                 }
@@ -94,8 +94,8 @@ struct SaveOnboardNew: View {
                 
                 
             }
-            .opacity(isExiting ? 0 : 1)
-            .animation(.easeInOut(duration: exitDuration), value: isExiting)
+            //.opacity(isExiting ? 0 : 1)
+            //.animation(.easeInOut(duration: exitDuration), value: isExiting)
             
         }
         .onAppear {

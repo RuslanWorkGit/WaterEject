@@ -30,28 +30,28 @@ struct StartOnboardView: View {
 
     var body: some View {
         ZStack {
-//            LinearGradient(
-//                colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
-//                         Color(red: 56/255, green: 114/255, blue: 229/255)],
-//                startPoint: .top, endPoint: .bottom
-//            )
-//            .ignoresSafeArea()
+            LinearGradient(
+                colors: [Color(red: 94/255, green: 148/255, blue: 255/255),
+                         Color(red: 56/255, green: 114/255, blue: 229/255)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
             LightPanelScaffold(ctaTitle: "Get Started", ctaAction: handleCTA, ctaWidth: 260) {
 
                 Image(device?.imageName ?? "IphoneNewOnboard")  // ← ключ
                                         .resizable()
                                         .scaledToFit()
-                                        .opacity(isExiting ? 0 : 1)
-                                        .offset(y: isExiting ? 16 : 0)
-                                        .animation(.easeInOut(duration: exitDuration), value: isExiting)
+                                       // .opacity(isExiting ? 0 : 1)
+                                        //.offset(y: isExiting ? 16 : 0)
+                                        //.animation(.easeInOut(duration: exitDuration), value: isExiting)
                 
                 LottieView(name: "Water")
                     .frame(width: 60, height: 50)
                     .padding(.bottom, 16)
-                    .opacity(isExiting ? 0 : 1)
-                    .offset(y: isExiting ? 12 : 0)
-                    .animation(.easeInOut(duration: exitDuration), value: isExiting)
+                //.opacity(isExiting ? 0 : 1)
+                    //.offset(y: isExiting ? 12 : 0)
+                    //.animation(.easeInOut(duration: exitDuration), value: isExiting)
                 Spacer()
                 
             } contentOne: {
@@ -75,9 +75,9 @@ struct StartOnboardView: View {
                         .font(.system(size: 16))
                         .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
                 }
-                .opacity(isExiting ? 0 : 1)
+                //.opacity(isExiting ? 0 : 1)
 //                .offset(y: isExiting ? 20 : 0)
-                .animation(.easeInOut(duration: exitDuration), value: isExiting)
+                //.animation(.easeInOut(duration: exitDuration), value: isExiting)
                 
             } footer: {
                 HStack(spacing: 0) {
@@ -110,15 +110,15 @@ struct StartOnboardView: View {
                     .buttonStyle(.plain)
                 }
                 
-                .opacity(isExiting ? 0 : 1)
+                //.opacity(isExiting ? 0 : 1)
 //                .offset(y: isExiting ? 8 : 0)
-                .animation(.easeInOut(duration: exitDuration), value: isExiting)
+                //.animation(.easeInOut(duration: exitDuration), value: isExiting)
             }
             .allowsHitTesting(!isExiting)
             //.padding(.horizontal, 16) // поля від країв екрана
-            .offset(y: (appearScreen ? 0 : 20))
-            .opacity(appearScreen && !isExiting ? 1 : 0)
-            .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
+            //.offset(y: (appearScreen ? 0 : 20))
+            //.opacity(appearScreen && !isExiting ? 1 : 0)
+            //.animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
         }
 
         .onAppear {
