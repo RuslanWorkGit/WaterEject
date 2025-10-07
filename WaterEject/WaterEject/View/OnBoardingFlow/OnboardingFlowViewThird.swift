@@ -151,6 +151,9 @@ struct OnboardingFlowViewThree: View {
 
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
+    
+    @State private var childAnimate = false
+    private let slideDuration: Double = 0.6
 
     var body: some View {
         GeometryReader { geo in
@@ -160,14 +163,14 @@ struct OnboardingFlowViewThree: View {
 
                 // 2) Старий екран — залишається на місці під час анімації
                 if let p = prevStep {
-                    screen(for: p)
+                    screen(for: p, startAnimations: false, staticDisplay: true)
                         .id(p)
                         .frame(width: geo.size.width, height: geo.size.height)  // ✅ фіксуємо розмір
 //                                        .ignoresSafeArea()
                         .zIndex(0)
                 } else {
                     // якщо немає prevStep, показуємо поточний як базовий
-                    screen(for: currentStep)
+                    screen(for: currentStep, startAnimations: true, staticDisplay: false)
                         .id(currentStep)
                         .frame(width: geo.size.width, height: geo.size.height)  // ✅
 //                                        .ignoresSafeArea()
@@ -176,7 +179,7 @@ struct OnboardingFlowViewThree: View {
 
                 // 3) Новий екран — в’їжджає зверху поверх старого
                 if let inc = incomingStep {
-                    screen(for: inc)
+                    screen(for: inc, startAnimations: childAnimate, staticDisplay: false)
                         .id(inc)
                         .frame(width: geo.size.width, height: geo.size.height)  // ✅
 //                                        .ignoresSafeArea()
@@ -185,9 +188,12 @@ struct OnboardingFlowViewThree: View {
                         .onAppear {
                             // стартуємо за межами екрана справа/зліва
                             overlayX = (isForward ? 1 : -1) * geo.size.width
-                            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.9)) {
-                                overlayX = 0
-                            }
+                            withAnimation(.easeInOut(duration: slideDuration)) {
+                                            overlayX = 0
+                                        }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
+                                            childAnimate = true
+                                        }
                         }
                 }
             }
@@ -203,14 +209,15 @@ struct OnboardingFlowViewThree: View {
         guard !isAnimating, step != currentStep else { return }
         isAnimating = true
         isForward = forward
-
+        childAnimate = false
+        
         // фіксуємо старий і запускаємо оверлей
         prevStep = currentStep
         incomingStep = step
 
         // після короткої затримки (кінець пружини) — фіксуємо новий current і чистимо тимчасові
-        let delay = 0.7
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+        //let delay = 0.7
+        DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
             currentStep = step
             prevStep = nil
             incomingStep = nil
@@ -235,7 +242,7 @@ struct OnboardingFlowViewThree: View {
 
     // MARK: - Рендер екрана та фону
     @ViewBuilder
-    private func screen(for step: OnboardingStepThree) -> some View {
+    private func screen(for step: OnboardingStepThree, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
         switch step {
         case .device:
             DeviceOnboardNew(

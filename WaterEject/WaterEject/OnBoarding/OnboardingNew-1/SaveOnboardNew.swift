@@ -10,16 +10,13 @@ import SwiftUI
 struct SaveOnboardNew: View {
     let action: () -> Void
     
-    @State private var isExiting = false
+    var startAnimations: Bool = false
+    var staticDisplay: Bool = false
+    
     private func handleCTA() {
-        guard !isExiting else { return }
-        withAnimation(.easeOut(duration: 0.3)) { isExiting = true }
-//        isExiting = true
-        // Після завершення локальної анімації — викликаємо перехід нагору
-  
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            action()
-        }
+        
+        action()
+        
         
     }
     private let exitDuration: Double = 0.35
@@ -71,15 +68,15 @@ struct SaveOnboardNew: View {
                 HStack(spacing: 0) {
                     WalletImg()
                         .offset(y: 122)
-                        //.offset(x: (appearHand ? -20 : -30))
-                    //.opacity(appearHand && !isExiting ? 1 : 0)
-                        //.animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHand)
+                        .offset(x: (appearHand ? -20 : -100))
+                        .opacity(appearHand ? 1 : 0)
+                        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHand)
                     
                     AppImg()
                         .padding(.trailing, 12)
-                        //.offset(x: (appearLogo ? -10 : 20))
-                        //.opacity(appearLogo && !isExiting ? 1 : 0)
-                        //.animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearLogo)
+                        .offset(x: (appearLogo ? -10 : 100))
+                        .opacity(appearLogo ? 1 : 0)
+                        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearLogo)
                     
                     
                 }
@@ -98,12 +95,28 @@ struct SaveOnboardNew: View {
             //.animation(.easeInOut(duration: exitDuration), value: isExiting)
             
         }
-        .onAppear {
-            appearHand = false
+        .animation(nil, value: startAnimations)
+        .animation(nil, value: staticDisplay)
+        .onChange(of: startAnimations) { _, ready in
+            guard ready && !staticDisplay else { return }
+            appearHand = false; appearLogo = false
             withAnimation(.easeOut(duration: 0.45)) { appearHand = true }
-            
-            appearLogo = false
-            withAnimation(.easeOut(duration: 0.45)) { appearLogo = true }
+            withAnimation(.easeOut(duration: 0.45).delay(0.06)) { appearLogo = true }
+        }
+        .onAppear {
+            if staticDisplay {
+                var tx = Transaction()
+                tx.disablesAnimations = true           // вимкнути анімації на час апдейту
+                withTransaction(tx) {
+                    appearHand = true
+                    appearLogo = true
+                }
+            } else if startAnimations {
+                appearHand = false
+                appearLogo = false
+                withAnimation(.easeOut(duration: 0.45)) { appearHand = true }
+                withAnimation(.easeOut(duration: 0.45).delay(0.06)) { appearLogo = true }
+            }
         }
     }
 }
@@ -160,7 +173,7 @@ struct PillButton: View {
     
     
     var body: some View {
-        Button(action: action) { 
+        Button(action: action) {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
@@ -198,7 +211,7 @@ struct OnboardScaffold<Content: View>: View {
     let ctaAction: () -> Void
     var fixedWidth: CGFloat = 260
     @ViewBuilder let content: () -> Content
-
+    
     var body: some View {
         ZStack { content() }
             .safeAreaInset(edge: .bottom) {
@@ -211,7 +224,7 @@ struct OnboardScaffold<Content: View>: View {
                 }
                 
                 .padding(.bottom, 30)
-
+                
             }
     }
 }
