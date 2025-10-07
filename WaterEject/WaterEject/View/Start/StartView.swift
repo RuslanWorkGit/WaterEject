@@ -164,6 +164,12 @@ struct StartView: View {
                 })
             )
         }
+        .onChange(of: viewModel.finishedAt) { _, ts in
+            guard ts != nil else { return }
+            print("✅ Mode finished at \(ts!) → asking for review")
+            ReviewPrompter.recordCompletion()
+            Task { await ReviewPrompter.maybeAsk() }
+        }
         
     }
 }

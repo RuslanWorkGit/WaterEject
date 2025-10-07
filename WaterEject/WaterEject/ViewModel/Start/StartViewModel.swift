@@ -25,6 +25,7 @@ final class StartViewModel: ObservableObject {
     
     @Published var startCleaning: Bool = false
     @Published var countdown: Int = 25
+    @Published var finishedAt: Date? = nil 
     
     private var timer: Timer?
     
@@ -69,20 +70,21 @@ final class StartViewModel: ObservableObject {
     func startTimer() {
         stopTimer()
         countdown = 25
-        
-        
         startCleaning = true
+
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
-            if self.countdown > 0 {
+            if self.countdown > 1 {
                 self.countdown -= 1
-            }
-            if self.countdown == 0 {
+            } else {
+                // ⬇️ дійшли до 0: спочатку позначаємо фініш,
+                // а вже потім робимо звичний reset у stopTimer()
+                self.countdown = 0
+                self.finishedAt = Date()      // ⬅️ стабільний тригер
                 self.stopTimer()
             }
         }
     }
-    
     func stopAllPlayback(reason: String? = nil) {
             seqPlayer.stop()
             audioManager.stop()

@@ -41,6 +41,7 @@ struct StartOnboardView: View {
                                         .resizable()
                                         .scaledToFit()
 //                                      .offset(y: (appearScreen ? 0 : 20))
+                                        .scaleEffect(device?.imageName == "AirpodsNewOnboard" ? 0.8 : 1 )
                                         .opacity(appearScreen ? 1 : 0)
                                         .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
                 
