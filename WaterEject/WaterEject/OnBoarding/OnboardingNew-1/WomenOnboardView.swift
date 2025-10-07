@@ -10,17 +10,16 @@ import SwiftUI
 struct WomenOnboardView: View {
     let action: () -> Void
     
+    var startAnimations: Bool = false
+    var staticDisplay: Bool = false
+    
     @State private var isExiting = false
     private func handleCTA() {
-        guard !isExiting else { return }
-        withAnimation(.easeOut(duration: 0.35)) { }
-        isExiting = true 
-//        isExiting = true
-        // Після завершення локальної анімації — викликаємо перехід нагору
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+        isExiting = true 
+
             action()
-        }
+        
         
     }
     private let exitDuration: Double = 0.35
@@ -43,10 +42,9 @@ struct WomenOnboardView: View {
             )
             .ignoresSafeArea()
             Image("Women")
-                .offset(y: (appearHero ? 70 : 90))
-                //.opacity(appearHero && !isExiting ? 1 : 0)
-                //.opacity(isExiting ? 0 : 1)
-               // .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHero)
+                .offset(y: (appearHero ? 70 : 190))
+                .opacity(appearHero ? 1 : 0)
+                .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearHero)
                // .animation(.easeInOut(duration: exitDuration), value: isExiting)
             
             
@@ -103,10 +101,30 @@ struct WomenOnboardView: View {
             //.opacity(isExiting ? 0 : 1)
             //.animation(.easeInOut(duration: exitDuration), value: isExiting)
         }
-        .onAppear {
-//            appearHero = false
-//            withAnimation(.easeOut(duration: 0.45)) { appearHero = true }
+        .animation(nil, value: startAnimations)
+        .animation(nil, value: staticDisplay)
+        .onChange(of: startAnimations) { _, ready in
+            guard ready && !staticDisplay else { return }
+            appearHero = false
+            withAnimation(.easeOut(duration: 0.45)) { appearHero = true }
+           
         }
+        .onAppear {
+            if staticDisplay {
+                var tx = Transaction()
+                tx.disablesAnimations = true           // вимкнути анімації на час апдейту
+                withTransaction(tx) {
+                    appearHero = true
+
+                }
+            } else if startAnimations {
+                appearHero = false
+
+                withAnimation(.easeOut(duration: 0.45)) { appearHero = true }
+
+            }
+        }
+
     }
 }
 

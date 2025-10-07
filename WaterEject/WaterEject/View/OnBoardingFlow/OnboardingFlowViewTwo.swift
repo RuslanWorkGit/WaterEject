@@ -182,7 +182,7 @@ struct OnboardingFlowViewTwo: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var childAnimate = false
-    private let slideDuration: Double = 0.6
+    private let slideDuration: Double = 0.5
 
     var body: some View {
         GeometryReader { geo in
@@ -274,9 +274,9 @@ struct OnboardingFlowViewTwo: View {
     private func screen(for step: OnboardingStepTwo, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
         switch step {
         case .start:
-            StartOnboardView(action: { goTo(.women, forward: true) })
+            StartOnboardView(action: { goTo(.women, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .women:
-            WomenOnboardView(action: { goTo(.wallet, forward: true) })
+            WomenOnboardView(action: { goTo(.wallet, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .wallet:
             SaveOnboardNew(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .paywall:

@@ -153,7 +153,7 @@ struct OnboardingFlowViewThree: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var childAnimate = false
-    private let slideDuration: Double = 0.6
+    private let slideDuration: Double = 0.5
 
     var body: some View {
         GeometryReader { geo in
@@ -255,12 +255,12 @@ struct OnboardingFlowViewThree: View {
                            )
            
         case .start:
-            StartOnboardView(action: { goTo(.test, forward: true) }, device: pickedDevice)
+            StartOnboardView(action: { goTo(.test, forward: true) }, device: pickedDevice, startAnimations: startAnimations, staticDisplay: staticDisplay)
             
         case .test:
-            TestOnboardNew(action: { goTo(.women, forward: true) })
+            TestOnboardNew(action: { goTo(.women, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .women:
-            WomenOnboardView(action: { goTo(.paywall, forward: true) })
+            WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .paywall:
             PaywallThirdView(onFinish: finishOnboarding)
         }

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct TestOnboardNew: View {
     
+    
+    
     private let tests: [(icon: String, label: String)] = [
         ("circle.hexagongrid", "Stereo"),
         ("dot.radiowaves.left.and.right", "Bass"),
@@ -22,17 +24,14 @@ struct TestOnboardNew: View {
     ]
     
     let action: () -> Void
-    
-    @State private var isExiting = false
+    var startAnimations: Bool = false
+    var staticDisplay: Bool = false
     @State private var appearScreen   = false
     
     private func handleCTA() {
-        guard !isExiting else { return }
-        withAnimation(.easeOut(duration: 0.35)) { isExiting = true }
-        // Після завершення локальної анімації — викликаємо перехід нагору
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+
             action()
-        }
+        
     }
     
     // Один параметр, щоб легко змінювати час
@@ -105,16 +104,30 @@ struct TestOnboardNew: View {
                 Spacer()
                 
             }
-            .offset(y: (appearScreen ? 00 : 30))
-            .opacity(appearScreen && !isExiting ? 1 : 0)
-            .opacity(isExiting ? 0 : 1)
-            .offset(y: isExiting ? 16 : 0)
+            .offset(y: (appearScreen ? 0 : 90))
+            .opacity(appearScreen ? 1 : 0)
             .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
-            .animation(.easeInOut(duration: exitDuration), value: isExiting)
+            
         }
-        .onAppear {
+        .animation(nil, value: startAnimations)
+        .animation(nil, value: staticDisplay)
+        .onChange(of: startAnimations) { _, ready in
+            guard ready && !staticDisplay else { return }
             appearScreen = false
             withAnimation(.easeOut(duration: 0.45)) { appearScreen = true }
+        }
+        .onAppear {
+            if staticDisplay {
+                var tx = Transaction()
+                tx.disablesAnimations = true           // вимкнути анімації на час апдейту
+                withTransaction(tx) {
+                    appearScreen = true
+                }
+            } else if startAnimations {
+                appearScreen = false
+
+                withAnimation(.easeOut(duration: 0.45)) { appearScreen = true }
+            }
         }
     }
 }

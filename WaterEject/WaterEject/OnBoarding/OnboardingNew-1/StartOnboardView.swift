@@ -10,18 +10,16 @@ import SwiftUI
 struct StartOnboardView: View {
     @State private var webViewURL: URL?
     let action: () -> Void
+    
     var device: OnboardDeviceModel? = nil   // ← нове
-    @State private var isExiting = false
+    var startAnimations: Bool = false
+    var staticDisplay: Bool = false
     @State private var appearScreen   = false
     
     private func handleCTA() {
-        guard !isExiting else { return }
-        withAnimation(.easeOut(duration: 0.3)) { isExiting = true }
-//        isExiting = true
-        // Після завершення локальної анімації — викликаємо перехід нагору
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+
             action()
-        }
+        
     }
     
     // Один параметр, щоб легко змінювати час
@@ -37,21 +35,21 @@ struct StartOnboardView: View {
             )
             .ignoresSafeArea()
             
-            LightPanelScaffold(ctaTitle: "Get Started", ctaAction: handleCTA, ctaWidth: 260) {
+            LightPanelScaffold(ctaTitle: "Get Started", ctaAction: handleCTA, ctaWidth: 260, animation: appearScreen) {
 
                 Image(device?.imageName ?? "IphoneNewOnboard")  // ← ключ
                                         .resizable()
                                         .scaledToFit()
-                                       // .opacity(isExiting ? 0 : 1)
-                                        //.offset(y: isExiting ? 16 : 0)
-                                        //.animation(.easeInOut(duration: exitDuration), value: isExiting)
+//                                      .offset(y: (appearScreen ? 0 : 20))
+                                        .opacity(appearScreen ? 1 : 0)
+                                        .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
                 
                 LottieView(name: "Water")
                     .frame(width: 60, height: 50)
                     .padding(.bottom, 16)
-                //.opacity(isExiting ? 0 : 1)
-                    //.offset(y: isExiting ? 12 : 0)
-                    //.animation(.easeInOut(duration: exitDuration), value: isExiting)
+                    .offset(y: (appearScreen ? 0 : 20))
+                    .opacity(appearScreen ? 1 : 0)
+                    .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
                 Spacer()
                 
             } contentOne: {
@@ -114,16 +112,30 @@ struct StartOnboardView: View {
 //                .offset(y: isExiting ? 8 : 0)
                 //.animation(.easeInOut(duration: exitDuration), value: isExiting)
             }
-            .allowsHitTesting(!isExiting)
             //.padding(.horizontal, 16) // поля від країв екрана
-            //.offset(y: (appearScreen ? 0 : 20))
-            //.opacity(appearScreen && !isExiting ? 1 : 0)
-            //.animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
+//            .offset(y: (appearScreen ? 0 : 20))
+//            .opacity(appearScreen ? 1 : 0)
+//            .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
         }
 
-        .onAppear {
+        .animation(nil, value: startAnimations)
+        .animation(nil, value: staticDisplay)
+        .onChange(of: startAnimations) { _, ready in
+            guard ready && !staticDisplay else { return }
             appearScreen = false
             withAnimation(.easeOut(duration: 0.45)) { appearScreen = true }
+        }
+        .onAppear {
+            if staticDisplay {
+                var tx = Transaction()
+                tx.disablesAnimations = true           // вимкнути анімації на час апдейту
+                withTransaction(tx) {
+                    appearScreen = true
+                }
+            } else if startAnimations {
+                appearScreen = false
+                withAnimation(.easeOut(duration: 0.45)) { appearScreen = true }
+            }
         }
         
         .sheet(item: $webViewURL) { url in
@@ -162,6 +174,7 @@ struct LightPanelScaffold<Top: View, Main: View, Footer: View>: View {
     let ctaTitle: String
     let ctaAction: () -> Void
     var ctaWidth: CGFloat = 260
+    var animation: Bool = false
     
     @ViewBuilder let content: () -> Top
     @ViewBuilder let contentOne: () -> Main
@@ -207,6 +220,9 @@ struct LightPanelScaffold<Top: View, Main: View, Footer: View>: View {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .stroke(Color.white.opacity(0.10), lineWidth: 1)
             )
+            .offset(y: (animation ? 0 : 300))
+            .opacity(animation ? 1 : 0)
+            .animation(.spring(response: 0.55, dampingFraction: 0.85), value: animation)
             
         }
     }
