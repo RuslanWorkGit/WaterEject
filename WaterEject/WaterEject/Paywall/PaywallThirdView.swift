@@ -60,11 +60,11 @@ struct PaywallThirdView: View {
                     
                     
                     (
-                        Text("Premium Access")
+                        Text("Premium Access 👑")
                             .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
                         
                     )
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.system(size: 34, weight: .bold))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 12)
@@ -80,7 +80,7 @@ struct PaywallThirdView: View {
                         HorizontalThirdText(title: "Scientifically proven methods", image: "graduationcap")
                         HorizontalThirdText(title: "All future features + No Ads", image: "sparkles")
                     }
-                    .padding(.leading, 90)
+                    .padding(.leading, 80)
                     
 //                    .opacity(appearList ? 1 : 0)
                     .offset(y: appearList ? 0 : 10)
@@ -274,7 +274,7 @@ struct HorizontalThirdText: View {
         HStack {
             Image(systemName: image)
                 .resizable()
-                .frame(width: 16, height: 16)
+                .frame(width: 18, height: 18)
                 .foregroundStyle(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
                 
                 .padding(6)                                // розмір “піллюлі”
@@ -286,7 +286,7 @@ struct HorizontalThirdText: View {
 //                        )
                 )
             Text(title)
-                .font(.system(size: 15))
+                .font(.system(size: 17))
                 .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
 //                .foregroundStyle(Color(red: 170 / 255, green: 178 / 255, blue: 191 / 255))
         }
