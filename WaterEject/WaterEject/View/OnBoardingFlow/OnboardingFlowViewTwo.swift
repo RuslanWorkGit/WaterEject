@@ -90,8 +90,12 @@ struct OnboardingFlowViewTwo: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
             currentStep = step
             prevStep = nil
-            incomingStep = nil
-            isAnimating = false
+//            incomingStep = nil
+//            isAnimating = false
+            if step != .paywall {
+                       incomingStep = nil
+                   }
+                   isAnimating = false
         }
     }
 

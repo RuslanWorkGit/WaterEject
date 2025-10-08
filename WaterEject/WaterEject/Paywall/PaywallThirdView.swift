@@ -28,6 +28,7 @@ struct PaywallThirdView: View {
     @State private var appearTitle = false
     @State private var appearList  = false
     @State private var appearCards = false
+    @State private var startDelay: Double = 0.35
     
     
     let onFinish: () -> Void
@@ -53,8 +54,20 @@ struct PaywallThirdView: View {
                     .onAppear {
                         AudioSessionManager.activatePlayback(duckOthers: true)
                         player.isMuted = true
-                        player.play()
+                        player.automaticallyWaitsToMinimizeStalling = true
+                            player.currentItem?.preferredForwardBufferDuration = 2
+                            player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+
+                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                              player.play()
+                            }
                     }
+                    .onDisappear {
+                        player.pause()
+                        player.seek(to: .zero)
+                        AudioSessionManager.deactivate()
+                      }
+
                 
                     .frame(maxWidth: .infinity, maxHeight: isLarge ? 400 : 370)
                     .allowsHitTesting(false)
@@ -374,7 +387,9 @@ struct AspectFillPlayerView: UIViewRepresentable {
         return v
     }
     func updateUIView(_ uiView: PlayerView, context: Context) {
-        uiView.playerLayer.player = player
+        if uiView.playerLayer.player !== player {           // ✅ guard
+                    uiView.playerLayer.player = player
+                }
     }
 }
 
@@ -382,11 +397,13 @@ enum AudioSessionManager {
     static func activatePlayback(duckOthers: Bool = true) {
         let session = AVAudioSession.sharedInstance()
         do {
-            try session.setCategory(
-                .playback,                    // ігнорує тумблер беззвучного режиму
-                mode: .moviePlayback,
-                options: duckOthers ? [.duckOthers] : [] // або [.mixWithOthers]
-            )
+//            try session.setCategory(
+//                .playback,                    // ігнорує тумблер беззвучного режиму
+//                mode: .moviePlayback,
+//                options: duckOthers ? [.duckOthers] : [] // або [.mixWithOthers]
+//            )
+            try session.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
+
             try session.setActive(true)
         } catch {
             print("Audio session error:", error)
