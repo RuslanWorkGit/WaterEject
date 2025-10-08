@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct OnboardingFlowViewOne: View {
+    private let flowId = "onb_3.1"
+    private let onboardId = OnboardTag.v31.rawValue
+    
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
     @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
 
@@ -69,7 +72,9 @@ struct OnboardingFlowViewOne: View {
             }
             .task {
                 onbLastShownTS = Date().timeIntervalSince1970
-                Telemetry.shared.onboardingStart()
+                Telemetry.shared.onboardFlowMark(.v31)
+                Telemetry.shared.onbFlowStart(flowId: flowId)
+                            Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
             }
         }
     }
@@ -90,12 +95,15 @@ struct OnboardingFlowViewOne: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
             currentStep = step
             prevStep = nil
-//            incomingStep = nil
-//            isAnimating = false
+            incomingStep = nil
+            isAnimating = false
             if step != .paywall {
-                       incomingStep = nil
-                   }
-                   isAnimating = false
+//                       incomingStep = nil
+                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+            } else {
+                PaywallGate.shared.currentContext = .onboarding
+            }
+
         }
     }
 
@@ -105,12 +113,23 @@ struct OnboardingFlowViewOne: View {
         dismiss()
         coordinator.showMainTabbar()
     }
+    
 
     // Виклики з дочірніх екранів
     private func goToNextStep() {
         if let idx = OnboardingStepOne.allCases.firstIndex(of: currentStep),
            idx + 1 < OnboardingStepOne.allCases.count {
             goTo(OnboardingStepOne.allCases[idx + 1], forward: true)
+        }
+    }
+    
+    // MARK: - Screen IDs для аналітики
+    private func screenId(for step: OnboardingStepOne) -> String {
+        switch step {
+        case .start:  return "start"
+        case .wallet: return "wallet"
+        case .women:  return "women"
+        case .paywall:return "paywall"
         }
     }
 
@@ -126,7 +145,7 @@ struct OnboardingFlowViewOne: View {
         case .women:
             WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .paywall:
-            PaywallThirdView(onFinish: finishOnboarding)
+            PaywallThirdView(onFinish: finishOnboarding, onboardId: onboardId)
         }
     }
 

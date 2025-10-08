@@ -472,3 +472,146 @@ extension Telemetry {
         ])
     }
 }
+
+
+// Telemetry.swift
+
+import FirebaseAnalytics
+
+extension Telemetry {
+    // MARK: - Helpers
+    private func base(_ extra: [String: Any]) -> [String: Any] {
+        var p = baseParams()
+        extra.forEach { p[$0.key] = $0.value }
+        return p
+    }
+
+    // MARK: - Onboarding (flow-centric)
+    func onbFlowStart(flowId: String) {
+        Analytics.logEvent("onb_flow_start", parameters: base(["flow_id": flowId]))
+    }
+
+    func onbScreenView(flowId: String, screenId: String) {
+        Analytics.logEvent("onb_screen_view", parameters: base([
+            "flow_id": flowId,
+            "screen_id": screenId
+        ]))
+    }
+
+    func onbFlowFinish(flowId: String) {
+        Analytics.logEvent("onb_flow_finish", parameters: base(["flow_id": flowId]))
+    }
+
+    // MARK: - Paywall
+    func paywallExposure(flowId: String?, variant: String, entryPoint: String) {
+        Analytics.logEvent("paywall_exposure", parameters: base([
+            "flow_id": flowId ?? "unknown",
+            "paywall_variant": variant,
+            "entry_point": entryPoint
+        ]))
+    }
+
+    func paywallCTATap(flowId: String?, variant: String, entryPoint: String, plan: String) {
+        Analytics.logEvent("paywall_cta_tap", parameters: base([
+            "flow_id": flowId ?? "unknown",
+            "paywall_variant": variant,
+            "entry_point": entryPoint,
+            "plan": plan
+        ]))
+    }
+
+    func purchaseSuccess(flowId: String?, variant: String, plan: String, packageId: String, sessionId: String) {
+        Analytics.logEvent("purchase_success", parameters: base([
+            "flow_id": flowId ?? "unknown",
+            "paywall_variant": variant,
+            "plan": plan,
+            "package_id": packageId,
+            "paywall_session_id": sessionId
+        ]))
+    }
+
+    func purchaseError(flowId: String?, variant: String, plan: String, packageId: String, rcCode: Int?, message: String?, sessionId: String) {
+        Analytics.logEvent("purchase_error", parameters: base([
+            "flow_id": flowId ?? "unknown",
+            "paywall_variant": variant,
+            "plan": plan,
+            "package_id": packageId,
+            "rc_code": rcCode ?? -1,
+            "message": message ?? "",
+            "paywall_session_id": sessionId
+        ]))
+    }
+}
+
+
+// Telemetry.swift
+
+enum OnboardTag: String {
+    case v31 = "Onboard_3.1"
+    case v32 = "Onboard_3.2"
+    case v33 = "Onboard_3.3"
+}
+
+extension Telemetry {
+
+    // 1) Єдиний лог для конкретного онборд-флоу
+    func onboardFlowMark(_ tag: OnboardTag) {
+        var p = baseParams()
+        p["onboard_id"] = tag.rawValue            // щоб легко джойнити у воронці
+        Analytics.logEvent(tag.rawValue, parameters: p) // ІМ’Я ПОДІЇ = Onboard_3.x
+        Analytics.setUserProperty(tag.rawValue, forName: "onboard_last") // опційно
+    }
+
+    // 2) Пейвол: експожер
+    func paywallExposure(variant: String, entryPoint: String, onboardId: String?) {
+        var p = baseParams()
+        p["variant"] = variant
+        p["entry_point"] = entryPoint
+        if let onboardId { p["onboard_id"] = onboardId }
+        Analytics.logEvent("paywall_exposure", parameters: p)
+    }
+
+    // 3) Пейвол: тап по CTA
+    func paywallCTATap(variant: String, entryPoint: String, plan: String, onboardId: String?) {
+        var p = baseParams()
+        p["variant"] = variant
+        p["entry_point"] = entryPoint
+        p["plan"] = plan
+        if let onboardId { p["onboard_id"] = onboardId }
+        Analytics.logEvent("paywall_cta_tap", parameters: p)
+    }
+
+    // 4) Покупка: успіх
+    func purchaseSuccess(variant: String,
+                         plan: String,
+                         packageId: String,
+                         sessionId: String,
+                         onboardId: String?) {
+        var p = baseParams()
+        p["variant"] = variant
+        p["plan"] = plan
+        p["package_id"] = packageId
+        p["paywall_session_id"] = sessionId
+        if let onboardId { p["onboard_id"] = onboardId }
+        Analytics.logEvent("purchase_success", parameters: p)
+    }
+
+    // 5) Покупка: помилка
+    func purchaseError(variant: String,
+                       plan: String,
+                       packageId: String,
+                       rcCode: Int?,
+                       message: String?,
+                       sessionId: String,
+                       onboardId: String?) {
+        var p = baseParams()
+        p["variant"] = variant
+        p["plan"] = plan
+        p["package_id"] = packageId
+        p["rc_code"] = rcCode ?? -1
+        p["message"] = message ?? ""
+        p["paywall_session_id"] = sessionId
+        if let onboardId { p["onboard_id"] = onboardId }
+        Analytics.logEvent("purchase_error", parameters: p)
+    }
+}

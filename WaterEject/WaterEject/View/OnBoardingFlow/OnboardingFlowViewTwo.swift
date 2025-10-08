@@ -9,6 +9,9 @@
 import SwiftUI
 
 struct OnboardingFlowViewTwo: View {
+    private let flowId = "onb_3.2"
+    private let onboardId = OnboardTag.v32.rawValue
+    
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
     @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
 
@@ -69,7 +72,7 @@ struct OnboardingFlowViewTwo: View {
             }
             .task {
                 onbLastShownTS = Date().timeIntervalSince1970
-                Telemetry.shared.onboardingStart()
+                Telemetry.shared.onboardFlowMark(.v32)
             }
         }
     }
@@ -125,7 +128,7 @@ struct OnboardingFlowViewTwo: View {
         case .wallet:
             SaveOnboardNew(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .paywall:
-            PaywallThirdView(onFinish: finishOnboarding)
+            PaywallThirdView(onFinish: finishOnboarding, onboardId: onboardId)
         }
     }
 

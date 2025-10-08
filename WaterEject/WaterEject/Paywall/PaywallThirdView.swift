@@ -33,10 +33,15 @@ struct PaywallThirdView: View {
     @State private var appearCards = false
     @State private var startDelay: Double = 0.35
     
-    
+
     let onFinish: () -> Void
+    let onboardId: String?
     private let exitDuration: Double = 0.6
     
+    init(onFinish: @escaping () -> Void, onboardId: String? = nil) {
+            self.onFinish = onFinish
+            self.onboardId = onboardId
+        }
     
     var body: some View {
         
@@ -55,9 +60,6 @@ struct PaywallThirdView: View {
                 
                 VStack(alignment: .center) {
                     
-
-                    
-                    
                     
                     (
                         Text("Premium Access 👑")
@@ -67,20 +69,20 @@ struct PaywallThirdView: View {
                     .font(.system(size: 34, weight: .bold))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 12)
-                    .padding(.top, 20)
+                    .padding(.bottom, 0)
+                    .padding(.top, 12)
                     
                     //.opacity(appearTitle ? 1 : 0)
 //                    .offset(y: appearTitle ? 0 : 8)
 //                    .animation(.easeOut(duration: 0.45), value: appearTitle)
                     
-                    VStack(spacing: isSmall ? 8 : 12) {
-                        HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3")
-                        HorizontalThirdText(title: "5 pro-level sound tests", image: "powermeter")
-                        HorizontalThirdText(title: "Scientifically proven methods", image: "graduationcap")
-                        HorizontalThirdText(title: "All future features + No Ads", image: "sparkles")
+                    VStack(spacing: isSmall ? 4 : isLarge ? 8 : 4) {
+                        HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
+                        HorizontalThirdText(title: "5 pro-level sound tests", image: "powermeter", isLarge: isLarge)
+                        HorizontalThirdText(title: "Scientifically proven methods", image: "graduationcap", isLarge: isLarge)
+                        HorizontalThirdText(title: "All future features + No Ads", image: "sparkles", isLarge: isLarge)
                     }
-                    .padding(.leading, 80)
+                    .padding(.leading, isLarge ? 70 : 80)
                     
 //                    .opacity(appearList ? 1 : 0)
                     .offset(y: appearList ? 0 : 10)
@@ -118,20 +120,33 @@ struct PaywallThirdView: View {
                     
                     
                     Button {
-                        let v = PaywallAB.shared.variant()
-                        Analytics.logEvent("paywall_cta_tap", parameters: ["variant": v.rawValue])
-                        
-                        let plan: PaywallPlan = viewModel.selectedPlan
                         let variant = PaywallAB.shared.variant().rawValue
-                        let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
-                        //let plan = viewModel.selectedPlan
+                                let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
+                                let plan    = viewModel.selectedPlan
+
+                                Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
+                                                               plan: plan.analyticsValue, onboardId: onboardId)
                         Task {
                             await viewModel.buyWithRevenueCat(
-                                plan: plan, variant: variant,
-                                entryPoint: entryPoint, sessionId: sessionId
-                            )
-                            if viewModel.purchaseSucceeded { onFinish() }
-                        }
+                                            plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId
+                                        )
+                            if viewModel.purchaseSucceeded {
+                                            Telemetry.shared.purchaseSuccess(
+                                                variant: variant, plan: plan.analyticsValue,
+                                                packageId: plan.analyticsValue, // або свій packageId
+                                                sessionId: sessionId,
+                                                onboardId: onboardId
+                                            )
+                                            onFinish()
+                                        } else {
+                                            Telemetry.shared.purchaseError(
+                                                variant: variant, plan: plan.analyticsValue,
+                                                packageId: plan.analyticsValue,
+                                                rcCode: nil, message: "cancel_or_fail",
+                                                sessionId: sessionId,
+                                                onboardId: onboardId
+                                            )
+                                        }                        }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
                         Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
@@ -220,7 +235,7 @@ struct PaywallThirdView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity /*isLarge ? 400 : 370*/)
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                        .offset(y: -80)
+                        .offset(y: -60)
                         .allowsHitTesting(false) // ⬅︎ важливо
                 )
                 
@@ -252,13 +267,12 @@ struct PaywallThirdView: View {
         .onAppear {
             
             if !didLogOpen {
-                Telemetry.shared.paywallBOpen()   // ⬅️ головний івент
-                didLogOpen = true
-            }
-            Purchases.logLevel = .debug
-            Task { await viewModel.loadPricing()  }
-            //let v = PaywallAB.shared.variant()
-            //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
+                let variant = PaywallAB.shared.variant().rawValue
+                        let entry = paywallGate.currentContext?.rawValue ?? "unknown"
+                Telemetry.shared.paywallExposure(variant: variant, entryPoint: entry, onboardId: onboardId)
+                   didLogOpen = true
+               }
+               Task { await viewModel.loadPricing() }
         }
         
     }
@@ -268,6 +282,7 @@ struct PaywallThirdView: View {
 struct HorizontalThirdText: View {
     let title: String
     let image: String
+    let isLarge: Bool
     private let color = Color(red: 81/255, green: 132/255, blue: 234/255)
     
     var body: some View {
@@ -286,8 +301,8 @@ struct HorizontalThirdText: View {
 //                        )
                 )
             Text(title)
-                .font(.system(size: 17))
-                .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+                .font(.system(size: isLarge ? 20 : 17))
+                .foregroundStyle(Color(red: 240 / 255, green: 240 / 255, blue: 240 / 255))
 //                .foregroundStyle(Color(red: 170 / 255, green: 178 / 255, blue: 191 / 255))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
