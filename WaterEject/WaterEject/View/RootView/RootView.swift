@@ -21,14 +21,14 @@ struct RootView: View {
                 })
                 .onAppear { paywallGate.currentContext = .startViewAuto }
         case .onboarding:
-            OnboardingFlowView()
+//            OnboardingFlowView()
             
-//            OnboardingAB.shared
-//                          .assignedOnboardingView() // ← ось тут
-//                          .onAppear {
-//                              // Якщо потрібен RC для свіжих часток:
-//                              OnboardingAB.shared.fetchRemoteConfig()
-//                          }
+            OnboardingAB.shared
+                          .assignedOnboardingView() // ← ось тут
+                          .onAppear {
+                              // Якщо потрібен RC для свіжих часток:
+                              OnboardingAB.shared.fetchRemoteConfig()
+                          }
         case .mainTabbar:
             TabBarView()
         }

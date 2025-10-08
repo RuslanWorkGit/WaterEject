@@ -18,10 +18,13 @@ struct PaywallThirdView: View {
     @State private var didLogOpen = false
     @EnvironmentObject private var paywallGate: PaywallGate
     @State private var sessionId = UUID().uuidString
-    @State private var player: AVPlayer = {
-        let url = Bundle.main.url(forResource: "Video", withExtension: "mp4")!
-        return AVPlayer(url: url)
-    }()
+//    @State private var player: AVPlayer = {
+////        let url = Bundle.main.url(forResource: "Video", withExtension: "mp4")!
+//        let url = Bundle.main.url(forResource: "NewVideo", withExtension: "mp4")!
+//        return AVPlayer(url: url)
+//    }()
+    @State private var player = AVQueuePlayer()
+    @State private var playerLooper: AVPlayerLooper?
     @State private var isExiting = false
     
     @State private var appearVideo = false
@@ -48,43 +51,13 @@ struct PaywallThirdView: View {
                 
                 Color.black
                     .ignoresSafeArea()
-                
-                
-                AspectFillPlayerView(player: player)
-                    .onAppear {
-                        AudioSessionManager.activatePlayback(duckOthers: true)
-                        player.isMuted = true
-                        player.automaticallyWaitsToMinimizeStalling = true
-                            player.currentItem?.preferredForwardBufferDuration = 2
-                            player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
-
-                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
-                              player.play()
-                            }
-                    }
-                    .onDisappear {
-                        player.pause()
-                        player.seek(to: .zero)
-                        AudioSessionManager.deactivate()
-                      }
-
-                
-                    .frame(maxWidth: .infinity, maxHeight: isLarge ? 400 : 370)
-                    .allowsHitTesting(false)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .ignoresSafeArea()
-                    .offset(y: 40)
-                
-//                    .opacity(appearVideo ? 1 : 0)
-//                    .scaleEffect(appearVideo ? 1.0 : 0.985)
-//                    .blur(radius: appearVideo ? 0 : 2)
-//                    .animation(.easeOut(duration: 0.45), value: appearVideo)
+            
                 
                 VStack(alignment: .center) {
                     
 
                     
-                    Spacer()
+                    
                     
                     (
                         Text("Premium Access")
@@ -94,7 +67,8 @@ struct PaywallThirdView: View {
                     .font(.system(size: 32, weight: .bold))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 12)
+                    .padding(.top, 20)
                     
                     //.opacity(appearTitle ? 1 : 0)
 //                    .offset(y: appearTitle ? 0 : 8)
@@ -111,6 +85,8 @@ struct PaywallThirdView: View {
 //                    .opacity(appearList ? 1 : 0)
                     .offset(y: appearList ? 0 : 10)
                     .animation(.easeOut(duration: 0.5), value: appearList)
+                    
+                    Spacer()
                     
                     VStack(spacing: 12) {
                         PaywallThirdPlanCard(
@@ -133,6 +109,7 @@ struct PaywallThirdView: View {
                     .padding(.top, isSmall ? 12 : isLarge ? 60 : 40)
                     .padding(.horizontal, 14)
                     .padding(.bottom, isSmall ? 12 : isLarge ? 48 : 36)
+            
                     
 //                    .opacity(appearCards ? 1 : 0)
                     //.scaleEffect(appearCards ? 1.0 : 0.99)
@@ -176,7 +153,8 @@ struct PaywallThirdView: View {
                             .foregroundColor(Color(.gray))
                         Text("Cancel Anytime. Secure with App Store.")
                             .font(.system(size: 13))
-                            .foregroundColor(Color(.gray))
+                            .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+//                            .foregroundColor(Color(.gray))
                             .multilineTextAlignment(.center)
                     }
                     .padding(0)
@@ -187,7 +165,8 @@ struct PaywallThirdView: View {
                             Task { await viewModel.restorePurchases() }
                         }
                         .font(.footnote)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+//                        .foregroundColor(.gray)
                         
                         Button("Terms") {
                             
@@ -196,7 +175,8 @@ struct PaywallThirdView: View {
                             
                         }
                         .font(.footnote)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+//                        .foregroundColor(.gray)
                         
                         Button("Privacy") {
                             
@@ -204,8 +184,10 @@ struct PaywallThirdView: View {
                             //                            isPresentingWebView = true
                             
                         }
+                        
                         .font(.footnote)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+//                        .foregroundColor(.gray)
                     }
                     
                     
@@ -214,9 +196,33 @@ struct PaywallThirdView: View {
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
-                //.padding(.top, isSmall ? 30 : isLarge ? 60 : 50)
-                .padding(.bottom, 24)
-                
+                .padding(.bottom, 8)
+                .background(
+                    AspectFillPlayerView(player: player)
+                        .onAppear {
+                            AudioSessionManager.activatePlayback(duckOthers: true)
+                            player.isMuted = true
+                            player.automaticallyWaitsToMinimizeStalling = true
+                            let url = Bundle.main.url(forResource: "NewVideo", withExtension: "mp4")!
+                                let item = AVPlayerItem(url: url)
+                            playerLooper = AVPlayerLooper(player: player, templateItem: item)
+
+                            player.currentItem?.preferredForwardBufferDuration = 2
+                            player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+//                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                                player.play()
+//                            }
+                        }
+                        .onDisappear {
+                            player.pause()
+                            player.seek(to: .zero)
+                            AudioSessionManager.deactivate()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity /*isLarge ? 400 : 370*/)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .offset(y: -80)
+                        .allowsHitTesting(false) // ⬅︎ важливо
+                )
                 
                 
             }
@@ -238,8 +244,7 @@ struct PaywallThirdView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
-        //.opacity(isExiting ? 1 : 0)
-        //.animation(.easeInOut(duration: exitDuration), value: isExiting)
+
         
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
@@ -256,25 +261,6 @@ struct PaywallThirdView: View {
             //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
         
-        // onAppear
-        .onAppear {
-            // основний фейд контейнера можеш лишити як є:
-//            isExiting = false
-//            withAnimation(.easeOut(duration: 0.6)) { isExiting = true }
-//
-//            // стагер всередині:
-//            appearVideo = false; appearTitle = false; appearList = false; appearCards = false
-//            withAnimation(.easeOut(duration: 0.45)) { appearVideo = true }
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
-//                withAnimation(.easeOut(duration: 0.45)) { appearTitle = true }
-//            }
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-//                withAnimation(.easeOut(duration: 0.5)) { appearList = true }
-//            }
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-//                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { appearCards = true }
-//            }
-        }
     }
     
 }
@@ -290,6 +276,7 @@ struct HorizontalThirdText: View {
                 .resizable()
                 .frame(width: 16, height: 16)
                 .foregroundStyle(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                
                 .padding(6)                                // розмір “піллюлі”
                 .background(
                     Circle()
@@ -300,7 +287,8 @@ struct HorizontalThirdText: View {
                 )
             Text(title)
                 .font(.system(size: 15))
-                .foregroundStyle(Color(red: 170 / 255, green: 178 / 255, blue: 191 / 255))
+                .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+//                .foregroundStyle(Color(red: 170 / 255, green: 178 / 255, blue: 191 / 255))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -357,13 +345,23 @@ struct PaywallThirdPlanCard: View {
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
             .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255) : Color.clear, lineWidth: 1)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.15))
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.black)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.white.opacity(0.15))
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(
+                        isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255) : .clear,
+                        lineWidth: 1
                     )
-                    .shadow(color: isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.08) : .clear, radius: 8, x: 0, y: 4)
+            )
+            .shadow(
+                color: isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.08) : .clear,
+                radius: 8, x: 0, y: 4
             )
         }
         .buttonStyle(.plain)

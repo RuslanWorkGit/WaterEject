@@ -251,6 +251,16 @@ struct ModesView: View {
                         }
                     }
                 })
+            case .third:
+                PaywallThirdView(onFinish: {
+                    paywallGate.dismissPaywall()
+                    Task {
+                        if let pending = pendingMode, await paywallGate.isPro() {
+                            onStart(pending)
+                            pendingMode = nil
+                        }
+                    }
+                })
             }
         }
     }

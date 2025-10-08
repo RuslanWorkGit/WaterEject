@@ -12,7 +12,9 @@ import RevenueCat
 import SwiftUI
 
 enum PaywallVariant: String, Identifiable {
-    case A, B
+    case third    = "third"  // наш основний
+    case A        = "A"
+    case B        = "B"
     var id: String { rawValue }
 }
 
@@ -24,9 +26,9 @@ final class PaywallAB {
         settings.minimumFetchInterval = 0 // на проді зроби 3600+
         rc.configSettings = settings
         rc.setDefaults([
-            "paywall_share_A": 50 as NSObject,   // % у варіант A
-            "paywall_force": "" as NSObject      // "A"/"B" або ""
-        ])
+                    "paywall_share_A": 50 as NSObject,   // якщо колись повернешся до спліта
+                    "paywall_force":   "third" as NSObject // <- ВСІ бачать PaywallThirdView
+                ])
     }
 
     private let rc = RemoteConfig.remoteConfig()
@@ -45,50 +47,84 @@ final class PaywallAB {
 
     // ❗️Єдина точка, що ставить user property + RC attributes
     private func applyTracking(_ v: PaywallVariant) {
-        Analytics.setUserProperty(v.rawValue, forName: "paywall_variant")
-        Purchases.shared.attribution.setAttributes(["paywall_variant": v.rawValue])
-        
-        let key = "variant_assigned_logged_v1"
+            Analytics.setUserProperty(v.rawValue, forName: "paywall_variant")
+            Purchases.shared.attribution.setAttributes(["paywall_variant": v.rawValue])
+
+            let key = "variant_assigned_logged_v1"
             if !UserDefaults.standard.bool(forKey: key) {
                 Analytics.logEvent("variant_assigned", parameters: ["variant": v.rawValue])
                 UserDefaults.standard.set(true, forKey: key)
             }
-    }
-
+        }
+    // Допоміжний парсер RC-рядка (ігнорує регістр/пробіли)
+       private func parseForcedVariant(_ s: String) -> PaywallVariant? {
+           let t = s.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+           switch t {
+           case "A":      return .A
+           case "B":      return .B
+           case "THIRD", "C", "PAYWALL3": return .third
+           default:       return nil
+           }
+       }
     func variant() -> PaywallVariant {
-        // 1) уже є в кеші
-        if let raw = UserDefaults.standard.string(forKey: storageKey),
-           let v = PaywallVariant(rawValue: raw) {
-            applyTracking(v) // <-- не забуваємо
+            // 1) Якщо у RC заданий форс — він має ПРІОРИТЕТ над кешем
+            if let forced = parseForcedVariant(rc["paywall_force"].stringValue) {
+                UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
+                applyTracking(forced)
+                return forced
+            }
+
+            // 2) Інакше беремо з кешу
+            if let raw = UserDefaults.standard.string(forKey: storageKey),
+               let v = PaywallVariant(rawValue: raw) {
+                applyTracking(v)
+                return v
+            }
+
+            // 3) Якщо форсу немає і кешу немає — зробимо спліт (на майбутнє)
+            let rawShare = rc["paywall_share_A"].numberValue.intValue
+            let shareA = min(max(rawShare, 0), 100)
+            let bucket = abs(stableUserID().hashValue) % 100
+            let v: PaywallVariant = (bucket < shareA) ? .A : .B
+
+            UserDefaults.standard.set(v.rawValue, forKey: storageKey)
+            applyTracking(v)
             return v
         }
 
-        // 2) форс із RC
-        if let forced = PaywallVariant(rawValue: rc["paywall_force"].stringValue) {
-            UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
-            applyTracking(forced)
-            return forced
-        }
-
-        // 3) спліт за RC
-        let rawShare = rc["paywall_share_A"].numberValue.intValue
-        let shareA = min(max(rawShare, 0), 100) // clamp 0...100
-        let bucket = abs(stableUserID().hashValue) % 100
-        let v: PaywallVariant = (bucket < shareA) ? .A : .B
-
-        UserDefaults.standard.set(v.rawValue, forKey: storageKey)
-        applyTracking(v)
-        return v
-    }
 
     func assignedPaywallView(onFinish: @escaping () -> Void) -> AnyView {
-        switch variant() {
-        case .A: return AnyView(PaywallFirstView(onFinish: onFinish))
-        case .B: return AnyView(PaywallSecondView(onFinish: onFinish))
+            switch variant() {
+            case .third:
+                return AnyView(PaywallThirdView(onFinish: onFinish))
+            case .A:
+                return AnyView(PaywallStubView(title: "Paywall A (stub)", onClose: onFinish))
+            case .B:
+                return AnyView(PaywallStubView(title: "Paywall B (stub)", onClose: onFinish))
+            }
+        }
+}
+
+
+// Простенька заглушка, щоб не падало і було що показати
+struct PaywallStubView: View {
+    let title: String
+    let onClose: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 16) {
+                Text(title)
+                    .foregroundStyle(.white)
+                    .font(.title2.bold())
+                Button("Close") { onClose() }
+                    .buttonStyle(.borderedProminent)
+            }
+            .padding()
         }
     }
 }
-
 
 enum PaywallRouter {
     static func presentAssigned(from presenter: UIViewController, onFinish: @escaping () -> Void = {}) {

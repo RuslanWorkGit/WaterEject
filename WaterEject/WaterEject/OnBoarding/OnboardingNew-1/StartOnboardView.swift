@@ -45,7 +45,9 @@ struct StartOnboardView: View {
                                         .opacity(appearScreen ? 1 : 0)
                                         .animation(.spring(response: 0.55, dampingFraction: 0.85), value: appearScreen)
                 
-                LottieView(name: "Water")
+                Image("WaterDrop")
+
+//                LottieView(name: "Water")
                     .frame(width: 60, height: 50)
                     .padding(.bottom, 16)
                     .offset(y: (appearScreen ? 0 : 20))
