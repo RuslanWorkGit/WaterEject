@@ -140,7 +140,12 @@ struct OnboardingFlowViewThree: View {
         case .women:
             WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .paywall:
-            PaywallThirdView(onFinish: finishOnboarding, onboardId: onboardId)
+//            PaywallThirdView(onFinish: finishOnboarding, onboardId: onboardId)
+            PaywallThirdView(
+                    onFinish: finishOnboarding,
+                    onboardId: onboardId,
+                    startDelay: slideDuration + 0.00   // 0.55 s
+                )
         }
     }
 

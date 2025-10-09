@@ -18,11 +18,11 @@ struct PaywallThirdView: View {
     @State private var didLogOpen = false
     @EnvironmentObject private var paywallGate: PaywallGate
     @State private var sessionId = UUID().uuidString
-//    @State private var player: AVPlayer = {
-////        let url = Bundle.main.url(forResource: "Video", withExtension: "mp4")!
-//        let url = Bundle.main.url(forResource: "NewVideo", withExtension: "mp4")!
-//        return AVPlayer(url: url)
-//    }()
+    //    @State private var player: AVPlayer = {
+    ////        let url = Bundle.main.url(forResource: "Video", withExtension: "mp4")!
+    //        let url = Bundle.main.url(forResource: "NewVideo", withExtension: "mp4")!
+    //        return AVPlayer(url: url)
+    //    }()
     @State private var player = AVQueuePlayer()
     @State private var playerLooper: AVPlayerLooper?
     @State private var isExiting = false
@@ -33,16 +33,16 @@ struct PaywallThirdView: View {
     @State private var appearCards = false
     @State private var startDelay: Double = 0.35
     
-
+    
     let onFinish: () -> Void
     let onboardId: String?
     private let exitDuration: Double = 0.6
     
-    init(onFinish: @escaping () -> Void, onboardId: String? = nil) {
-            self.onFinish = onFinish
-            self.onboardId = onboardId
-        }
-    
+    init(onFinish: @escaping () -> Void, onboardId: String? = nil, startDelay: Double = 0.35) {
+        self.onFinish = onFinish
+        self.onboardId = onboardId
+        self._startDelay = State(initialValue: startDelay)
+    }
     var body: some View {
         
         let isSmall = UIScreen.main.bounds.height < 700
@@ -56,7 +56,7 @@ struct PaywallThirdView: View {
                 
                 Color.black
                     .ignoresSafeArea()
-            
+                
                 
                 VStack(alignment: .center) {
                     
@@ -73,8 +73,8 @@ struct PaywallThirdView: View {
                     .padding(.top, 12)
                     
                     //.opacity(appearTitle ? 1 : 0)
-//                    .offset(y: appearTitle ? 0 : 8)
-//                    .animation(.easeOut(duration: 0.45), value: appearTitle)
+                    //                    .offset(y: appearTitle ? 0 : 8)
+                    //                    .animation(.easeOut(duration: 0.45), value: appearTitle)
                     
                     VStack(spacing: isSmall ? 4 : isLarge ? 8 : 4) {
                         HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
@@ -84,7 +84,7 @@ struct PaywallThirdView: View {
                     }
                     .padding(.leading, isLarge ? 70 : 80)
                     
-//                    .opacity(appearList ? 1 : 0)
+                    //                    .opacity(appearList ? 1 : 0)
                     .offset(y: appearList ? 0 : 10)
                     .animation(.easeOut(duration: 0.5), value: appearList)
                     
@@ -111,9 +111,9 @@ struct PaywallThirdView: View {
                     .padding(.top, isSmall ? 12 : isLarge ? 60 : 40)
                     .padding(.horizontal, 14)
                     .padding(.bottom, isSmall ? 12 : isLarge ? 48 : 36)
-            
                     
-//                    .opacity(appearCards ? 1 : 0)
+                    
+                    //                    .opacity(appearCards ? 1 : 0)
                     //.scaleEffect(appearCards ? 1.0 : 0.99)
                     //.animation(.spring(response: 0.5, dampingFraction: 0.85), value: appearCards)
                     
@@ -121,32 +121,32 @@ struct PaywallThirdView: View {
                     
                     Button {
                         let variant = PaywallAB.shared.variant().rawValue
-                                let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
-                                let plan    = viewModel.selectedPlan
-
-                                Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
-                                                               plan: plan.analyticsValue, onboardId: onboardId)
+                        let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
+                        let plan    = viewModel.selectedPlan
+                        
+                        Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
+                                                       plan: plan.analyticsValue, onboardId: onboardId)
                         Task {
                             await viewModel.buyWithRevenueCat(
-                                            plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId
-                                        )
+                                plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId
+                            )
                             if viewModel.purchaseSucceeded {
-                                            Telemetry.shared.purchaseSuccess(
-                                                variant: variant, plan: plan.analyticsValue,
-                                                packageId: plan.analyticsValue, // або свій packageId
-                                                sessionId: sessionId,
-                                                onboardId: onboardId
-                                            )
-                                            onFinish()
-                                        } else {
-                                            Telemetry.shared.purchaseError(
-                                                variant: variant, plan: plan.analyticsValue,
-                                                packageId: plan.analyticsValue,
-                                                rcCode: nil, message: "cancel_or_fail",
-                                                sessionId: sessionId,
-                                                onboardId: onboardId
-                                            )
-                                        }                        }
+                                Telemetry.shared.purchaseSuccess(
+                                    variant: variant, plan: plan.analyticsValue,
+                                    packageId: plan.analyticsValue, // або свій packageId
+                                    sessionId: sessionId,
+                                    onboardId: onboardId
+                                )
+                                onFinish()
+                            } else {
+                                Telemetry.shared.purchaseError(
+                                    variant: variant, plan: plan.analyticsValue,
+                                    packageId: plan.analyticsValue,
+                                    rcCode: nil, message: "cancel_or_fail",
+                                    sessionId: sessionId,
+                                    onboardId: onboardId
+                                )
+                            }                        }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
                         Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
@@ -169,7 +169,7 @@ struct PaywallThirdView: View {
                         Text("Cancel Anytime. Secure with App Store.")
                             .font(.system(size: 13))
                             .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
-//                            .foregroundColor(Color(.gray))
+                        //                            .foregroundColor(Color(.gray))
                             .multilineTextAlignment(.center)
                     }
                     .padding(0)
@@ -181,7 +181,7 @@ struct PaywallThirdView: View {
                         }
                         .font(.footnote)
                         .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
-//                        .foregroundColor(.gray)
+                        //                        .foregroundColor(.gray)
                         
                         Button("Terms") {
                             
@@ -191,7 +191,7 @@ struct PaywallThirdView: View {
                         }
                         .font(.footnote)
                         .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
-//                        .foregroundColor(.gray)
+                        //                        .foregroundColor(.gray)
                         
                         Button("Privacy") {
                             
@@ -202,7 +202,7 @@ struct PaywallThirdView: View {
                         
                         .font(.footnote)
                         .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
-//                        .foregroundColor(.gray)
+                        //                        .foregroundColor(.gray)
                     }
                     
                     
@@ -212,31 +212,56 @@ struct PaywallThirdView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
                 .padding(.bottom, 8)
+                //                .background(
+                //                    AspectFillPlayerView(player: player)
+                //                        .onAppear {
+                //                            AudioSessionManager.activatePlayback(duckOthers: true)
+                //                            player.isMuted = true
+                //                            player.automaticallyWaitsToMinimizeStalling = true
+                //                            let url = Bundle.main.url(forResource: "NewVideo", withExtension: "mp4")!
+                //                                let item = AVPlayerItem(url: url)
+                //                            playerLooper = AVPlayerLooper(player: player, templateItem: item)
+                //
+                //                            player.currentItem?.preferredForwardBufferDuration = 2
+                //                            player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+                ////                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                //                                player.play()
+                ////                            }
+                //                        }
+                //                        .onDisappear {
+                //                            player.pause()
+                //                            player.seek(to: .zero)
+                //                            AudioSessionManager.deactivate()
+                //                        }
+                //                        .frame(maxWidth: .infinity, maxHeight: .infinity /*isLarge ? 400 : 370*/)
+                //                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                //                        .offset(y: -60)
+                //                        .allowsHitTesting(false) // ⬅︎ важливо
+                //                )
                 .background(
                     AspectFillPlayerView(player: player)
+                        .opacity(appearVideo ? 1 : 0)               // ← fade-in
                         .onAppear {
+                            // лише підготовка, без play()
                             AudioSessionManager.activatePlayback(duckOthers: true)
                             player.isMuted = true
                             player.automaticallyWaitsToMinimizeStalling = true
+                            
                             let url = Bundle.main.url(forResource: "NewVideo", withExtension: "mp4")!
-                                let item = AVPlayerItem(url: url)
+                            let item = AVPlayerItem(url: url)
                             playerLooper = AVPlayerLooper(player: player, templateItem: item)
-
+                            
                             player.currentItem?.preferredForwardBufferDuration = 2
                             player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
-//                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
-                                player.play()
-//                            }
                         }
                         .onDisappear {
                             player.pause()
                             player.seek(to: .zero)
                             AudioSessionManager.deactivate()
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity /*isLarge ? 400 : 370*/)
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .offset(y: -60)
-                        .allowsHitTesting(false) // ⬅︎ важливо
+                        .allowsHitTesting(false)
                 )
                 
                 
@@ -245,10 +270,10 @@ struct PaywallThirdView: View {
             Button(action: {
                 let variant = PaywallAB.shared.variant().rawValue
                 let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
-//                Telemetry.shared.paywallClose(
-//                    variant: variant, entryPoint: entryPoint,
-//                    reason: "close_button", sessionId: sessionId
-//                )
+                //                Telemetry.shared.paywallClose(
+                //                    variant: variant, entryPoint: entryPoint,
+                //                    reason: "close_button", sessionId: sessionId
+                //                )
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -259,7 +284,7 @@ struct PaywallThirdView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
-
+        
         
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
@@ -268,11 +293,18 @@ struct PaywallThirdView: View {
             
             if !didLogOpen {
                 let variant = PaywallAB.shared.variant().rawValue
-                        let entry = paywallGate.currentContext?.rawValue ?? "unknown"
+                let entry = paywallGate.currentContext?.rawValue ?? "unknown"
                 Telemetry.shared.paywallExposure(variant: variant, entryPoint: entry, onboardId: onboardId)
-                   didLogOpen = true
-               }
-               Task { await viewModel.loadPricing() }
+                didLogOpen = true
+            }
+            Task { await viewModel.loadPricing() }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                player.play()
+                withAnimation(.easeIn(duration: 0.3)) {
+                    appearVideo = true
+                }
+            }
         }
         
     }
@@ -291,19 +323,19 @@ struct HorizontalThirdText: View {
                 .resizable()
                 .frame(width: 18, height: 18)
                 .foregroundStyle(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
-                
+            
                 .padding(6)                                // розмір “піллюлі”
                 .background(
                     Circle()
                         .fill(color.opacity(0.15))         // напівпрозорий круг
-//                        .overlay(
-//                            Circle().stroke(color.opacity(0.25), lineWidth: 1) // тонка обводка (опц.)
-//                        )
+                    //                        .overlay(
+                    //                            Circle().stroke(color.opacity(0.25), lineWidth: 1) // тонка обводка (опц.)
+                    //                        )
                 )
             Text(title)
                 .font(.system(size: isLarge ? 20 : 17))
                 .foregroundStyle(Color(red: 240 / 255, green: 240 / 255, blue: 240 / 255))
-//                .foregroundStyle(Color(red: 170 / 255, green: 178 / 255, blue: 191 / 255))
+            //                .foregroundStyle(Color(red: 170 / 255, green: 178 / 255, blue: 191 / 255))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -391,7 +423,7 @@ final class PlayerView: UIView {
 
 struct AspectFillPlayerView: UIViewRepresentable {
     let player: AVPlayer
-
+    
     func makeUIView(context: Context) -> PlayerView {
         let v = PlayerView()
         v.playerLayer.player = player
@@ -401,8 +433,8 @@ struct AspectFillPlayerView: UIViewRepresentable {
     }
     func updateUIView(_ uiView: PlayerView, context: Context) {
         if uiView.playerLayer.player !== player {           // ✅ guard
-                    uiView.playerLayer.player = player
-                }
+            uiView.playerLayer.player = player
+        }
     }
 }
 
@@ -410,19 +442,19 @@ enum AudioSessionManager {
     static func activatePlayback(duckOthers: Bool = true) {
         let session = AVAudioSession.sharedInstance()
         do {
-//            try session.setCategory(
-//                .playback,                    // ігнорує тумблер беззвучного режиму
-//                mode: .moviePlayback,
-//                options: duckOthers ? [.duckOthers] : [] // або [.mixWithOthers]
-//            )
+            //            try session.setCategory(
+            //                .playback,                    // ігнорує тумблер беззвучного режиму
+            //                mode: .moviePlayback,
+            //                options: duckOthers ? [.duckOthers] : [] // або [.mixWithOthers]
+            //            )
             try session.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
-
+            
             try session.setActive(true)
         } catch {
             print("Audio session error:", error)
         }
     }
-
+    
     static func deactivate() {
         do { try AVAudioSession.sharedInstance().setActive(false) }
         catch { print("Deactivate error:", error) }
@@ -432,5 +464,5 @@ enum AudioSessionManager {
 #Preview(body: {
     PaywallThirdView(onFinish: {print("hello")})
 })
- 
+
 
