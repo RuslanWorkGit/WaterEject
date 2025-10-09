@@ -131,7 +131,7 @@ struct StartView: View {
             case .B:
                 PaywallSecondView(onFinish: { paywallGate.dismissPaywall() })
             case .third:
-                PaywallThirdView(flowId: "", onFinish: { paywallGate.dismissPaywall() })
+                PaywallThirdView(onFinish: { paywallGate.dismissPaywall() })
             }
         }
         
