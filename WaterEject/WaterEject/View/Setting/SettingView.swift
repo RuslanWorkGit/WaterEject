@@ -52,41 +52,41 @@ struct SettingView: View {
                             }
                             .buttonStyle(PillButtonStyle())
                         }
+//                        
+//                        Text("Help center")
+//                            .font(.system(size: 20, weight: .bold))
+//                            .foregroundStyle(Color.gray)
                         
-                        Text("Help center")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(Color.gray)
-                        
-                        VStack(spacing: 12) {
-                            Button("FirstOnboard") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showFirstOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                            Button("SecondOnboard") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showSecondOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                            Button("ThirdOnboard") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showThirdOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                            Button("OldOnboard") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showOldOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                        }
+//                        VStack(spacing: 12) {
+//                            Button("FirstOnboard") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showFirstOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                            
+//                            Button("SecondOnboard") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showSecondOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                            
+//                            Button("ThirdOnboard") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showThirdOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                            
+//                            Button("OldOnboard") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showOldOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                            
+//                        }
    
 
                     }

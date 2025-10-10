@@ -44,6 +44,7 @@ struct CleaningModeCard: View {
     let deviceColor: Color
     let freq: String
     let time: String
+    let isSmall: Bool
     let onModeAction: (CleaningMode) -> Void
     
     var body: some View {
@@ -62,12 +63,12 @@ struct CleaningModeCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             Text(mode.modeName)
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(.system(size: isSmall ? 14 : 18, weight: .semibold))
                                 .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                             
                         }
                         Text(mode.explainText)
-                            .font(.system(size: 14))
+                            .font(.system(size: isSmall ? 12 : 14))
                             .foregroundColor(Color.white.opacity(0.55))
                     }
                     .padding(.bottom, 16)
@@ -79,18 +80,18 @@ struct CleaningModeCard: View {
                     Image(deviceIcon)
                     
                     Text(deviceName)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.system(size: isSmall ? 14 : 15, weight: .medium))
                         .foregroundStyle(deviceColor)
                     Text("•")
-                        .font(.system(size: 15))
+                        .font(.system(size: isSmall ? 14 : 15))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                     Text(freq)
-                        .font(.system(size: 15))
+                        .font(.system(size: isSmall ? 14 : 15))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                     Spacer()
                     Text(time)
                     //.font(.system(size: 12))
-                        .font(.system(size: 12, weight: .regular))
+                        .font(.system(size: isSmall ? 10 : 12, weight: .regular))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 5)
@@ -108,7 +109,8 @@ struct CleaningModeCard: View {
                 RoundedRectangle(cornerRadius: 18)
                     .stroke(Color.white.opacity(0.05), lineWidth: 1)
             )
-            .padding(.horizontal, 24)
+//            .padding(.horizontal, 24)
+            //.padding(.horizontal, isSmall ? 8 : 0)
             .padding(.vertical, 6)
         }
         
@@ -131,60 +133,74 @@ struct ModesView: View {
     let onStart: (CleaningMode) -> Void
     
     var body: some View {
+        
+        let isSmall = UIScreen.main.bounds.height < 700
+        let isMini = UIScreen.main.bounds.height < 850
+        let isLarge = UIScreen.main.bounds.height > 900
+        
         ZStack {
             Background()
-            
-            VStack(spacing: 28) {
-                
-                // --- Контент списку режимів ---
-                CleaningModeCard(
-                    icon: "Drop",
-                    mode: .sonicPulse,
-                    deviceIcon: "SmallDynamic",
-                    deviceName: "Speaker",
-                    deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in startIfAllowed(mode) }
-                )
-                
-                CleaningModeCard(
-                    icon: "Dynamic",
-                    mode: .nanoShake,
-                    deviceIcon: "SmallDynamic",
-                    deviceName: "Speaker",
-                    deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in startIfAllowed(mode) }
-                )
-                
-                CleaningModeCard(
-                    icon: "Drop",
-                    mode: .dynamicEject,
-                    deviceIcon: "SmallDrop",
-                    deviceName: "Water",
-                    deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in startIfAllowed(mode) }
-                )
-                
-                CleaningModeCard(
-                    icon: "Drop",
-                    mode: .hydroGuard,
-                    deviceIcon: "SmallWave",
-                    deviceName: "Speaker",
-                    deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
-                    freq: "175HZ Vibro",
-                    time: "25 seconds",
-                    onModeAction: { mode in startIfAllowed(mode) }
-                )
-                
-                Spacer()
+            ScrollView {
+                VStack(spacing: 28) {
+                    
+                    // --- Контент списку режимів ---
+                    CleaningModeCard(
+                        icon: "Drop",
+                        mode: .sonicPulse,
+                        deviceIcon: "SmallDynamic",
+                        deviceName: "Speaker",
+                        deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
+                    
+                    CleaningModeCard(
+                        icon: "Dynamic",
+                        mode: .nanoShake,
+                        deviceIcon: "SmallDynamic",
+                        deviceName: "Speaker",
+                        deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
+                    
+                    CleaningModeCard(
+                        icon: "Drop",
+                        mode: .dynamicEject,
+                        deviceIcon: "SmallDrop",
+                        deviceName: "Water",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
+                    
+                    CleaningModeCard(
+                        icon: "Drop",
+                        mode: .hydroGuard,
+                        deviceIcon: "SmallWave",
+                        deviceName: "Speaker",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
+                        freq: "175HZ Vibro",
+                        time: "25 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
+                    
+                    
+                }
+                .padding(.top, 32)
+               // .padding(.horizontal, isSmall ? 32 : isLarge ? 4 : 8)
             }
-            .padding(.top, 32)
-            .padding(.horizontal, 4)
+//            .padding(.horizontal, 4)
+            .contentMargins(.horizontal, isSmall ? 48 : isMini ? 40 : isLarge ? 16 : 32)
+            //.contentMargins(.horizontal, 24)
+            .scrollIndicators(.never)
         }
 
         .navigationBarBackButtonHidden(true)
