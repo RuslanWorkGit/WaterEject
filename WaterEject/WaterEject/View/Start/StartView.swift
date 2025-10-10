@@ -17,6 +17,8 @@ struct StartView: View {
     let mode: CleaningMode
     
     var body: some View {
+        let isLarge = UIScreen.main.bounds.height > 900
+        
         ZStack {
             Background(startCleaning: viewModel.startCleaning)
             
@@ -99,7 +101,7 @@ struct StartView: View {
                 .padding(.bottom, 24)
                 
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, isLarge ? 0 : 16)
             
         }
         

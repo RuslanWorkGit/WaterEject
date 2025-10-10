@@ -125,6 +125,7 @@ struct VibroView: View {
             
             
         }
+        .padding(.horizontal, 8)
         .opacity(appearScreen && !isExiting ? 1 : 0)
         
         .opacity(isExiting ? 0 : 1)
