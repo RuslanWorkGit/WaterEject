@@ -73,7 +73,19 @@ struct OnboardingFlowViewTwo: View {
             .task {
                 onbLastShownTS = Date().timeIntervalSince1970
                 Telemetry.shared.onboardFlowMark(.v32)
+                Telemetry.shared.onbFlowStart(flowId: flowId)
+                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
             }
+        }
+    }
+    
+    // MARK: - Screen IDs для аналітики
+    private func screenId(for step: OnboardingStepTwo) -> String {
+        switch step {
+        case .start:  return "start"
+        case .wallet: return "wallet"
+        case .women:  return "women"
+        case .paywall:return "paywall"
         }
     }
 

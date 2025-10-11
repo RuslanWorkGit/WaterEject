@@ -12,7 +12,9 @@ import RevenueCat
 import SwiftUI
 
 enum OnboardingVariant: String, Identifiable, CaseIterable {
-    case A, B, C
+    case A = "Onb_3.1"
+    case B = "Onb_3.2"
+    case C = "Onb_3.3"
     var id: String { rawValue }
 }
 

@@ -117,12 +117,13 @@ final class PaywallViewModel: ObservableObject {
     
     
     // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
-    func buyWithRevenueCat(plan: PaywallPlan, variant: String, entryPoint: String, sessionId: String) async {
+    func buyWithRevenueCat(plan: PaywallPlan, variant: String, entryPoint: String, sessionId: String, onboardId: String?, paywallId: String) async {
+        let paywallId = "pw_3.0"
         guard let pkg = packageByPlan[plan] else {
             errorMessage = "Product not found"
             Telemetry.shared.purchaseResult(
                 variant: variant, status: "error", rcCode: -2,
-                packageId: plan.productID, pricePaid: nil, currency: nil, sessionId: sessionId
+                packageId: plan.productID, pricePaid: nil, currency: nil, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
             )
             return
         }
@@ -157,34 +158,34 @@ final class PaywallViewModel: ObservableObject {
                 Telemetry.shared.purchaseResult(
                     variant: variant, status: "success", rcCode: nil,
                     packageId: p.productIdentifier, pricePaid: price, currency: currency,
-                    sessionId: sessionId
+                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                 )
-                
-                Telemetry.shared.paywallPurchaseSuccess(   // НОВИЙ яскравий івент
-                        variant: variant,
-                        entryPoint: entryPoint,
-                        packageId: p.productIdentifier,
-                        price: price,
-                        currency: currency,
-                        transactionId: txId,
-                        sessionId: sessionId
-                    )
+//                
+//                Telemetry.shared.paywallPurchaseSuccess(   // НОВИЙ яскравий івент
+//                        variant: variant,
+//                        entryPoint: entryPoint,
+//                        packageId: p.productIdentifier,
+//                        price: price,
+//                        currency: currency,
+//                        transactionId: txId,
+//                        sessionId: sessionId
+//                    )
             } else {
                 errorMessage = "Subscription not active"
                 Telemetry.shared.purchaseResult(
                     variant: variant, status: "error", rcCode: -3,
                     packageId: p.productIdentifier, pricePaid: nil, currency: currency,
-                    sessionId: sessionId
+                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                 )
                 
-                Telemetry.shared.paywallPurchaseError(     // НОВИЙ для помилки
-                        variant: variant,
-                        entryPoint: entryPoint,
-                        packageId: p.productIdentifier,
-                        rcCode: -3,
-                        message: "Subscription not active",
-                        sessionId: sessionId
-                    )
+//                Telemetry.shared.paywallPurchaseError(     // НОВИЙ для помилки
+//                        variant: variant,
+//                        entryPoint: entryPoint,
+//                        packageId: p.productIdentifier,
+//                        rcCode: -3,
+//                        message: "Subscription not active",
+//                        sessionId: sessionId
+//                    )
             }
         } catch {
             let ns = error as NSError
@@ -194,7 +195,7 @@ final class PaywallViewModel: ObservableObject {
             Telemetry.shared.purchaseResult(
                 variant: variant, status: status, rcCode: rcCode,
                 packageId: p.productIdentifier, pricePaid: nil, currency: currency,
-                sessionId: sessionId
+                sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
             )
             if status == "error" {
                 Telemetry.shared.paywallPurchaseError(

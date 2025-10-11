@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct OnboardingFlowViewThree: View {
-    
+    private let flowId = "onb_3.3"
     private let onboardId = OnboardTag.v33.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
@@ -74,7 +74,20 @@ struct OnboardingFlowViewThree: View {
             .task {
                 onbLastShownTS = Date().timeIntervalSince1970
                 Telemetry.shared.onboardFlowMark(.v33)
+                Telemetry.shared.onbFlowStart(flowId: flowId)
+                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
             }
+        }
+    }
+    
+    // MARK: - Screen IDs для аналітики
+    private func screenId(for step: OnboardingStepThree) -> String {
+        switch step {
+        case .device: return "device"
+        case .start:  return "start"
+        case .test: return "test"
+        case .women:  return "women"
+        case .paywall:return "paywall"
         }
     }
 

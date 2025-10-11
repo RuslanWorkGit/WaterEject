@@ -94,10 +94,12 @@ struct PaywallSecondView: View {
                         let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
                         //let plan = viewModel.selectedPlan
                         Task {
-                            await viewModel.buyWithRevenueCat(
-                                plan: plan, variant: variant,
-                                entryPoint: entryPoint, sessionId: sessionId
-                            )
+//                            let paywallId = "pw_2.0"
+//
+//                            await viewModel.buyWithRevenueCat(
+//                                plan: plan, variant: variant,
+//                                entryPoint: entryPoint, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
+//                            )
                             if viewModel.purchaseSucceeded { onFinish() }
                         }
                     } label: {

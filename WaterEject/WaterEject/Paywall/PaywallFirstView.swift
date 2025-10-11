@@ -115,12 +115,12 @@ struct PaywallFirstView: View {
                                     let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
                                     let plan = viewModel.selectedPlan
                                     Task {
-                                        await viewModel.buyWithRevenueCat(
-                                            plan: plan,
-                                            variant: variant,
-                                            entryPoint: entryPoint,
-                                            sessionId: sessionId
-                                        )
+//                                        await viewModel.buyWithRevenueCat(
+//                                            plan: plan,
+//                                            variant: variant,
+//                                            entryPoint: entryPoint,
+//                                            sessionId: sessionId
+//                                        )
                                         if viewModel.purchaseSucceeded { onFinish() }
                                     }
 

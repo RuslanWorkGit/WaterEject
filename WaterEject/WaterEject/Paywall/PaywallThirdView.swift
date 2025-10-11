@@ -127,8 +127,9 @@ struct PaywallThirdView: View {
                         Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
                         Task {
+                            let paywallId = "pw_3.0"
                             await viewModel.buyWithRevenueCat(
-                                plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId
+                                plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                             )
                             if viewModel.purchaseSucceeded {
                                 Telemetry.shared.purchaseSuccess(
@@ -270,10 +271,10 @@ struct PaywallThirdView: View {
             Button(action: {
                 let variant = PaywallAB.shared.variant().rawValue
                 let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
-                //                Telemetry.shared.paywallClose(
-                //                    variant: variant, entryPoint: entryPoint,
-                //                    reason: "close_button", sessionId: sessionId
-                //                )
+                                Telemetry.shared.paywallClose(
+                                    variant: variant, entryPoint: entryPoint,
+                                    reason: "close_button", sessionId: sessionId
+                                )
                 onFinish()
             }) {
                 Image(systemName: "xmark")

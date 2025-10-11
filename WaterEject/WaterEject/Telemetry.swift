@@ -424,16 +424,23 @@ extension Telemetry {
         ])
     }
     func purchaseResult(variant: String, status: String, rcCode: Int?, packageId: String,
-                        pricePaid: Double?, currency: String?, sessionId: String) {
-        logRaw("Purchase_Result", params: [
-            "variant": variant, "status": status, "rc_code": rcCode ?? -1,
-            "package_id": packageId, "price_paid": pricePaid ?? 0,
-            "currency": currency ?? "NA", "paywall_session_id": sessionId
-        ])
-        if status == "success", let value = pricePaid, let cur = currency {
-            // стандартний GA4 purchase (дає revenue-метрики)
-            Analytics.logEvent("purchase", parameters: ["value": value, "currency": cur])
-        }
+                        pricePaid: Double?, currency: String?, sessionId: String, onboardId: String?, paywallId: String) {
+        
+        var p = baseParams()
+            p["variant"] = variant
+            p["status"] = status
+            p["rc_code"] = rcCode ?? -1
+            p["package_id"] = packageId
+            p["price_paid"] = pricePaid ?? 0
+            p["currency"] = currency ?? "NA"
+            p["paywall_session_id"] = sessionId
+            if let onboardId { p["onboard_id"] = onboardId }  // зв’язок з онбордом
+            p["paywall_id"] = paywallId                       // явна версія пейвола (3.0)
+
+            logRaw("Purchase_Result", params: p)
+            if status == "success", let v = pricePaid, let cur = currency {
+                Analytics.logEvent("purchase", parameters: ["value": v, "currency": cur]) // revenue
+            }
     }
 }
 
