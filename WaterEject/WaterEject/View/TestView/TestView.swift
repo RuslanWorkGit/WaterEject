@@ -65,7 +65,7 @@ struct TestView: View {
                 }
                 .frame(height: 140)
                 .padding(.leading, 8)
-                .padding(.top, -10)
+                //.padding(.top, -10)
                 
                 switch viewModel.mode {
                 case .stereo:

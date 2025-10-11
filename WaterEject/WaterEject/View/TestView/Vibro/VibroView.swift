@@ -29,19 +29,22 @@ struct VibroView: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            ZStack {
-                Image("Lines")
-                
-                VStack(spacing: 15) {
-                    Text("Vibro")
-                        .font(.system(size: 80, weight: .bold))
-                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
-                    ZStack {
-                        Image("Heart")
-                    }
-                }
+//            ZStack {
+//                Image("Lines")
+//                
+//                VStack(spacing: 15) {
+//                    Text("Vibro")
+//                        .font(.system(size: 80, weight: .bold))
+//                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+//                    ZStack {
+//                        Image("Heart")
+//                    }
+//                }
+//                .offset(y: -20)
+//            }
+            LoudnessBlockTwo()
+                //.padding(.horizontal, 16)
                 .offset(y: -20)
-            }
             
             Text("Patern")
                 .font(.system(size: 14))
@@ -185,6 +188,36 @@ struct VibroCard: View {
     }
 }
 
+struct LoudnessBlockTwo: View {
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            block(font: 80, waveMaxH: 180)
+            block(font: 64, waveMaxH: 160)
+            block(font: 52, waveMaxH: 130)
+            block(font: 44, waveMaxH: 110)
+        }
+    }
+
+    @ViewBuilder
+    private func block(font: CGFloat, waveMaxH: CGFloat) -> some View {
+        ZStack {
+            Image("Lines")
+                .resizable()/*.scaledToFit().frame(maxHeight: waveMaxH)*/
+
+            VStack(spacing: 15) {
+                Text("Vibro")
+                    .font(.system(size: font, weight: .bold))
+                    .foregroundStyle(Color(red: 238/255, green: 255/255, blue: 236/255))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+
+                ZStack {
+                    Image("Heart")/*.resizable().scaledToFit().frame(maxHeight: waveMaxH)*/
+                }
+            }
+        }
+    }
+}
 
 // MARK: - Reusable pill button
 

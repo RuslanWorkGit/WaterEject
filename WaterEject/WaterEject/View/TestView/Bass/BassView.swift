@@ -29,20 +29,22 @@ struct BassView: View {
     
     var body: some View {
         
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             ZStack {
-                Image("Lines")
-                
-                VStack(spacing: 15) {
-                    Text("32dB")
-                        .font(.system(size: 80, weight: .bold))
-                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
-                    ZStack {
-                        Image("BlueWave")
-                        Image("BlackWave")
-                    }
-                }
-                .offset(y: -20)
+//                Image("Lines")
+//                
+//                VStack(spacing: 15) {
+//                    Text("32dB")
+//                        .font(.system(size: 80, weight: .bold))
+//                        .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 236 / 255))
+//                    ZStack {
+//                        Image("BlueWave")
+//                        Image("BlackWave")
+//                    }
+//                }
+                LoudnessBlock()
+                    //.padding(.horizontal, 16)
+                    .offset(y: -20)
             }
             
             HStack(spacing: 56) {
@@ -72,7 +74,7 @@ struct BassView: View {
                 }
             }
             .offset(y: -40)
-            .padding(.bottom, -20)
+            //.padding(.bottom, -20)
             
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 16),
                                 GridItem(.flexible(), spacing: 16)],
@@ -122,6 +124,39 @@ struct BassView: View {
     }
     
 }
+
+struct LoudnessBlock: View {
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            block(font: 80, waveMaxH: 200)
+            block(font: 64, waveMaxH: 160)
+            block(font: 52, waveMaxH: 130)
+            block(font: 44, waveMaxH: 110)
+        }
+    }
+
+    @ViewBuilder
+    private func block(font: CGFloat, waveMaxH: CGFloat) -> some View {
+        ZStack {
+            Image("Lines")
+                .resizable()/*.scaledToFit().frame(maxHeight: waveMaxH)*/
+
+            VStack(spacing: 15) {
+                Text("32dB")
+                    .font(.system(size: font, weight: .bold))
+                    .foregroundStyle(Color(red: 238/255, green: 255/255, blue: 236/255))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+
+                ZStack {
+                    Image("BlueWave").resizable().scaledToFit().frame(maxHeight: waveMaxH)
+                    Image("BlackWave").resizable().scaledToFit().frame(maxHeight: waveMaxH)
+                }
+            }
+        }
+    }
+}
+
 
 struct TestClipCard: View {
     let title: String
@@ -203,7 +238,7 @@ struct TestClipCard: View {
                 .padding(18)
             }
             // ВАЖЛИВО: робимо клікабельною всю картку
-            .frame(maxWidth: .infinity, minHeight: 84)
+            .frame(maxWidth: .infinity, minHeight: 80)
             .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(alignment: .topTrailing) {
                 if isFinished {
