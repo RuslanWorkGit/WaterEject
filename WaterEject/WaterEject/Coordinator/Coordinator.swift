@@ -12,12 +12,13 @@ import SwiftUI
 final class AppCoordinator: ObservableObject {
     
     enum Screen {
+        case boot
         case paywall
         case onboarding
         case mainTabbar
     }
     
-    @Published var currentScreen: Screen = .mainTabbar
+    @Published var currentScreen: Screen = .boot
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
     
@@ -29,8 +30,6 @@ final class AppCoordinator: ObservableObject {
                 self.currentScreen = .mainTabbar
                 return
             }
-
-            // показати онбординг, якщо його ще не бачили або сплив «cooldown»
             if !hasSeenOnboarding || self.shouldResurfaceOnboarding() {
                 self.currentScreen = .onboarding
             } else {

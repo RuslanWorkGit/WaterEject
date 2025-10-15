@@ -11,26 +11,32 @@ struct RootView: View {
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     @EnvironmentObject var coordinator: AppCoordinator
     @EnvironmentObject var paywallGate: PaywallGate
-
+    
     var body: some View {
-        switch coordinator.currentScreen {
-        case .paywall:
-            PaywallAB.shared
-                .assignedPaywallView(onFinish: {
-                    coordinator.showMainTabbar()       // ✅ закрили пейвол → таббар
-                })
-                .onAppear { paywallGate.currentContext = .startViewAuto }
-        case .onboarding:
-//            OnboardingFlowView()
-            
-            OnboardingAB.shared
-                          .assignedOnboardingView() // ← ось тут
-                          .onAppear {
-                              // Якщо потрібен RC для свіжих часток:
-                              OnboardingAB.shared.fetchRemoteConfig()
-                          }
-        case .mainTabbar:
-            TabBarView()
+        Group {
+            switch coordinator.currentScreen {
+            case .boot:
+                // Можна поставити свій SplashView/лого/чорний фон
+                Color.black.ignoresSafeArea()
+            case .paywall:
+                PaywallAB.shared
+                    .assignedPaywallView(onFinish: {
+                        coordinator.showMainTabbar()       // ✅ закрили пейвол → таббар
+                    })
+                    .onAppear { paywallGate.currentContext = .startViewAuto }
+            case .onboarding:
+                //            OnboardingFlowView()
+                
+                OnboardingAB.shared
+                    .assignedOnboardingView() // ← ось тут
+                    .onAppear {
+                        // Якщо потрібен RC для свіжих часток:
+                        OnboardingAB.shared.fetchRemoteConfig()
+                    }
+            case .mainTabbar:
+                TabBarView()
+            }
         }
+        .animation(nil, value: coordinator.currentScreen)
     }
 }

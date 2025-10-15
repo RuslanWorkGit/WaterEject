@@ -32,6 +32,12 @@ struct PaywallThirdView: View {
     @State private var appearList  = false
     @State private var appearCards = false
     @State private var startDelay: Double = 0.35
+    @State private var featuresWidth: CGFloat = 0
+    
+    @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    
+    
     
     
     let onFinish: () -> Void
@@ -76,13 +82,36 @@ struct PaywallThirdView: View {
                     //                    .offset(y: appearTitle ? 0 : 8)
                     //                    .animation(.easeOut(duration: 0.45), value: appearTitle)
                     
-                    VStack(spacing: isSmall ? 4 : isLarge ? 8 : 4) {
-                        HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
-                        HorizontalThirdText(title: "5 pro-level sound tests", image: "powermeter", isLarge: isLarge)
-                        HorizontalThirdText(title: "Scientifically proven methods", image: "graduationcap", isLarge: isLarge)
-                        HorizontalThirdText(title: "All future features + No Ads", image: "sparkles", isLarge: isLarge)
+                    GeometryReader { geo in
+                        let screenW = geo.size.width
+                        let pad = max((screenW - featuresWidth) / 2, 16)
+                        VStack {
+                            //Spacer(minLength: 0)
+                            VStack(spacing: isSmall ? 4 : isLarge ? 8 : 4) {
+                                HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
+                                HorizontalThirdText(title: "5 pro-level sound tests", image: "powermeter", isLarge: isLarge)
+                                HorizontalThirdText(title: "Scientifically proven methods", image: "graduationcap", isLarge: isLarge)
+                                HorizontalThirdText(title: "All future features + No Ads", image: "sparkles", isLarge: isLarge)
+                            }
+                            .fixedSize(horizontal: true, vertical: false)   // важливо: беремо фактичну ширину контенту
+                                        .onSizeChange { featuresWidth = $0.width }      // зчитуємо ширину
+                                        .padding(.horizontal, pad)
+                            // контент всередині — по leading:
+                                //.frame(alignment: .center)      // будь-яка бажана ширина блоку
+                            // сам блок — по центру екрана:
+                            //.frame(maxWidth: 520, alignment: .leading)
+                               // .frame(maxWidth: .infinity, alignment: .center) // центрує блок горизонтально
+                            //.multilineTextAlignment(.center)
+                            // Spacer(minLength: 0)
+                            
+                        }
+                        .frame(width: screenW, height: geo.size.height, alignment: .top)
+                        
+                        //features(isLarge: isLarge)
+                        
+                       // .padding(.leading, isLarge ? 40 : 60)
+                        
                     }
-                    .padding(.leading, isLarge ? 70 : 80)
                     
                     //                    .opacity(appearList ? 1 : 0)
                     .offset(y: appearList ? 0 : 10)
@@ -157,19 +186,38 @@ struct PaywallThirdView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                         
-                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+//                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                            .background(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         
+                            .scaleEffect(pulse ? 1.03 : 1.0)
+                                    .shadow(
+                                        color: Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255)
+                                            .opacity(pulse ? 0.45 : 0.0),
+                                        radius: pulse ? 18 : 6, x: 0, y: 0
+                                    )
+                                    .animation(
+                                        reduceMotion ? nil :
+                                                .easeInOut(duration: 0.95).repeatForever(autoreverses: true),
+                                        value: pulse
+                                    )
+                        
                     }
+//                    .overlay {
+//                        if !reduceMotion {
+//                            GleamShine(cornerRadius: 16)   // ⬅️ переливаючий ефект
+//                                .allowsHitTesting(false)
+//                        }
+//                    }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 8)
                     
                     HStack {
                         Image(systemName: "checkmark.shield")
-                            .foregroundColor(Color(.gray))
+                            .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                         Text("Cancel Anytime. Secure with App Store.")
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+                            .font(.system(size: 10))
+                            .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                         //                            .foregroundColor(Color(.gray))
                             .multilineTextAlignment(.center)
                     }
@@ -177,12 +225,15 @@ struct PaywallThirdView: View {
                     
                     
                     HStack(spacing: 30) {
+                        
+
+
                         Button("Restore") {
                             Task { await viewModel.restorePurchases() }
                         }
-                        .font(.footnote)
-                        .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
-                        //                        .foregroundColor(.gray)
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
+
                         
                         Button("Terms") {
                             
@@ -190,8 +241,8 @@ struct PaywallThirdView: View {
                             //                            isPresentingWebView = true
                             
                         }
-                        .font(.footnote)
-                        .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                         //                        .foregroundColor(.gray)
                         
                         Button("Privacy") {
@@ -201,8 +252,8 @@ struct PaywallThirdView: View {
                             
                         }
                         
-                        .font(.footnote)
-                        .foregroundStyle(Color(red: 251 / 255, green: 255 / 255, blue: 255 / 255))
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                         //                        .foregroundColor(.gray)
                     }
                     
@@ -291,6 +342,7 @@ struct PaywallThirdView: View {
             SafariView(url: url)
         }
         .onAppear {
+            if !reduceMotion { pulse = true }
             
             if !didLogOpen {
                 let variant = PaywallAB.shared.variant().rawValue
@@ -307,10 +359,143 @@ struct PaywallThirdView: View {
                 }
             }
         }
+        .onDisappear { pulse = false }
         
     }
     
+    @ViewBuilder
+    private func features(isLarge: Bool) -> some View {
+        VStack(alignment: .leading, spacing: isLarge ? 8 : 4) {
+            HorizontalThirdText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
+            HorizontalThirdText(title: "5 pro-level sound tests",     image: "powermeter",          isLarge: isLarge)
+            HorizontalThirdText(title: "Scientifically proven methods", image: "graduationcap",     isLarge: isLarge)
+            HorizontalThirdText(title: "All future features + No Ads",  image: "sparkles",          isLarge: isLarge)
+        }
+        // контент всередині — по leading:
+        //.frame(maxWidth: 360, alignment: .center)      // будь-яка бажана ширина блоку
+        // сам блок — по центру екрана:
+        .frame(maxWidth: .infinity, alignment: .center) // центрує блок горизонтально
+        .multilineTextAlignment(.center)
+    }
+    
+    
+    
 }
+
+// 1) Ключ для передачі розміру
+private struct SizePref: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        let n = nextValue()
+        value = CGSize(width: max(value.width, n.width), height: max(value.height, n.height))
+    }
+}
+
+// 2) Зручний модифікатор
+private extension View {
+    func onSizeChange(_ perform: @escaping (CGSize) -> Void) -> some View {
+        background(
+            GeometryReader { g in
+                Color.clear.preference(key: SizePref.self, value: g.size)
+            }
+        )
+        .onPreferenceChange(SizePref.self, perform: perform)
+    }
+}
+
+//struct GleamShine: View {
+//    var cornerRadius: CGFloat = 16
+//    var tint: Color = .white
+//    var duration: Double = 3
+//    var angle: Double = 22
+//
+//    @State private var travel: CGFloat = -1.2
+//
+//    var body: some View {
+//        GeometryReader { g in
+//            // Діагональна “смуга” більша за кнопку, щоб повністю проходила
+//            let diag = hypot(g.size.width, g.size.height)
+//
+//            LinearGradient(
+//                colors: [.clear, tint.opacity(0.85), .clear],
+//                startPoint: .top, endPoint: .bottom
+//            )
+//            .frame(width: diag * 0.55, height: diag * 1.4)
+//            .rotationEffect(.degrees(angle))
+//            .offset(x: travel * (g.size.width + diag))
+//            .blendMode(.plusLighter)        // м’яке підсвічування
+//            .onAppear {
+//                withAnimation(.linear(duration: duration)
+//                    .repeatForever(autoreverses: false)) {
+//                        travel = 1.2
+//                }
+//            }
+//        }
+//        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+//    }
+//}
+
+struct GleamShine: View {
+    var cornerRadius: CGFloat = 16
+    var tint: Color = .white
+    var duration: Double = 3          // довжина одного проходу
+    var angle: Double = 22            // кут смуги
+    var stagger: Double = 0.8         // ⬅️ коли стартує друга смуга (фаза 0..1)
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var start = Date()
+
+    var body: some View {
+        TimelineView(.animation) { ctx in
+            GeometryReader { g in
+                let w = g.size.width, h = g.size.height
+                let diag = hypot(w, h)
+                let bandW = diag * 0.55
+                let bandH = diag * 1.4
+                let travel = w + diag
+
+                // фаза 0..1
+                let phase = (ctx.date.timeIntervalSince(start) / duration)
+                    .truncatingRemainder(dividingBy: 1)
+
+                // Мінімальний інтервал, щоб друга не накривала першу (з невеликим буфером)
+                let minClearance = (bandW / travel) + 0.06
+                let effectiveStagger = max(stagger, minClearance)   // гарантує, що перша встигає вийти
+
+                ZStack {
+                    band(size: CGSize(width: bandW, height: bandH))
+                        .offset(x: -travel/2 + phase * travel)
+
+                    band(size: CGSize(width: bandW, height: bandH))
+                        .offset(x: -travel/2 + ((phase + effectiveStagger)
+                            .truncatingRemainder(dividingBy: 1)) * travel)
+                }
+                .rotationEffect(.degrees(angle))
+                .frame(width: w, height: h)
+                .opacity(reduceMotion ? 0 : 1)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .allowsHitTesting(false)
+    }
+
+    private func band(size: CGSize) -> some View {
+        LinearGradient(stops: [
+            .init(color: .clear,                 location: 0.00),
+            .init(color: tint.opacity(0.10),     location: 0.38),
+            .init(color: tint.opacity(0.28),     location: 0.50),
+            .init(color: tint.opacity(0.10),     location: 0.62),
+            .init(color: .clear,                 location: 1.00),
+        ], startPoint: .top, endPoint: .bottom)
+        .frame(width: size.width, height: size.height)
+        .blur(radius: 12, opaque: false)
+        .blendMode(.screen)
+        .compositingGroup()
+    }
+}
+
+
+
 
 struct HorizontalThirdText: View {
     let title: String
@@ -340,6 +525,8 @@ struct HorizontalThirdText: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+    
+    
 }
 
 struct PaywallThirdPlanCard: View {
