@@ -30,8 +30,6 @@ struct OnboardingFlowViewOne: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // 1) Постійний фон по актуальному кроку
-                background(for: currentStep).ignoresSafeArea()
 
                 // 2) Старий екран — залишається на місці під час анімації
                 if let p = prevStep {
@@ -154,19 +152,4 @@ struct OnboardingFlowViewOne: View {
         }
     }
 
-    @ViewBuilder
-    private func background(for s: OnboardingStepOne) -> some View {
-        switch s {
-        case .start:
-            LinearGradient(colors: [Color(red: 94/255, green: 148/255, blue: 1),
-                                    Color(red: 56/255, green: 114/255, blue: 229/255)],
-                           startPoint: .top, endPoint: .bottom)
-        case .women, .wallet:
-            LinearGradient(colors: [.white,
-                                    Color(red: 201/255, green: 214/255, blue: 238/255)],
-                           startPoint: .top, endPoint: .bottom)
-        case .paywall:
-            Color.black
-        }
-    }
 }

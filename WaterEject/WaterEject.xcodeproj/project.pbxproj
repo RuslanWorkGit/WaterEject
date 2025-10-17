@@ -143,6 +143,7 @@
 				9BBB1B282E4CCC3D00C15E8C /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				9BDEB9A62E872AD80027F4CA /* XCRemoteSwiftPackageReference "lottie-spm" */,
+				9B5996C02EA29E32001318E7 /* XCRemoteSwiftPackageReference "OnboardFramework" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9BA1E0662E328F970027AD07 /* Products */;
@@ -391,6 +392,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9B5996C02EA29E32001318E7 /* XCRemoteSwiftPackageReference "OnboardFramework" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RuslanWorkGit/OnboardFramework.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.6;
+			};
+		};
 		9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
