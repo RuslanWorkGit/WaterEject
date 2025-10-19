@@ -1,5 +1,5 @@
 {
-  "originHash" : "6ed7ff12e0011cefa50fadc956deceb904385738bf5a8a8e3e7b86d00521f172",
+  "originHash" : "21a647be0ac2fde5027289a39ac3806d1ae9102052c4fd69a7490f94bf2f3e07",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -116,15 +116,6 @@
       "state" : {
         "revision" : "b7e1104502eca3a213b46303391ca4d3bc8ddec1",
         "version" : "2.30910.0"
-      }
-    },
-    {
-      "identity" : "onboardframework",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/RuslanWorkGit/OnboardFramework.git",
-      "state" : {
-        "revision" : "341d5f039479528c9bd48305aa03ce18f43ead8c",
-        "version" : "1.0.6"
       }
     },
     {
