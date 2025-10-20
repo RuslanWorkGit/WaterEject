@@ -144,7 +144,7 @@ struct PaywallThirdView: View {
                         Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
                         Task {
-                            let paywallId = "pw_3.0"
+                            let paywallId = "paywall_v_3.0"
                             await viewModel.buyWithRevenueCat(
                                 plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                             )

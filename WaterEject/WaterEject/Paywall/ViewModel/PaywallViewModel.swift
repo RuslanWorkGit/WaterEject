@@ -118,7 +118,7 @@ final class PaywallViewModel: ObservableObject {
     
     // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
     func buyWithRevenueCat(plan: PaywallPlan, variant: String, entryPoint: String, sessionId: String, onboardId: String?, paywallId: String) async {
-        let paywallId = "pw_3.0"
+        let paywallId = "paywall_v_3.0"
         guard let pkg = packageByPlan[plan] else {
             errorMessage = "Product not found"
             Telemetry.shared.purchaseResult(
