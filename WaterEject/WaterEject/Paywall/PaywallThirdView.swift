@@ -37,13 +37,27 @@ struct PaywallThirdView: View {
     
     let onFinish: () -> Void
     let onboardId: String?
+    let summaryTag: OnboardTag?     // ⬅️ нове: для "Onbord_v_3.x"
+    let stepsVisited: [String]?     // ⬅️ нове: пройдені екрани
     private let exitDuration: Double = 0.6
     
-    init(onFinish: @escaping () -> Void, onboardId: String? = nil, startDelay: Double = 0.35) {
+    init(onFinish: @escaping () -> Void, onboardId: String? = nil, startDelay: Double = 0.35, summaryTag: OnboardTag? = nil, stepsVisited: [String]? = nil) {
         self.onFinish = onFinish
         self.onboardId = onboardId
         self._startDelay = State(initialValue: startDelay)
+        self.summaryTag = summaryTag
+        self.stepsVisited = stepsVisited
     }
+    
+    
+    private func logOnboardSummary(_ status: PaywallStatus) {
+        guard let tag = summaryTag else { return }
+        Telemetry.shared.onbFlowSummary(onboard: tag,
+                                        steps: stepsVisited ?? [],
+                                        paywallId: "paywall_v_3.0",
+                                        status: status)
+    }
+    
     var body: some View {
         
         let isSmall = UIScreen.main.bounds.height < 700
@@ -141,8 +155,14 @@ struct PaywallThirdView: View {
                                     sessionId: sessionId,
                                     onboardId: onboardId
                                 )
+                                
+                                logOnboardSummary(.success)
+                                
                                 onFinish()
                             } else {
+                                
+                                logOnboardSummary(.error)
+                                
                                 Telemetry.shared.purchaseError(
                                     variant: variant, plan: plan.analyticsValue,
                                     packageId: plan.analyticsValue,
@@ -264,6 +284,9 @@ struct PaywallThirdView: View {
                                     variant: variant, entryPoint: entryPoint,
                                     reason: "close_button", sessionId: sessionId
                                 )
+                
+                logOnboardSummary(.close)
+                
                 onFinish()
             }) {
                 Image(systemName: "xmark")

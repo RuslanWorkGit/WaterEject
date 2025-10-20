@@ -28,6 +28,13 @@ struct OnboardingFlowViewThree: View {
     
     @State private var childAnimate = false
     private let slideDuration: Double = 0.5
+    
+    @State private var stepsVisited: [String] = []
+    private func appendStep(_ step: OnboardingStepThree) {
+        let id = screenId(for: step)
+        if stepsVisited.last != id { stepsVisited.append(id) }
+    }
+
 
     var body: some View {
         GeometryReader { geo in
@@ -76,6 +83,8 @@ struct OnboardingFlowViewThree: View {
                 Telemetry.shared.onboardFlowMark(.v33)
                 Telemetry.shared.onbFlowStart(flowId: flowId)
                 Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
+                
+                appendStep(currentStep)
             }
         }
     }
@@ -111,6 +120,9 @@ struct OnboardingFlowViewThree: View {
 //            isAnimating = false
             if step != .paywall {
                        incomingStep = nil
+                
+                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+                    appendStep(step)
                    }
                    isAnimating = false
         }
@@ -157,7 +169,9 @@ struct OnboardingFlowViewThree: View {
             PaywallThirdView(
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
-                    startDelay: slideDuration + 0.00   // 0.55 s
+                    startDelay: slideDuration + 0.00,   // 0.55 s
+                    summaryTag: .v33,                 // Onbord_v_3.3
+                    stepsVisited: stepsVisited
                 )
         }
     }

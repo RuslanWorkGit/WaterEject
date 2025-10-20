@@ -20,12 +20,24 @@ struct OnboardingFlowViewOne: View {
     @State private var overlayX: CGFloat = 0                       // ← офсет оверлея
     @State private var isAnimating = false
     @State private var isForward = true
+    
+    @State private var stepsVisited: [String] = []
+    
 
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
     
+    
+    
     @State private var childAnimate = false
     private let slideDuration: Double = 0.5
+    
+    
+    private func appendStep(_ step: OnboardingStepOne) {
+        let id = screenId(for: step)
+        if stepsVisited.last != id { stepsVisited.append(id) }
+    }
+    
 
     var body: some View {
         GeometryReader { geo in
@@ -73,6 +85,8 @@ struct OnboardingFlowViewOne: View {
                 Telemetry.shared.onboardFlowMark(.v31)
                 Telemetry.shared.onbFlowStart(flowId: flowId)
                 Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
+                
+                appendStep(currentStep)
             }
         }
     }
@@ -98,6 +112,8 @@ struct OnboardingFlowViewOne: View {
             if step != .paywall {
 //                       incomingStep = nil
                 Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+                
+                appendStep(step)
             } else {
                 PaywallGate.shared.currentContext = .onboarding
             }
@@ -147,7 +163,10 @@ struct OnboardingFlowViewOne: View {
             PaywallThirdView(
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
-                    startDelay: slideDuration + 0.00   // 0.55 s
+                    startDelay: slideDuration + 0.00,   // 0.55 s
+                    summaryTag: .v31,
+                    stepsVisited: stepsVisited
+                    
                 )
         }
     }

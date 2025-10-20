@@ -9,6 +9,8 @@ import FirebaseAnalytics
 import RevenueCat
 import StoreKit
 
+enum PaywallStatus: String { case success, error, close }
+
 /// Єдині імена подій
 enum TelemetryEvent: String {
     case paywallExposure   = "paywall_exposure"
@@ -620,5 +622,46 @@ extension Telemetry {
         p["paywall_session_id"] = sessionId
         if let onboardId { p["onboard_id"] = onboardId }
         Analytics.logEvent("purchase_error", parameters: p)
+    }
+}
+
+
+extension OnboardTag {
+    /// Ім’я події, яке просив керівник: Onbord_v_3.x
+    var summaryEventName: String {
+        switch self {
+        case .v31: return "Onbord_v_3.1"
+        case .v32: return "Onbord_v_3.2"
+        case .v33: return "Onbord_v_3.3"
+        }
+    }
+}
+
+extension Telemetry {
+    /// Єдиний “зведений” лог по онборду:
+    /// - steps: імена екранів у порядку проходження (через “|”)
+    /// - paywallId: напр., "paywall_v_3.0"
+    /// - status: success / error / close
+    func onbFlowSummary(onboard tag: OnboardTag,
+                        steps: [String],
+                        paywallId: String,
+                        status: PaywallStatus,
+                        variant: String? = nil,
+                        entryPoint: String? = nil)
+    {
+        var p: [String: Any] = base(["steps": steps.joined(separator: "|"),
+                                             "paywall_id": paywallId,
+                                             "status": status.rawValue,
+                                             "onboard_id": tag.rawValue]) // ← ви вже це використовуєте :contentReference[oaicite:0]{index=0}
+                if let variant { p["variant"] = variant }
+                if let entryPoint { p["entry_point"] = entryPoint }
+        
+        Analytics.logEvent(tag.summaryEventName, parameters: p)
+//        let joined = steps.joined(separator: "|")
+//        Analytics.logEvent(tag.summaryEventName, parameters: base([
+//            "steps": joined,
+//            "paywall_id": paywallId,
+//            "paywall_status": status.rawValue
+//        ]))
     }
 }
