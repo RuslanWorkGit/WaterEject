@@ -20,7 +20,7 @@ final class AppCoordinator: ObservableObject {
     
     @Published var currentScreen: Screen = .boot
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
-    @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
+//    @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
     
     init() {
         // Якщо користувач не бачив онбординг — показати його, інакше Home
@@ -30,7 +30,7 @@ final class AppCoordinator: ObservableObject {
                 self.currentScreen = .mainTabbar
                 return
             }
-            if !hasSeenOnboarding || self.shouldResurfaceOnboarding() {
+            if !hasSeenOnboarding /*|| self.shouldResurfaceOnboarding() */{
                 self.currentScreen = .onboarding
             } else {
                 self.currentScreen = .paywall
@@ -38,12 +38,12 @@ final class AppCoordinator: ObservableObject {
         }
     }
     
-    private func shouldResurfaceOnboarding(now: Date = .init()) -> Bool {
-        guard onbLastShownTS > 0 else { return true } // ще жодного показу – показати
-        let elapsed = now.timeIntervalSince1970 - onbLastShownTS
-        return elapsed >= OnboardingConfig.cooldown
-    }
-    
+//    private func shouldResurfaceOnboarding(now: Date = .init()) -> Bool {
+//        guard onbLastShownTS > 0 else { return true } // ще жодного показу – показати
+//        let elapsed = now.timeIntervalSince1970 - onbLastShownTS
+//        return elapsed >= OnboardingConfig.cooldown
+//    }
+//    
     func showOnboarding() {
         if !hasSeenOnboarding {
             currentScreen = .onboarding

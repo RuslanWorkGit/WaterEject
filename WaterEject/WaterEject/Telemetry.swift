@@ -9,7 +9,7 @@ import FirebaseAnalytics
 import RevenueCat
 import StoreKit
 
-enum PaywallStatus: String { case success, error, close }
+enum PaywallStatus: String { case success, error, close, abandon }
 
 /// Єдині імена подій
 enum TelemetryEvent: String {
@@ -100,9 +100,9 @@ extension Telemetry {
     }
     
     // PURCHASE
-//    func purchaseStart(plan: PaywallPlan) {
-//        log(.purchaseStart, params: ["plan": plan.analyticsValue])
-//    }
+    //    func purchaseStart(plan: PaywallPlan) {
+    //        log(.purchaseStart, params: ["plan": plan.analyticsValue])
+    //    }
     
     func purchaseSuccess(plan: PaywallPlan,
                          product: StoreProduct,
@@ -294,58 +294,58 @@ extension Telemetry {
         log(.startPaywallDismissed, params: ["converted": converted])
     }
     
-
+    
 }
 
 
 extension Telemetry {
     //MARK: - Onboarding
     func onboardingStart(flow: String = "default") {
-            var p = baseParams(); p["onboarding_flow"] = flow
-            Analytics.logEvent("onboarding_start_1.2", parameters: p)
-        }
-
+        var p = baseParams(); p["onboarding_flow"] = flow
+        Analytics.logEvent("onboarding_start_1.2", parameters: p)
+    }
+    
     func onboardingExposure(step: OnboardingStep, flow: String = "default") {
         logOnboarding(action: "screen", extra: [
             "onboarding_step": stepName(step),
             "onboarding_flow": flow
         ])
     }
-
+    
     func onboardingContinue(step: OnboardingStep, flow: String = "default") {
-            var p = baseParams()
-            p["onboarding_step"] = stepName(step)
-            p["onboarding_flow"] = flow
-            Analytics.logEvent("onboarding_continue_1.2", parameters: p)
-        }
-
+        var p = baseParams()
+        p["onboarding_step"] = stepName(step)
+        p["onboarding_flow"] = flow
+        Analytics.logEvent("onboarding_continue_1.2", parameters: p)
+    }
+    
     func onboardingFinish(flow: String = "default") {
-            var p = baseParams(); p["onboarding_flow"] = flow
-            Analytics.logEvent("onboarding_finish_1.2", parameters: p)
-        }
+        var p = baseParams(); p["onboarding_flow"] = flow
+        Analytics.logEvent("onboarding_finish_1.2", parameters: p)
+    }
     
     
     /// Лог події з довільною назвою (для screen-маркерів)
     func onboardingStepChange(from: OnboardingStep, to: OnboardingStep, flow: String = "default") {
-            var p = baseParams()
-            p["onboarding_from_step"] = stepName(from)
-            p["onboarding_to_step"]   = stepName(to)
-            p["onboarding_flow"]      = flow
-            Analytics.logEvent("onboarding_step_change_1.2", parameters: p)
-        }
+        var p = baseParams()
+        p["onboarding_from_step"] = stepName(from)
+        p["onboarding_to_step"]   = stepName(to)
+        p["onboarding_flow"]      = flow
+        Analytics.logEvent("onboarding_step_change_1.2", parameters: p)
+    }
     
     func onboardingScreenMarker(step: OnboardingStep, flow: String = "default") {
-            // 1) новий єдиний івент
-            var p = baseParams()
-            p["onboarding_action"] = "screen"
-            p["onboarding_step"]   = stepName(step)
-            p["onboarding_flow"]   = flow
-            Analytics.logEvent("onboarding_1.2", parameters: p)
-
-            // 2) legacy-івент для старих звітів
-            Analytics.logEvent(onboardingRawEventName(step), parameters: baseParams())
-        }
-
+        // 1) новий єдиний івент
+        var p = baseParams()
+        p["onboarding_action"] = "screen"
+        p["onboarding_step"]   = stepName(step)
+        p["onboarding_flow"]   = flow
+        Analytics.logEvent("onboarding_1.2", parameters: p)
+        
+        // 2) legacy-івент для старих звітів
+        Analytics.logEvent(onboardingRawEventName(step), parameters: baseParams())
+    }
+    
     /// Мапимо крок онбордингу у потрібну назву події
     private func onboardingRawEventName(_ step: OnboardingStep) -> String {
         switch step {
@@ -379,23 +379,23 @@ extension Telemetry {
 extension Telemetry {
     
     /// Лог події з довільною назвою (для screen-маркерів) func logRaw(_ name: String, params: [String: Any] = [:]) { var merged = baseParams() params.forEach { merged[$0.key] = $0.value } Analytics.logEvent(name, parameters: merged) }
-     func logRaw(_ name: String, params: [String: Any] = [:]) {
-         var merged = baseParams()
-         params.forEach {
-             merged[$0.key] = $0.value
-         }
-         Analytics.logEvent(name, parameters: merged)
-     }
+    func logRaw(_ name: String, params: [String: Any] = [:]) {
+        var merged = baseParams()
+        params.forEach {
+            merged[$0.key] = $0.value
+        }
+        Analytics.logEvent(name, parameters: merged)
+    }
     // Одноразовий маркер старту тестів
     func testStart() {
         logRaw("Test_Start")
     }
-
+    
     // Маркер відкриття конкретного екрану тесту
     func testScreenOpen(_ mode: TestMode) {
         logRaw(testEventName(for: mode))
     }
-
+    
     private func testEventName(for mode: TestMode) -> String {
         switch mode {
         case .stereo: return "Test_StereoView"
@@ -429,20 +429,20 @@ extension Telemetry {
                         pricePaid: Double?, currency: String?, sessionId: String, onboardId: String?, paywallId: String) {
         
         var p = baseParams()
-            p["variant"] = variant
-            p["status"] = status
-            p["rc_code"] = rcCode ?? -1
-            p["package_id"] = packageId
-            p["price_paid"] = pricePaid ?? 0
-            p["currency"] = currency ?? "NA"
-            p["paywall_session_id"] = sessionId
-            if let onboardId { p["onboard_id"] = onboardId }  // зв’язок з онбордом
-            p["paywall_id"] = paywallId                       // явна версія пейвола (3.0)
-
-            logRaw("Purchase_Result", params: p)
-            if status == "success", let v = pricePaid, let cur = currency {
-                Analytics.logEvent("purchase", parameters: ["value": v, "currency": cur]) // revenue
-            }
+        p["variant"] = variant
+        p["status"] = status
+        p["rc_code"] = rcCode ?? -1
+        p["package_id"] = packageId
+        p["price_paid"] = pricePaid ?? 0
+        p["currency"] = currency ?? "NA"
+        p["paywall_session_id"] = sessionId
+        if let onboardId { p["onboard_id"] = onboardId }  // зв’язок з онбордом
+        p["paywall_id"] = paywallId                       // явна версія пейвола (3.0)
+        
+        logRaw("Purchase_Result", params: p)
+        if status == "success", let v = pricePaid, let cur = currency {
+            Analytics.logEvent("purchase", parameters: ["value": v, "currency": cur]) // revenue
+        }
     }
 }
 
@@ -464,7 +464,7 @@ extension Telemetry {
             "paywall_session_id": sessionId
         ])
     }
-
+    
     func paywallPurchaseError(variant: String,
                               entryPoint: String,
                               packageId: String,
@@ -494,23 +494,23 @@ extension Telemetry {
         extra.forEach { p[$0.key] = $0.value }
         return p
     }
-
+    
     // MARK: - Onboarding (flow-centric)
     func onbFlowStart(flowId: String) {
         Analytics.logEvent("onb_flow_start", parameters: base(["flow_id": flowId]))
     }
-
+    
     func onbScreenView(flowId: String, screenId: String) {
         Analytics.logEvent("onb_screen_view", parameters: base([
             "flow_id": flowId,
             "screen_id": screenId
         ]))
     }
-
+    
     func onbFlowFinish(flowId: String) {
         Analytics.logEvent("onb_flow_finish", parameters: base(["flow_id": flowId]))
     }
-
+    
     // MARK: - Paywall
     func paywallExposure(flowId: String?, variant: String, entryPoint: String) {
         Analytics.logEvent("paywall_exposure", parameters: base([
@@ -519,7 +519,7 @@ extension Telemetry {
             "entry_point": entryPoint
         ]))
     }
-
+    
     func paywallCTATap(flowId: String?, variant: String, entryPoint: String, plan: String) {
         Analytics.logEvent("paywall_cta_tap", parameters: base([
             "flow_id": flowId ?? "unknown",
@@ -528,7 +528,7 @@ extension Telemetry {
             "plan": plan
         ]))
     }
-
+    
     func purchaseSuccess(flowId: String?, variant: String, plan: String, packageId: String, sessionId: String) {
         Analytics.logEvent("purchase_success", parameters: base([
             "flow_id": flowId ?? "unknown",
@@ -538,7 +538,7 @@ extension Telemetry {
             "paywall_session_id": sessionId
         ]))
     }
-
+    
     func purchaseError(flowId: String?, variant: String, plan: String, packageId: String, rcCode: Int?, message: String?, sessionId: String) {
         Analytics.logEvent("purchase_error", parameters: base([
             "flow_id": flowId ?? "unknown",
@@ -555,14 +555,14 @@ extension Telemetry {
 
 // Telemetry.swift
 
-enum OnboardTag: String {
-    case v31 = "Onboard_3.1"
-    case v32 = "Onboard_3.2"
-    case v33 = "Onboard_3.3"
+enum OnboardTag: String, Codable {
+    case v31 = "Onboard_3_1"
+    case v32 = "Onboard_3_2"
+    case v33 = "Onboard_3_3"
 }
 
 extension Telemetry {
-
+    
     // 1) Єдиний лог для конкретного онборд-флоу
     func onboardFlowMark(_ tag: OnboardTag) {
         var p = baseParams()
@@ -570,7 +570,7 @@ extension Telemetry {
         Analytics.logEvent(tag.rawValue, parameters: p) // ІМ’Я ПОДІЇ = Onboard_3.x
         Analytics.setUserProperty(tag.rawValue, forName: "onboard_last") // опційно
     }
-
+    
     // 2) Пейвол: експожер
     func paywallExposure(variant: String, entryPoint: String, onboardId: String?) {
         var p = baseParams()
@@ -579,7 +579,7 @@ extension Telemetry {
         if let onboardId { p["onboard_id"] = onboardId }
         Analytics.logEvent("paywall_exposure", parameters: p)
     }
-
+    
     // 3) Пейвол: тап по CTA
     func paywallCTATap(variant: String, entryPoint: String, plan: String, onboardId: String?) {
         var p = baseParams()
@@ -589,7 +589,7 @@ extension Telemetry {
         if let onboardId { p["onboard_id"] = onboardId }
         Analytics.logEvent("paywall_cta_tap", parameters: p)
     }
-
+    
     // 4) Покупка: успіх
     func purchaseSuccess(variant: String,
                          plan: String,
@@ -604,7 +604,7 @@ extension Telemetry {
         if let onboardId { p["onboard_id"] = onboardId }
         Analytics.logEvent("purchase_success", parameters: p)
     }
-
+    
     // 5) Покупка: помилка
     func purchaseError(variant: String,
                        plan: String,
@@ -630,9 +630,9 @@ extension OnboardTag {
     /// Ім’я події, яке просив керівник: Onbord_v_3.x
     var summaryEventName: String {
         switch self {
-        case .v31: return "Onbord_v_3.1"
-        case .v32: return "Onbord_v_3.2"
-        case .v33: return "Onbord_v_3.3"
+        case .v31: return "Onbord_v_3_1"
+        case .v32: return "Onbord_v_3_2"
+        case .v33: return "Onbord_v_3_3"
         }
     }
 }
@@ -647,21 +647,23 @@ extension Telemetry {
                         paywallId: String,
                         status: PaywallStatus,
                         variant: String? = nil,
-                        entryPoint: String? = nil)
+                        entryPoint: String? = nil,
+                        reason: String? = nil)
     {
         var p: [String: Any] = base(["steps": steps.joined(separator: "|"),
-                                             "paywall_id": paywallId,
-                                             "status": status.rawValue,
-                                             "onboard_id": tag.rawValue]) // ← ви вже це використовуєте :contentReference[oaicite:0]{index=0}
-                if let variant { p["variant"] = variant }
-                if let entryPoint { p["entry_point"] = entryPoint }
+                                     "paywall_id": paywallId,
+                                     "status": status.rawValue,
+                                     "onboard_id": tag.rawValue]) // ← ви вже це використовуєте :contentReference[oaicite:0]{index=0}
+        if let variant { p["variant"] = variant }
+        if let entryPoint { p["entry_point"] = entryPoint }
+        if let reason { p["reason"] = reason }
         
         Analytics.logEvent(tag.summaryEventName, parameters: p)
-//        let joined = steps.joined(separator: "|")
-//        Analytics.logEvent(tag.summaryEventName, parameters: base([
-//            "steps": joined,
-//            "paywall_id": paywallId,
-//            "paywall_status": status.rawValue
-//        ]))
+        //        let joined = steps.joined(separator: "|")
+        //        Analytics.logEvent(tag.summaryEventName, parameters: base([
+        //            "steps": joined,
+        //            "paywall_id": paywallId,
+        //            "paywall_status": status.rawValue
+        //        ]))
     }
 }

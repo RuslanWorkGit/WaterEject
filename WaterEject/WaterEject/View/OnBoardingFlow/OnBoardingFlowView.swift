@@ -9,7 +9,7 @@ import SwiftUI
 struct OnboardingFlowView: View {
     //@Binding var isActive: Bool  // Для Coordinator, щоб закривати flow
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
-    @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
+    //@AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
     @State private var currentStep: OnboardingStep = .hook
     @EnvironmentObject var coordinator: AppCoordinator
     
@@ -63,7 +63,7 @@ struct OnboardingFlowView: View {
         .transition(.slide)
         .animation(.easeInOut, value: currentStep)
         .task {
-            onbLastShownTS = Date().timeIntervalSince1970
+            //onbLastShownTS = Date().timeIntervalSince1970
             Telemetry.shared.onboardingStart()
         }
         .onAppear {

@@ -12,7 +12,7 @@ struct OnboardingFlowViewOne: View {
     private let onboardId = OnboardTag.v31.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
-    @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
+    //@AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
 
     @State private var currentStep: OnboardingStepOne = .start
     @State private var prevStep: OnboardingStepOne? = nil          // ← старий екран (фон)
@@ -38,6 +38,11 @@ struct OnboardingFlowViewOne: View {
         if stepsVisited.last != id { stepsVisited.append(id) }
     }
     
+    @State private var paywallShown = false
+
+    private func persist(tag: OnboardTag) {
+        OnboardingSessionStore.shared.save(tag: tag, steps: stepsVisited, paywallShown: paywallShown)
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -81,7 +86,7 @@ struct OnboardingFlowViewOne: View {
                 }
             }
             .task {
-                onbLastShownTS = Date().timeIntervalSince1970
+                //onbLastShownTS = Date().timeIntervalSince1970
                 Telemetry.shared.onboardFlowMark(.v31)
                 Telemetry.shared.onbFlowStart(flowId: flowId)
                 Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
@@ -114,6 +119,7 @@ struct OnboardingFlowViewOne: View {
                 Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                 
                 appendStep(step)
+                persist(tag: .v31)
             } else {
                 PaywallGate.shared.currentContext = .onboarding
             }
@@ -123,7 +129,7 @@ struct OnboardingFlowViewOne: View {
 
     private func finishOnboarding() {
         Telemetry.shared.onboardingFinish()
-        hasSeenOnboarding = true
+        //hasSeenOnboarding = true
         dismiss()
         coordinator.showMainTabbar()
     }
@@ -159,7 +165,7 @@ struct OnboardingFlowViewOne: View {
         case .women:
             WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .paywall:
-//            PaywallThirdView(onFinish: finishOnboarding, onboardId: onboardId)
+
             PaywallThirdView(
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
@@ -168,6 +174,12 @@ struct OnboardingFlowViewOne: View {
                     stepsVisited: stepsVisited
                     
                 )
+            .onAppear {
+
+                    paywallShown = true        // <-- тут, а не вище
+                    persist(tag: .v31)      // якщо зберігаєш прогрес
+                
+            }
         }
     }
 

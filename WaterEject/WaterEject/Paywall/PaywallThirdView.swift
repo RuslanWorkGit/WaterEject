@@ -51,11 +51,20 @@ struct PaywallThirdView: View {
     
     
     private func logOnboardSummary(_ status: PaywallStatus) {
-        guard let tag = summaryTag else { return }
-        Telemetry.shared.onbFlowSummary(onboard: tag,
-                                        steps: stepsVisited ?? [],
-                                        paywallId: "paywall_v_3.0",
-                                        status: status)
+        guard let tag = summaryTag else {
+            print("NOOOOOOOOOO SSSSSSSUMMMMMARYYYYYY TAG")
+            return }
+        let variant = PaywallAB.shared.variant().rawValue
+        let entry = paywallGate.currentContext?.rawValue ?? "unknown"
+        Telemetry.shared.onbFlowSummary(
+                onboard: tag,
+                steps: stepsVisited ?? [],
+                paywallId: "paywall_v_3.0",
+                status: status,
+                variant: variant,
+                entryPoint: entry
+            )
+            OnboardingSessionStore.shared.clear() // ⬅️ важливо
     }
     
     var body: some View {
@@ -179,7 +188,7 @@ struct PaywallThirdView: View {
                         
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                        
+     
 //                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
                             .background(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -197,6 +206,7 @@ struct PaywallThirdView: View {
                                     )
                         
                     }
+                    .opacity(appearVideo ? 1 : 0)
 
                     .padding(.horizontal, 24)
                     .padding(.bottom, 8)

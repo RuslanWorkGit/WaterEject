@@ -37,6 +37,18 @@ struct RootView: View {
                 TabBarView()
             }
         }
+        .onAppear {
+            if let s = OnboardingSessionStore.shared.load() {
+                        Telemetry.shared.onbFlowSummary(
+                            onboard: s.tag,
+                            steps: s.steps,
+                            paywallId: s.paywallShown ? "paywall_v_3.0" : "none",
+                            status: .abandon,
+                            reason: "relaunch"
+                        )
+                        OnboardingSessionStore.shared.clear()
+                    }
+        }
         .animation(nil, value: coordinator.currentScreen)
     }
 }
