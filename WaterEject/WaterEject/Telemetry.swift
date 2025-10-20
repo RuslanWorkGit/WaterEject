@@ -58,6 +58,8 @@ enum TelemetryEvent: String {
     case onboardingContinue  = "onboarding_continue"
     case onboardingFinish    = "onboarding_finish"
     case onboardingStepChange = "onboarding_step_change"
+    
+    case modesPaywall = "modes_paywall"
 }
 
 enum PaywallCloseSource: String {
@@ -645,6 +647,7 @@ extension Telemetry {
     func onbFlowSummary(onboard tag: OnboardTag,
                         steps: [String],
                         paywallId: String,
+                        plan: String?,
                         status: PaywallStatus,
                         variant: String? = nil,
                         entryPoint: String? = nil,
@@ -657,8 +660,21 @@ extension Telemetry {
         if let variant { p["variant"] = variant }
         if let entryPoint { p["entry_point"] = entryPoint }
         if let reason { p["reason"] = reason }
+        if status == .success, let plan {
+            p["plan"] = plan
+        }
         
         Analytics.logEvent(tag.summaryEventName, parameters: p)
 
+    }
+}
+
+extension Telemetry {
+    func modesPaywall(status: PaywallStatus, plan: String?) {
+        var p: [String: Any] = ["status": status.rawValue]
+        if status == .success, let plan {
+            p["plan"] = plan
+        }
+        log(.modesPaywall, params: p)
     }
 }

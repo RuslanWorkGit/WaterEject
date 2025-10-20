@@ -43,6 +43,7 @@ struct RootView: View {
                             onboard: s.tag,
                             steps: s.steps,
                             paywallId: s.paywallShown ? "paywall_v_3.0" : "none",
+                            plan: "none",
                             status: .abandon,
                             reason: "relaunch"
                         )

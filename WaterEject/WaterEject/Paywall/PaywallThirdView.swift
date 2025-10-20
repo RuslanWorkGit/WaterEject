@@ -51,20 +51,41 @@ struct PaywallThirdView: View {
     
     
     private func logOnboardSummary(_ status: PaywallStatus) {
-        guard let tag = summaryTag else {
-            print("NOOOOOOOOOO SSSSSSSUMMMMMARYYYYYY TAG")
-            return }
-        let variant = PaywallAB.shared.variant().rawValue
-        let entry = paywallGate.currentContext?.rawValue ?? "unknown"
-        Telemetry.shared.onbFlowSummary(
-                onboard: tag,
-                steps: stepsVisited ?? [],
-                paywallId: "paywall_v_3.0",
-                status: status,
-                variant: variant,
-                entryPoint: entry
-            )
-            OnboardingSessionStore.shared.clear() // ⬅️ важливо
+//        guard let tag = summaryTag else {
+//            print("NOOOOOOOOOO SSSSSSSUMMMMMARYYYYYY TAG")
+//            return }
+//        let variant = PaywallAB.shared.variant().rawValue
+//        let entry = paywallGate.currentContext?.rawValue ?? "unknown"
+//        Telemetry.shared.onbFlowSummary(
+//                onboard: tag,
+//                steps: stepsVisited ?? [],
+//                paywallId: "paywall_v_3.0",
+//                status: status,
+//                variant: variant,
+//                entryPoint: entry
+//            )
+//            OnboardingSessionStore.shared.clear() // ⬅️ важливо
+        let plan    = viewModel.selectedPlan
+        
+        if let tag = summaryTag {
+                let variant = PaywallAB.shared.variant().rawValue
+                let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
+                Telemetry.shared.onbFlowSummary(
+                    onboard: tag,
+                    steps: stepsVisited ?? [],
+                    paywallId: "paywall_v_3.0",
+                    plan: plan.analyticsValue,
+                    status: status,
+                    variant: variant,
+                    entryPoint: entry
+                )
+                OnboardingSessionStore.shared.clear()
+            } else {
+                // ⬇️ НЕ онбординг: якщо пейвол відкрито з Modes — логнемо modes_paywall
+                if paywallGate.currentContext == .modesTap {
+                    Telemetry.shared.modesPaywall(status: status, plan: plan.analyticsValue)
+                }
+            }
     }
     
     var body: some View {
