@@ -14,6 +14,8 @@ import FirebaseFirestore
 struct WaterEjectApp: App {
     
     init() {
+        OneTimeDefaultsReset.run(full: true)
+        
         Purchases.configure(withAPIKey: "appl_lVJsBEhDCcyoBVhDgoyaBHruByh")
         FirebaseApp.configure()
         

@@ -630,9 +630,9 @@ extension OnboardTag {
     /// Ім’я події, яке просив керівник: Onbord_v_3.x
     var summaryEventName: String {
         switch self {
-        case .v31: return "Onbord_v_3_1"
-        case .v32: return "Onbord_v_3_2"
-        case .v33: return "Onbord_v_3_3"
+        case .v31: return "Onboard_v_3_1"
+        case .v32: return "Onboard_v_3_2"
+        case .v33: return "Onboard_v_3_3"
         }
     }
 }
@@ -659,11 +659,6 @@ extension Telemetry {
         if let reason { p["reason"] = reason }
         
         Analytics.logEvent(tag.summaryEventName, parameters: p)
-        //        let joined = steps.joined(separator: "|")
-        //        Analytics.logEvent(tag.summaryEventName, parameters: base([
-        //            "steps": joined,
-        //            "paywall_id": paywallId,
-        //            "paywall_status": status.rawValue
-        //        ]))
+
     }
 }
