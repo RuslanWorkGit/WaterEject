@@ -155,11 +155,11 @@ final class PaywallViewModel: ObservableObject {
             purchaseSucceeded = active
             if active {
                 let txId = result.transaction?.transactionIdentifier
-                Telemetry.shared.purchaseResult(
-                    variant: variant, status: "success", rcCode: nil,
-                    packageId: p.productIdentifier, pricePaid: price, currency: currency,
-                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
-                )
+//                Telemetry.shared.purchaseResult(
+//                    variant: variant, status: "success", rcCode: nil,
+//                    packageId: p.productIdentifier, pricePaid: price, currency: currency,
+//                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
+//                )
 //                
 //                Telemetry.shared.paywallPurchaseSuccess(   // НОВИЙ яскравий івент
 //                        variant: variant,

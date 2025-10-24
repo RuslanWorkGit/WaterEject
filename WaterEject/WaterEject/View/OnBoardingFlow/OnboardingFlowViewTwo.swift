@@ -86,7 +86,7 @@ struct OnboardingFlowViewTwo: View {
             }
             .task {
                 //onbLastShownTS = Date().timeIntervalSince1970
-                Telemetry.shared.onboardFlowMark(.v32)
+               // Telemetry.shared.onboardFlowMark(.v32)
                 Telemetry.shared.onbFlowStart(flowId: flowId)
                 Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
                 appendStep(currentStep)
@@ -168,7 +168,7 @@ struct OnboardingFlowViewTwo: View {
                     stepsVisited: stepsVisited
                 )
             .onAppear {
-                Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+//                Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
                     persist(tag: .v32)      // якщо зберігаєш прогрес
                 

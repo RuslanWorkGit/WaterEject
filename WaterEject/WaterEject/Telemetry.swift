@@ -565,13 +565,13 @@ enum OnboardTag: String, Codable {
 
 extension Telemetry {
     
-    // 1) Єдиний лог для конкретного онборд-флоу
-    func onboardFlowMark(_ tag: OnboardTag) {
-        var p = baseParams()
-        p["onboard_id"] = tag.rawValue            // щоб легко джойнити у воронці
-        Analytics.logEvent(tag.rawValue, parameters: p) // ІМ’Я ПОДІЇ = Onboard_3.x
-        Analytics.setUserProperty(tag.rawValue, forName: "onboard_last") // опційно
-    }
+//    // 1) Єдиний лог для конкретного онборд-флоу
+//    func onboardFlowMark(_ tag: OnboardTag) {
+//        var p = baseParams()
+//        p["onboard_id"] = tag.rawValue            // щоб легко джойнити у воронці
+//        Analytics.logEvent(tag.rawValue, parameters: p) // ІМ’Я ПОДІЇ = Onboard_3.x
+//        Analytics.setUserProperty(tag.rawValue, forName: "onboard_last") // опційно
+//    }
     
     // 2) Пейвол: експожер
     func paywallExposure(variant: String, entryPoint: String, onboardId: String?) {
@@ -876,7 +876,7 @@ extension Telemetry {
             "status": status.rawValue,
             "steps_count": steps.count
         ])
-        if let variant { summary["variant"] = variant }
+        //if let variant { summary["variant"] = variant }
         if let entryPoint { summary["entry_point"] = entryPoint }
         if let reason { summary["reason"] = reason }
         if status == .success, let plan { summary["plan"] = plan } // ← тільки для success

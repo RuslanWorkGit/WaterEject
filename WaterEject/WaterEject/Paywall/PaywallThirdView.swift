@@ -76,7 +76,6 @@ struct PaywallThirdView: View {
                 paywallId: "paywall_v_3.0",
                 plan: (status == .success ? plan.analyticsValue : nil), // ← лише для success
                 status: status,
-                variant: variant,
                 entryPoint: entry
             )
                 OnboardingSessionStore.shared.clear()
@@ -339,7 +338,7 @@ struct PaywallThirdView: View {
             if !didLogOpen {
                 let variant = PaywallAB.shared.variant().rawValue
                 let entry = paywallGate.currentContext?.rawValue ?? "unknown"
-                Telemetry.shared.paywallExposure(variant: variant, entryPoint: entry, onboardId: onboardId)
+                //Telemetry.shared.paywallExposure(variant: variant, entryPoint: entry, onboardId: onboardId)
                 didLogOpen = true
             }
             Task { await viewModel.loadPricing() }

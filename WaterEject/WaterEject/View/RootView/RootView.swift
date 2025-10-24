@@ -38,17 +38,17 @@ struct RootView: View {
             }
         }
         .onAppear {
-            if let s = OnboardingSessionStore.shared.load() {
-                        Telemetry.shared.onbFlowSummary(
-                            onboard: s.tag,
-                            steps: s.steps,
-                            paywallId: s.paywallShown ? "paywall_v_3.0" : "none",
-                            plan: "none",
-                            status: .abandon,
-                            reason: "relaunch"
-                        )
-                        OnboardingSessionStore.shared.clear()
-                    }
+//            if let s = OnboardingSessionStore.shared.load() {
+//                        Telemetry.shared.onbFlowSummary(
+//                            onboard: s.tag,
+//                            steps: s.steps,
+//                            paywallId: s.paywallShown ? "paywall_v_3.0" : "none",
+//                            plan: "none",
+//                            status: .abandon,
+//                            reason: "relaunch"
+//                        )
+//                        OnboardingSessionStore.shared.clear()
+//                    }
         }
         .animation(nil, value: coordinator.currentScreen)
     }
