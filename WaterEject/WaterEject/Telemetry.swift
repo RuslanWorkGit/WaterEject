@@ -503,7 +503,7 @@ extension Telemetry {
     }
     
     func onbScreenView(flowId: String, screenId: String) {
-        Analytics.logEvent("onb_screen_view", parameters: base([
+        Analytics.logEvent("\(flowId)", parameters: base([
             "flow_id": flowId,
             "screen_id": screenId
         ]))
@@ -628,8 +628,206 @@ extension Telemetry {
 }
 
 
+//extension OnboardTag {
+//    /// Ім’я події, яке просив керівник: Onbord_v_3.x
+//    var summaryEventName: String {
+//        switch self {
+//        case .v31: return "Onboard_v_3_1"
+//        case .v32: return "Onboard_v_3_2"
+//        case .v33: return "Onboard_v_3_3"
+//        }
+//    }
+//}
+
+//extension Telemetry {
+//    /// Єдиний “зведений” лог по онборду:
+//    /// - steps: імена екранів у порядку проходження (через “|”)
+//    /// - paywallId: напр., "paywall_v_3.0"
+//    /// - status: success / error / close
+//    func onbFlowSummary(onboard tag: OnboardTag,
+//                        steps: [String],
+//                        paywallId: String,
+//                        plan: String?,
+//                        status: PaywallStatus,
+//                        variant: String? = nil,
+//                        entryPoint: String? = nil,
+//                        reason: String? = nil)
+//    {
+//        var p: [String: Any] = base(["steps": steps.joined(separator: "|"),
+//                                     "paywall_id": paywallId,
+//                                     "status": status.rawValue,
+//                                     "onboard_id": tag.rawValue]) // ← ви вже це використовуєте :contentReference[oaicite:0]{index=0}
+//        if let variant { p["variant"] = variant }
+//        if let entryPoint { p["entry_point"] = entryPoint }
+//        if let reason { p["reason"] = reason }
+//        if status == .success, let plan {
+//            p["plan"] = plan
+//        }
+//        
+//        Analytics.logEvent(tag.summaryEventName, parameters: p)
+//
+//    }
+//}
+//extension Telemetry {
+//    func onbFlowSummary(onboard tag: OnboardTag,
+//                        steps: [String],
+//                        paywallId: String,
+//                        plan: String?,
+//                        status: PaywallStatus,
+//                        variant: String? = nil,
+//                        entryPoint: String? = nil,
+//                        reason: String? = nil)
+//    {
+//        // Базові параметри
+//        var p: [String: Any] = base([
+//            "paywall_id": paywallId,
+//            "status": status.rawValue,
+//            "onboard_id": tag.rawValue
+//        ])
+//        if let variant { p["variant"] = variant }
+//        if let entryPoint { p["entry_point"] = entryPoint }
+//        if let reason { p["reason"] = reason }
+//
+//        // Розкладаємо кроки
+//        let cap = 12                         // захист від ліміту параметрів у GA4
+//        let limited = Array(steps.prefix(cap))
+//        for (idx, name) in limited.enumerated() {
+//            p["step_\(idx + 1)"] = name
+//        }
+//        p["steps_count"] = steps.count
+//
+//        // Прапорці відвіданих кроків
+//        let unique = Set(steps)
+//        for raw in unique {
+//            let safe = raw.replacingOccurrences(of: "[^a-zA-Z0-9_]",
+//                                                with: "_",
+//                                                options: .regularExpression)
+//            p["visited_\(safe)"] = 1
+//        }
+//
+//        // Legacy-рядок — залишимо для зворотної сумісності (опційно)
+//        p["steps"] = steps.joined(separator: "|")
+//
+//        // План додаємо лише для успішної покупки
+//        if status == .success, let plan {
+//            p["plan"] = plan
+//        }
+//
+//        Analytics.logEvent(tag.summaryEventName, parameters: p)
+//    }
+//}
+
+//extension Telemetry {
+//    func onbFlowSummary(
+//        onboard tag: OnboardTag,
+//        steps: [String],
+//        paywallId: String,
+//        plan: String?,
+//        status: PaywallStatus,
+//        variant: String? = nil,
+//        entryPoint: String? = nil,
+//        reason: String? = nil
+//    ) {
+//        // ❶ Спершу — на кожен крок окремий onb_step з параметром "steps"
+//        //    Беремо унікальні в порядку появи, щоб не дублювати повернення назад
+//        var seen = Set<String>()
+//        var orderedUnique: [String] = []
+//        for s in steps where !seen.contains(s) { orderedUnique.append(s); seen.insert(s) }
+//        
+//        var p: [String: Any] = base([
+//            "paywall_id": paywallId,
+//            "status": status.rawValue,
+//            "onboard_id": tag.rawValue,
+//            "steps_count": steps.count
+//        ])
+//
+//        for (i, s) in orderedUnique.enumerated() {
+//            logOnbStep(
+//                onboard: tag,
+//                step: s,
+//                index: i + 1,
+//                total: steps.count,
+//                paywallId: paywallId,
+//                variant: variant,
+//                entryPoint: entryPoint
+//            )
+//            
+//
+//        }
+//
+//        // ❷ Далі — summary-івент без step_1/visited_*
+//        
+//        if let variant { p["variant"] = variant }
+//        if let entryPoint { p["entry_point"] = entryPoint }
+//        if let reason { p["reason"] = reason }
+//
+//        // План — ЛИШЕ при успішній покупці
+//        if status == .success, let plan {
+//            p["plan"] = plan
+//        }
+//
+//        // Якщо хочеш — лиши рядок для дебагу, але з іншою назвою, щоб не конфліктував з dimension "steps"
+//        // p["steps_str"] = steps.joined(separator: "|")
+//
+//        Analytics.logEvent(tag.summaryEventName, parameters: p)
+//    }
+//}
+
+
+//extension Telemetry {
+//    func onbFlowSummary(
+//        onboard tag: OnboardTag,
+//        steps: [String],
+//        paywallId: String,
+//        plan: String?,
+//        status: PaywallStatus,
+//        variant: String? = nil,
+//        entryPoint: String? = nil,
+//        reason: String? = nil
+//    ) {
+//        // унікальні в порядку появи
+//        var seen = Set<String>()
+//        let ordered = steps.filter { s in
+//            if seen.contains(s) { return false }
+//            seen.insert(s); return true
+//        }
+//
+//        // 1) Івенти-«кроки» (та сама назва івенту!)
+//        for (i, s) in ordered.enumerated() {
+//            var stepParams = base([
+//                "onboard_id": tag.rawValue,
+//                "paywall_id": paywallId,
+//                "event_role": "step",   // ← щоб фільтрувати
+//                "steps": s,             // ← ЄДИНИЙ custom dimension
+//                "step_index": i + 1,
+//                "steps_count": steps.count
+//            ])
+//            if let variant { stepParams["variant"] = variant }
+//            if let entryPoint { stepParams["entry_point"] = entryPoint }
+//            Analytics.logEvent(tag.summaryEventName, parameters: stepParams)
+//        }
+//
+//        // 2) Підсумковий івент (план тільки при success)
+//        var summary = base([
+//            "onboard_id": tag.rawValue,
+//            "paywall_id": paywallId,
+//            "event_role": "summary",
+//            "status": status.rawValue,
+//            "steps_count": steps.count
+//        ])
+//        if let variant { summary["variant"] = variant }
+//        if let entryPoint { summary["entry_point"] = entryPoint }
+//        if let reason { summary["reason"] = reason }
+//        if status == .success, let plan { summary["plan"] = plan }
+//
+//        // (опційно, чисто для дебагу) summary["steps_str"] = steps.joined(separator: "|")
+//
+//        Analytics.logEvent(tag.summaryEventName, parameters: summary)
+//    }
+//}
+
+
 extension OnboardTag {
-    /// Ім’я події, яке просив керівник: Onbord_v_3.x
     var summaryEventName: String {
         switch self {
         case .v31: return "Onboard_v_3_1"
@@ -637,37 +835,59 @@ extension OnboardTag {
         case .v33: return "Onboard_v_3_3"
         }
     }
+    var stepEventName: String { "\(summaryEventName)_step" } // ← подія для КРОКІВ
 }
-
 extension Telemetry {
-    /// Єдиний “зведений” лог по онборду:
-    /// - steps: імена екранів у порядку проходження (через “|”)
-    /// - paywallId: напр., "paywall_v_3.0"
-    /// - status: success / error / close
-    func onbFlowSummary(onboard tag: OnboardTag,
-                        steps: [String],
-                        paywallId: String,
-                        plan: String?,
-                        status: PaywallStatus,
-                        variant: String? = nil,
-                        entryPoint: String? = nil,
-                        reason: String? = nil)
-    {
-        var p: [String: Any] = base(["steps": steps.joined(separator: "|"),
-                                     "paywall_id": paywallId,
-                                     "status": status.rawValue,
-                                     "onboard_id": tag.rawValue]) // ← ви вже це використовуєте :contentReference[oaicite:0]{index=0}
-        if let variant { p["variant"] = variant }
-        if let entryPoint { p["entry_point"] = entryPoint }
-        if let reason { p["reason"] = reason }
-        if status == .success, let plan {
-            p["plan"] = plan
+    func onbFlowSummary(
+        onboard tag: OnboardTag,
+        steps: [String],
+        paywallId: String,
+        plan: String?,
+        status: PaywallStatus,
+        variant: String? = nil,
+        entryPoint: String? = nil,
+        reason: String? = nil
+    ) {
+        // унікальні кроки у порядку проходження (без дублів при поверненні назад)
+        var seen = Set<String>()
+        let ordered = steps.filter { s in
+            if seen.contains(s) { return false }
+            seen.insert(s); return true
         }
-        
-        Analytics.logEvent(tag.summaryEventName, parameters: p)
 
+//        // 1) ОКРЕМИЙ лог на КОЖЕН крок: onboard_v_3_x_step
+//        for (i, s) in ordered.enumerated() {
+//            var stepParams = base([
+//                "onboard_id": tag.rawValue,
+//                "paywall_id": paywallId,
+//                "steps": s,                // ← ЄДИНИЙ custom dimension для кроків
+//                "step_index": i + 1,       // (опційно)
+//                "steps_count": steps.count // (опційно)
+//            ])
+//            if let variant { stepParams["variant"] = variant }
+//            if let entryPoint { stepParams["entry_point"] = entryPoint }
+//            Analytics.logEvent(tag.stepEventName, parameters: stepParams)
+//        }
+
+        // 2) Зведення: onboard_v_3_x (без step_1/visited_* і без steps-рядка)
+        var summary = base([
+            "onboard_id": tag.rawValue,
+            "paywall_id": paywallId,
+            "status": status.rawValue,
+            "steps_count": steps.count
+        ])
+        if let variant { summary["variant"] = variant }
+        if let entryPoint { summary["entry_point"] = entryPoint }
+        if let reason { summary["reason"] = reason }
+        if status == .success, let plan { summary["plan"] = plan } // ← тільки для success
+
+        // (опційно для дебагу) summary["steps_str"] = ordered.joined(separator: "|")
+
+        Analytics.logEvent(tag.summaryEventName, parameters: summary)
     }
 }
+
+
 
 extension Telemetry {
     func modesPaywall(status: PaywallStatus, plan: String?) {
@@ -678,3 +898,32 @@ extension Telemetry {
         log(.modesPaywall, params: p)
     }
 }
+
+//extension OnboardTag {
+//    var stepEventName: String { "onb_step" }
+//}
+
+
+extension Telemetry {
+    private func logOnbStep(
+        onboard tag: OnboardTag,
+        step: String,
+        index: Int,
+        total: Int,
+        paywallId: String,
+        variant: String?,
+        entryPoint: String?
+    ) {
+        var p = base([
+            "onboard_id": tag.rawValue,
+            "paywall_id": paywallId,
+            "steps": step,          // ← ЄДИНИЙ custom dimension (Item = значення кроку)
+            "step_index": index,    // опційно, 2-й dimension
+            "steps_count": total    // опційно
+        ])
+        if let variant { p["variant"] = variant }
+        if let entryPoint { p["entry_point"] = entryPoint }
+        Analytics.logEvent(tag.stepEventName, parameters: p)
+    }
+}
+

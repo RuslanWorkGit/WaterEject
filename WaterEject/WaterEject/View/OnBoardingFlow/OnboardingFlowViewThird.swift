@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct OnboardingFlowViewThree: View {
-    private let flowId = "onb_3.3"
+    private let flowId = "onboard_3_3_steps"
     private let onboardId = OnboardTag.v33.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
@@ -98,10 +98,10 @@ struct OnboardingFlowViewThree: View {
     // MARK: - Screen IDs для аналітики
     private func screenId(for step: OnboardingStepThree) -> String {
         switch step {
-        case .device: return "device"
-        case .start:  return "start"
-        case .test: return "test"
-        case .women:  return "women"
+        case .device: return "step_1"
+        case .start:  return "step_2"
+        case .test: return "step_3"
+        case .women:  return "step_4"
         case .paywall:return "paywall"
         }
     }
@@ -182,7 +182,7 @@ struct OnboardingFlowViewThree: View {
                     stepsVisited: stepsVisited
                 )
             .onAppear {
-
+                Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
                     persist(tag: .v33)      // якщо зберігаєш прогрес
                 

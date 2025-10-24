@@ -70,15 +70,15 @@ struct PaywallThirdView: View {
         if let tag = summaryTag {
                 let variant = PaywallAB.shared.variant().rawValue
                 let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
-                Telemetry.shared.onbFlowSummary(
-                    onboard: tag,
-                    steps: stepsVisited ?? [],
-                    paywallId: "paywall_v_3.0",
-                    plan: plan.analyticsValue,
-                    status: status,
-                    variant: variant,
-                    entryPoint: entry
-                )
+            Telemetry.shared.onbFlowSummary(
+                onboard: tag,
+                steps: stepsVisited ?? [],
+                paywallId: "paywall_v_3.0",
+                plan: (status == .success ? plan.analyticsValue : nil), // ← лише для success
+                status: status,
+                variant: variant,
+                entryPoint: entry
+            )
                 OnboardingSessionStore.shared.clear()
             } else {
                 // ⬇️ НЕ онбординг: якщо пейвол відкрито з Modes — логнемо modes_paywall
