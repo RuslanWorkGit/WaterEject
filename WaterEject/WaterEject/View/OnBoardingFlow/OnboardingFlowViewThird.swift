@@ -182,7 +182,7 @@ struct OnboardingFlowViewThree: View {
                     stepsVisited: stepsVisited
                 )
             .onAppear {
-//                Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+                    Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
                     persist(tag: .v33)      // якщо зберігаєш прогрес
                 

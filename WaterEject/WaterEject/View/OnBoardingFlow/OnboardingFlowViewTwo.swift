@@ -100,7 +100,7 @@ struct OnboardingFlowViewTwo: View {
         case .start:  return "step_1"
         case .wallet: return "step_2"
         case .women:  return "step_3"
-        case .paywall:return "paywall"
+        case .paywall: return "paywall"
         }
     }
 
@@ -168,7 +168,7 @@ struct OnboardingFlowViewTwo: View {
                     stepsVisited: stepsVisited
                 )
             .onAppear {
-//                Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+                    Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
                     persist(tag: .v32)      // якщо зберігаєш прогрес
                 
