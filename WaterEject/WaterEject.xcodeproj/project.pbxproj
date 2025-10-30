@@ -14,6 +14,7 @@
 		9B57ECB02E4CCC66005D4850 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 9B57ECAF2E4CCC66005D4850 /* RevenueCatUI */; };
 		9BB69F192E6B304500FF583E /* GoogleService-Info-Shared.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BB69F182E6B304500FF583E /* GoogleService-Info-Shared.plist */; };
 		9BB6A0E32E6B434200FF583E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BB6A0E22E6B434200FF583E /* FirebaseFirestore */; };
+		9BCB08B12EB4069E00154BA8 /* AppsFlyerLib-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 9BCB08B02EB4069E00154BA8 /* AppsFlyerLib-Static */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +52,7 @@
 				9B57ECAE2E4CCC66005D4850 /* RevenueCat in Frameworks */,
 				9B1B800D2E4CD8A20049CE33 /* FirebaseAnalytics in Frameworks */,
 				9BB6A0E32E6B434200FF583E /* FirebaseFirestore in Frameworks */,
+				9BCB08B12EB4069E00154BA8 /* AppsFlyerLib-Static in Frameworks */,
 				9B1B800F2E4CD8A20049CE33 /* FirebaseRemoteConfig in Frameworks */,
 				9B1FFD7C2E872B0E00441BAD /* Lottie in Frameworks */,
 			);
@@ -110,6 +112,7 @@
 				9B1B800E2E4CD8A20049CE33 /* FirebaseRemoteConfig */,
 				9BB6A0E22E6B434200FF583E /* FirebaseFirestore */,
 				9B1FFD7B2E872B0E00441BAD /* Lottie */,
+				9BCB08B02EB4069E00154BA8 /* AppsFlyerLib-Static */,
 			);
 			productName = WaterEject;
 			productReference = 9BA1E0652E328F970027AD07 /* WaterEject.app */;
@@ -143,6 +146,7 @@
 				9BBB1B282E4CCC3D00C15E8C /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				9BDEB9A62E872AD80027F4CA /* XCRemoteSwiftPackageReference "lottie-spm" */,
+				9B1CA3892EB405DE00A923E7 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9BA1E0662E328F970027AD07 /* Products */;
@@ -310,6 +314,7 @@
 				INFOPLIST_FILE = WaterEject/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Water Eject Clear Sound";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to perform the audio test";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "We use your data to show relevant ads and measure app performance.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -345,6 +350,7 @@
 				INFOPLIST_FILE = WaterEject/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Water Eject Clear Sound";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to perform the audio test";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "We use your data to show relevant ads and measure app performance.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -391,6 +397,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9B1CA3892EB405DE00A923E7 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AppsFlyerSDK/AppsFlyerFramework-Static";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.17.7;
+			};
+		};
 		9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -447,6 +461,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9BB820F92E4CD83700EF03BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		9BCB08B02EB4069E00154BA8 /* AppsFlyerLib-Static */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9B1CA3892EB405DE00A923E7 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */;
+			productName = "AppsFlyerLib-Static";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
