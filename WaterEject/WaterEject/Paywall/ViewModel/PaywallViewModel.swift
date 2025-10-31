@@ -9,34 +9,6 @@ import Foundation
 import RevenueCat
 import StoreKit
 
-//enum PaywallPlan {
-//    case weekly, yearly
-//
-//    var productID: String {
-//        switch self {
-//        case .weekly: return "kyryloVoinov.WaterEject.subscription.weekly"
-//        case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
-//        }
-//    }
-//
-//    var price: String {
-//        switch self {
-//        case .weekly:
-//            return " $0.57/day"
-//        case .yearly:
-//            return " $0.03/day"
-//        }
-//    }
-//
-//    var onlyPrice: String {
-//        switch self {
-//        case .weekly:
-//            return "for $3.59"
-//        case .yearly:
-//            return "for $12.99"
-//        }
-//    }
-//}
 
 enum PaywallPlan: String, CaseIterable, Hashable {
     case weekly, yearly
@@ -155,6 +127,18 @@ final class PaywallViewModel: ObservableObject {
             purchaseSucceeded = active
             if active {
                 let txId = result.transaction?.transactionIdentifier
+                
+
+                
+                AF.log(.subscribe_cr, [
+                  "af_revenue": price,               // Double
+                  "af_currency": currency ?? "USD",
+                  "af_content_id": p.productIdentifier,
+                  "cpa_value": 0
+                ])
+                
+                SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
+                
 //                Telemetry.shared.purchaseResult(
 //                    variant: variant, status: "success", rcCode: nil,
 //                    packageId: p.productIdentifier, pricePaid: price, currency: currency,

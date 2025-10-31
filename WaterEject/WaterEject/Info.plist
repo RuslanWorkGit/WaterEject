@@ -3,12 +3,12 @@
 <plist version="1.0">
 <dict>
 	<key>NSAdvertisingAttributionReportEndpoint</key>
-	<string>https://appsflyer-skadnetwork.com/</string>
+	<string>https://appsflyer-skadnetwork.com</string>
 	<key>ONBOARDING_COOLDOWN_HOURS</key>
 	<integer>1</integer>
-	<key>SKAdNetworkIdentifier</key>
-	<string></string>
 	<key>SKAdNetworkItems</key>
-	<array/>
+	<array>
+		<string></string>
+	</array>
 </dict>
 </plist>
