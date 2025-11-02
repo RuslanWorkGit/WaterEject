@@ -927,3 +927,10 @@ extension Telemetry {
     }
 }
 
+extension Telemetry {
+    /// Єдиний стартовий маркер онбордингу з явним onboard_id
+    func onboardStarted(onboardId: String) {
+        Analytics.logEvent("onboardStarted", parameters: base(["onboard_id": onboardId]))
+    }
+}
+
