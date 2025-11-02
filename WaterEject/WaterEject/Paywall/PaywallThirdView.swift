@@ -317,6 +317,8 @@ struct PaywallThirdView: View {
                 
                 logOnboardSummary(.close)
                 
+                Telemetry.shared.paywallClosed(source: .closeButton)
+                
                 onFinish()
             }) {
                 Image(systemName: "xmark")

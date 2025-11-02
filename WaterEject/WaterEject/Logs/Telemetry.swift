@@ -14,7 +14,7 @@ enum PaywallStatus: String { case success, error, close, abandon }
 /// Єдині імена подій
 enum TelemetryEvent: String {
     case paywallExposure   = "paywall_exposure"
-    case paywallClose      = "paywall_close"
+    case paywallClose      = "paywallClose"
     
     case purchaseStart     = "purchase_start"
     case purchaseSuccess   = "purchase_success"
@@ -932,5 +932,6 @@ extension Telemetry {
     func onboardStarted(onboardId: String) {
         Analytics.logEvent("onboardStarted", parameters: base(["onboard_id": onboardId]))
     }
+    
 }
 
