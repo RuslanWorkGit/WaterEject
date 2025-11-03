@@ -60,11 +60,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
         #if DEBUG
-        af.isDebug = true
+        af.isDebug = false
         #endif
 
-        print("AF UID:", af.getAppsFlyerUID())
-        print("AF customerUserID at launch:", af.customerUserID ?? "nil")
+//        print("AF UID:", af.getAppsFlyerUID())
+//        print("AF customerUserID at launch:", af.customerUserID ?? "nil")
         
 
         // 2) Старт AF одразу після лаунчу (як і було)
@@ -214,114 +214,3 @@ struct WaterEjectApp: App {
         }
     }
 }
-
-//  AppDelegate + SwiftUI App
-//import SwiftUI
-//import AppsFlyerLib
-//import RevenueCat
-//import Firebase
-//import FirebaseFirestore
-//
-//// MARK: - AppDelegate
-//final class AppDelegate: NSObject, UIApplicationDelegate {
-//
-//    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
-//    private let appleAppID      = "6749094272"     // без "id"
-//
-//    private var didStartThisForeground = false     // щоб не стартувати двічі за один фокус
-//
-//    func application(
-//        _ application: UIApplication,
-//        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
-//    ) -> Bool {
-//
-//        // 1) RevenueCat
-//        Purchases.configure(withAPIKey: "appl_lVJsBEhDCcyoBVhDgoyaBHruByh")
-//
-//        // 2) AppsFlyer — базова конфігурація
-//        let af = AppsFlyerLib.shared()
-//        af.appsFlyerDevKey = appsFlyerDevKey
-//        af.appleAppID      = appleAppID
-//        #if DEBUG
-//        af.isDebug = true
-//        #endif
-//
-//        // 3) Прив’язуємо CUID (можна одразу — RC вже має appUserID)
-//        af.customerUserID = Purchases.shared.appUserID
-//
-//        // 4) (не викликаємо start тут; зробимо це лише коли app стане active)
-//        return true
-//    }
-//
-//    func applicationDidBecomeActive(_ application: UIApplication) {
-//        guard !didStartThisForeground else { return }
-//        didStartThisForeground = true
-//
-//        // Якщо потрібно, оновимо CUID перед стартом (раптом змінився)
-//        AppsFlyerLib.shared().customerUserID = Purchases.shared.appUserID
-//
-//        AppsFlyerLib.shared().start { result, error in
-//            if let error = error {
-//                print("AppsFlyer start error:", error.localizedDescription)
-//            } else {
-//                let status = (result?["status"] as? Int) ?? -1
-//                let type   = (result?["type"] as? String) ?? "unknown"
-//                print("AppsFlyer started. status=\(status) type=\(type)")
-//            }
-//        }
-//    }
-//
-//    func applicationDidEnterBackground(_ application: UIApplication) {
-//        didStartThisForeground = false
-//    }
-//
-//    // Диплінки/Universal Links (опційно, якщо використовуєте)
-//    func application(_ app: UIApplication,
-//                     open url: URL,
-//                     options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-//        AppsFlyerLib.shared().handleOpen(url, options: options)
-//        return false
-//    }
-//}
-//
-//@main
-//struct WaterEjectApp: App {
-//    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-//    @Environment(\.scenePhase) private var scenePhase
-//    @StateObject var coordinator = AppCoordinator()
-//    
-//    init() {
-//            OneTimeDefaultsReset.run(full: true)
-//    
-//            // Firebase
-//            FirebaseApp.configure()
-//            if let path = Bundle.main.path(forResource: "GoogleService-Info-Shared", ofType: "plist"),
-//               let opts = FirebaseOptions(contentsOfFile: path) {
-//                FirebaseApp.configure(name: "SharedCatalog", options: opts)
-//            }
-//    
-//            let sharedApp = FirebaseApp.app(name: "SharedCatalog")
-//            let sharedDB  = Firestore.firestore(app: sharedApp!)
-//            sharedDB.collection("apps").getDocuments { snap, err in
-//                print("shared apps ids =", snap?.documents.map { $0.documentID } ?? [], "err:", err as Any)
-//            }
-//    
-//            PaywallAB.shared.fetchRemoteConfig()
-//        }
-//
-//    var body: some Scene {
-//        WindowGroup {
-//            RootView()
-//                .environmentObject(coordinator)
-//                .environmentObject(PaywallGate.shared)
-//        }
-//        .onChange(of: scenePhase) { _, newPhase in
-//            // 👇 якщо хочете свій кастомний евент на кожен фокус
-//            if newPhase == .active {
-//                AppsFlyerLib.shared().logEvent("start_app", withValues: [
-//                    "session_kind": "auto",
-//                ])
-//            }
-//        }
-//    }
-//}
