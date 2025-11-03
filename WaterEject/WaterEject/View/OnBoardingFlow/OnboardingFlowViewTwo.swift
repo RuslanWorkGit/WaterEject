@@ -101,8 +101,8 @@ struct OnboardingFlowViewTwo: View {
     private func screenId(for step: OnboardingStepTwo) -> String {
         switch step {
         case .start:  return "step_1"
-        case .wallet: return "step_2"
-        case .women:  return "step_3"
+        case .wallet: return "step_3"
+        case .women:  return "step_2"
         case .paywall: return "paywall"
         }
     }
@@ -123,10 +123,11 @@ struct OnboardingFlowViewTwo: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
             currentStep = step
             prevStep = nil
-//            incomingStep = nil
-//            isAnimating = false
+            incomingStep = nil
+            isAnimating = false
+            Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
             if step != .paywall {
-                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+                //
                     appendStep(step)
                     persist(tag: .v32)
                        incomingStep = nil
@@ -171,7 +172,7 @@ struct OnboardingFlowViewTwo: View {
                     stepsVisited: stepsVisited
                 )
             .onAppear {
-                    Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+                   // Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
                     persist(tag: .v32)      // якщо зберігаєш прогрес
                 

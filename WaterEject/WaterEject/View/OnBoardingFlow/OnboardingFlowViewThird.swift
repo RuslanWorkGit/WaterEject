@@ -125,12 +125,13 @@ struct OnboardingFlowViewThree: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
             currentStep = step
             prevStep = nil
-//            incomingStep = nil
-//            isAnimating = false
+            Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+            incomingStep = nil
+            isAnimating = false
             if step != .paywall {
                        incomingStep = nil
                 
-                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+                //Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                     appendStep(step)
                 persist(tag: .v33)
                    }
@@ -185,7 +186,7 @@ struct OnboardingFlowViewThree: View {
                     stepsVisited: stepsVisited
                 )
             .onAppear {
-                    Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+                   // Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
                     persist(tag: .v33)      // якщо зберігаєш прогрес
                 

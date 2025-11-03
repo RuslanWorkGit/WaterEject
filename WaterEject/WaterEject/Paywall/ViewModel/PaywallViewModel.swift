@@ -126,7 +126,9 @@ final class PaywallViewModel: ObservableObject {
             let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
             purchaseSucceeded = active
             if active {
+                let tx = result.transaction
                 let txId = result.transaction?.transactionIdentifier
+  
                 
 
                 
@@ -137,23 +139,21 @@ final class PaywallViewModel: ObservableObject {
                   "cpa_value": 0
                 ])
                 
+                let cpaFlag = "af_subscribe_cpa_sent \(Purchases.shared.appUserID)"
+                    if !UserDefaults.standard.bool(forKey: cpaFlag) {
+                        AppsFlyerLib.shared().logEvent("subscribe_cpa", withValues: [
+                            "cpa_value": p.afPriceDouble,        // твоя CPA-ціль (можеш підставити інше число)
+                            "af_currency": p.afCurrencyCode,
+                            "product_id": p.productIdentifier,
+                            "transaction_id": txId
+                        ])
+                        UserDefaults.standard.set(true, forKey: cpaFlag)
+                    }
+                
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
                 
-//                Telemetry.shared.purchaseResult(
-//                    variant: variant, status: "success", rcCode: nil,
-//                    packageId: p.productIdentifier, pricePaid: price, currency: currency,
-//                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
-//                )
-//                
-//                Telemetry.shared.paywallPurchaseSuccess(   // НОВИЙ яскравий івент
-//                        variant: variant,
-//                        entryPoint: entryPoint,
-//                        packageId: p.productIdentifier,
-//                        price: price,
-//                        currency: currency,
-//                        transactionId: txId,
-//                        sessionId: sessionId
-//                    )
+                RCPriceCache.save(entitlementID: "pro_user", price: price, currency: currency ?? "USD")
+
             } else {
                 errorMessage = "Subscription not active"
                 Telemetry.shared.purchaseResult(
@@ -162,14 +162,7 @@ final class PaywallViewModel: ObservableObject {
                     sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                 )
                 
-//                Telemetry.shared.paywallPurchaseError(     // НОВИЙ для помилки
-//                        variant: variant,
-//                        entryPoint: entryPoint,
-//                        packageId: p.productIdentifier,
-//                        rcCode: -3,
-//                        message: "Subscription not active",
-//                        sessionId: sessionId
-//                    )
+
             }
         } catch {
             let ns = error as NSError
@@ -212,4 +205,17 @@ final class PaywallViewModel: ObservableObject {
             Telemetry.shared.restoreError(ns)
         }
     }
+}
+
+import AppsFlyerLib
+
+private extension StoreProduct {
+    var afCurrencyCode: String {
+        if let c = priceFormatter?.currencyCode, !c.isEmpty { return c }
+        if #available(iOS 16.0, *), let c = priceFormatter?.locale.currency?.identifier { return c }
+        if let c = priceFormatter?.locale.currencyCode { return c }
+        if #available(iOS 16.0, *), let c = Locale.current.currency?.identifier { return c }
+        return "USD"
+    }
+    var afPriceDouble: Double { (price as NSDecimalNumber).doubleValue }
 }

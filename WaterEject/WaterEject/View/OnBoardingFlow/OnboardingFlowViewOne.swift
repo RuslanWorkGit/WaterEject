@@ -117,9 +117,12 @@ struct OnboardingFlowViewOne: View {
             prevStep = nil
             incomingStep = nil
             isAnimating = false
+            
+            Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+            
             if step != .paywall {
 //                       incomingStep = nil
-                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+                // Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                 
                 appendStep(step)
                 persist(tag: .v31)
@@ -178,7 +181,7 @@ struct OnboardingFlowViewOne: View {
                     
                 )
             .onAppear {
-                    Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
                     persist(tag: .v31)      // якщо зберігаєш прогрес
                 

@@ -8,6 +8,30 @@
 import Foundation
 import RevenueCat
 
+enum RCPriceCache {
+    static func save(entitlementID: String, price: Double, currency: String) {
+        UserDefaults.standard.set(price,    forKey: "rc_last_price_\(entitlementID)")
+        UserDefaults.standard.set(currency, forKey: "rc_last_curr_\(entitlementID)")
+    }
+    static func read(entitlementID: String) -> (price: Double, currency: String)? {
+        let p = UserDefaults.standard.double(forKey: "rc_last_price_\(entitlementID)")
+        let c = UserDefaults.standard.string(forKey: "rc_last_curr_\(entitlementID)")
+        if p > 0, let c { return (p, c) }
+        return nil
+    }
+}
+
+private extension SubscriptionMonitor {
+    func afPayload(revenue: Double?, currency: String?) -> [String: Any] {
+        var d: [String: Any] = [
+            "af_content_id": entitlementID,
+            "af_currency": currency ?? "USD"
+        ]
+        d["af_revenue"] = revenue ?? 0.0
+        return d
+    }
+}
+
 /// Збережений сніпшот, щоб не слати дублікати
 private struct SavedState: Codable, Equatable {
     var isActive: Bool
@@ -59,42 +83,37 @@ final class SubscriptionMonitor {
 
         // 1) Скасування авто-пролонгації (user turned off renewal)
         if new.unsubscribed, old?.unsubscribed == false || (old == nil && new.unsubscribed) {
-            AF.log(.subscription_cancelled, [
-                "af_content_id": entitlementID
-            ])
+            let cached = RCPriceCache.read(entitlementID: entitlementID)
+            AF.log(.subscription_cancelled, afPayload(revenue: 0.0, currency: cached?.currency))
         }
+
 
         // 2) Ренювал (новий період почався): коли зросла expiration або з’явилась нова latestPurchase
         if let newExp = new.expirationTs,
            let oldExp = old?.expirationTs,
-           new.isActive,            // підписка активна
-           newExp > oldExp + 1 {    // +1 сек — антидребезг
-            AF.log(.subscription_renewed, [
-                "af_content_id": entitlementID
-            ])
+           new.isActive, newExp > oldExp + 1 {
+            let cached = RCPriceCache.read(entitlementID: entitlementID)
+            AF.log(.subscription_renewed, afPayload(revenue: cached?.price, currency: cached?.currency))
         } else if let newLP = new.latestPurchaseTs,
                   let oldLP = old?.latestPurchaseTs,
-                  new.isActive,
-                  newLP > oldLP + 1 {
-            AF.log(.subscription_renewed, [
-                "af_content_id": entitlementID
-            ])
+                  new.isActive, newLP > oldLP + 1 {
+            let cached = RCPriceCache.read(entitlementID: entitlementID)
+            AF.log(.subscription_renewed, afPayload(revenue: cached?.price, currency: cached?.currency))
         }
+
 
         // 3) Закінчення (вже не активна, і термін минув)
         if old?.isActive == true,
            new.isActive == false,
            (new.expirationTs ?? 0) < Date().timeIntervalSince1970 {
-            AF.log(.subscription_expired, [
-                "af_content_id": entitlementID
-            ])
+            let cached = RCPriceCache.read(entitlementID: entitlementID)
+            AF.log(.subscription_expired, afPayload(revenue: 0.0, currency: cached?.currency))
         }
 
         // 4) Billing issue (помилка білінгу)
         if new.billingIssue, old?.billingIssue == false || (old == nil && new.billingIssue) {
-            AF.log(.billing_issue_detected, [
-                "af_content_id": entitlementID
-            ])
+            let cached = RCPriceCache.read(entitlementID: entitlementID)
+            AF.log(.billing_issue_detected, afPayload(revenue: 0.0, currency: cached?.currency))
         }
 
         // Зберегти новий стан
