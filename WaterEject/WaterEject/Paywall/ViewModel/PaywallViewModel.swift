@@ -156,11 +156,11 @@ final class PaywallViewModel: ObservableObject {
 
             } else {
                 errorMessage = "Subscription not active"
-                Telemetry.shared.purchaseResult(
-                    variant: variant, status: "error", rcCode: -3,
-                    packageId: p.productIdentifier, pricePaid: nil, currency: currency,
-                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
-                )
+//                Telemetry.shared.purchaseResult(
+//                    variant: variant, status: "error", rcCode: -3,
+//                    packageId: p.productIdentifier, pricePaid: nil, currency: currency,
+//                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
+//                )
                 
 
             }
@@ -169,20 +169,20 @@ final class PaywallViewModel: ObservableObject {
             let rcCode = ns.userInfo["RCErrorCodeKey"] as? Int
             let status = (rcCode == 1) ? "user_cancelled" : "error"
             errorMessage = ns.localizedDescription
-            Telemetry.shared.purchaseResult(
-                variant: variant, status: status, rcCode: rcCode,
-                packageId: p.productIdentifier, pricePaid: nil, currency: currency,
-                sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
-            )
+//            Telemetry.shared.purchaseResult(
+//                variant: variant, status: status, rcCode: rcCode,
+//                packageId: p.productIdentifier, pricePaid: nil, currency: currency,
+//                sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
+//            )
             if status == "error" {
-                Telemetry.shared.paywallPurchaseError(
-                        variant: variant,
-                        entryPoint: entryPoint,
-                        packageId: p.productIdentifier,
-                        rcCode: rcCode,
-                        message: ns.localizedDescription,
-                        sessionId: sessionId
-                    )
+//                Telemetry.shared.paywallPurchaseError(
+//                        variant: variant,
+//                        entryPoint: entryPoint,
+//                        packageId: p.productIdentifier,
+//                        rcCode: rcCode,
+//                        message: ns.localizedDescription,
+//                        sessionId: sessionId
+//                    )
             }
         }
     }

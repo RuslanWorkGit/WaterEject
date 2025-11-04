@@ -60,13 +60,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
         #if DEBUG
-        af.isDebug = false
+        af.isDebug = true
         #endif
 
 //        print("AF UID:", af.getAppsFlyerUID())
 //        print("AF customerUserID at launch:", af.customerUserID ?? "nil")
         
-
         // 2) Старт AF одразу після лаунчу (як і було)
         startAppsFlyer()
 
@@ -106,21 +105,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // як і було: дебаунс старту SDK
-        let now = Date().timeIntervalSince1970
-        guard now - lastAFStartTs > 2 else { return }
-        lastAFStartTs = now
+
 
         // запускаємо SDK (але НЕ прив’язуємо start_app до completion)
-        AppsFlyerLib.shared().start { result, error in
-            if let error = error {
-                print("AF start error:", error.localizedDescription)
-                return
-            }
-            let status = (result?["status"] as? Int) ?? -1
-            let type   = (result?["type"] as? String) ?? "unknown"
-            print("AF start status:", status, "type:", type)
-        }
+        AppsFlyerLib.shared().start()
 
         // як і було: підтягнути CustomerInfo
         Task { @MainActor in

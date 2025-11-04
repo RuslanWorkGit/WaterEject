@@ -308,12 +308,12 @@ struct PaywallThirdView: View {
             }
             
             Button(action: {
-                let variant = PaywallAB.shared.variant().rawValue
-                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
-                                Telemetry.shared.paywallClose(
-                                    variant: variant, entryPoint: entryPoint,
-                                    reason: "close_button", sessionId: sessionId
-                                )
+//                let variant = PaywallAB.shared.variant().rawValue
+//                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
+//                                Telemetry.shared.paywallClose(
+//                                    variant: variant, entryPoint: entryPoint,
+//                                    reason: "close_button", sessionId: sessionId
+//                                )
                 
                 logOnboardSummary(.close)
                 
