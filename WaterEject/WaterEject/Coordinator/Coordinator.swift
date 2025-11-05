@@ -8,6 +8,7 @@
 import Combine
 import SwiftUI
 
+
 @MainActor
 final class AppCoordinator: ObservableObject {
     
@@ -17,6 +18,7 @@ final class AppCoordinator: ObservableObject {
         case onboarding
         case mainTabbar
     }
+
     
     @Published var currentScreen: Screen = .boot
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
@@ -54,6 +56,8 @@ final class AppCoordinator: ObservableObject {
     func showMainTabbar() {
         currentScreen = .mainTabbar
     }
+    
+
 }
 
 
