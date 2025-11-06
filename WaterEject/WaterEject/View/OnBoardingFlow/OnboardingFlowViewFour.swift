@@ -184,11 +184,11 @@ struct OnboardingFlowViewFour: View {
         switch step {
         case .stepOne:
             //StartOnboardView(action: { goTo(.wallet, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            OnboardFourthFirstView()
+            OnboardFourthFirstView(action: { print("|")})
             
         case .stepTwo:
             //SaveOnboardNew(action: { goTo(.women, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            OnboardFourthSecondView()
+            OnboardFourthSecondView(action: { print("|")})
         case .stepThree:
            // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
             OnboardFourthThirdView()

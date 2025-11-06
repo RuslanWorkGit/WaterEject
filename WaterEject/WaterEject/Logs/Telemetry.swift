@@ -834,6 +834,7 @@ extension OnboardTag {
         case .v31: return "Onboard_v_3_1"
         case .v32: return "Onboard_v_3_2"
         case .v33: return "Onboard_v_3_3"
+        case .v41: return "Onboard_v_4_1"
         }
     }
     var stepEventName: String { "\(summaryEventName)_step" } // ← подія для КРОКІВ
