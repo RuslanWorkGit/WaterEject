@@ -49,3 +49,13 @@ enum OnboardingStepThree: Int, CaseIterable {
     case paywall
 }
 
+enum OnboardingStepFour: Int, CaseIterable, Hashable {
+    case stepOne
+    case stepTwo
+    case stepThree
+    case stepFourth
+    case stepFive
+    case stepSix
+    case paywall
+}
+

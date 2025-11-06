@@ -561,6 +561,7 @@ enum OnboardTag: String, Codable {
     case v31 = "Onboard_3_1"
     case v32 = "Onboard_3_2"
     case v33 = "Onboard_3_3"
+    case v41 = "Onboard_4_1"
 }
 
 extension Telemetry {
