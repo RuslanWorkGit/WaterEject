@@ -166,7 +166,7 @@ struct OnboardingFlowViewFour: View {
             return "step_2"
         case .stepThree:
             return "step_3"
-        case .stepFourth:
+        case .stepFour:
             return "step_4"
         case .stepFive:
             return "step_5"
@@ -184,17 +184,17 @@ struct OnboardingFlowViewFour: View {
         switch step {
         case .stepOne:
             //StartOnboardView(action: { goTo(.wallet, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            OnboardFourthFirstView(action: { print("|")})
+            OnboardFourthFirstView(action: { goTo(.stepTwo, forward: true) })
             
         case .stepTwo:
             //SaveOnboardNew(action: { goTo(.women, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            OnboardFourthSecondView(action: { print("|")})
+            OnboardFourthSecondView(action: { goTo(.stepThree, forward: true) })
         case .stepThree:
            // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            OnboardFourthThirdView(action: { print("|")})
-        case .stepFourth:
+            OnboardFourthThirdView(action: { goTo(.stepFour, forward: true) })
+        case .stepFour:
            // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            OnboardFourthFourhtView(action: { print("|")})
+            OnboardFourthFourhtView(action: { goTo(.stepFive, forward: true) })
         case .stepFive:
            // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
             OnboardFourthFifthView()
