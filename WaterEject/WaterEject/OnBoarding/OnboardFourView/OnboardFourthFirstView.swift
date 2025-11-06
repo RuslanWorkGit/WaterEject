@@ -16,62 +16,57 @@ struct OnboardFourthFirstView: View {
     
     @AppStorage("selectedDevice") private var selectedDeviceRaw: String = ChooseDevice.iphone.rawValue
     @State private var tempSelected: ChooseDevice = .iphone
-    
-//    @AppStorage("selectedDevice") private var selectedDeviceRaw: String = ChooseDevice.iphone.rawValue
-//        private var selectedDevice: ChooseDevice {
-//            get { ChooseDevice(rawValue: selectedDeviceRaw) ?? .iphone }
-//            set { selectedDeviceRaw = newValue.rawValue }
-//        }
-//    
+
     var body: some View {
 
 
             
             
-        OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
-            // увесь твій контент екрану, БЕЗ кнопки!
+        OnboardScaffoldNew(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
+
             LinearGradient(gradient: Gradient(stops: [
                 .init(color: Color(red: 255/255, green: 255/255, blue: 255/255).opacity(1), location: 0),
                 .init(color: Color(red: 222/255, green: 233/255, blue: 255/255).opacity(1), location: 0.5),
                 .init(color: Color(red: 255/255, green: 255/255, blue: 255/255).opacity(1), location: 1.0)
             ]), startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
-            
-            VStack {
-                Group {
+            ScrollView{
+                VStack {
+                    Group {
+                        
+                        (
+                            Text("What device are we rescuing? ").font(.system(size: 30, weight: .semibold))
+                            + Text("💦").font(.system(size: 30, weight: .medium))
+                        )
+                        .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.top, 16)
+                        .padding(.bottom, 12)
+                        
+                        Text("Choose your device to start the check-up.")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
+                            .padding(.bottom, 42)
+                    }
                     
-                    (
-                        Text("What device are we rescuing? ").font(.system(size: 30, weight: .semibold))
-                        + Text("💦").font(.system(size: 30, weight: .medium))
-                    )
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 16)
-                    .padding(.bottom, 12)
                     
-                    Text("Choose your device to start the check-up.")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
-                        .padding(.bottom, 42)
+                    ForEach(ChooseDevice.allCases) { device in
+                        SelectableChipOne(title: device.rawValue,
+                                          isSelected: Binding(
+                                            get: { tempSelected == device },
+                                            set: { if $0 { tempSelected = device } }
+                                          )
+                                          
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    
                 }
-                
-                
-                ForEach(ChooseDevice.allCases) { device in
-                    SelectableChip(title: device.rawValue,
-                                   isSelected: Binding(
-                                               get: { tempSelected == device },
-                                               set: { if $0 { tempSelected = device } }
-                                           )
-                                    
-                    )
-                }
-                
-                Spacer()
-            
-                
+                .padding(.horizontal, 32)
             }
-            .padding(.horizontal, 32)
         }
         .onAppear {
             tempSelected = ChooseDevice(rawValue: selectedDeviceRaw) ?? .iphone
@@ -81,7 +76,52 @@ struct OnboardFourthFirstView: View {
     }
 }
 
-struct SelectableChip: View {
+struct PillButtonNew: View {
+    let title: String
+    let action: () -> Void
+    var arrow: Bool = false
+    
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(minHeight: 52)
+                .frame(maxWidth: .infinity)
+                //.contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            
+        }
+        //.buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255)) // як на скріні
+                .innerShadow(
+                    RoundedRectangle(cornerRadius: 16),
+                    color: .white, opacity: 0.25,
+                    x: 0, y: 1, blur: 0, spread: 2
+                )
+        )
+        .overlay( // стрілка зверху, не зсуває текст
+            Group {
+                if arrow {
+                    Image(systemName: "arrow.right")
+                        .foregroundStyle(.white)
+
+                        .padding(.trailing, 16)
+                }
+            },
+            alignment: .trailing
+        )
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 16, style: .continuous)
+//                .stroke(Color.white.opacity(0.08), lineWidth: 1) // тонка обводка (опційно)
+//        )
+        
+    }
+}
+
+struct SelectableChipOne: View {
     let title: String
     @Binding var isSelected: Bool
     
@@ -104,11 +144,17 @@ struct SelectableChip: View {
             .padding(.vertical, 19)
             .padding(.horizontal, 14)
             .contentShape(RoundedRectangle(cornerRadius: 16))
+
         }
         .buttonStyle(.plain)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(.white)
+                .innerShadow(
+                    RoundedRectangle(cornerRadius: 16),
+                    color: Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255), opacity: 0.05,
+                    x: 0, y: -1, blur: 0, spread: 2
+                )
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
@@ -120,6 +166,26 @@ struct SelectableChip: View {
 }
 
 
+extension View {
+    /// Figma-like inner shadow (overlay + mask)
+    func innerShadow<S: Shape>(
+        _ shape: S,
+        color: Color = .black,
+        opacity: Double = 1,
+        x: CGFloat = 0,
+        y: CGFloat = 0,
+        blur: CGFloat = 6,
+        spread: CGFloat = 0
+    ) -> some View {
+        overlay(
+            shape
+                .stroke(color.opacity(opacity), lineWidth: max(spread, 0.0001))
+                .offset(x: x, y: y)
+                .blur(radius: blur)
+                .mask(shape)
+        )
+    }
+}
 #Preview {
     OnboardFourthFirstView(action: {print("N")})
 }

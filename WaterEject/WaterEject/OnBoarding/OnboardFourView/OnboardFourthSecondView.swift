@@ -10,11 +10,11 @@ import SwiftUI
 struct OnboardFourthSecondView: View {
     let action: () -> Void
     private func handleCTA() {
-        selectedDeviceRaw = tempSelected.rawValue
+        selectedReasonRaw = tempSelected.rawValue
         action()
     }
     
-    @AppStorage("selectedDevice") private var selectedDeviceRaw: String = ChooseReason.first.rawValue
+    @AppStorage("selectedReason") private var selectedReasonRaw: String = ChooseReason.first.rawValue
     @State private var tempSelected: ChooseReason = .first
     
     var body: some View {
@@ -22,7 +22,7 @@ struct OnboardFourthSecondView: View {
         
         
         
-        OnboardScaffold(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
+        OnboardScaffoldNew(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
             LinearGradient(gradient: Gradient(stops: [
                 .init(color: Color(red: 255/255, green: 255/255, blue: 255/255).opacity(1), location: 0),
@@ -51,7 +51,7 @@ struct OnboardFourthSecondView: View {
                 
                 
                 ForEach(ChooseReason.allCases) { reason in
-                    SelectableChip(title: reason.rawValue,
+                    SelectableChipOne(title: reason.rawValue,
                                    isSelected: Binding(
                                     get: { tempSelected == reason },
                                     set: { if $0 { tempSelected = reason } }
@@ -68,7 +68,7 @@ struct OnboardFourthSecondView: View {
         }
         }
         .onAppear {
-            tempSelected = ChooseReason(rawValue: selectedDeviceRaw) ?? .first
+            tempSelected = ChooseReason(rawValue: selectedReasonRaw) ?? .first
         }
     }
 }

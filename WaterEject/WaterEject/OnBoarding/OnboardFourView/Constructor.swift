@@ -31,45 +31,81 @@ enum ChooseReason: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-struct PillButtonNew: View {
-    let title: String
-    let action: () -> Void
-    var arrow: Bool = false
+enum ChooseMuffledSound: String, CaseIterable, Identifiable {
+    case first = "Almost normal"
+    case second = "Slightly muffled"
+    case third = "Noticeably quieter"
+    case fourth = "Crackling sound"
+    case fifth = "Distorted or hollow"
+    case sixth = "Barely audible"
+    case seventh = "No sound at all"
     
+    var id: String { rawValue }
     
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(minHeight: 52)
-                .frame(maxWidth: .infinity)
-                .contentShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-            
+    var subtitle: String {
+            switch self {
+            case .first:   return "just a tiny change in sound"
+            case .second:  return "a bit softer or less clear"
+            case .third:   return "volume feels lower"
+            case .fourth:  return "small pops or gurgles"
+            case .fifth:   return "unnatural sound"
+            case .sixth:   return "very low clarity"
+            case .seventh: return "completely silent"
+            }
         }
-        .buttonStyle(.plain)
-        .background(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .fill(Color.black) // як на скріні
-        )
-        .overlay( // стрілка зверху, не зсуває текст
-            Group {
-                if arrow {
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.white)
-                        .fontWeight(.bold)
-                        .padding(.trailing, 16)
-                }
-            },
-            alignment: .trailing
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1) // тонка обводка (опційно)
-        )
-        
-    }
 }
+
+enum ChooseTime: String, CaseIterable, Identifiable {
+    case first = "Just now"
+    case second = "15 min ago"
+    case third = "1 hour ago"
+    case fourth = "Today"
+    case fifth = "Yesterday"
+    case sixth = "2+ days ago"
+    case seventh = "No sound at all"
+    
+    var id: String { rawValue }
+}
+
+//struct PillButtonNew: View {
+//    let title: String
+//    let action: () -> Void
+//    var arrow: Bool = false
+//    
+//    
+//    var body: some View {
+//        Button(action: action) {
+//            Text(title)
+//                .font(.system(size: 18, weight: .semibold))
+//                .foregroundStyle(.white)
+//                .frame(minHeight: 52)
+//                .frame(maxWidth: .infinity)
+//                .contentShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+//            
+//        }
+//        .buttonStyle(.plain)
+//        .background(
+//            RoundedRectangle(cornerRadius: 32, style: .continuous)
+//                .fill(Color.black) // як на скріні
+//        )
+//        .overlay( // стрілка зверху, не зсуває текст
+//            Group {
+//                if arrow {
+//                    Image(systemName: "chevron.right")
+//                        .foregroundStyle(.white)
+//                        .fontWeight(.bold)
+//                        .padding(.trailing, 16)
+//                }
+//            },
+//            alignment: .trailing
+//        )
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 32, style: .continuous)
+//                .stroke(Color.white.opacity(0.08), lineWidth: 1) // тонка обводка (опційно)
+//        )
+//        
+//    }
+//}
 
 struct OnboardScaffoldNew<Content: View>: View {
     let ctaTitle: String
@@ -83,8 +119,9 @@ struct OnboardScaffoldNew<Content: View>: View {
                 HStack { // гарантує однакову геометрію
                     Spacer()
                     PillButtonNew(title: ctaTitle, action: ctaAction, arrow: true)
+                        .padding(.horizontal, 32)
                         .frame(minHeight: 52) // ключ
-                        .frame(width: fixedWidth)
+//                        .frame(width: fixedWidth)
                     Spacer()
                 }
                 
