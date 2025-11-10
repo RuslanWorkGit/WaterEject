@@ -10,19 +10,25 @@ import SwiftUI
 struct OnboardFourthThirdView: View {
     let action: () -> Void
     private func handleCTA() {
-        selectedSoundRaw = tempSelected.rawValue
+        guard let sound = tempSelected else {
+            showAlert = true
+            return
+        }
+        selectedSoundRaw = sound.rawValue
+        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedSoundRaw, choiceName: "sound")
         action()
     }
     
-    @AppStorage("selectedSound") private var selectedSoundRaw: String = ChooseMuffledSound.first.rawValue
-    @State private var tempSelected: ChooseMuffledSound = .first
+    @AppStorage("selectedSound") private var selectedSoundRaw: String = ""
+    @State private var tempSelected: ChooseMuffledSound? = nil
+    @State private var showAlert = false
     
-
+    
     var body: some View {
-
-
-            
-            
+        
+        
+        
+        
         OnboardScaffoldNew(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
             LinearGradient(gradient: Gradient(stops: [
@@ -34,42 +40,42 @@ struct OnboardFourthThirdView: View {
             
             ScrollView{
                 VStack {
-                Group {
+                    Group {
+                        
+                        (
+                            Text("How muffled is the sound?").font(.system(size: 30, weight: .semibold))
+                        )
+                        .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.top, 16)
+                        .padding(.bottom, 24)
+                        
+                    }
                     
-                    (
-                        Text("How muffled is the sound?").font(.system(size: 30, weight: .semibold))
-                    )
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 16)
-                    .padding(.bottom, 24)
-
+                    
+                    ForEach(ChooseMuffledSound.allCases) { sound in
+                        SelectableChipTwo(title: sound.rawValue,
+                                          subtitle: sound.subtitle,
+                                          isSelected: Binding(
+                                            get: { tempSelected == sound },
+                                            set: { if $0 { tempSelected = sound } }
+                                          )
+                                          
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    
                 }
-                
-                
-                ForEach(ChooseMuffledSound.allCases) { sound in
-                    SelectableChipTwo(title: sound.rawValue,
-                                      subtitle: sound.subtitle,
-                                      isSelected: Binding(
-                                        get: { tempSelected == sound },
-                                        set: { if $0 { tempSelected = sound } }
-                                      )
-                                      
-                    )
-                }
-                
-                Spacer()
-                
-                
+                .padding(.horizontal, 32)
             }
-            .padding(.horizontal, 32)
         }
+        .alert("Please make a choice", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
         }
-        .onAppear {
-            tempSelected = ChooseMuffledSound(rawValue: selectedSoundRaw) ?? .first
-        }
-
+        
         
     }
 }
@@ -84,10 +90,12 @@ struct SelectableChipTwo: View {
             isSelected.toggle()
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .imageScale(.large)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255) : Color(red: 195 / 255, green: 198 / 255, blue: 205 / 255))
+                Image(isSelected ? "fillCheckmark" : "emptyCheckmark")
+                
+//                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+//                    .imageScale(.large)
+//                    .font(.system(size: 18, weight: .semibold))
+//                    .foregroundStyle(isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255) : Color(red: 195 / 255, green: 198 / 255, blue: 205 / 255))
                 
                 VStack(alignment: .leading) {
                     
@@ -99,10 +107,10 @@ struct SelectableChipTwo: View {
                     Text(subtitle)
                         .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
-
+                    
                 }
                 
-
+                
                 Spacer(minLength: 0)
             }
             .padding(.vertical, 19)

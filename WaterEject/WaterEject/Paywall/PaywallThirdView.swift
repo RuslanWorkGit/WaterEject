@@ -345,9 +345,17 @@ struct PaywallThirdView: View {
             }
             Task { await viewModel.loadPricing() }
             
+//            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+//                player.play()
+//                withAnimation(.easeIn(duration: 0.3)) {
+//                    appearVideo = true
+//                }
+//            }
+        }
+        .task {
             DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
                 player.play()
-                withAnimation(.easeIn(duration: 0.3)) {
+                withAnimation(.easeIn(duration: 0.4)) {
                     appearVideo = true
                 }
             }

@@ -1,0 +1,10 @@
+<svg width="146" height="146" viewBox="0 0 146 146" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g opacity="0.15">
+<rect x="18" y="18" width="110" height="110" rx="55" fill="#2BD99C"/>
+</g>
+<g opacity="0.05">
+<rect width="146" height="146" rx="73" fill="#2BD99C"/>
+</g>
+<rect x="33" y="33" width="80" height="80" rx="40" fill="#2BD99C"/>
+<path d="M55.5 73L68 85.5L93 60.5" stroke="#0D402E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -54,13 +54,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             }
         }
 
-        // 1) Конфігурація AppsFlyer
+        // 1) Конфігурація AppsFlyer 
         let af = AppsFlyerLib.shared()
         af.appsFlyerDevKey = appsFlyerDevKey
         af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
         #if DEBUG
-        af.isDebug = true
+        af.isDebug = false
         #endif
 
 //        print("AF UID:", af.getAppsFlyerUID())

@@ -27,13 +27,13 @@ struct RootView: View {
             case .onboarding:
                 //            OnboardingFlowView()
                 
-//                OnboardingAB.shared
-//                    .assignedOnboardingView() // ← ось тут
-//                    .onAppear {
-//                        // Якщо потрібен RC для свіжих часток:
-//                        OnboardingAB.shared.fetchRemoteConfig()
-//                    }
-                OnboardingFlowViewFour()
+                OnboardingAB.shared
+                    .assignedOnboardingView() // ← ось тут
+                    .onAppear {
+                        // Якщо потрібен RC для свіжих часток:
+                        OnboardingAB.shared.fetchRemoteConfig()
+                    }
+//                OnboardingFlowViewFour()
             case .mainTabbar:
                 TabBarView()
             }

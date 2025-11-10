@@ -509,6 +509,13 @@ extension Telemetry {
         ]))
     }
     
+    func logOnboardChoice(flowId: String, choiceInfo: String, choiceName: String) {
+        Analytics.logEvent("\(flowId)", parameters: base([
+            "flow_id": flowId,
+            choiceName: choiceInfo
+        ]))
+    }
+    
     func onbFlowFinish(flowId: String) {
         Analytics.logEvent("onb_flow_finish", parameters: base(["flow_id": flowId]))
     }

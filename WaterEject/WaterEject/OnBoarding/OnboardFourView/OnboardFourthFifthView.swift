@@ -15,12 +15,30 @@ struct OnboardFourthFifthView: View {
     }
     
     @AppStorage("selectedDevice") private var selectedDeviceRaw: String = ChooseDevice.iphone.rawValue
-        @State private var showEdit = false
+    @AppStorage("selectedReason") private var selectedReasonRaw: String = ChooseReason.first.rawValue
+    @AppStorage("selectedSound") private var selectedSoundRaw: String = ChooseMuffledSound.first.rawValue
+    @AppStorage("selectedTime") private var selectedTimeRaw: String = ChooseTime.first.rawValue
+    @State private var showEditDevice = false
+    @State private var showEditReason = false
+    @State private var showEditSound = false
+    @State private var showEditTime = false
 
         // якщо збережено enum — показуємо його title, якщо довільний текст — показуємо як є
         private var deviceName: String {
             ChooseDevice(rawValue: selectedDeviceRaw)?.rawValue ?? selectedDeviceRaw
         }
+    
+    private var reason: String {
+        ChooseReason(rawValue: selectedReasonRaw)?.rawValue ?? selectedReasonRaw
+    }
+    
+    private var sound: String {
+        ChooseMuffledSound(rawValue: selectedSoundRaw)?.rawValue ?? selectedSoundRaw
+    }
+    
+    private var time: String {
+        ChooseTime(rawValue: selectedTimeRaw)?.rawValue ?? selectedTimeRaw
+    }
     
     var body: some View {
         
@@ -32,7 +50,7 @@ struct OnboardFourthFifthView: View {
                 .init(color: Color(red: 255/255, green: 255/255, blue: 255/255).opacity(1), location: 1.0)
             ]), startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
-            ScrollView{
+            //ScrollView{
                 VStack {
                     Group {
                         
@@ -51,22 +69,72 @@ struct OnboardFourthFifthView: View {
                             .padding(.bottom, 42)
                     }
                     
-                    
-                    InfoActionCard(
-                        title: "Device name:",
-                        value: deviceName,
-                        iconName: "square.and.pencil",
-                        action: { showEdit = true }
-                    )
-                   
-                    .sheet(isPresented: $showEdit) {
-                        EditNameSheet(name: $selectedDeviceRaw)
+                    Group {
+                        InfoActionCard(
+                            title: "Device name:",
+                            value: deviceName,
+                            action: { showEditDevice = true }
+                        )
                         
+                        .sheet(isPresented: $showEditDevice) {
+                            EditNameSheet(name: $selectedDeviceRaw)
+                            
+                        }
+                        
+                        InfoActionCard(
+                            title: "Situateion:",
+                            value: reason,
+                            action: { showEditReason = true }
+                        )
+                        .sheet(isPresented: $showEditReason) {
+                            EditNameSheet(name: $selectedReasonRaw)
+                            
+                            
+                        }
+                        
+                        InfoActionCard(
+                            title: "Sound issue:",
+                            value: sound,
+                            action: { showEditSound = true }
+                        )
+                        .sheet(isPresented: $showEditSound) {
+                            EditNameSheet(name: $selectedSoundRaw)
+                            
+                            
+                        }
+                        
+                        InfoActionCard(
+                            title: "Time since exposure:",
+                            value: time,
+                            action: { showEditTime = true }
+                        )
+                        .sheet(isPresented: $showEditTime) {
+                            EditNameSheet(name: $selectedTimeRaw)
+                            
+                            
+                        }
                         
                     }
+                    
                     .padding(.horizontal, 32)
+                    
+                    Spacer()
+                    
+                    HStack {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color(red: 34/255, green: 155/255, blue: 87/255))
+                        
+                        Text("Dual speakers detected")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color(red: 34/255, green: 155/255, blue: 87/255))
+                            
+                    }
+                    .padding(.bottom, 14)
                 }
-            }
+                
+                
+                
+            //}
             
             
         }
@@ -77,15 +145,14 @@ struct InfoActionCard: View {
     // Основні параметри
     let title: String
     let value: String
-    var iconName: String = "square.and.pencil"     // SF Symbol
     var action: () -> Void                          // натиск на іконку
 
     // Стилі (можеш змінити під тему)
-    var cornerRadius: CGFloat = 20
-    var gradient: LinearGradient = LinearGradient(
-        colors: [Color.white, Color(red: 0.92, green: 0.96, blue: 1.0)],
-        startPoint: .top, endPoint: .bottom
-    )
+    var cornerRadius: CGFloat = 8
+//    var gradient: LinearGradient = LinearGradient(
+//        colors: [Color.white, Color(red: 0.92, green: 0.96, blue: 1.0)],
+//        startPoint: .top, endPoint: .bottom
+//    )
     var strokeColor: Color = Color.white.opacity(0.6)
     var iconBG: Color = .white
     var iconColor: Color = Color(red: 0.16, green: 0.28, blue: 0.73) // темно-синій
@@ -94,23 +161,35 @@ struct InfoActionCard: View {
         HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color(red: 0.23, green: 0.25, blue: 0.28))
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
 
                 Text(value)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.07))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Button(action: action) {
-                Image(systemName: iconName)
+                Image("squareAndPencil")
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(iconColor)
                     .frame(width: 44, height: 44)
-                    .background(Circle().fill(iconBG))
+                    .background(
+                        Circle().fill(iconBG)
+                            .innerShadow(
+                                Circle(),
+                                color: Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255), opacity: 0.05,
+                                x: 0, y: -1, blur: 0, spread: 1
+                            )
+                            .innerShadow(
+                                Circle(),
+                                color: .white, opacity: 0.5,
+                                x: 0, y: 1, blur: 0, spread: 1
+                            )
+                    )
                     .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
             }
             .buttonStyle(.plain)
@@ -118,12 +197,19 @@ struct InfoActionCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(gradient)
+                .fill(.white.opacity(0.35))
+                .innerShadow(
+                    RoundedRectangle(cornerRadius: cornerRadius),
+                    color: Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255), opacity: 0.05,
+                    x: 0, y: -1, blur: 0, spread: 2
+                )
+                .innerShadow(
+                    RoundedRectangle(cornerRadius: cornerRadius),
+                    color: .white, opacity: 0.5,
+                    x: 0, y: 1, blur: 0, spread: 2
+                )
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(strokeColor, lineWidth: 1)
-        )
+
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title) \(value)")

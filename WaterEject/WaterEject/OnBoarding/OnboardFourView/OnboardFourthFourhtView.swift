@@ -10,18 +10,24 @@ import SwiftUI
 struct OnboardFourthFourhtView: View {
     let action: () -> Void
     private func handleCTA() {
-        selectedTimeRaw = tempSelected.rawValue
+        guard let time = tempSelected else {
+            showAlert = true
+            return
+        }
+        selectedTimeRaw = time.rawValue
+        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedTimeRaw, choiceName: "time")
         action()
     }
     
-    @AppStorage("selectedTime") private var selectedTimeRaw: String = ChooseTime.first.rawValue
-    @State private var tempSelected: ChooseTime = .first
+    @AppStorage("selectedTime") private var selectedTimeRaw: String = ""
+    @State private var tempSelected: ChooseTime? = nil
+    @State private var showAlert = false
     
     var body: some View {
-
-
-            
-            
+        
+        
+        
+        
         OnboardScaffoldNew(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             // увесь твій контент екрану, БЕЗ кнопки!
             LinearGradient(gradient: Gradient(stops: [
@@ -31,46 +37,46 @@ struct OnboardFourthFourhtView: View {
             ]), startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
             ScrollView {
-            VStack {
-                Group {
+                VStack {
+                    Group {
+                        
+                        (
+                            Text("How long ago did it happen?").font(.system(size: 30, weight: .semibold))
+                        )
+                        .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.top, 16)
+                        .padding(.bottom, 32)
+                        
+                        
+                    }
                     
-                    (
-                        Text("How long ago did it happen?").font(.system(size: 30, weight: .semibold))
-                    )
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+                    
+                    ForEach(ChooseTime.allCases) { time in
+                        SelectableChipOne(title: time.rawValue,
+                                          isSelected: Binding(
+                                            get: { tempSelected == time },
+                                            set: { if $0 { tempSelected = time } }
+                                          )
+                                          
+                        )
+                    }
+                    
+                    Spacer()
                     
                     
                 }
-                
-                
-                ForEach(ChooseTime.allCases) { time in
-                    SelectableChipOne(title: time.rawValue,
-                                      isSelected: Binding(
-                                        get: { tempSelected == time },
-                                        set: { if $0 { tempSelected = time } }
-                                      )
-                                      
-                    )
-                }
-                
-                Spacer()
-                
-                
+                .padding(.horizontal, 32)
             }
-            .padding(.horizontal, 32)
         }
+        .alert("Please choose a time", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
         }
-        .onAppear {
-            tempSelected = ChooseTime(rawValue: selectedTimeRaw) ?? .first
-        }
-
+        
         
     }
-
+    
 }
 
 #Preview {

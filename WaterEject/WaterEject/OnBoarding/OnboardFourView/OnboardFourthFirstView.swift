@@ -10,20 +10,26 @@ import SwiftUI
 struct OnboardFourthFirstView: View {
     let action: () -> Void
     private func handleCTA() {
-        selectedDeviceRaw = tempSelected.rawValue
+        guard let choice = tempSelected else {
+            showAlert = true
+            return
+        }
+        selectedDeviceRaw = choice.rawValue
+        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedDeviceRaw, choiceName: "device")
         action()
     }
     
-    @AppStorage("selectedDevice") private var selectedDeviceRaw: String = ChooseDevice.iphone.rawValue
-    @State private var tempSelected: ChooseDevice = .iphone
-
+    @AppStorage("selectedDevice") private var selectedDeviceRaw: String = ""
+    @State private var tempSelected: ChooseDevice? = nil
+    @State private var showAlert = false
+    
     var body: some View {
-
-
-            
-            
+        
+        
+        
+        
         OnboardScaffoldNew(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
-
+            
             LinearGradient(gradient: Gradient(stops: [
                 .init(color: Color(red: 255/255, green: 255/255, blue: 255/255).opacity(1), location: 0),
                 .init(color: Color(red: 222/255, green: 233/255, blue: 255/255).opacity(1), location: 0.5),
@@ -68,10 +74,13 @@ struct OnboardFourthFirstView: View {
                 .padding(.horizontal, 32)
             }
         }
-        .onAppear {
-            tempSelected = ChooseDevice(rawValue: selectedDeviceRaw) ?? .iphone
+        .alert("Please choose a device", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
         }
-
+        //        .onAppear {
+        //            tempSelected = ChooseDevice(rawValue: selectedDeviceRaw) ?? .iphone
+        //        }
+        
         
     }
 }
@@ -89,7 +98,7 @@ struct PillButtonNew: View {
                 .foregroundStyle(.white)
                 .frame(minHeight: 52)
                 .frame(maxWidth: .infinity)
-                //.contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            //.contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             
         }
         //.buttonStyle(.plain)
@@ -107,16 +116,16 @@ struct PillButtonNew: View {
                 if arrow {
                     Image(systemName: "arrow.right")
                         .foregroundStyle(.white)
-
+                    
                         .padding(.trailing, 16)
                 }
             },
             alignment: .trailing
         )
-//        .overlay(
-//            RoundedRectangle(cornerRadius: 16, style: .continuous)
-//                .stroke(Color.white.opacity(0.08), lineWidth: 1) // тонка обводка (опційно)
-//        )
+        //        .overlay(
+        //            RoundedRectangle(cornerRadius: 16, style: .continuous)
+        //                .stroke(Color.white.opacity(0.08), lineWidth: 1) // тонка обводка (опційно)
+        //        )
         
     }
 }
@@ -130,21 +139,22 @@ struct SelectableChipOne: View {
             isSelected.toggle()
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .imageScale(.large)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255) : Color(red: 195 / 255, green: 198 / 255, blue: 205 / 255))
-
+                Image(isSelected ? "fillCheckmark" : "emptyCheckmark")
+//                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+//                    .imageScale(.large)
+//                    .font(.system(size: 18, weight: .semibold))
+//                    .foregroundStyle(isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255) : Color(red: 195 / 255, green: 198 / 255, blue: 205 / 255))
+                
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
-
+                
                 Spacer(minLength: 0)
             }
             .padding(.vertical, 19)
             .padding(.horizontal, 14)
             .contentShape(RoundedRectangle(cornerRadius: 16))
-
+            
         }
         .buttonStyle(.plain)
         .background(

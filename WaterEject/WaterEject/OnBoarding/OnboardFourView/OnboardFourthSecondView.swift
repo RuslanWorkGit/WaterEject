@@ -10,12 +10,18 @@ import SwiftUI
 struct OnboardFourthSecondView: View {
     let action: () -> Void
     private func handleCTA() {
-        selectedReasonRaw = tempSelected.rawValue
+        guard let reason = tempSelected else {
+            showAlert = true
+            return
+        }
+        selectedReasonRaw = reason.rawValue
+        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedReasonRaw, choiceName: "reason")
         action()
     }
     
-    @AppStorage("selectedReason") private var selectedReasonRaw: String = ChooseReason.first.rawValue
-    @State private var tempSelected: ChooseReason = .first
+    @AppStorage("selectedReason") private var selectedReasonRaw: String = ""
+    @State private var tempSelected: ChooseReason? = nil
+    @State private var showAlert = false
     
     var body: some View {
         
@@ -31,44 +37,44 @@ struct OnboardFourthSecondView: View {
             ]), startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
             ScrollView{
-            VStack {
-                Group {
+                VStack {
+                    Group {
+                        
+                        (
+                            Text("What happened to your iPhone?").font(.system(size: 30, weight: .semibold))
+                        )
+                        .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.top, 16)
+                        .padding(.bottom, 12)
+                        
+                        Text("Choose your device to start the check-up.")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
+                            .padding(.bottom, 42)
+                    }
                     
-                    (
-                        Text("What happened to your iPhone?").font(.system(size: 30, weight: .semibold))
-                    )
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 16)
-                    .padding(.bottom, 12)
                     
-                    Text("Choose your device to start the check-up.")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
-                        .padding(.bottom, 42)
+                    ForEach(ChooseReason.allCases) { reason in
+                        SelectableChipOne(title: reason.rawValue,
+                                          isSelected: Binding(
+                                            get: { tempSelected == reason },
+                                            set: { if $0 { tempSelected = reason } }
+                                          )
+                                          
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    
                 }
-                
-                
-                ForEach(ChooseReason.allCases) { reason in
-                    SelectableChipOne(title: reason.rawValue,
-                                   isSelected: Binding(
-                                    get: { tempSelected == reason },
-                                    set: { if $0 { tempSelected = reason } }
-                                   )
-                                   
-                    )
-                }
-                
-                Spacer()
-                
-                
+                .padding(.horizontal, 32)
             }
-            .padding(.horizontal, 32)
         }
-        }
-        .onAppear {
-            tempSelected = ChooseReason(rawValue: selectedReasonRaw) ?? .first
+        .alert("Please choose a reaason", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
         }
     }
 }

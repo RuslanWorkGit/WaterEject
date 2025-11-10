@@ -12,7 +12,7 @@ import RevenueCat
 import SwiftUI
 
 enum OnboardingVariant: String, Identifiable, CaseIterable {
-    case A = "Onb_3.1"
+    case A = "Onb_4.1"
     case B = "Onb_3.2"
     case C = "Onb_3.3"
     var id: String { rawValue }
@@ -100,7 +100,8 @@ final class OnboardingAB {
         switch variant() {
         case .A:
             // Флоу 1
-            return AnyView(OnboardingFlowViewOne())
+            //return AnyView(OnboardingFlowViewOne())
+            return AnyView(OnboardingFlowViewFour())
         case .B:
             // Флоу 2
             return AnyView(OnboardingFlowViewTwo())

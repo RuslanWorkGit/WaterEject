@@ -62,7 +62,7 @@ enum ChooseTime: String, CaseIterable, Identifiable {
     case fourth = "Today"
     case fifth = "Yesterday"
     case sixth = "2+ days ago"
-    case seventh = "No sound at all"
+    case seventh = "No sure"
     
     var id: String { rawValue }
 }

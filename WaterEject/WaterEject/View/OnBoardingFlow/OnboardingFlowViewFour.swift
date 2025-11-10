@@ -94,7 +94,7 @@ struct OnboardingFlowViewFour: View {
             }
             .task {
                 //onbLastShownTS = Date().timeIntervalSince1970
-                //Telemetry.shared.onboardFlowMark(.v31)
+                //Telemetry.shared.onboardFlowMark(.v41)
                 
                 Telemetry.shared.onboardStarted(onboardId: onboardId)
                 
@@ -132,7 +132,7 @@ struct OnboardingFlowViewFour: View {
                 // Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                 
                 appendStep(step)
-                persist(tag: .v31)
+                persist(tag: .v41)
             } else {
                 PaywallGate.shared.currentContext = .onboarding
             }
@@ -200,21 +200,21 @@ struct OnboardingFlowViewFour: View {
             OnboardFourthFifthView(action: { goTo(.stepSix, forward: true) })
         case .stepSix:
            // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            OnboardFourthSixthView()
+            OnboardFourthSixthView(action: { goTo(.paywall, forward: true) })
         case .paywall:
 
             PaywallThirdView(
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
-                    startDelay: slideDuration + 0.00,   // 0.55 s
-                    summaryTag: .v31,
+                    startDelay: slideDuration + 0.1,   // 0.55 s
+                    summaryTag: .v41,
                     stepsVisited: stepsVisited
                     
                 )
             .onAppear {
                     //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v31)      // якщо зберігаєш прогрес
+                    persist(tag: .v41)      // якщо зберігаєш прогрес
                 
             }
         }

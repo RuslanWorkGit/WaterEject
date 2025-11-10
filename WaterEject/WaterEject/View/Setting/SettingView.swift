@@ -17,6 +17,7 @@ struct SettingView: View {
     @State private var showSecondOnboarding = false
     @State private var showThirdOnboarding = false
     @State private var showOldOnboarding = false
+    @State private var showFourthOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -53,12 +54,21 @@ struct SettingView: View {
                             .buttonStyle(PillButtonStyle())
                         }
                         
-//                        Text("Help center")
-//                            .font(.system(size: 20, weight: .bold))
-//                            .foregroundStyle(Color.gray)
-//                        
-//                        VStack(spacing: 12) {
+                        Text("Help center")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(Color.gray)
+                        
+                        VStack(spacing: 12) {
+                            
+                            Button("NewOnboard") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showFourthOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
 //                            Button("FirstOnboard") {
+//                                
 //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
 //                                showFirstOnboarding = true
 //                                
@@ -85,8 +95,8 @@ struct SettingView: View {
 //                                
 //                            }
 //                            .buttonStyle(PillButtonStyle())
-//                            
-//                        }
+                            
+                        }
    
 
                     }
@@ -103,6 +113,13 @@ struct SettingView: View {
         .sheet(item: $webViewURL, content: { url in
             SafariView(url: url)
         })
+        
+        .fullScreenCover(isPresented: $showFourthOnboarding, onDismiss: {
+            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        }) {
+            OnboardingFlowViewFour()
+                .environmentObject(coordinator)    // пробросимо координатор
+        }
         
         .fullScreenCover(isPresented: $showFirstOnboarding, onDismiss: {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)
