@@ -15,6 +15,7 @@ struct DeviceOnboardNew: View {
     @State private var selected: OnboardDeviceModel? = nil
     
     @State private var isExiting = false
+    @State private var showAlert = false
     
     private func handleCTA() {
         guard !isExiting else { return }
@@ -33,6 +34,7 @@ struct DeviceOnboardNew: View {
         OnboardScaffold(ctaTitle: "Continue", ctaAction: {
             guard let picked = selected else {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                showAlert = true
                 return
             }
             handleCTA()
@@ -79,6 +81,9 @@ struct DeviceOnboardNew: View {
             .opacity(isExiting ? 0 : 1)
             .offset(y: isExiting ? 100 : 0)
             .animation(.easeInOut(duration: exitDuration), value: isExiting)
+            .alert("Please choose a device", isPresented: $showAlert) {
+                Button("OK", role: .cancel) {}
+            }
 
 
         }

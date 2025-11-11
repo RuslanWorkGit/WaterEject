@@ -15,7 +15,7 @@ struct OnboardFourthSecondView: View {
             return
         }
         selectedReasonRaw = reason.rawValue
-        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedReasonRaw, choiceName: "reason")
+        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedReasonRaw, choiceName: "reasonWet")
         action()
     }
     
