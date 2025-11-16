@@ -569,6 +569,7 @@ enum OnboardTag: String, Codable {
     case v32 = "Onboard_3_2"
     case v33 = "Onboard_3_3"
     case v41 = "Onboard_4_1"
+    case modes = "Modes"
 }
 
 extension Telemetry {
@@ -842,6 +843,7 @@ extension OnboardTag {
         case .v32: return "Onboard_v_3_2"
         case .v33: return "Onboard_v_3_3"
         case .v41: return "Onboard_v_4_1"
+        case .modes: return "Modes"
         }
     }
     var stepEventName: String { "\(summaryEventName)_step" } // ← подія для КРОКІВ
@@ -863,21 +865,7 @@ extension Telemetry {
             if seen.contains(s) { return false }
             seen.insert(s); return true
         }
-
-//        // 1) ОКРЕМИЙ лог на КОЖЕН крок: onboard_v_3_x_step
-//        for (i, s) in ordered.enumerated() {
-//            var stepParams = base([
-//                "onboard_id": tag.rawValue,
-//                "paywall_id": paywallId,
-//                "steps": s,                // ← ЄДИНИЙ custom dimension для кроків
-//                "step_index": i + 1,       // (опційно)
-//                "steps_count": steps.count // (опційно)
-//            ])
-//            if let variant { stepParams["variant"] = variant }
-//            if let entryPoint { stepParams["entry_point"] = entryPoint }
-//            Analytics.logEvent(tag.stepEventName, parameters: stepParams)
-//        }
-
+        
         // 2) Зведення: onboard_v_3_x (без step_1/visited_* і без steps-рядка)
         var summary = base([
             "onboard_id": tag.rawValue,
@@ -888,9 +876,7 @@ extension Telemetry {
         //if let variant { summary["variant"] = variant }
         if let entryPoint { summary["entry_point"] = entryPoint }
         if let reason { summary["reason"] = reason }
-        if status == .success, let plan { summary["plan"] = plan } // ← тільки для success
-
-        // (опційно для дебагу) summary["steps_str"] = ordered.joined(separator: "|")
+        if let plan { summary["plan"] = plan } // ← тільки для success
 
         Analytics.logEvent(tag.summaryEventName, parameters: summary)
     }
@@ -899,12 +885,15 @@ extension Telemetry {
 
 
 extension Telemetry {
-    func modesPaywall(status: PaywallStatus, plan: String?) {
-        var p: [String: Any] = ["status": status.rawValue]
-        if status == .success, let plan {
-            p["plan"] = plan
-        }
-        log(.modesPaywall, params: p)
+    func modesPaywall(status: PaywallStatus, plan: String?, paywallId: String, onboard tag: OnboardTag) {
+        
+        var summary = base([
+            "onboard_id": tag.rawValue,
+            "status": status.rawValue,
+            "paywall_id": paywallId
+        ])
+        if let plan { summary["plan"] = plan }
+        log(.modesPaywall, params: summary)
     }
 }
 
