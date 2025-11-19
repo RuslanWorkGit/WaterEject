@@ -1,0 +1,202 @@
+//
+//  LightCardView.swift
+//  WaterEject
+//
+//  Created by Ruslan Liulka on 19.11.2025.
+//
+
+import SwiftUI
+
+struct LightCardView: View {
+
+    var cards: [Color] = [
+        Color(red: 2/255, green: 125/255, blue: 244/255),
+        Color(red: 2/255, green: 125/255, blue: 244/255),
+        Color(red: 2/255, green: 125/255, blue: 244/255),
+        Color(red: 2/255, green: 125/255, blue: 244/255)
+    ]
+    
+    var myCards: [StatusCardView2] = [
+        StatusCardView2(imageName: "LightCardTwo"),
+        StatusCardView2(imageName: "LightCardOne"),
+        StatusCardView2(imageName: "LightCardTwo"),
+        StatusCardView2(imageName: "LightCardOne")
+    ]
+
+    var text: [String] = [
+        "Did water get inside?",
+        "Does it sound distorted?",
+        "Worried it’s damaged?",
+        "Ready to fix your speaker"
+    ]
+   // let action: () -> Void
+    private func handleCTA() {
+       
+        anim()
+        //action()
+    }
+    @State private var dragOffset: CGSize = .zero
+    @State private var showText: Bool = true
+    @State private var topCardIndex: Int = 0
+    @State private var colorIndex: Int = 0
+
+    var width: CGFloat = 220
+    var height: CGFloat = 160
+
+    var body: some View {
+        
+        OnboardCustomNew(ctaTitle: "Start Cleaning", ctaAction: handleCTA, fixedWidth: 260) {
+            
+            Color(red: 225 / 255, green: 233 / 255, blue: 239 / 255).ignoresSafeArea()
+            
+            VStack {
+                Group {
+                    
+                    (
+                        Text("Let's ").font(.system(size: 26, weight: .semibold))
+                            .foregroundStyle(.black) +
+                        Text("protect ").font(.system(size: 26, weight: .semibold))
+                            .foregroundStyle(Color(red: 2/255, green: 125/255, blue: 244/255)) +
+                        Text("your speaker ").font(.system(size: 26, weight: .semibold))
+                            .foregroundStyle(.black)
+      
+                    )
+                    
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 16)
+                    .padding(.bottom, 12)
+                    
+                    Text("Choose your device to start the check-up.")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.black.opacity(0.6))
+                        .padding(.bottom, 200)
+                }
+                ZStack {
+                    ForEach(myCards.indices, id: \.self) { index in
+                        let visualIndex = (index - topCardIndex + myCards.count) % myCards.count
+                        let progress = min(abs(dragOffset.height) / 150, 1)
+                        let signedProgress = (dragOffset.height >= 0 ? 1 : -1) * progress
+                        
+                        myCards[index]                         // 👈 підставляємо картку
+                            .frame(width: width, height: height)
+                            .offset(
+                                x: visualIndex == 0 ? 0 : Double(visualIndex) * -10,
+                                y: visualIndex == 0 ? -dragOffset.height * 0.9 : Double(visualIndex) * -15
+                            )
+                            .zIndex(Double(myCards.count - visualIndex))
+                            .rotationEffect(
+                                .degrees(
+                                    visualIndex == 0
+                                    ? Double(visualIndex) * 30 - progress * 35
+                                    : 0
+                                ),
+                                anchor: .bottom
+                            )
+                            .offset(x: visualIndex == 0 ? 0 : Double(visualIndex) * -3)
+                            .contentShape(Rectangle())
+                    }
+                }
+                .offset(x: 20)
+                
+                Text(text[colorIndex])
+                    .frame(width: 220)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        Capsule()
+                            .fill(cards[topCardIndex])     // кольори можна лишити тільки для бейджа
+                    )
+                    .opacity(showText ? 1 : 0)
+                    //.padding(.top, 220)
+                
+                Spacer()
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            let delay: CGFloat = 0.4        // затримка як у жесті
+            let targetOffset = height * -1.33  // куди "вилітає" картка вправо
+            
+            withAnimation(.smooth(duration: 0.5)) {
+                showText = false
+               
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.smooth(duration: 0.8)) {
+                    if colorIndex != 2 {
+                        colorIndex += 1
+                    } else {
+                        colorIndex = 0
+                    }
+                    showText = true
+                    
+                }
+            }
+
+            // 1) виносимо верхню картку вправо
+            withAnimation(.smooth(duration: 0.7)) {
+                dragOffset.height = targetOffset
+               
+            }
+
+            // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.smooth(duration: 0.8)) {
+                    topCardIndex = (topCardIndex + 1) % cards.count
+                    dragOffset = .zero
+                    
+                    
+                }
+            }
+        }
+
+    }
+    
+    func anim() {
+        let delay: CGFloat = 0.4        // затримка як у жесті
+        let targetOffset = height * -1.33  // куди "вилітає" картка вправо
+        
+        withAnimation(.smooth(duration: 0.5)) {
+            showText = false
+           
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            withAnimation(.smooth(duration: 0.8)) {
+                if colorIndex != 2 {
+                    colorIndex += 1
+                } else {
+                    colorIndex = 0
+                }
+                showText = true
+                
+            }
+        }
+
+        // 1) виносимо верхню картку вправо
+        withAnimation(.smooth(duration: 0.7)) {
+            dragOffset.height = targetOffset
+           
+        }
+
+        // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            withAnimation(.smooth(duration: 0.8)) {
+                topCardIndex = (topCardIndex + 1) % cards.count
+                dragOffset = .zero
+                
+                
+            }
+        }
+    }
+
+}
+
+#Preview {
+    LightCardView()
+}
+
+
