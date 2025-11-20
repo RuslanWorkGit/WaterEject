@@ -264,7 +264,7 @@ struct NewOboardButton: View {
         //.buttonStyle(.plain)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255)) // як на скріні
+                .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)) // як на скріні
                 .innerShadow(
                     RoundedRectangle(cornerRadius: 16),
                     color: .white, opacity: 0.25,
