@@ -59,3 +59,9 @@ enum OnboardingStepFour: Int, CaseIterable, Hashable {
     case paywall
 }
 
+enum OnboardingStepFive: Int, CaseIterable, Hashable {
+    case stepOne
+    case paywall
+}
+
+

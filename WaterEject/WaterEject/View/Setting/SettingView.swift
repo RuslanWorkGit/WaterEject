@@ -18,6 +18,7 @@ struct SettingView: View {
     @State private var showThirdOnboarding = false
     @State private var showOldOnboarding = false
     @State private var showFourthOnboarding = false
+    @State private var showFiveOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -63,6 +64,13 @@ struct SettingView: View {
                             Button("NewOnboard") {
                                 tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
                                 showFourthOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
+                            Button("onboardFive") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showFiveOnboarding = true
                                 
                             }
                             .buttonStyle(PillButtonStyle())
@@ -120,35 +128,41 @@ struct SettingView: View {
             OnboardingFlowViewFour()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
-        
-        .fullScreenCover(isPresented: $showFirstOnboarding, onDismiss: {
+        .fullScreenCover(isPresented: $showFiveOnboarding, onDismiss: {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)
         }) {
-            OnboardingFlowViewOne()
+            OnboardingFlowViewFive()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
         
-        .fullScreenCover(isPresented: $showSecondOnboarding, onDismiss: {
-            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
-        }) {
-            OnboardingFlowViewTwo()
-                .environmentObject(coordinator)    // пробросимо координатор
-        }
-        
-        .fullScreenCover(isPresented: $showThirdOnboarding, onDismiss: {
-            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
-        }) {
-            OnboardingFlowViewThree()
-                .environmentObject(coordinator)    // пробросимо координатор
-        }
-        
-        
-        .fullScreenCover(isPresented: $showOldOnboarding, onDismiss: {
-            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
-        }) {
-            OnboardingFlowView()
-                .environmentObject(coordinator)    // пробросимо координатор
-        }
+//        .fullScreenCover(isPresented: $showFirstOnboarding, onDismiss: {
+//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+//        }) {
+//            OnboardingFlowViewOne()
+//                .environmentObject(coordinator)    // пробросимо координатор
+//        }
+//        
+//        .fullScreenCover(isPresented: $showSecondOnboarding, onDismiss: {
+//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+//        }) {
+//            OnboardingFlowViewTwo()
+//                .environmentObject(coordinator)    // пробросимо координатор
+//        }
+//        
+//        .fullScreenCover(isPresented: $showThirdOnboarding, onDismiss: {
+//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+//        }) {
+//            OnboardingFlowViewThree()
+//                .environmentObject(coordinator)    // пробросимо координатор
+//        }
+//        
+//        
+//        .fullScreenCover(isPresented: $showOldOnboarding, onDismiss: {
+//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+//        }) {
+//            OnboardingFlowView()
+//                .environmentObject(coordinator)    // пробросимо координатор
+//        }
     }
 }
 

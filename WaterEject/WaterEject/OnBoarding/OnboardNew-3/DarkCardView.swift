@@ -19,8 +19,8 @@ struct DarkCardView: View {
     var myCards: [StatusCardView2] = [
         StatusCardView2(imageName: "BlackCardTwo"),
         StatusCardView2(imageName: "BlackCardOne"),
-        StatusCardView2(imageName: "BlackCardTwo"),
-        StatusCardView2(imageName: "BlackCardOne")
+        StatusCardView2(imageName: "BlackCardThree"),
+        StatusCardView2(imageName: "BlackCardFour")
     ]
 
     var text: [String] = [
@@ -29,10 +29,15 @@ struct DarkCardView: View {
         "Worried it’s damaged?",
         "Ready to fix your speaker"
     ]
-   // let action: () -> Void
+    let action: () -> Void
     private func handleCTA() {
        
-        anim()
+        //anim()
+        if topCardIndex < myCards.count - 1 {
+            anim()
+        } else {
+            action()
+        }
         //action()
     }
     @State private var dragOffset: CGSize = .zero
@@ -196,7 +201,7 @@ struct DarkCardView: View {
 }
 
 #Preview {
-    DarkCardView()
+    DarkCardView(action: { print("N")})
 }
 
 import SwiftUI
