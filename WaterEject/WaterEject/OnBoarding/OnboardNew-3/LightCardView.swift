@@ -166,24 +166,29 @@ struct LightCardView: View {
     }
     
     func anim() {
-        let delay: CGFloat = 0.4        // затримка як у жесті
+        let delay: CGFloat = 0.45        // затримка як у жесті
         let targetOffset = height * -1.33  // куди "вилітає" картка вправо
         
-        withAnimation(.smooth(duration: 0.5)) {
+        withAnimation(.smooth(duration: 0.3)) {
             showText = false
            
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            withAnimation(.smooth(duration: 0.8)) {
+            withAnimation(.smooth(duration: 0.1)) {
                 if colorIndex != 2 {
                     colorIndex += 1
                 } else {
                     colorIndex = 0
                 }
-                showText = true
-                
+                                
             }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.smooth(duration: 0.5)) {
+                    showText = true
+                }
+            }
+
         }
 
         // 1) виносимо верхню картку вправо

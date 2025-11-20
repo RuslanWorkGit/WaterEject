@@ -163,7 +163,7 @@ struct PaywallFourView: View {
                             Toggle("", isOn: $isFreeTrialEnabled)
                                    .labelsHidden()
                                    .tint(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-                                   .disabled(viewModel.selectedPlan == .yearly)
+                                   //.disabled(viewModel.selectedPlan == .yearly)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
@@ -352,6 +352,12 @@ struct PaywallFourView: View {
             }
             .padding(.top, 20)
             .padding(.trailing, 18)
+        }
+        .onChange(of: isFreeTrialEnabled, initial: false) { _, newValue in
+            // якщо включили trial, а був обраний річний – перемикаємо на weekly
+            if newValue, viewModel.selectedPlan == .yearly {
+                viewModel.selectedPlan = .weekly
+            }
         }
         .onChange(of: viewModel.selectedPlan) { _, newPlan in
             switch newPlan {
