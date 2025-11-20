@@ -19,6 +19,7 @@ struct SettingView: View {
     @State private var showOldOnboarding = false
     @State private var showFourthOnboarding = false
     @State private var showFiveOnboarding = false
+    @State private var showSixOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -71,6 +72,13 @@ struct SettingView: View {
                             Button("onboardFive") {
                                 tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
                                 showFiveOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
+                            Button("onboardSix") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showSixOnboarding = true
                                 
                             }
                             .buttonStyle(PillButtonStyle())
@@ -132,6 +140,12 @@ struct SettingView: View {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)
         }) {
             OnboardingFlowViewFive()
+                .environmentObject(coordinator)    // пробросимо координатор
+        }
+        .fullScreenCover(isPresented: $showSixOnboarding, onDismiss: {
+            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        }) {
+            OnboardingFlowViewSix()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
         

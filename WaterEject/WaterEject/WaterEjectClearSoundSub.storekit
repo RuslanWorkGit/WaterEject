@@ -18,58 +18,55 @@
   ],
   "settings" : {
     "_applicationInternalID" : "6749094272",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
     "_developerTeamID" : "LBA86YKHYN",
+    "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 776784502.23270297,
+    "_lastSynchronizedDate" : 785366173.56294203,
     "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
     "_storeKitErrors" : [
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Load Products"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Purchase"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Verification"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "App Store Sync"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Subscription Status"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "App Transaction"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Manage Subscriptions Sheet"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Refund Request Sheet"
       },
       {
-        "current" : null,
         "enabled" : false,
         "name" : "Offer Code Redeem Sheet"
       }
-    ]
+    ],
+    "_timeRate" : 0
   },
   "subscriptionGroups" : [
     {
@@ -90,7 +87,12 @@
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "6749955956",
-          "introductoryOffer" : null,
+          "introductoryOffer" : {
+            "internalID" : "2855DD04",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
           "localizations" : [
             {
               "description" : "Grants Pro access to user",
@@ -122,7 +124,7 @@
           "localizations" : [
             {
               "description" : "Grants Pro Access to User",
-              "displayName" : "Pro Sub",
+              "displayName" : "Pro",
               "locale" : "en_US"
             }
           ],

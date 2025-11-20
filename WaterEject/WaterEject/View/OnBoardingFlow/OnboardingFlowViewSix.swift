@@ -1,4 +1,11 @@
 //
+//  OnboardingFlowViewSix.swift
+//  WaterEject
+//
+//  Created by Ruslan Liulka on 20.11.2025.
+//
+
+//
 //  OnboardingFlowViewFive.swift
 //  WaterEject
 //
@@ -7,16 +14,16 @@
 
 import SwiftUI
 
-struct OnboardingFlowViewFive: View {
+struct OnboardingFlowViewSix: View {
     private let flowId = "onboard_4_steps"
     private let onboardId = OnboardTag.v41.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
     //@AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
 
-    @State private var currentStep: OnboardingStepFive = .stepOne
-    @State private var prevStep: OnboardingStepFive? = nil          // ← старий екран (фон)
-    @State private var incomingStep: OnboardingStepFive? = nil      // ← новий екран (оверлей)
+    @State private var currentStep: OnboardingStepSix = .stepOne
+    @State private var prevStep: OnboardingStepSix? = nil          // ← старий екран (фон)
+    @State private var incomingStep: OnboardingStepSix? = nil      // ← новий екран (оверлей)
     @State private var overlayX: CGFloat = 0                       // ← офсет оверлея
     @State private var isAnimating = false
     @State private var isForward = true
@@ -36,7 +43,7 @@ struct OnboardingFlowViewFive: View {
     private let slideDuration: Double = 0.5
     
     
-    private func appendStep(_ step: OnboardingStepFive) {
+    private func appendStep(_ step: OnboardingStepSix) {
         let id = screenId(for: step)
         if stepsVisited.last != id { stepsVisited.append(id) }
     }
@@ -103,7 +110,7 @@ struct OnboardingFlowViewFive: View {
     }
 
     // MARK: - Навігація
-    private func goTo(_ step: OnboardingStepFive, forward: Bool) {
+    private func goTo(_ step: OnboardingStepSix, forward: Bool) {
         guard !isAnimating, step != currentStep else { return }
         isAnimating = true
         isForward = forward
@@ -146,14 +153,14 @@ struct OnboardingFlowViewFive: View {
 
     // Виклики з дочірніх екранів
     private func goToNextStep() {
-        if let idx = OnboardingStepFive.allCases.firstIndex(of: currentStep),
-           idx + 1 < OnboardingStepFive.allCases.count {
-            goTo(OnboardingStepFive.allCases[idx + 1], forward: true)
+        if let idx = OnboardingStepSix.allCases.firstIndex(of: currentStep),
+           idx + 1 < OnboardingStepSix.allCases.count {
+            goTo(OnboardingStepSix.allCases[idx + 1], forward: true)
         }
     }
     
     // MARK: - Screen IDs для аналітики
-    private func screenId(for step: OnboardingStepFive) -> String {
+    private func screenId(for step: OnboardingStepSix) -> String {
         
         switch step {
         case .stepOne:
@@ -166,11 +173,11 @@ struct OnboardingFlowViewFive: View {
 
     // MARK: - Рендер екрана та фону
     @ViewBuilder
-    private func screen(for step: OnboardingStepFive, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
+    private func screen(for step: OnboardingStepSix, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
         switch step {
         case .stepOne:
             //StartOnboardView(action: { goTo(.wallet, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
-            DarkCardView(action: { goTo(.paywall, forward: true) },
+            LightCardView(action: { goTo(.paywall, forward: true) },
                          topCardIndex: $topCardIndex,
                          colorIndex: $colorIndex,
                          )

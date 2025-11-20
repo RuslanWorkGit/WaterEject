@@ -17,10 +17,10 @@ struct LightCardView: View {
     ]
     
     var myCards: [StatusCardView2] = [
-        StatusCardView2(imageName: "LightCardTwo"),
         StatusCardView2(imageName: "LightCardOne"),
         StatusCardView2(imageName: "LightCardTwo"),
-        StatusCardView2(imageName: "LightCardOne")
+        StatusCardView2(imageName: "LightCardThree"),
+        StatusCardView2(imageName: "LightCardFour")
     ]
 
     var text: [String] = [
@@ -29,16 +29,25 @@ struct LightCardView: View {
         "Worried it’s damaged?",
         "Ready to fix your speaker"
     ]
-   // let action: () -> Void
+    let action: () -> Void
     private func handleCTA() {
        
-        anim()
+        //anim()
+        if isLastCard {
+            action()
+        } else {
+            anim()
+        }
         //action()
     }
     @State private var dragOffset: CGSize = .zero
     @State private var showText: Bool = true
-    @State private var topCardIndex: Int = 0
-    @State private var colorIndex: Int = 0
+    @Binding var topCardIndex: Int
+    @Binding var colorIndex: Int
+    
+    private var isLastCard: Bool {
+        topCardIndex >= myCards.count - 1
+    }
 
     var width: CGFloat = 220
     var height: CGFloat = 160
@@ -49,29 +58,30 @@ struct LightCardView: View {
             
             Color(red: 225 / 255, green: 233 / 255, blue: 239 / 255).ignoresSafeArea()
             
-            VStack {
-                Group {
+            VStack() {
+                VStack(alignment: .leading) {
                     
                     (
                         Text("Let's ").font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(.black) +
                         Text("protect ").font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(Color(red: 2/255, green: 125/255, blue: 244/255)) +
-                        Text("your speaker ").font(.system(size: 26, weight: .semibold))
+                        Text("your \nspeaker ").font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(.black)
       
                     )
                     
                     .multilineTextAlignment(.leading)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 16)
-                    .padding(.bottom, 12)
+                    //.padding(.horizontal, 16)
+                    .padding(.top, 40)
+                    .padding(.bottom, 8)
                     
                     Text("Choose your device to start the check-up.")
                         .font(.system(size: 16))
                         .foregroundStyle(.black.opacity(0.6))
                         .padding(.bottom, 200)
                 }
+                
                 ZStack {
                     ForEach(myCards.indices, id: \.self) { index in
                         let visualIndex = (index - topCardIndex + myCards.count) % myCards.count
@@ -115,43 +125,43 @@ struct LightCardView: View {
             }
         }
         .contentShape(Rectangle())
-        .onTapGesture {
-            let delay: CGFloat = 0.4        // затримка як у жесті
-            let targetOffset = height * -1.33  // куди "вилітає" картка вправо
-            
-            withAnimation(.smooth(duration: 0.5)) {
-                showText = false
-               
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                withAnimation(.smooth(duration: 0.8)) {
-                    if colorIndex != 2 {
-                        colorIndex += 1
-                    } else {
-                        colorIndex = 0
-                    }
-                    showText = true
-                    
-                }
-            }
-
-            // 1) виносимо верхню картку вправо
-            withAnimation(.smooth(duration: 0.7)) {
-                dragOffset.height = targetOffset
-               
-            }
-
-            // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                withAnimation(.smooth(duration: 0.8)) {
-                    topCardIndex = (topCardIndex + 1) % cards.count
-                    dragOffset = .zero
-                    
-                    
-                }
-            }
-        }
+//        .onTapGesture {
+//            let delay: CGFloat = 0.4        // затримка як у жесті
+//            let targetOffset = height * -1.33  // куди "вилітає" картка вправо
+//            
+//            withAnimation(.smooth(duration: 0.5)) {
+//                showText = false
+//               
+//            }
+//            
+//            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+//                withAnimation(.smooth(duration: 0.8)) {
+//                    if colorIndex != 2 {
+//                        colorIndex += 1
+//                    } else {
+//                        colorIndex = 0
+//                    }
+//                    showText = true
+//                    
+//                }
+//            }
+//
+//            // 1) виносимо верхню картку вправо
+//            withAnimation(.smooth(duration: 0.7)) {
+//                dragOffset.height = targetOffset
+//               
+//            }
+//
+//            // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
+//            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+//                withAnimation(.smooth(duration: 0.8)) {
+//                    topCardIndex = (topCardIndex + 1) % cards.count
+//                    dragOffset = .zero
+//                    
+//                    
+//                }
+//            }
+//        }
 
     }
     
@@ -185,7 +195,7 @@ struct LightCardView: View {
         // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             withAnimation(.smooth(duration: 0.8)) {
-                topCardIndex = (topCardIndex + 1) % cards.count
+                topCardIndex += 1
                 dragOffset = .zero
                 
                 
@@ -196,7 +206,12 @@ struct LightCardView: View {
 }
 
 #Preview {
-    LightCardView()
+    LightCardView(
+        action: { print("N") },
+        topCardIndex: .constant(3),
+        colorIndex: .constant(3)
+        
+    )
 }
 
 
