@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OnboardAnimationView: View {
-    let someAction: () -> ()
+    //let someAction: () -> ()
     @State private var dropOffset: CGFloat = -300   // стартує високо
     @State private var moveOffsetX: CGFloat = 0
     @State private var textMove: CGFloat = 500
@@ -134,7 +134,7 @@ struct OnboardAnimationView: View {
             OnboardingFlowViewEight(someAction: {
                 showOnboarding = false
                 coordinator.showMainTabbar()
-                someAction()
+                //someAction()
             })
                 .environmentObject(coordinator)    // пробросимо координатор
         }
@@ -188,5 +188,5 @@ struct WaterDrop<S: ShapeStyle>: View {
 }
 
 #Preview {
-    OnboardAnimationView(someAction: {print("m")})
+    OnboardAnimationView()
 }

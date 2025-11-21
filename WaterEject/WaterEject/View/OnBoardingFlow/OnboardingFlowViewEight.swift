@@ -7,8 +7,8 @@ import SwiftUI
 
 struct OnboardingFlowViewEight: View {
     let someAction: () -> ()
-    private let flowId = "onboard_4_steps"
-    private let onboardId = OnboardTag.v41.rawValue
+    private let flowId = "onboard_8_steps"
+    private let onboardId = OnboardTag.v8.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
     //@AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
@@ -44,6 +44,7 @@ struct OnboardingFlowViewEight: View {
 
     private func persist(tag: OnboardTag) {
         OnboardingSessionStore.shared.save(tag: tag, steps: stepsVisited, paywallShown: paywallShown)
+        OnboardTag.saveAsLast(tag)
     }
 
     var body: some View {
@@ -127,7 +128,7 @@ struct OnboardingFlowViewEight: View {
                 // Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                 
                 appendStep(step)
-                persist(tag: .v41)
+                persist(tag: .v8)
             } else {
                 PaywallGate.shared.currentContext = .onboarding
             }
@@ -140,7 +141,7 @@ struct OnboardingFlowViewEight: View {
         //hasSeenOnboarding = true
         someAction()
         //dismiss()
-        //coordinator.showMainTabbar()
+        coordinator.showMainTabbar()
     }
     
 
@@ -189,14 +190,14 @@ struct OnboardingFlowViewEight: View {
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
                     startDelay: slideDuration + 0.1,   // 0.55 s
-                    summaryTag: .v41,
+                    summaryTag: .v8,
                     stepsVisited: stepsVisited
                     
                 )
             .onAppear {
                     //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v41)      // якщо зберігаєш прогрес
+                    persist(tag: .v8)      // якщо зберігаєш прогрес
                 
             }
         }

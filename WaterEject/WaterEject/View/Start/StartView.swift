@@ -134,6 +134,8 @@ struct StartView: View {
                 PaywallSecondView(onFinish: { paywallGate.dismissPaywall() })
             case .third:
                 PaywallThirdView(onFinish: { paywallGate.dismissPaywall() })
+            case .fourth:
+                PaywallFourView(onFinish: { paywallGate.dismissPaywall() })
             }
         }
         

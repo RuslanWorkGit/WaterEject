@@ -277,6 +277,16 @@ struct ModesView: View {
                         }
                     }
                 })
+            case .fourth:
+                PaywallFourView(onFinish: {
+                    paywallGate.dismissPaywall()
+                    Task {
+                        if let pending = pendingMode, await paywallGate.isPro() {
+                            onStart(pending)
+                            pendingMode = nil
+                        }
+                    }
+                })
             }
         }
     }

@@ -569,6 +569,10 @@ enum OnboardTag: String, Codable {
     case v32 = "Onboard_3_2"
     case v33 = "Onboard_3_3"
     case v41 = "Onboard_4_1"
+    case v5 = "Onboard_5"
+    case v6 = "Onboard_6"
+    case v7 = "Onboard_7"
+    case v8 = "Onboard_8"
     case modes = "Modes"
 }
 
@@ -843,11 +847,36 @@ extension OnboardTag {
         case .v32: return "Onboard_v_3_2"
         case .v33: return "Onboard_v_3_3"
         case .v41: return "Onboard_v_4_1"
+        case .v5: return "Onboard_v_5"
+        case .v6: return "Onboard_v_6"
+        case .v7: return "Onboard_v_7"
+        case .v8: return "Onboard_v_8"
         case .modes: return "Modes"
         }
     }
     var stepEventName: String { "\(summaryEventName)_step" } // ← подія для КРОКІВ
 }
+
+private let kOnboardLastTagKey = "onboard_last_tag_v1"
+
+extension OnboardTag {
+    /// Зберегти останній онборд, який показали юзеру
+    static func saveAsLast(_ tag: OnboardTag) {
+        UserDefaults.standard.set(tag.rawValue, forKey: kOnboardLastTagKey)
+        // опційно — ще й user property в GA4
+        Analytics.setUserProperty(tag.rawValue, forName: "onboard_last")
+    }
+
+    /// Прочитати останній онборд із UserDefaults
+    static func lastFromUserDefaults() -> OnboardTag? {
+        guard let raw = UserDefaults.standard.string(forKey: kOnboardLastTagKey) else {
+            return nil
+        }
+        return OnboardTag(rawValue: raw)
+    }
+}
+
+
 extension Telemetry {
     func onbFlowSummary(
         onboard tag: OnboardTag,
@@ -893,7 +922,7 @@ extension Telemetry {
             "paywall_id": paywallId
         ])
         if let plan { summary["plan"] = plan }
-        log(.modesPaywall, params: summary)
+        Analytics.logEvent(tag.summaryEventName, parameters: summary)
     }
 }
 

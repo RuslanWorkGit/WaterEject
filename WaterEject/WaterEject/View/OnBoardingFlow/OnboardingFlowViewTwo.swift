@@ -39,6 +39,7 @@ struct OnboardingFlowViewTwo: View {
 
     private func persist(tag: OnboardTag) {
         OnboardingSessionStore.shared.save(tag: tag, steps: stepsVisited, paywallShown: paywallShown)
+        OnboardTag.saveAsLast(tag)
     }
 
 

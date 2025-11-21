@@ -15,8 +15,8 @@
 import SwiftUI
 
 struct OnboardingFlowViewSix: View {
-    private let flowId = "onboard_4_steps"
-    private let onboardId = OnboardTag.v41.rawValue
+    private let flowId = "onboard_6_steps"
+    private let onboardId = OnboardTag.v6.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
     //@AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
@@ -52,6 +52,7 @@ struct OnboardingFlowViewSix: View {
 
     private func persist(tag: OnboardTag) {
         OnboardingSessionStore.shared.save(tag: tag, steps: stepsVisited, paywallShown: paywallShown)
+        OnboardTag.saveAsLast(tag)
     }
 
     var body: some View {
@@ -106,6 +107,19 @@ struct OnboardingFlowViewSix: View {
                 
                 appendStep(currentStep)
             }
+            .onChange(of: topCardIndex) { newValue in
+                // newValue: 1 → друга картка, 2 → третя, 3 → четверта
+                let stepIndex = newValue + 1           // бо перша картка = step_1
+                let screenId = "step_\(stepIndex)"     // "step_2", "step_3", "step_4"
+                
+                // не дублюємо, якщо вже останній такий самий
+                if stepsVisited.last != screenId {
+                    stepsVisited.append(screenId)
+                }
+                
+                // окремий лог перегляду "підкроку"
+                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId)
+            }
         }
     }
 
@@ -135,7 +149,7 @@ struct OnboardingFlowViewSix: View {
                 // Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                 
                 appendStep(step)
-                persist(tag: .v41)
+                persist(tag: .v6)
             } else {
                 PaywallGate.shared.currentContext = .onboarding
             }
@@ -189,14 +203,14 @@ struct OnboardingFlowViewSix: View {
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
                     startDelay: slideDuration + 0.1,   // 0.55 s
-                    summaryTag: .v41,
+                    summaryTag: .v6,
                     stepsVisited: stepsVisited
                     
                 )
             .onAppear {
                     //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v41)      // якщо зберігаєш прогрес
+                    persist(tag: .v6)      // якщо зберігаєш прогрес
                 
             }
         }

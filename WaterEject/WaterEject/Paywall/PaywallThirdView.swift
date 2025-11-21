@@ -82,11 +82,14 @@ struct PaywallThirdView: View {
             } else {
                 // ⬇️ НЕ онбординг: якщо пейвол відкрито з Modes — логнемо modes_paywall
                 if paywallGate.currentContext == .modesTap {
+                    
+                    let onboardTag = OnboardTag.lastFromUserDefaults() ?? .modes
+                    
                     Telemetry.shared.modesPaywall(
                         status: status,
                         plan: status == .success ? plan.analyticsValue : nil,
                         paywallId: "paywall_v_3.0",
-                        onboard: .modes)
+                        onboard: onboardTag)
 
                 }
             }

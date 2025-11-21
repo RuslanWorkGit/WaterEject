@@ -12,9 +12,15 @@ import RevenueCat
 import SwiftUI
 
 enum OnboardingVariant: String, Identifiable, CaseIterable {
-    case A = "Onb_4.1"
-    case B = "Onb_3.2"
-    case C = "Onb_3.3"
+    case A = "Onb_4.1" // зараз OnboardingFlowViewFour
+    case B = "Onb_3.2" // OnboardingFlowViewTwo
+    case C = "Onb_3.3" // OnboardingFlowViewThree
+
+    case D = "Onb_5.0" // OnboardingFlowViewFive
+    case E = "Onb_6.0" // OnboardingFlowViewSix
+    case F = "Onb_7.0" // OnboardingFlowViewSeven
+    case G = "Onb_8.0" // OnboardAnimationView
+
     var id: String { rawValue }
 }
 
@@ -26,11 +32,8 @@ final class OnboardingAB {
         settings.minimumFetchInterval = 0 // на проді зроби 3600+ або більше
         rc.configSettings = settings
         rc.setDefaults([
-            // Розподіл у %, A + B + (100 - A - B) = 100
-            "onb_share_A": 34 as NSObject,
-            "onb_share_B": 33 as NSObject,
-            "onb_force": "" as NSObject // "A"/"B"/"C" або ""
-        ])
+                "onb_force": "" as NSObject // "Onb_4.1", "Onb_5.0" тощо або ""
+            ])
     }
 
     private let rc = RemoteConfig.remoteConfig()
@@ -67,28 +70,17 @@ final class OnboardingAB {
             return v
         }
 
-        // 2) форс через RC
+        // 2) форс через RC (залишаємо)
         if let forced = OnboardingVariant(rawValue: rc["onb_force"].stringValue) {
             UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
             applyTracking(forced)
             return forced
         }
 
-        // 3) стабільний спліт за RC частками
-        let shareA = min(max(rc["onb_share_A"].numberValue.intValue, 0), 100)
-        let shareB = min(max(rc["onb_share_B"].numberValue.intValue, 0), 100)
-        let clampedSum = min(shareA + shareB, 100)
-        let shareC = 100 - clampedSum
-
-        let bucket = abs(stableUserID().hashValue) % 100
-        let v: OnboardingVariant
-        if bucket < shareA {
-            v = .A
-        } else if bucket < (shareA + shareB) {
-            v = .B
-        } else {
-            v = .C
-        }
+        // 3) рівномірний спліт по всіх варіантах
+        let all = OnboardingVariant.allCases
+        let bucket = abs(stableUserID().hashValue) % all.count
+        let v = all[bucket]
 
         UserDefaults.standard.set(v.rawValue, forKey: storageKey)
         applyTracking(v)
@@ -98,16 +90,27 @@ final class OnboardingAB {
     // Повертаємо конкретний флоу
     func assignedOnboardingView() -> AnyView {
         switch variant() {
-        case .A:
-            // Флоу 1
-            //return AnyView(OnboardingFlowViewOne())
-            return AnyView(OnboardingFlowViewFour())
-        case .B:
-            // Флоу 2
-            return AnyView(OnboardingFlowViewTwo())
-        case .C:
-            // Флоу 3
-            return AnyView(OnboardingFlowViewThree())
-        }
+            case .A:
+                // старий флоу 4.1
+                return AnyView(OnboardingFlowViewFour())
+
+            case .B:
+                return AnyView(OnboardingFlowViewTwo())
+
+            case .C:
+                return AnyView(OnboardingFlowViewThree())
+
+            case .D:
+                return AnyView(OnboardingFlowViewFive())
+
+            case .E:
+                return AnyView(OnboardingFlowViewSix())
+
+            case .F:
+                return AnyView(OnboardingFlowViewSeven())
+
+            case .G:
+                return AnyView(OnboardAnimationView())
+            }
     }
 }
