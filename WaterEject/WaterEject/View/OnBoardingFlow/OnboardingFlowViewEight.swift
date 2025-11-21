@@ -1,22 +1,21 @@
-//
-//  OnboardingFlowViewSeven.swift
-//  WaterEject
-//
-//  Created by Ruslan Liulka on 21.11.2025.
-//
+
+
+
+
 
 import SwiftUI
 
-struct OnboardingFlowViewSeven: View {
+struct OnboardingFlowViewEight: View {
+    let someAction: () -> ()
     private let flowId = "onboard_4_steps"
     private let onboardId = OnboardTag.v41.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
     //@AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
-    
-    @State private var currentStep: OnboardingStepSeven = .stepOne
-    @State private var prevStep: OnboardingStepSeven? = nil          // ← старий екран (фон)
-    @State private var incomingStep: OnboardingStepSeven? = nil      // ← новий екран (оверлей)
+
+    @State private var currentStep: OnboardingStepEight = .stepOne
+    @State private var prevStep: OnboardingStepEight? = nil          // ← старий екран (фон)
+    @State private var incomingStep: OnboardingStepEight? = nil      // ← новий екран (оверлей)
     @State private var overlayX: CGFloat = 0                       // ← офсет оверлея
     @State private var isAnimating = false
     @State private var isForward = true
@@ -26,7 +25,7 @@ struct OnboardingFlowViewSeven: View {
     
     @State private var stepsVisited: [String] = []
     
-    
+
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
     
@@ -36,21 +35,21 @@ struct OnboardingFlowViewSeven: View {
     private let slideDuration: Double = 0.5
     
     
-    private func appendStep(_ step: OnboardingStepSeven) {
+    private func appendStep(_ step: OnboardingStepEight) {
         let id = screenId(for: step)
         if stepsVisited.last != id { stepsVisited.append(id) }
     }
     
     @State private var paywallShown = false
-    
+
     private func persist(tag: OnboardTag) {
         OnboardingSessionStore.shared.save(tag: tag, steps: stepsVisited, paywallShown: paywallShown)
     }
-    
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                
+
                 // 2) Старий екран — залишається на місці під час анімації
                 if let p = prevStep {
                     screen(for: p, startAnimations: false, staticDisplay: true)
@@ -64,39 +63,30 @@ struct OnboardingFlowViewSeven: View {
                         .frame(width: geo.size.width, height: geo.size.height)  // ✅
                         .zIndex(0)
                 }
-                
+
                 // 3) Новий екран — в’їжджає зверху поверх старого
                 if let inc = incomingStep {
                     screen(for: inc, startAnimations: childAnimate, staticDisplay: false)
                         .id(inc)
                         .frame(width: geo.size.width, height: geo.size.height)  // ✅
-                    //                                        .ignoresSafeArea()
+//                                        .ignoresSafeArea()
                         .offset(x: overlayX)         // ← тільки він рухається
                         .zIndex(1)
                         .onAppear {
                             // стартуємо за межами екрана справа/зліва
                             overlayX = (isForward ? 1 : -1) * geo.size.width
                             withAnimation(.easeInOut(duration: slideDuration)) {
-                                overlayX = 0
-                            }
+                                            overlayX = 0
+                                        }
                             DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
-                                childAnimate = true
-                            }
-                            //                            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.9)) {
-                            //                                overlayX = 0
-                            //                            }
+                                            childAnimate = true
+                                        }
+//                            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.9)) {
+//                                overlayX = 0
+//                            }
                         }
                 }
             }
-            .overlay(alignment: .bottom, content: {
-                if currentStep != .paywall && incomingStep != .paywall {
-                        NewSecondOboardButton(title: "Continue", action: { goToNextStep() } )
-                            .padding(.horizontal, 36)
-                            .padding(.bottom, 32)
-                    }
-                
-            })
-            
             .task {
                 //onbLastShownTS = Date().timeIntervalSince1970
                 //Telemetry.shared.onboardFlowMark(.v41)
@@ -110,18 +100,18 @@ struct OnboardingFlowViewSeven: View {
             }
         }
     }
-    
+
     // MARK: - Навігація
-    private func goTo(_ step: OnboardingStepSeven, forward: Bool) {
+    private func goTo(_ step: OnboardingStepEight, forward: Bool) {
         guard !isAnimating, step != currentStep else { return }
         isAnimating = true
         isForward = forward
         childAnimate = false
-        
+
         // фіксуємо старий і запускаємо оверлей
         prevStep = currentStep
         incomingStep = step
-        
+
         // після короткої затримки (кінець пружини) — фіксуємо новий current і чистимо тимчасові
         //let delay = 0.7
         DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
@@ -133,7 +123,7 @@ struct OnboardingFlowViewSeven: View {
             Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
             
             if step != .paywall {
-                //                       incomingStep = nil
+//                       incomingStep = nil
                 // Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                 
                 appendStep(step)
@@ -141,28 +131,29 @@ struct OnboardingFlowViewSeven: View {
             } else {
                 PaywallGate.shared.currentContext = .onboarding
             }
-            
+
         }
     }
-    
+
     private func finishOnboarding() {
         Telemetry.shared.onboardingFinish()
         //hasSeenOnboarding = true
-        dismiss()
-        coordinator.showMainTabbar()
+        someAction()
+        //dismiss()
+        //coordinator.showMainTabbar()
     }
     
-    
+
     // Виклики з дочірніх екранів
     private func goToNextStep() {
-        if let idx = OnboardingStepSeven.allCases.firstIndex(of: currentStep),
-           idx + 1 < OnboardingStepSeven.allCases.count {
-            goTo(OnboardingStepSeven.allCases[idx + 1], forward: true)
+        if let idx = OnboardingStepEight.allCases.firstIndex(of: currentStep),
+           idx + 1 < OnboardingStepEight.allCases.count {
+            goTo(OnboardingStepEight.allCases[idx + 1], forward: true)
         }
     }
     
     // MARK: - Screen IDs для аналітики
-    private func screenId(for step: OnboardingStepSeven) -> String {
+    private func screenId(for step: OnboardingStepEight) -> String {
         
         switch step {
         case .stepOne:
@@ -171,44 +162,44 @@ struct OnboardingFlowViewSeven: View {
             return "step_2"
         case .stepThree:
             return "step_3"
-        case .stepFour:
-            return "step_4"
         case .paywall:
             return "paywall"
         }
-        
+
     }
-    
+
     // MARK: - Рендер екрана та фону
     @ViewBuilder
-    private func screen(for step: OnboardingStepSeven, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
+    private func screen(for step: OnboardingStepEight, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
         switch step {
         case .stepOne:
-            FirstSeventhOnboardView(action: { goTo(.stepTwo, forward: true) })
+            //StartOnboardView(action: { goTo(.wallet, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
             
+            WaterDropsView(index: 0, action: { goTo(.stepTwo, forward: true) })
+
+            //OnboardFourthFirstView(action: { goTo(.paywall, forward: true) })
         case .stepTwo:
-            SecondSeventhOnboardView(action: { goTo(.stepThree, forward: true) })
+            BlueLinesView(index: 1, action: { goTo(.stepThree, forward: true) })
         case .stepThree:
-            ThirdSeventhOnboardView(action: { goTo(.stepFour, forward: true) })
-        case .stepFour:
-            FourthSeventhOnboardView(action: { goTo(.paywall, forward: true) })
+            MeetView(index: 2, action: { goTo(.paywall, forward: true) })
+        
         case .paywall:
-            
+
             PaywallFourView(
-                onFinish: finishOnboarding,
-                onboardId: onboardId,
-                startDelay: slideDuration + 0.1,   // 0.55 s
-                summaryTag: .v41,
-                stepsVisited: stepsVisited
-                
-            )
+                    onFinish: finishOnboarding,
+                    onboardId: onboardId,
+                    startDelay: slideDuration + 0.1,   // 0.55 s
+                    summaryTag: .v41,
+                    stepsVisited: stepsVisited
+                    
+                )
             .onAppear {
-                //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
-                paywallShown = true        // <-- тут, а не вище
-                persist(tag: .v41)      // якщо зберігаєш прогрес
+                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+                    paywallShown = true        // <-- тут, а не вище
+                    persist(tag: .v41)      // якщо зберігаєш прогрес
                 
             }
         }
     }
-    
+
 }

@@ -19,6 +19,7 @@ struct FirstSeventhOnboardView: View {
 
     
     var body: some View {
+        let isLarge = UIScreen.main.bounds.height > 900
         
         
         OnboardCustomNewSecond(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
@@ -28,7 +29,7 @@ struct FirstSeventhOnboardView: View {
             
             Text("💦 Water got into your speakers?")
                 .foregroundStyle(.black)
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: isLarge ? 26 : 24, weight: .bold))
 
 
     }
@@ -38,14 +39,6 @@ struct FirstSeventhOnboardView: View {
 #Preview {
     FirstSeventhOnboardView(action: { print("N")})
 }
-
-
-
-
-
-  
-
-
 
 
 struct NewSecondOboardButton: View {
@@ -91,9 +84,9 @@ struct OnboardCustomNewSecond<Content: View>: View {
             .safeAreaInset(edge: .bottom) {
                 HStack { // гарантує однакову геометрію
                     Spacer()
-                    NewSecondOboardButton(title: ctaTitle, action: ctaAction, arrow: true)
-                        .padding(.horizontal, 32)
-                        .frame(minHeight: 52) // ключ
+//                    NewSecondOboardButton(title: ctaTitle, action: ctaAction, arrow: true)
+//                        .padding(.horizontal, 32)
+//                        .frame(minHeight: 52) // ключ
 //                        .frame(width: fixedWidth)
                     Spacer()
                 }

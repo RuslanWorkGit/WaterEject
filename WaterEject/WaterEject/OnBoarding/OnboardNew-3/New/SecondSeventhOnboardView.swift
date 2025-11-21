@@ -17,7 +17,7 @@ struct SecondSeventhOnboardView: View {
     
     
     var body: some View {
-        
+        let isLarge = UIScreen.main.bounds.height > 900
         
         OnboardCustomNewSecond(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             
@@ -26,7 +26,7 @@ struct SecondSeventhOnboardView: View {
             
             Text("😵‍💫 Speaker sounds messed up?")
                 .foregroundStyle(.black)
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: isLarge ? 26 : 24, weight: .bold))
             
             
         }

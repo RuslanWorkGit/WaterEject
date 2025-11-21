@@ -17,7 +17,7 @@ struct FourthSeventhOnboardView: View {
     
     
     var body: some View {
-        
+        let isLarge = UIScreen.main.bounds.height > 900
         
         OnboardCustomNewSecond(ctaTitle: "Continue", ctaAction: handleCTA, fixedWidth: 260) {
             
@@ -26,7 +26,7 @@ struct FourthSeventhOnboardView: View {
             
             Text("✅ We’ll clear the water out")
                 .foregroundStyle(.black)
-                .font(.system(size: 20, weight: .bold))
+                .font(.system(size: isLarge ? 26 : 24, weight: .bold))
             
             
         }

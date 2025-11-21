@@ -281,6 +281,7 @@ struct OnboardCustomNew<Content: View>: View {
     let ctaTitle: String
     let ctaAction: () -> Void
     var fixedWidth: CGFloat = 260
+    var pageDots: Bool = false
     @ViewBuilder let content: () -> Content
     
     var body: some View {
@@ -300,3 +301,7 @@ struct OnboardCustomNew<Content: View>: View {
             }
     }
 }
+
+
+
+

@@ -21,6 +21,7 @@ struct SettingView: View {
     @State private var showFiveOnboarding = false
     @State private var showSixOnboarding = false
     @State private var showSevenOnboarding = false
+    @State private var showEightOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -91,6 +92,13 @@ struct SettingView: View {
                             }
                             .buttonStyle(PillButtonStyle())
                             
+                            Button("onboardEight") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showEightOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
+                            
 //                            Button("FirstOnboard") {
 //                                
 //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
@@ -129,7 +137,11 @@ struct SettingView: View {
                 }
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
+            .safeAreaInset(edge: .bottom) {
+              Color.clear.frame(height: 100) // висота твого таббара
+            }
         }
+        
         .onAppear {
             tabBarState.isHidden = false 
 //            Telemetry.shared.settingExposure()
@@ -156,11 +168,19 @@ struct SettingView: View {
             OnboardingFlowViewSix()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
-        
         .fullScreenCover(isPresented: $showSevenOnboarding, onDismiss: {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)
         }) {
             OnboardingFlowViewSeven()
+                .environmentObject(coordinator)    // пробросимо координатор
+        }
+        
+        .fullScreenCover(isPresented: $showEightOnboarding, onDismiss: {
+            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        }) {
+            
+            OnboardAnimationView(someAction: { showEightOnboarding = false})
+            //OnboardingFlowViewSeven()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
         
