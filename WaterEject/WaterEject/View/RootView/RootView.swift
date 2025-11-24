@@ -25,32 +25,56 @@ struct RootView: View {
                     })
                     .onAppear { paywallGate.currentContext = .startViewAuto }
             case .onboarding:
-                //            OnboardingFlowView()
+
                 
-                OnboardingAB.shared
-                    .assignedOnboardingView() // ← ось тут
-                    .onAppear {
-                        // Якщо потрібен RC для свіжих часток:
-                        OnboardingAB.shared.fetchRemoteConfig()
-                    }
-//                OnboardingFlowViewFour()
+//                OnboardingAB.shared.assignedOnboardingView() // ← ось тут
+//                    .onAppear {
+//                        print("🔥 Onboarding variant =", OnboardingAB.shared.variant().rawValue)
+//                    }
+                OnboardingEntryView()
+
             case .mainTabbar:
                 TabBarView()
             }
         }
         .onAppear {
-//            if let s = OnboardingSessionStore.shared.load() {
-//                        Telemetry.shared.onbFlowSummary(
-//                            onboard: s.tag,
-//                            steps: s.steps,
-//                            paywallId: s.paywallShown ? "paywall_v_3.0" : "none",
-//                            plan: "none",
-//                            status: .abandon,
-//                            reason: "relaunch"
-//                        )
-//                        OnboardingSessionStore.shared.clear()
-//                    }
+
         }
         .animation(nil, value: coordinator.currentScreen)
+    }
+}
+
+
+struct OnboardingEntryView: View {
+    @State private var isReady = false
+
+    var body: some View {
+        Group {
+            if isReady {
+                // тут вже можна безпечно вибирати онборд —
+                // Remote Config активувався
+                OnboardingAB.shared.assignedOnboardingView()
+            } else {
+                // простий лоадер / чорний екран / сплеш
+                Color.black.ignoresSafeArea()
+            }
+        }
+        .onAppear {
+            // 1) тягнемо Remote Config
+            OnboardingAB.shared.fetchRemoteConfig {
+                print("🔥 RC fetched, variant =", OnboardingAB.shared.variant().rawValue)
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isReady = true
+                }
+            }
+
+            // 2) фолбек на випадок, якщо мережі нема або RC не відповів
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                if !isReady {
+                    print("⚠️ RC timeout, showing default onboarding")
+                    isReady = true     // використає значення з setDefaults
+                }
+            }
+        }
     }
 }

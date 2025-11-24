@@ -12,15 +12,15 @@ import RevenueCat
 import SwiftUI
 
 enum OnboardingVariant: String, Identifiable, CaseIterable {
-    case A = "Onb_4.1" // зараз OnboardingFlowViewFour
-    case B = "Onb_3.2" // OnboardingFlowViewTwo
-    case C = "Onb_3.3" // OnboardingFlowViewThree
+    case A = "Onb_4" // зараз OnboardingFlowViewFour
+    case B = "Onb_3_2" // OnboardingFlowViewTwo
+    case C = "Onb_3_3" // OnboardingFlowViewThree
     
-    case D = "Onb_5.0" // OnboardingFlowViewFive
-    case E = "Onb_6.0" // OnboardingFlowViewSix
-    case F = "Onb_7.0" // OnboardingFlowViewSeven
-    case G = "Onb_8.0" // OnboardAnimationView
-    case H = "Onb_9.0" // OnboardAnimationView
+    case D = "Onb_5" // OnboardingFlowViewFive
+    case E = "Onb_6" // OnboardingFlowViewSix
+    case F = "Onb_7" // OnboardingFlowViewSeven
+    case G = "Onb_8" // OnboardAnimationView
+    case H = "Onb_9" // OnboardAnimationView
     
     var id: String { rawValue }
 }
@@ -29,16 +29,32 @@ final class OnboardingAB {
     static let shared = OnboardingAB()
     
     private init() {
-        let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 0 // на проді зроби 3600+ або більше
-        rc.configSettings = settings
-        rc.setDefaults([
-            "onb_force": "" as NSObject // "Onb_4.1", "Onb_5.0" тощо або ""
-        ])
-    }
+            let settings = RemoteConfigSettings()
+            settings.minimumFetchInterval = 0 // на проді зроби 3600+
+            rc.configSettings = settings
+            
+            rc.setDefaults([
+                "onb_force": "" as NSObject,
+                
+                // 🔹 прапорці для кожного онборду
+                "Onb_4_enabled": true as NSObject,
+                "Onb_3_2_enabled": true as NSObject,
+                "Onb_3_3_enabled": true as NSObject,
+                "Onb_5_enabled": true as NSObject,
+                "Onb_6_enabled": true as NSObject,
+                "Onb_7_enabled": true as NSObject,
+                "Onb_8_enabled": true as NSObject,
+                "Onb_9_enabled": true as NSObject
+            ])
+        }
     
     private let rc = RemoteConfig.remoteConfig()
-    private let storageKey = "onboarding_variant_v1"
+    private let storageKey = "onboarding_variant_v2"
+    
+    private func isEnabled(_ variant: OnboardingVariant) -> Bool {
+        let key = "\(variant.rawValue)_enabled"   // наприклад "Onb_3.3_enabled"
+        return rc[key].boolValue                  // якщо ключа нема – буде false
+    }
     
     func fetchRemoteConfig(completion: (() -> Void)? = nil) {
         rc.fetchAndActivate { _, _ in completion?() }
@@ -64,29 +80,62 @@ final class OnboardingAB {
     }
     
     func variant() -> OnboardingVariant {
-        // 1) кеш у UserDefaults
-        if let raw = UserDefaults.standard.string(forKey: storageKey),
-           let v = OnboardingVariant(rawValue: raw) {
+            // 1) спроба взяти закешований варіант, але тільки якщо він ще enabled
+            if let raw = UserDefaults.standard.string(forKey: storageKey),
+               let v = OnboardingVariant(rawValue: raw),
+               isEnabled(v) {
+                applyTracking(v)
+                return v
+            }
+            
+            // 2) форсований варіант із RC, якщо він існує і enabled
+            if let forced = OnboardingVariant(rawValue: rc["onb_force"].stringValue),
+               isEnabled(forced) {
+                UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
+                applyTracking(forced)
+                return forced
+            }
+            
+            // 3) беремо тільки увімкнені онборди
+            let enabled = OnboardingVariant.allCases.filter { isEnabled($0) }
+            
+            // 4) якщо раптом у RC усі вимкнули (або ще не підвантажилось) – фолбек на дефолтний пул
+            let pool = enabled.isEmpty ? OnboardingVariant.allCases : enabled
+            // тут дефолтний ти контролюєш тим, як будеш розподіляти або можеш явно вибрати, наприклад:
+            // let fallback: OnboardingVariant = .G
+            
+            let bucket = abs(stableUserID().hashValue) % pool.count
+            let v = pool[bucket]
+            
+            UserDefaults.standard.set(v.rawValue, forKey: storageKey)
             applyTracking(v)
             return v
         }
-        
-        // 2) форс через RC (залишаємо)
-        if let forced = OnboardingVariant(rawValue: rc["onb_force"].stringValue) {
-            UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
-            applyTracking(forced)
-            return forced
-        }
-        
-        // 3) рівномірний спліт по всіх варіантах
-        let all = OnboardingVariant.allCases
-        let bucket = abs(stableUserID().hashValue) % all.count
-        let v = all[bucket]
-        
-        UserDefaults.standard.set(v.rawValue, forKey: storageKey)
-        applyTracking(v)
-        return v
-    }
+    
+//    func variant() -> OnboardingVariant {
+//        // 1) кеш у UserDefaults
+//        if let raw = UserDefaults.standard.string(forKey: storageKey),
+//           let v = OnboardingVariant(rawValue: raw) {
+//            applyTracking(v)
+//            return v
+//        }
+//        
+//        // 2) форс через RC (залишаємо)
+//        if let forced = OnboardingVariant(rawValue: rc["onb_force"].stringValue) {
+//            UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
+//            applyTracking(forced)
+//            return forced
+//        }
+//        
+//        // 3) рівномірний спліт по всіх варіантах
+//        let all = OnboardingVariant.allCases
+//        let bucket = abs(stableUserID().hashValue) % all.count
+//        let v = all[bucket]
+//        
+//        UserDefaults.standard.set(v.rawValue, forKey: storageKey)
+//        applyTracking(v)
+//        return v
+//    }
     
     // Повертаємо конкретний флоу
     func assignedOnboardingView() -> AnyView {

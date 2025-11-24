@@ -63,10 +63,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         af.isDebug = false
         #endif
 
-//        print("AF UID:", af.getAppsFlyerUID())
-//        print("AF customerUserID at launch:", af.customerUserID ?? "nil")
-        
-        // 2) Старт AF одразу після лаунчу (як і було)
         startAppsFlyer()
 
         // 3) Одноразовий кастомний івент "install" — ПІСЛЯ configure()
@@ -155,6 +151,7 @@ struct WaterEjectApp: App {
 
     init() {
         OneTimeDefaultsReset.run(full: true)
+        
 
         // Firebase
         FirebaseApp.configure()
@@ -169,6 +166,7 @@ struct WaterEjectApp: App {
             print("shared apps ids =", snap?.documents.map { $0.documentID } ?? [], "err:", err as Any)
         }
 
+        OnboardingAB.shared.fetchRemoteConfig()
         PaywallAB.shared.fetchRemoteConfig()
     }
 

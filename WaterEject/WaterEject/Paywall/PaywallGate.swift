@@ -39,13 +39,13 @@ final class PaywallGate: ObservableObject {
     func assignedVariant() -> PaywallVariant {
         // 0) Якщо юзеру видали один з НОВИХ онбордів (D/E/F/G),
         //    завжди показуємо новий пейвол (.fourth)
-        if let rawOnb = UserDefaults.standard.string(forKey: "onboarding_variant_v1"),
+        if let rawOnb = UserDefaults.standard.string(forKey: "onboarding_variant_v2"),
            let onbVariant = OnboardingVariant(rawValue: rawOnb) {
             switch onbVariant {
-            case .D, .E, .F, .G, .H:
+            case .A, .B, .C, .D, .E, .F, .G, .H:
                 return .fourth        // ⬅️ тут жорстко форсим PaywallFourView
-            case .A, .B, .C:
-                break                 // для старих онбордів — стара логіка
+//            case .A, .B, .C:
+//                break                 // для старих онбордів — стара логіка
             }
         }
 
