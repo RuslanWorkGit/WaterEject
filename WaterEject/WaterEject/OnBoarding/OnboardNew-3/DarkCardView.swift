@@ -215,8 +215,8 @@ struct DarkCardView: View {
 #Preview {
     DarkCardView(
         action: { print("N") },
-        topCardIndex: .constant(3),
-        colorIndex: .constant(3)
+        topCardIndex: .constant(0),
+        colorIndex: .constant(0)
         
     )
 }

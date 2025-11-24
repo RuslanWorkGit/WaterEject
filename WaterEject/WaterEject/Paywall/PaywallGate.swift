@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 import RevenueCat
 
-enum PaywallContext: String { case startViewAuto, modesTap, startButton, onboarding }
+enum PaywallContext: String { case startViewAuto, modesTap, startButton, onboarding, testTab}
 
 @MainActor
 final class PaywallGate: ObservableObject {
@@ -42,7 +42,7 @@ final class PaywallGate: ObservableObject {
         if let rawOnb = UserDefaults.standard.string(forKey: "onboarding_variant_v1"),
            let onbVariant = OnboardingVariant(rawValue: rawOnb) {
             switch onbVariant {
-            case .D, .E, .F, .G:
+            case .D, .E, .F, .G, .H:
                 return .fourth        // ⬅️ тут жорстко форсим PaywallFourView
             case .A, .B, .C:
                 break                 // для старих онбордів — стара логіка

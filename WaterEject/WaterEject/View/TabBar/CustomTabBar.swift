@@ -44,6 +44,8 @@ enum TabBarTab {
 
 struct CustomTabBar: View {
     @Binding var selectedTab: TabBarTab
+    @State private var pendingSelectTest = false
+    @EnvironmentObject private var paywallGate: PaywallGate
 
     var body: some View {
         HStack(spacing: 0) {
@@ -63,7 +65,17 @@ struct CustomTabBar: View {
                 label: "Test",
                 isSelected: selectedTab == .test
             ) {
-                selectedTab = .test
+                Task {
+                                    // спочатку пробуємо вимагати Pro / показати paywall
+                                    let allowed = await paywallGate.requireProOrPresentPaywall(context: .testTab) // або .testTab, якщо маєш такий case
+                                    if allowed {
+                                        // вже Pro → просто переходимо на вкладку
+                                        selectedTab = .test
+                                    } else {
+                                        // чекаємо результату paywall
+                                        pendingSelectTest = true
+                                    }
+                                }
             }
             .frame(minWidth: 0, maxWidth: .infinity)
             
@@ -85,7 +97,40 @@ struct CustomTabBar: View {
             Color(red: 35/255, green: 37/255, blue: 41/255)
                 .ignoresSafeArea(.container, edges: .bottom)
         )
+        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
+                    Task {
+                        let isPro = await paywallGate.isPro()
+                        if isPro && pendingSelectTest {
+                            selectedTab = .test
+                        }
+                        pendingSelectTest = false
+                        paywallGate.dismissPaywall()
+                    }
+        }) { variant in
+            switch variant {
+            case .A:
+                PaywallFirstView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            case .B:
+                PaywallSecondView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            case .third:
+                PaywallThirdView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            case .fourth:
+                PaywallFourView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            }
+        }
+                    
+                
     }
+    
+
 }
 
 struct TabBarButton: View {
