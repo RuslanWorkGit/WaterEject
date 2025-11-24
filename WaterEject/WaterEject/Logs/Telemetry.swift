@@ -608,13 +608,11 @@ extension Telemetry {
     
     // 4) Покупка: успіх
     func purchaseSuccess(variant: String,
-                         plan: String,
                          packageId: String,
                          sessionId: String,
                          onboardId: String?) {
         var p = baseParams()
         p["variant"] = variant
-        p["plan"] = plan
         p["package_id"] = packageId
         p["paywall_session_id"] = sessionId
         if let onboardId { p["onboard_id"] = onboardId }
@@ -907,7 +905,7 @@ extension Telemetry {
         //if let variant { summary["variant"] = variant }
         if let entryPoint { summary["entry_point"] = entryPoint }
         if let reason { summary["reason"] = reason }
-        if let plan { summary["plan"] = plan } // ← тільки для success
+        if let plan { summary["success"] = plan } // ← тільки для success
 
         Analytics.logEvent(tag.summaryEventName, parameters: summary)
     }
@@ -923,7 +921,7 @@ extension Telemetry {
             "status": status.rawValue,
             "paywall_id": paywallId
         ])
-        if let plan { summary["plan"] = plan }
+        if let plan { summary["success"] = plan }
         Analytics.logEvent(tag.summaryEventName, parameters: summary)
     }
 }

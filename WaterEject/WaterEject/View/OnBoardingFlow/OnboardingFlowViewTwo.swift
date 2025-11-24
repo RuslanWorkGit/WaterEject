@@ -165,7 +165,15 @@ struct OnboardingFlowViewTwo: View {
         case .paywall:
 //            PaywallThirdView(onFinish: finishOnboarding, onboardId: onboardId)
 
-            PaywallThirdView(
+//            PaywallThirdView(
+//                    onFinish: finishOnboarding,
+//                    onboardId: onboardId,
+//                    startDelay: slideDuration + 0.00,   // 0.55 s
+//                    summaryTag: .v32,                 // Onbord_v_3.2
+//                    stepsVisited: stepsVisited
+//                )
+            
+            PaywallFourView(
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
                     startDelay: slideDuration + 0.00,   // 0.55 s

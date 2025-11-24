@@ -25,7 +25,7 @@ final class PaywallAB {
     
     private init() {
         let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 0 // на проді зроби 3600+
+        settings.minimumFetchInterval = 1800 // на проді зроби 3600+
         rc.configSettings = settings
         rc.setDefaults([
             "paywall_share_A": 50 as NSObject,   // якщо колись повернешся до спліта

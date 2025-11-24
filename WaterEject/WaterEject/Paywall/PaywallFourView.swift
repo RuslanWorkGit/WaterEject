@@ -211,10 +211,10 @@ struct PaywallFourView: View {
                             )
                             if viewModel.purchaseSucceeded {
                                 Telemetry.shared.purchaseSuccess(
-                                    variant: variant, plan: plan.analyticsValue,
+                                    variant: variant,
                                     packageId: plan.analyticsValue, // або свій packageId
                                     sessionId: sessionId,
-                                    onboardId: onboardId
+                                    onboardId: summaryTag?.rawValue
                                 )
                                 
                                 logOnboardSummary(.success)

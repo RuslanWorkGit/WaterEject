@@ -204,7 +204,16 @@ struct OnboardingFlowViewFour: View {
             OnboardFourthSixthView(action: { goTo(.paywall, forward: true) })
         case .paywall:
 
-            PaywallThirdView(
+//            PaywallThirdView(
+//                    onFinish: finishOnboarding,
+//                    onboardId: onboardId,
+//                    startDelay: slideDuration + 0.1,   // 0.55 s
+//                    summaryTag: .v41,
+//                    stepsVisited: stepsVisited
+//                    
+//                )
+            
+            PaywallFourView(
                     onFinish: finishOnboarding,
                     onboardId: onboardId,
                     startDelay: slideDuration + 0.1,   // 0.55 s
@@ -212,6 +221,7 @@ struct OnboardingFlowViewFour: View {
                     stepsVisited: stepsVisited
                     
                 )
+            
             .onAppear {
                     //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
                     paywallShown = true        // <-- тут, а не вище
