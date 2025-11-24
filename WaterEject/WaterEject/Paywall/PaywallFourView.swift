@@ -115,9 +115,9 @@ struct PaywallFourView: View {
                   
                             
                             VStack(spacing: isSmall ? 4 : isLarge ? 8 : 4) {
-                                HorizontalFourText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
-                                HorizontalFourText(title: "5 pro-level sound tests", image: "gauge.open.with.lines.needle.33percent", isLarge: isLarge)
-                                HorizontalFourText(title: "All future features + No Ads", image: "sparkles", isLarge: isLarge)
+                                HorizontalFourText(title: "Powerful Water Eject", image: "slider.vertical.3", isLarge: isLarge)
+                                HorizontalFourText(title: "Fast Speaker Cleaner", image: "gauge.open.with.lines.needle.33percent", isLarge: isLarge)
+                                HorizontalFourText(title: "Test Your Microphone", image: "sparkles", isLarge: isLarge)
                             }
                             .fixedSize(horizontal: true, vertical: true)   // важливо: беремо фактичну ширину контенту
                             .onSizeChange { featuresWidth = $0.width }      // зчитуємо ширину
@@ -406,16 +406,19 @@ struct HorizontalFourText: View {
         HStack {
             Image(systemName: image)
                 .resizable()
-                .frame(width: 18, height: 18)
-                .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                .frame(width: 16, height: 16)
+//                .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                .foregroundStyle(.white)
             
-                .padding(6)
+                .padding(8)
                 .background(
-                    Circle()
-                        .fill(color.opacity(0.15))
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+//                    Circle()
+//                        .fill(color.opacity(0.15))
                 )
             Text(title)
-                .font(.system(size: isLarge ? 20 : 17))
+                .font(.system(size: isLarge ? 20 : 17, weight: .semibold))
                 .foregroundStyle(Color(red: 65 / 255, green: 67 / 255, blue: 72 / 255))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
