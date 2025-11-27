@@ -74,18 +74,38 @@ final class PaywallAB {
     }
     
     func onboardingPaywallVariant(for tag: OnboardTag) -> PaywallVariant {
+        // 0) форс з RC — як і було, має абсолютний пріоритет
         let forceKey = rc["paywall_force"].stringValue
         if !forceKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
            let forced = parseForcedVariant(forceKey) {
             return forced
         }
 
-        let primary = primaryOnboardingVariant(for: tag)
+        let primary  = primaryOnboardingVariant(for: tag)
         let fallback: PaywallVariant = (primary == .third ? .fourth : .third)
 
-        if isEnabled(primary) { return primary }
-        if isEnabled(fallback) { return fallback }
-        return primary
+        let primaryEnabled  = isEnabled(primary)
+        let fallbackEnabled = isEnabled(fallback)
+
+        switch (primaryEnabled, fallbackEnabled) {
+        case (true, false):
+            // увімкнений тільки primary → показуємо його
+            return primary
+
+        case (false, true):
+            // увімкнений тільки fallback → показуємо його
+            return fallback
+
+        case (false, false):
+            // обидва вимкнені → безпечний фолбек (щоб не впасти)
+            return primary
+
+        case (true, true):
+            // ⬅️ коли ОБИДВА true робимо стабільний “рандом” 50/50
+            let seed = stableUserID() + "|\(tag.rawValue)|paywallAB"
+            let bucket = abs(seed.hashValue) % 2
+            return (bucket == 0) ? primary : fallback
+        }
     }
 
     

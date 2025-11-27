@@ -37,30 +37,42 @@ final class PaywallGate: ObservableObject {
         }
     }
 
+//    func assignedVariant() -> PaywallVariant {
+//        // 0) Якщо юзеру видали один з НОВИХ онбордів (D/E/F/G),
+//        //    завжди показуємо новий пейвол (.fourth)
+//        if let rawOnb = UserDefaults.standard.string(forKey: "onboarding_variant_v2"),
+//           let onbVariant = OnboardingVariant(rawValue: rawOnb) {
+//            switch onbVariant {
+//            case .A, .B, .C, .D, .E, .F, .G, .H:
+//                return .fourth        // ⬅️ тут жорстко форсим PaywallFourView
+////            case .A, .B, .C:
+////                break                 // для старих онбордів — стара логіка
+//            }
+//        }
+//
+//        // 1) Далі — як було: читаємо paywall_variant із UserDefaults
+//        if let raw = UserDefaults.standard.string(forKey: variantKey),
+//           let v = PaywallVariant(rawValue: raw) {
+//            return v
+//        } else {
+//            let v = PaywallAB.shared.variant()
+//            UserDefaults.standard.set(v.rawValue, forKey: variantKey)
+//            return v
+//        }
+//    }
+    
     func assignedVariant() -> PaywallVariant {
-        // 0) Якщо юзеру видали один з НОВИХ онбордів (D/E/F/G),
-        //    завжди показуємо новий пейвол (.fourth)
-        if let rawOnb = UserDefaults.standard.string(forKey: "onboarding_variant_v2"),
-           let onbVariant = OnboardingVariant(rawValue: rawOnb) {
-            switch onbVariant {
-            case .A, .B, .C, .D, .E, .F, .G, .H:
-                return .fourth        // ⬅️ тут жорстко форсим PaywallFourView
-//            case .A, .B, .C:
-//                break                 // для старих онбордів — стара логіка
-            }
-        }
-
-        // 1) Далі — як було: читаємо paywall_variant із UserDefaults
+        // читаємо закріплений варіант із UserDefaults
         if let raw = UserDefaults.standard.string(forKey: variantKey),
            let v = PaywallVariant(rawValue: raw) {
             return v
         } else {
+            // якщо ще не було – фіксуємо через PaywallAB.variant()
             let v = PaywallAB.shared.variant()
             UserDefaults.standard.set(v.rawValue, forKey: variantKey)
             return v
         }
     }
-    
 
 
     func isPro() async -> Bool {
