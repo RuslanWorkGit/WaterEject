@@ -185,21 +185,33 @@ struct OnboardingFlowViewEight: View {
             MeetView(index: 2, action: { goTo(.paywall, forward: true) })
         
         case .paywall:
+            
+            PaywallAB.shared
+                   .onboardingPaywallView(
+                       for: .v8,                       // тег онборду (Onbord_v_3.3)
+                       onFinish: finishOnboarding,
+                       startDelay: slideDuration + 0.0,
+                       stepsVisited: stepsVisited
+                   )
+                   .onAppear {
+                       paywallShown = true
+                       persist(tag: .v8)
+                   }
 
-            PaywallFourView(
-                    onFinish: finishOnboarding,
-                    onboardId: onboardId,
-                    startDelay: slideDuration + 0.1,   // 0.55 s
-                    summaryTag: .v8,
-                    stepsVisited: stepsVisited
-                    
-                )
-            .onAppear {
-                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
-                    paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v8)      // якщо зберігаєш прогрес
-                
-            }
+//            PaywallFourView(
+//                    onFinish: finishOnboarding,
+//                    onboardId: onboardId,
+//                    startDelay: slideDuration + 0.1,   // 0.55 s
+//                    summaryTag: .v8,
+//                    stepsVisited: stepsVisited
+//                    
+//                )
+//            .onAppear {
+//                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+//                    paywallShown = true        // <-- тут, а не вище
+//                    persist(tag: .v8)      // якщо зберігаєш прогрес
+//                
+//            }
         }
     }
 

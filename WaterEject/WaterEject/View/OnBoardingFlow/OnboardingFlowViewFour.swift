@@ -213,21 +213,33 @@ struct OnboardingFlowViewFour: View {
 //                    
 //                )
             
-            PaywallFourView(
-                    onFinish: finishOnboarding,
-                    onboardId: onboardId,
-                    startDelay: slideDuration + 0.1,   // 0.55 s
-                    summaryTag: .v41,
-                    stepsVisited: stepsVisited
-                    
-                )
+            PaywallAB.shared
+                   .onboardingPaywallView(
+                       for: .v41,                       // тег онборду (Onbord_v_3.3)
+                       onFinish: finishOnboarding,
+                       startDelay: slideDuration + 0.0,
+                       stepsVisited: stepsVisited
+                   )
+                   .onAppear {
+                       paywallShown = true
+                       persist(tag: .v41)
+                   }
             
-            .onAppear {
-                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
-                    paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v41)      // якщо зберігаєш прогрес
-                
-            }
+//            PaywallFourView(
+//                    onFinish: finishOnboarding,
+//                    onboardId: onboardId,
+//                    startDelay: slideDuration + 0.1,   // 0.55 s
+//                    summaryTag: .v41,
+//                    stepsVisited: stepsVisited
+//                    
+//                )
+//            
+//            .onAppear {
+//                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+//                    paywallShown = true        // <-- тут, а не вище
+//                    persist(tag: .v41)      // якщо зберігаєш прогрес
+//                
+//            }
         }
     }
 

@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 import RevenueCat
 
+
 enum PaywallContext: String { case startViewAuto, modesTap, startButton, onboarding, testTab}
 
 @MainActor
@@ -59,6 +60,8 @@ final class PaywallGate: ObservableObject {
             return v
         }
     }
+    
+
 
     func isPro() async -> Bool {
         do {

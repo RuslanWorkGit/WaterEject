@@ -29,7 +29,11 @@ final class PaywallAB {
         rc.configSettings = settings
         rc.setDefaults([
             "paywall_share_A": 50 as NSObject,   // якщо колись повернешся до спліта
-            "paywall_force":   "third" as NSObject // <- ВСІ бачать PaywallThirdView
+            "paywall_force":   "" as NSObject, // <- ВСІ бачать PaywallThirdView
+            
+            // ⬇️ нові ключі
+            "paywall3_enabled": true as NSObject,
+            "paywall4_enabled": true as NSObject
         ])
     }
     
@@ -47,6 +51,83 @@ final class PaywallAB {
         : id
     }
     
+    private func isEnabled(_ v: PaywallVariant) -> Bool {
+        switch v {
+        case .third:
+            return rc["paywall3_enabled"].boolValue
+        case .fourth:
+            return rc["paywall4_enabled"].boolValue
+        case .A, .B:
+            return true
+        }
+    }
+    
+    private func primaryOnboardingVariant(for tag: OnboardTag) -> PaywallVariant {
+        switch tag {
+        case .v32, .v33, .v41:        // OnboardingFlowViewTwo / Three
+            return .third       // старий пейвол основний
+        case .v5, .v6, .v7, .v8, .v9: // нові флоу 5/6/7/8
+            return .fourth      // новий пейвол основний
+        default:
+            return .fourth
+        }
+    }
+    
+    func onboardingPaywallVariant(for tag: OnboardTag) -> PaywallVariant {
+        let forceKey = rc["paywall_force"].stringValue
+        if !forceKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           let forced = parseForcedVariant(forceKey) {
+            return forced
+        }
+
+        let primary = primaryOnboardingVariant(for: tag)
+        let fallback: PaywallVariant = (primary == .third ? .fourth : .third)
+
+        if isEnabled(primary) { return primary }
+        if isEnabled(fallback) { return fallback }
+        return primary
+    }
+
+    
+    func onboardingPaywallView(
+        for tag: OnboardTag,
+        onFinish: @escaping () -> Void,
+        startDelay: Double,
+        stepsVisited: [String]?
+    ) -> AnyView {
+        let variant = onboardingPaywallVariant(for: tag)
+
+        switch variant {
+        case .third:
+            return AnyView(
+                PaywallThirdView(
+                    onFinish: onFinish,
+                    onboardId: tag.rawValue,
+                    startDelay: startDelay,
+                    summaryTag: tag,
+                    stepsVisited: stepsVisited
+                )
+            )
+
+        case .fourth:
+            return AnyView(
+                PaywallFourView(
+                    onFinish: onFinish,
+                    onboardId: tag.rawValue,
+                    startDelay: startDelay,
+                    summaryTag: tag,
+                    stepsVisited: stepsVisited
+                )
+            )
+
+        case .A, .B:
+            // якщо колись захочеш ще варіанти – тут можна розширити
+            return AnyView(
+                PaywallStubView(title: "Paywall A/B (stub)", onClose: onFinish)
+            )
+        }
+    }
+
     // ❗️Єдина точка, що ставить user property + RC attributes
     private func applyTracking(_ v: PaywallVariant) {
         Analytics.setUserProperty(v.rawValue, forName: "paywall_variant")

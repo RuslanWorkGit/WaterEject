@@ -192,21 +192,33 @@ struct OnboardingFlowViewFive: View {
             //OnboardFourthFirstView(action: { goTo(.paywall, forward: true) })
         
         case .paywall:
+            
+            PaywallAB.shared
+                   .onboardingPaywallView(
+                       for: .v5,                       // тег онборду (Onbord_v_3.3)
+                       onFinish: finishOnboarding,
+                       startDelay: slideDuration + 0.0,
+                       stepsVisited: stepsVisited
+                   )
+                   .onAppear {
+                       paywallShown = true
+                       persist(tag: .v5)
+                   }
 
-            PaywallFourView(
-                    onFinish: finishOnboarding,
-                    onboardId: onboardId,
-                    startDelay: slideDuration + 0.1,   // 0.55 s
-                    summaryTag: .v5,
-                    stepsVisited: stepsVisited
-                    
-                )
-            .onAppear {
-                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
-                    paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v5)      // якщо зберігаєш прогрес
-                
-            }
+//            PaywallFourView(
+//                    onFinish: finishOnboarding,
+//                    onboardId: onboardId,
+//                    startDelay: slideDuration + 0.1,   // 0.55 s
+//                    summaryTag: .v5,
+//                    stepsVisited: stepsVisited
+//                    
+//                )
+//            .onAppear {
+//                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+//                    paywallShown = true        // <-- тут, а не вище
+//                    persist(tag: .v5)      // якщо зберігаєш прогрес
+//                
+//            }
         }
     }
 

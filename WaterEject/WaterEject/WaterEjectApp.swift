@@ -17,6 +17,7 @@ import FirebaseFirestore
 import AppsFlyerLib
 
 
+
 final class RCDelegateProxy: NSObject, PurchasesDelegate {
     static let shared = RCDelegateProxy()
     func purchases(_ purchases: Purchases, receivedUpdated customerInfo: CustomerInfo) {
