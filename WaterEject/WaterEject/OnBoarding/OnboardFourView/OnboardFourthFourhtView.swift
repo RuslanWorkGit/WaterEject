@@ -15,13 +15,40 @@ struct OnboardFourthFourhtView: View {
             return
         }
         selectedTimeRaw = time.rawValue
-        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedTimeRaw, choiceName: "time")
+        //Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedTimeRaw, choiceName: "time")
+        
+        Telemetry.shared.logOnboardChoiceSummary(
+            flowId: "user_onboard_v_4_info",
+            device: deviceName,
+            reasonWet: reason,
+            sound: sound,
+            period: selectedTimeRaw
+        )
+        
         action()
     }
     
+    @AppStorage("selectedDevice") private var selectedDeviceRaw: String = ""
+    @AppStorage("selectedReason") private var selectedReasonRaw: String = ""
+    @AppStorage("selectedSound")  private var selectedSoundRaw: String = ""
     @AppStorage("selectedTime") private var selectedTimeRaw: String = ""
+    
+    private var deviceName: String {
+        ChooseDevice(rawValue: selectedDeviceRaw)?.rawValue ?? selectedDeviceRaw
+    }
+    
+    private var reason: String {
+        ChooseReason(rawValue: selectedReasonRaw)?.rawValue ?? selectedReasonRaw
+    }
+    
+    private var sound: String {
+        ChooseMuffledSound(rawValue: selectedSoundRaw)?.rawValue ?? selectedSoundRaw
+    }
+    
+    
     @State private var tempSelected: ChooseTime? = nil
     @State private var showAlert = false
+    
     
     var body: some View {
         

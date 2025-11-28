@@ -184,23 +184,21 @@ struct OnboardingFlowViewFour: View {
     private func screen(for step: OnboardingStepFour, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
         switch step {
         case .stepOne:
-            //StartOnboardView(action: { goTo(.wallet, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
             OnboardFourthFirstView(action: { goTo(.stepTwo, forward: true) })
             
         case .stepTwo:
-            //SaveOnboardNew(action: { goTo(.women, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
+
             OnboardFourthSecondView(action: { goTo(.stepThree, forward: true) })
         case .stepThree:
-           // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
             OnboardFourthThirdView(action: { goTo(.stepFour, forward: true) })
         case .stepFour:
-           // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
+
             OnboardFourthFourhtView(action: { goTo(.stepFive, forward: true) })
         case .stepFive:
-           // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
+
             OnboardFourthFifthView(action: { goTo(.stepSix, forward: true) })
         case .stepSix:
-           // WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
+
             OnboardFourthSixthView(action: { goTo(.paywall, forward: true) })
         case .paywall:
 

@@ -59,53 +59,48 @@ struct SettingView: View {
                             .buttonStyle(PillButtonStyle())
                         }
                         
-                        Text("Help center")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(Color.gray)
-                        
-                        VStack(spacing: 12) {
-                            
-//                            Button("NewOnboard") {
+//                        Text("Help center")
+//                            .font(.system(size: 20, weight: .bold))
+//                            .foregroundStyle(Color.gray)
+//                        
+//                        VStack(spacing: 12) {
+//                            
+//
+////
+//                            Button("onboardFive") {
 //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showFourthOnboarding = true
+//                                showFiveOnboarding = true
 //                                
 //                            }
 //                            .buttonStyle(PillButtonStyle())
 //                            
-                            Button("onboardFive") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showFiveOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                            Button("onboardSix") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showSixOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                            Button("onboardSeven") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showSevenOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                            Button("onboardEight") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showEightOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
-                            
-                            Button("onboardNine") {
-                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-                                showNineOnboarding = true
-                                
-                            }
-                            .buttonStyle(PillButtonStyle())
+//                            Button("onboardSix") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showSixOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                            
+//                            Button("onboardSeven") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showSevenOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                            
+//                            Button("onboardEight") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showEightOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                            
+//                            Button("onboardNine") {
+//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+//                                showNineOnboarding = true
+//                                
+//                            }
+//                            .buttonStyle(PillButtonStyle())
                             
                             
 //                            Button("FirstOnboard") {
@@ -137,7 +132,7 @@ struct SettingView: View {
 //                            }
 //                            .buttonStyle(PillButtonStyle())
                             
-                        }
+//                        }
    
 
                     }

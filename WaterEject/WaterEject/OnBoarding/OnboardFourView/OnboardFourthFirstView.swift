@@ -15,7 +15,7 @@ struct OnboardFourthFirstView: View {
             return
         }
         selectedDeviceRaw = choice.rawValue
-        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedDeviceRaw, choiceName: "device")
+        //Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedDeviceRaw, choiceName: "device")
         action()
     }
     

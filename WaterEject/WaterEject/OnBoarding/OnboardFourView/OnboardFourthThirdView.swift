@@ -15,7 +15,7 @@ struct OnboardFourthThirdView: View {
             return
         }
         selectedSoundRaw = sound.rawValue
-        Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedSoundRaw, choiceName: "sound")
+        //Telemetry.shared.logOnboardChoice(flowId: "user_onboard_v_4_info", choiceInfo: selectedSoundRaw, choiceName: "sound")
         action()
     }
     
