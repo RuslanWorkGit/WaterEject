@@ -28,7 +28,7 @@ struct PaywallFourView: View {
     @State private var startDelay: Double = 0.35
     @State private var featuresWidth: CGFloat = 0
     
-    @State private var isFreeTrialEnabled = true
+    //@State private var isFreeTrialEnabled = true
     
     @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -141,28 +141,28 @@ struct PaywallFourView: View {
                     //Spacer()
                     
                     VStack(spacing: 12) {
-                        HStack {
-                            Text("Free Trial Enable")
-                                .font(.system(size: 16))
-                                .foregroundStyle(.black)
-                            
-                            Spacer()
-                            
-                            Toggle("", isOn: $isFreeTrialEnabled)
-                                   .labelsHidden()
-                                   .tint(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-                                   //.disabled(viewModel.selectedPlan == .yearly)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(.white)
-                                .overlay(content: {
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .strokeBorder(Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5), lineWidth: 1)
-                                })
-                        )
+//                        HStack {
+//                            Text("Free Trial Enable")
+//                                .font(.system(size: 16))
+//                                .foregroundStyle(.black)
+//                            
+//                            Spacer()
+//                            
+//                            Toggle("", isOn: $isFreeTrialEnabled)
+//                                   .labelsHidden()
+//                                   .tint(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+//                                   //.disabled(viewModel.selectedPlan == .yearly)
+//                        }
+//                        .padding(.horizontal, 16)
+//                        .padding(.vertical, 8)
+//                        .background(
+//                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+//                                .fill(.white)
+//                                .overlay(content: {
+//                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+//                                        .strokeBorder(Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5), lineWidth: 1)
+//                                })
+//                        )
                         
                         PaywallFourPlanCard(
                             title: PaywallPlan.weekly.title,
@@ -341,20 +341,20 @@ struct PaywallFourView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
-        .onChange(of: isFreeTrialEnabled, initial: false) { _, newValue in
-            // якщо включили trial, а був обраний річний – перемикаємо на weekly
-            if newValue, viewModel.selectedPlan == .yearly {
-                viewModel.selectedPlan = .weekly
-            }
-        }
-        .onChange(of: viewModel.selectedPlan) { _, newPlan in
-            switch newPlan {
-            case .weekly:
-                isFreeTrialEnabled = true
-            case .yearly:
-                isFreeTrialEnabled = false
-            }
-        }
+//        .onChange(of: isFreeTrialEnabled, initial: false) { _, newValue in
+//            // якщо включили trial, а був обраний річний – перемикаємо на weekly
+//            if newValue, viewModel.selectedPlan == .yearly {
+//                viewModel.selectedPlan = .weekly
+//            }
+//        }
+//        .onChange(of: viewModel.selectedPlan) { _, newPlan in
+//            switch newPlan {
+//            case .weekly:
+//                isFreeTrialEnabled = true
+//            case .yearly:
+//                isFreeTrialEnabled = false
+//            }
+//        }
         
         
         .sheet(item: $webViewURL) { url in

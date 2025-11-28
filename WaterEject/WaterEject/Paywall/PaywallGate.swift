@@ -62,12 +62,16 @@ final class PaywallGate: ObservableObject {
 //    }
     
     func assignedVariant() -> PaywallVariant {
-        // читаємо закріплений варіант із UserDefaults
+        // 0) Якщо ми знаємо останній онборд — беремо той самий варіант, що й там
+        if let tag = OnboardTag.lastFromUserDefaults() {
+            return PaywallAB.shared.onboardingPaywallVariant(for: tag)
+        }
+
+        // 1) Фолбек — як було раніше: читаємо paywall_variant із UserDefaults
         if let raw = UserDefaults.standard.string(forKey: variantKey),
            let v = PaywallVariant(rawValue: raw) {
             return v
         } else {
-            // якщо ще не було – фіксуємо через PaywallAB.variant()
             let v = PaywallAB.shared.variant()
             UserDefaults.standard.set(v.rawValue, forKey: variantKey)
             return v

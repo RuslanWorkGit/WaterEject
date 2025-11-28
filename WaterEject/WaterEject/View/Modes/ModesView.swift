@@ -247,26 +247,26 @@ struct ModesView: View {
             }
         }) { variant in
             switch variant {
-            case .A:
-                PaywallFirstView(onFinish: {
-                    paywallGate.dismissPaywall()
-                    Task {
-                        if let pending = pendingMode, await paywallGate.isPro() {
-                            onStart(pending)
-                            pendingMode = nil
-                        }
-                    }
-                })
-            case .B:
-                PaywallSecondView(onFinish: {
-                    paywallGate.dismissPaywall()
-                    Task {
-                        if let pending = pendingMode, await paywallGate.isPro() {
-                            onStart(pending)
-                            pendingMode = nil
-                        }
-                    }
-                })
+//            case .A:
+//                PaywallFirstView(onFinish: {
+//                    paywallGate.dismissPaywall()
+//                    Task {
+//                        if let pending = pendingMode, await paywallGate.isPro() {
+//                            onStart(pending)
+//                            pendingMode = nil
+//                        }
+//                    }
+//                })
+//            case .B:
+//                PaywallSecondView(onFinish: {
+//                    paywallGate.dismissPaywall()
+//                    Task {
+//                        if let pending = pendingMode, await paywallGate.isPro() {
+//                            onStart(pending)
+//                            pendingMode = nil
+//                        }
+//                    }
+//                })
             case .third:
                 PaywallThirdView(onFinish: {
                     paywallGate.dismissPaywall()

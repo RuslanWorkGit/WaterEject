@@ -128,10 +128,10 @@ struct StartView: View {
                         }
         }) { variant in
             switch variant {
-            case .A:
-                PaywallFirstView(onFinish: { paywallGate.dismissPaywall() })
-            case .B:
-                PaywallSecondView(onFinish: { paywallGate.dismissPaywall() })
+//            case .A:
+//                PaywallFirstView(onFinish: { paywallGate.dismissPaywall() })
+//            case .B:
+//                PaywallSecondView(onFinish: { paywallGate.dismissPaywall() })
             case .third:
                 PaywallThirdView(onFinish: { paywallGate.dismissPaywall() })
             case .fourth:

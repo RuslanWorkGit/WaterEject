@@ -14,8 +14,8 @@ import SwiftUI
 enum PaywallVariant: String, Identifiable {
     case third    = "third"  // наш основний
     case fourth   = "fourth"  // НОВИЙ PaywallFourView
-    case A        = "A"
-    case B        = "B"
+//    case A        = "A"
+//    case B        = "B"
     
     var id: String { rawValue }
 }
@@ -25,7 +25,7 @@ final class PaywallAB {
     
     private init() {
         let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 1800 // на проді зроби 3600+
+        settings.minimumFetchInterval = 0 // на проді зроби 3600+
         rc.configSettings = settings
         rc.setDefaults([
             "paywall_share_A": 50 as NSObject,   // якщо колись повернешся до спліта
@@ -57,8 +57,8 @@ final class PaywallAB {
             return rc["paywall3_enabled"].boolValue
         case .fourth:
             return rc["paywall4_enabled"].boolValue
-        case .A, .B:
-            return true
+//        case .A, .B:
+//            return true
         }
     }
     
@@ -140,11 +140,11 @@ final class PaywallAB {
                 )
             )
 
-        case .A, .B:
-            // якщо колись захочеш ще варіанти – тут можна розширити
-            return AnyView(
-                PaywallStubView(title: "Paywall A/B (stub)", onClose: onFinish)
-            )
+//        case .A, .B:
+//            // якщо колись захочеш ще варіанти – тут можна розширити
+//            return AnyView(
+//                PaywallStubView(title: "Paywall A/B (stub)", onClose: onFinish)
+//            )
         }
     }
 
@@ -163,14 +163,15 @@ final class PaywallAB {
     private func parseForcedVariant(_ s: String) -> PaywallVariant? {
         let t = s.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         switch t {
-        case "A":      return .A
-        case "B":      return .B
+//        case "A":      return .A
+//        case "B":      return .B
         case "THIRD", "C", "PAYWALL3": return .third
         case "FOURTH", "PAYWALL4", "D":      // ⬅️ додали
             return .fourth
         default:       return nil
         }
     }
+    
     func variant() -> PaywallVariant {
         // 1) Якщо у RC заданий форс — він має ПРІОРИТЕТ над кешем
         if let forced = parseForcedVariant(rc["paywall_force"].stringValue) {
@@ -190,11 +191,11 @@ final class PaywallAB {
         let rawShare = rc["paywall_share_A"].numberValue.intValue
         let shareA = min(max(rawShare, 0), 100)
         let bucket = abs(stableUserID().hashValue) % 100
-        let v: PaywallVariant = (bucket < shareA) ? .A : .B
+        //let v: PaywallVariant = (bucket < shareA) ? .A : .B
         
-        UserDefaults.standard.set(v.rawValue, forKey: storageKey)
-        applyTracking(v)
-        return v
+//        UserDefaults.standard.set(v.rawValue, forKey: storageKey)
+//        applyTracking(v)
+        return .fourth
     }
     
     
@@ -207,10 +208,10 @@ final class PaywallAB {
             return AnyView(
                 PaywallFourView(onFinish: onFinish)
             )
-        case .A:
-            return AnyView(PaywallStubView(title: "Paywall A (stub)", onClose: onFinish))
-        case .B:
-            return AnyView(PaywallStubView(title: "Paywall B (stub)", onClose: onFinish))
+//        case .A:
+//            return AnyView(PaywallStubView(title: "Paywall A (stub)", onClose: onFinish))
+//        case .B:
+//            return AnyView(PaywallStubView(title: "Paywall B (stub)", onClose: onFinish))
         }
     }
 }

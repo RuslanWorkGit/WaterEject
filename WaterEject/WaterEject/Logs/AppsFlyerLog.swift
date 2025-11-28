@@ -13,7 +13,6 @@ enum AFEvent: String {
   case install, start_app, subscribe_cr, subscription_started,
        subscription_renewed, subscription_cancelled,
        subscription_refunded, subscription_expired,
-       trial_started, trial_converted, trial_cancelled,
        billing_issue_detected, product_change,
        purch, non_subscription_purchase
 }
