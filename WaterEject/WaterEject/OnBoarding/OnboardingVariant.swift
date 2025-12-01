@@ -21,6 +21,7 @@ enum OnboardingVariant: String, Identifiable, CaseIterable {
     case F = "Onb_7" // OnboardingFlowViewSeven
     case G = "Onb_8" // OnboardAnimationView
     case H = "Onb_9" // OnboardAnimationView
+    case J = "Onb_3_1" // OnboardingFlowViewOne
     
     var id: String { rawValue }
 }
@@ -38,6 +39,7 @@ final class OnboardingAB {
                 
                 // 🔹 прапорці для кожного онборду
                 "Onb_4_enabled": true as NSObject,
+                "Onb_3_1_enabled": true as NSObject,
                 "Onb_3_2_enabled": true as NSObject,
                 "Onb_3_3_enabled": true as NSObject,
                 "Onb_5_enabled": true as NSObject,
@@ -112,30 +114,6 @@ final class OnboardingAB {
             return v
         }
     
-//    func variant() -> OnboardingVariant {
-//        // 1) кеш у UserDefaults
-//        if let raw = UserDefaults.standard.string(forKey: storageKey),
-//           let v = OnboardingVariant(rawValue: raw) {
-//            applyTracking(v)
-//            return v
-//        }
-//        
-//        // 2) форс через RC (залишаємо)
-//        if let forced = OnboardingVariant(rawValue: rc["onb_force"].stringValue) {
-//            UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
-//            applyTracking(forced)
-//            return forced
-//        }
-//        
-//        // 3) рівномірний спліт по всіх варіантах
-//        let all = OnboardingVariant.allCases
-//        let bucket = abs(stableUserID().hashValue) % all.count
-//        let v = all[bucket]
-//        
-//        UserDefaults.standard.set(v.rawValue, forKey: storageKey)
-//        applyTracking(v)
-//        return v
-//    }
     
     // Повертаємо конкретний флоу
     func assignedOnboardingView() -> AnyView {
@@ -163,6 +141,8 @@ final class OnboardingAB {
             return AnyView(OnboardAnimationView())
         case .H:
             return AnyView(OnboardingFlowViewNine())
+        case .J:
+            return AnyView(OnboardingFlowViewOne())
         }
     }
 }

@@ -132,7 +132,7 @@ final class PaywallViewModel: ObservableObject {
                 
 
                 
-                AF.log(.subscribe_cr, [
+                AF.log(.subscribe, [
                   "af_revenue": price,               // Double
                   "af_currency": currency ?? "USD",
                   "af_content_id": p.productIdentifier,

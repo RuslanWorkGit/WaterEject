@@ -171,21 +171,34 @@ struct OnboardingFlowViewOne: View {
         case .women:
             WomenOnboardView(action: { goTo(.paywall, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
         case .paywall:
-
-            PaywallThirdView(
-                    onFinish: finishOnboarding,
-                    onboardId: onboardId,
-                    startDelay: slideDuration + 0.00,   // 0.55 s
-                    summaryTag: .v31,
-                    stepsVisited: stepsVisited
-                    
-                )
-            .onAppear {
-                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
-                    paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v31)      // якщо зберігаєш прогрес
-                
-            }
+            
+            PaywallAB.shared
+                   .onboardingPaywallView(
+                       for: .v31,                       // тег онборду (Onbord_v_3.3)
+                       onFinish: finishOnboarding,
+                       startDelay: slideDuration + 0.0,
+                       stepsVisited: stepsVisited
+                   )
+                   .onAppear {
+                       paywallShown = true
+                       persist(tag: .v31)
+                   }
+            
+//
+//            PaywallThirdView(
+//                    onFinish: finishOnboarding,
+//                    onboardId: onboardId,
+//                    startDelay: slideDuration + 0.00,   // 0.55 s
+//                    summaryTag: .v31,
+//                    stepsVisited: stepsVisited
+//                    
+//                )
+//            .onAppear {
+//                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+//                    paywallShown = true        // <-- тут, а не вище
+//                    persist(tag: .v31)      // якщо зберігаєш прогрес
+//                
+//            }
         }
     }
 

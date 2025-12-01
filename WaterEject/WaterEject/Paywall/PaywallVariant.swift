@@ -25,7 +25,7 @@ final class PaywallAB {
     
     private init() {
         let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 0 // на проді зроби 3600+
+        settings.minimumFetchInterval = 1800 // на проді зроби 3600+
         rc.configSettings = settings
         rc.setDefaults([
             "paywall_share_A": 50 as NSObject,   // якщо колись повернешся до спліта
@@ -64,7 +64,7 @@ final class PaywallAB {
     
     private func primaryOnboardingVariant(for tag: OnboardTag) -> PaywallVariant {
         switch tag {
-        case .v32, .v33, .v41:        // OnboardingFlowViewTwo / Three
+        case .v31, .v32, .v33, .v41:        // OnboardingFlowViewTwo / Three
             return .third       // старий пейвол основний
         case .v5, .v6, .v7, .v8, .v9: // нові флоу 5/6/7/8
             return .fourth      // новий пейвол основний

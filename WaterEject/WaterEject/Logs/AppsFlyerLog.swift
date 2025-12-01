@@ -10,7 +10,7 @@ import RevenueCat
 import AppsFlyerLib
 
 enum AFEvent: String {
-  case install, start_app, subscribe_cr, subscription_started,
+  case install, start_app, subscribe, subscription_started,
        subscription_renewed, subscription_cancelled,
        subscription_refunded, subscription_expired,
        billing_issue_detected, product_change,
