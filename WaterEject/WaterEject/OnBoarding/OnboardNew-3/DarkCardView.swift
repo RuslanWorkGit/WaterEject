@@ -31,7 +31,7 @@ struct DarkCardView: View {
     ]
     let action: () -> Void
     private func handleCTA() {
-       
+        guard !isAnimating else { return }
         //anim()
         if isLastCard {
             action()
@@ -42,6 +42,7 @@ struct DarkCardView: View {
     }
     @State private var dragOffset: CGSize = .zero
     @State private var showText: Bool = true
+    @State private var isAnimating = false
 //    @State private var topCardIndex: Int = 0
 //    @State private var colorIndex: Int = 0
     
@@ -118,7 +119,7 @@ struct DarkCardView: View {
                     .padding(.vertical, 12)
                     .background(
                         Capsule()
-                            .fill(cards[topCardIndex])     // кольори можна лишити тільки для бейджа
+                            .fill(cards[min(topCardIndex, cards.count - 1)])    // кольори можна лишити тільки для бейджа
                     )
                     .opacity(showText ? 1 : 0)
                     //.padding(.top, 220)
@@ -127,47 +128,12 @@ struct DarkCardView: View {
             }
         }
         .contentShape(Rectangle())
-//        .onTapGesture {
-//            let delay: CGFloat = 0.4        // затримка як у жесті
-//            let targetOffset = height * -1.33  // куди "вилітає" картка вправо
-//            
-//            withAnimation(.smooth(duration: 0.5)) {
-//                showText = false
-//               
-//            }
-//            
-//            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-//                withAnimation(.smooth(duration: 0.8)) {
-//                    if colorIndex != 2 {
-//                        colorIndex += 1
-//                    } else {
-//                        colorIndex = 0
-//                    }
-//                    showText = true
-//                    
-//                }
-//            }
-//
-//            // 1) виносимо верхню картку вправо
-//            withAnimation(.smooth(duration: 0.7)) {
-//                dragOffset.height = targetOffset
-//               
-//            }
-//
-//            // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
-//            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-//                withAnimation(.smooth(duration: 0.8)) {
-//                    topCardIndex = (topCardIndex + 1) % cards.count
-//                    dragOffset = .zero
-//                    
-//                    
-//                }
-//            }
-//        }
+
 
     }
     
     func anim() {
+        isAnimating = true
         let delay: CGFloat = 0.45        // затримка як у жесті
         let targetOffset = height * -1.33  // куди "вилітає" картка вправо
         
@@ -202,8 +168,9 @@ struct DarkCardView: View {
         // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             withAnimation(.smooth(duration: 0.8)) {
-                topCardIndex += 1
+                topCardIndex = (topCardIndex + 1) % cards.count
                 dragOffset = .zero
+                isAnimating = false
                 
                 
             }
