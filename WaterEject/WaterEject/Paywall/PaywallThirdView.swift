@@ -89,7 +89,8 @@ struct PaywallThirdView: View {
                         status: status,
                         plan: status == .success ? plan.analyticsValue : nil,
                         paywallId: "paywall_v_3.0",
-                        onboard: onboardTag)
+                        onboard: onboardTag,
+                        entryPoint: "modes")
 
                 }
             }

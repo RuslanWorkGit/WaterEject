@@ -75,7 +75,9 @@ struct PaywallFourView: View {
                     status: status,
                     plan: status == .success ? plan.analyticsValue : nil,
                     paywallId: "paywall_v_4.0",
-                    onboard: onboardTag)
+                    onboard: onboardTag,
+                    entryPoint: "modes"
+                )
                 
             }
         }
