@@ -27,8 +27,8 @@ final class RCDelegateProxy: NSObject, PurchasesDelegate {
 
 // MARK: - AppDelegate
 final class AppDelegate: NSObject, UIApplicationDelegate {
-    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
-    private let appleAppID      = "6749094272" // без префікса "id"
+//    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
+//    private let appleAppID      = "6749094272" // без префікса "id"
     
     private var lastAFStartTs: TimeInterval = 0
 
@@ -57,8 +57,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
         // 1) Конфігурація AppsFlyer 
         let af = AppsFlyerLib.shared()
-        af.appsFlyerDevKey = appsFlyerDevKey
-        af.appleAppID = appleAppID
+//        af.appsFlyerDevKey = appsFlyerDevKey
+//        af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
         #if DEBUG
         af.isDebug = false

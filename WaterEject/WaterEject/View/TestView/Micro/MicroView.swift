@@ -30,6 +30,9 @@ struct MicroView: View {
         
     }
     private let exitDuration: Double = 0.35
+    
+    @State private var pendingSelectTest = false
+    @EnvironmentObject private var paywallGate: PaywallGate
 
     var body: some View {
         ZStack {
@@ -123,7 +126,18 @@ struct MicroView: View {
             
             HStack {
                 Button {
-                    viewModel.openSheetAndStart()
+                    Task {
+                        // спочатку пробуємо вимагати Pro / показати paywall
+                        let allowed = await paywallGate.requireProOrPresentPaywall(context: .testTab) // або .testTab, якщо маєш такий case
+                        if allowed {
+                            // вже Pro → просто переходимо на вкладку
+                            viewModel.openSheetAndStart()
+                        } else {
+                            // чекаємо результату paywall
+                            pendingSelectTest = true
+                        }
+                    }
+                    
                 } label: {
                     Text("Test Microphone")
                         .font(.system(size: 16, weight: .semibold))
@@ -168,6 +182,27 @@ struct MicroView: View {
             Task {
                 await viewModel.loadRecordings()
                 viewModel.canContinue = false    // щоразу дозволяємо зробити 1 новий запис
+            }
+        }
+        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
+            Task {
+                let isPro = await paywallGate.isPro()
+                if isPro && pendingSelectTest {
+                    viewModel.openSheetAndStart()
+                }
+                pendingSelectTest = false
+                paywallGate.dismissPaywall()
+            }
+        }) { variant in
+            switch variant {
+            case .third:
+                PaywallThirdView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            case .fourth:
+                PaywallFourView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
             }
         }
     }

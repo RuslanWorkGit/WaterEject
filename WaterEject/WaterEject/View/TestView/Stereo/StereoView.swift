@@ -28,6 +28,9 @@ struct StereoView: View {
     }
     private let exitDuration: Double = 0.35
     
+    @State private var pendingSelectTest = false
+    @EnvironmentObject private var paywallGate: PaywallGate
+    
     var body: some View {
         VStack {
             HStack(spacing: 8) {
@@ -45,11 +48,23 @@ struct StereoView: View {
             
             HStack {
                 Button {
-                    if viewModel.isPlaying {
-                        viewModel.pause()
-                    } else {
-                        viewModel.playTest(leftOn: isLeftOn, rightOn: isRightOn)
+                    Task {
+                        // спочатку пробуємо вимагати Pro / показати paywall
+                        let allowed = await paywallGate.requireProOrPresentPaywall(context: .testTab) // або .testTab, якщо маєш такий case
+                        if allowed {
+                            // вже Pro → просто переходимо на вкладку
+                            if viewModel.isPlaying {
+                                viewModel.pause()
+                            } else {
+                                viewModel.playTest(leftOn: isLeftOn, rightOn: isRightOn)
+                            }
+                        } else {
+                            // чекаємо результату paywall
+                            pendingSelectTest = true
+                        }
                     }
+
+                   
                 } label: {
                     Text(viewModel.isPlaying ? "Pause" : "Start Stereo")
                         .font(.system(size: 16, weight: .semibold))
@@ -95,6 +110,31 @@ struct StereoView: View {
             viewModel.updateRouting(leftOn: isLeftOn, rightOn: isRightOn)
         }
         .onDisappear { viewModel.stop() }
+        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
+            Task {
+                let isPro = await paywallGate.isPro()
+                if isPro && pendingSelectTest {
+                    if viewModel.isPlaying {
+                        viewModel.pause()
+                    } else {
+                        viewModel.playTest(leftOn: isLeftOn, rightOn: isRightOn)
+                    }
+                }
+                pendingSelectTest = false
+                paywallGate.dismissPaywall()
+            }
+        }) { variant in
+            switch variant {
+            case .third:
+                PaywallThirdView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            case .fourth:
+                PaywallFourView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            }
+        }
     }
 }
 

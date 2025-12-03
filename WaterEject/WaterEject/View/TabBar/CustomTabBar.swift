@@ -11,12 +11,12 @@ struct CustomTabBarContainerView<Content: View>: View {
     @Binding var selectedTab: TabBarTab
     @EnvironmentObject private var tabBarState: TabBarState   // ⟵ додали
     let content: Content
-
+    
     init(selectedTab: Binding<TabBarTab>, @ViewBuilder content: () -> Content) {
         self._selectedTab = selectedTab
         self.content = content()
     }
-
+    
     private var shouldHide: Bool {
         tabBarState.isHidden || selectedTab == .test            // ⟵ можна лишити/прибрати .test
     }
@@ -25,7 +25,7 @@ struct CustomTabBarContainerView<Content: View>: View {
         ZStack(alignment: .bottom) {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-
+            
             CustomTabBar(selectedTab: $selectedTab)
                 .offset(y: shouldHide ? 120 : 0)                 // ⟵ ховаємо вниз
                 .opacity(shouldHide ? 0 : 1)
@@ -44,9 +44,7 @@ enum TabBarTab {
 
 struct CustomTabBar: View {
     @Binding var selectedTab: TabBarTab
-    @State private var pendingSelectTest = false
-    @EnvironmentObject private var paywallGate: PaywallGate
-
+    
     var body: some View {
         HStack(spacing: 0) {
             TabBarButton(
@@ -57,30 +55,20 @@ struct CustomTabBar: View {
                 selectedTab = .home
             }
             .frame(minWidth: 0, maxWidth: .infinity)
-
-
-
+            
+            
+            
             TabBarButton(
                 icon: "gauge.open.with.lines.needle.33percent", // Для Test
                 label: "Test",
                 isSelected: selectedTab == .test
             ) {
-                Task {
-                                    // спочатку пробуємо вимагати Pro / показати paywall
-                                    let allowed = await paywallGate.requireProOrPresentPaywall(context: .testTab) // або .testTab, якщо маєш такий case
-                                    if allowed {
-                                        // вже Pro → просто переходимо на вкладку
-                                        selectedTab = .test
-                                    } else {
-                                        // чекаємо результату paywall
-                                        pendingSelectTest = true
-                                    }
-                                }
+                selectedTab = .test
             }
             .frame(minWidth: 0, maxWidth: .infinity)
             
-
-
+            
+            
             TabBarButton(
                 icon: "gearshape", // Для Test
                 label: "Setting",
@@ -89,7 +77,7 @@ struct CustomTabBar: View {
                 selectedTab = .setting
             }
             .frame(minWidth: 0, maxWidth: .infinity)
-
+            
         }
         .padding(.horizontal, 26)
         .padding(.vertical, 16)
@@ -97,40 +85,11 @@ struct CustomTabBar: View {
             Color(red: 35/255, green: 37/255, blue: 41/255)
                 .ignoresSafeArea(.container, edges: .bottom)
         )
-        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
-                    Task {
-                        let isPro = await paywallGate.isPro()
-                        if isPro && pendingSelectTest {
-                            selectedTab = .test
-                        }
-                        pendingSelectTest = false
-                        paywallGate.dismissPaywall()
-                    }
-        }) { variant in
-            switch variant {
-//            case .A:
-//                PaywallFirstView(onFinish: {
-//                    paywallGate.dismissPaywall()
-//                })
-//            case .B:
-//                PaywallSecondView(onFinish: {
-//                    paywallGate.dismissPaywall()
-//                })
-            case .third:
-                PaywallThirdView(onFinish: {
-                    paywallGate.dismissPaywall()
-                })
-            case .fourth:
-                PaywallFourView(onFinish: {
-                    paywallGate.dismissPaywall()
-                })
-            }
-        }
-                    
-                
+        
+        
     }
     
-
+    
 }
 
 struct TabBarButton: View {
@@ -138,7 +97,7 @@ struct TabBarButton: View {
     let label: String
     let isSelected: Bool
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             VStack(spacing: 6) {

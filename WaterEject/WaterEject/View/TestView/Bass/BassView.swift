@@ -27,6 +27,9 @@ struct BassView: View {
     }
     private let exitDuration: Double = 0.35
     
+    @State private var pendingSelectTest = false
+    @EnvironmentObject private var paywallGate: PaywallGate
+    
     var body: some View {
         
         VStack(spacing: 20) {
@@ -84,7 +87,20 @@ struct BassView: View {
                         title: clip.title,
                         isPlaying: vm.isPlaying(clip),
                         isFinished: vm.isFinished(clip),
-                        action: { vm.togglePlay(clip) }
+                        action: {
+                           
+                            Task {
+                                // спочатку пробуємо вимагати Pro / показати paywall
+                                let allowed = await paywallGate.requireProOrPresentPaywall(context: .testTab)
+                                if allowed {
+                                    // вже Pro → просто переходимо на вкладку
+                                    vm.togglePlay(clip)
+                                } else {
+                                    // чекаємо результату paywall
+                                    pendingSelectTest = true
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -119,6 +135,28 @@ struct BassView: View {
             withAnimation(.easeOut(duration: 0.35)) { appearScreen = true }
         }
         .onDisappear { vm.stop() }
+        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
+            Task {
+                let isPro = await paywallGate.isPro()
+                if isPro && pendingSelectTest {
+                   // vm.togglePlay(clip)
+                }
+                pendingSelectTest = false
+                paywallGate.dismissPaywall()
+            }
+        }) { variant in
+            switch variant {
+            case .third:
+                PaywallThirdView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            case .fourth:
+                PaywallFourView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
+            }
+        }
+
         
         
     }
