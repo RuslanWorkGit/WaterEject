@@ -173,9 +173,11 @@ struct WaterEjectApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(coordinator)
+            SpecialOfferView(onFinish: {print("hell")}, onboardId: "1")
                 .environmentObject(PaywallGate.shared)
+//            RootView()
+//                .environmentObject(coordinator)
+//                .environmentObject(PaywallGate.shared)
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             switch newPhase {

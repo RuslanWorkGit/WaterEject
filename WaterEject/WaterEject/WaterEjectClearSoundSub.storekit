@@ -24,7 +24,7 @@
     "_developerTeamID" : "LBA86YKHYN",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 786474152.102139,
+    "_lastSynchronizedDate" : 786486635.19218004,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
@@ -98,6 +98,40 @@
           "productID" : "kyryloVoinov.WaterEject.subscription.weekly",
           "recurringSubscriptionPeriod" : "P1W",
           "referenceName" : "Weekly Premium",
+          "subscriptionGroupID" : "21754724",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6756081159",
+          "introductoryOffer" : {
+            "displayPrice" : "2.99",
+            "internalID" : "76AEBBF2",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "payAsYouGo",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Grants Pro access to user",
+              "displayName" : "Pro Sub",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly Premium Offer",
           "subscriptionGroupID" : "21754724",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
