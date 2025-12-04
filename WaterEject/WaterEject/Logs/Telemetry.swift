@@ -446,6 +446,27 @@ extension Telemetry {
             Analytics.logEvent("purchase", parameters: ["value": v, "currency": cur]) // revenue
         }
     }
+    
+//    func specialOfferAction(placewhereBuy: String?) {
+//        
+//        var p = baseParams()
+//        if let placewhereBuy { p["place_where_buy"] = placewhereBuy }  // зв’язок з онбордом
+//        
+//        logRaw("Special_offer_buy", params: p)
+//
+//    
+//    }
+    
+
+    func specialOfferBuy(placewhereBuy: String?) {
+        
+        var p = baseParams()
+        if let placewhereBuy { p["place_where_buy"] = placewhereBuy }  // зв’язок з онбордом
+        
+        logRaw("Special_offer_buy", params: p)
+
+    
+    }
 }
 
 extension Telemetry {

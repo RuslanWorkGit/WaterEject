@@ -17,35 +17,61 @@ final class AppCoordinator: ObservableObject {
         case paywall
         case onboarding
         case mainTabbar
+        case specialOfferFromPush
     }
 
     
     @Published var currentScreen: Screen = .boot
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
-//    @AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
     
-    init() {
-        // Якщо користувач не бачив онбординг — показати його, інакше Home
-        Task { [weak self] in
-            guard let self else { return }
-            if await PaywallGate.shared.isPro() {
-                self.currentScreen = .mainTabbar
-                return
-            }
-            if !hasSeenOnboarding /*|| self.shouldResurfaceOnboarding() */{
-                self.currentScreen = .onboarding
-            } else {
-                self.currentScreen = .paywall
-            }
-        }
-    }
+    private var launchedFromPush = false
     
-//    private func shouldResurfaceOnboarding(now: Date = .init()) -> Bool {
-//        guard onbLastShownTS > 0 else { return true } // ще жодного показу – показати
-//        let elapsed = now.timeIntervalSince1970 - onbLastShownTS
-//        return elapsed >= OnboardingConfig.cooldown
+//    init() {
+//        // Якщо користувач не бачив онбординг — показати його, інакше Home
+//        
+//        if UserDefaults.standard.bool(forKey: "launch_special_offer_from_push") {
+//                    currentScreen = .specialOfferFromPush
+//                    return
+//                }
+//        
+//        Task { [weak self] in
+//            guard let self else { return }
+//            if await PaywallGate.shared.isPro() {
+//                self.currentScreen = .mainTabbar
+//                return
+//            }
+//            if !hasSeenOnboarding /*|| self.shouldResurfaceOnboarding() */{
+//                self.currentScreen = .onboarding
+//            } else {
+//                self.currentScreen = .paywall
+//            }
+//        }
 //    }
-//    
+    init() {
+           Task { [weak self] in
+               guard let self else { return }
+
+               // якщо вже прийшов пуш і ми переключились на specialOffer – нічого не робимо
+               guard !self.launchedFromPush, self.currentScreen == .boot else { return }
+
+               if await PaywallGate.shared.isPro() {
+                   // ще раз перевіримо перед записом
+                   guard !self.launchedFromPush, self.currentScreen == .boot else { return }
+                   self.currentScreen = .mainTabbar
+                   return
+               }
+
+               guard !self.launchedFromPush, self.currentScreen == .boot else { return }
+               
+               if !self.hasSeenOnboarding {
+                   self.currentScreen = .onboarding
+               } else {
+                   self.currentScreen = .paywall
+               }
+           }
+       }
+       
+    
     func showOnboarding() {
         if !hasSeenOnboarding {
             currentScreen = .onboarding
@@ -56,6 +82,11 @@ final class AppCoordinator: ObservableObject {
     func showMainTabbar() {
         currentScreen = .mainTabbar
     }
+    
+    func showSpecialOfferFromPush() {
+        launchedFromPush = true
+            currentScreen = .specialOfferFromPush
+        }
     
 
 }

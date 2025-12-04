@@ -14,7 +14,7 @@ struct SpecialOfferView: View {
     @EnvironmentObject private var paywallGate: PaywallGate
     
     let onFinish: () -> Void
-    let onboardId: String?
+    let placeWhereBuy: String?
     
     @State private var sessionId = UUID().uuidString
     @State private var featuresWidth: CGFloat = 0
@@ -26,163 +26,181 @@ struct SpecialOfferView: View {
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
         
-        ZStack {
-            Color.black.ignoresSafeArea()
+        ZStack(alignment: .topTrailing) {
             
-            VStack(spacing: 24) {
+            ZStack {
+                Color.black.ignoresSafeArea()
                 
-                // HEADER
-                VStack(spacing: 8) {
-                    Text("SPECIAL")
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundStyle(.white)
+                VStack(spacing: 24) {
                     
-                    Text("-40%")
-                        .padding(.vertical, 4)
-                        .padding(.horizontal ,8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .fill(Color(red: 207 / 255, green: 68 / 255, blue: 68 / 255))
-                        )
-                        .font(.system(size: 72, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.8))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                    
-                }
-                .padding(.top, 32)
-                
-                GeometryReader { geo in
-                    let screenW = geo.size.width
-                    let pad = max((screenW - featuresWidth) / 2, 16)
-                    
-                    
-                    VStack(spacing: isSmall ? 4 : isLarge ? 8 : 4) {
-                        HorizontalSpecialText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
-                        HorizontalSpecialText(title: "5 pro-level sound tests", image: "gauge.open.with.lines.needle.33percent", isLarge: isLarge)
-                        HorizontalSpecialText(title: "Scientifically proven methods", image: "sparkles", isLarge: isLarge)
-                        HorizontalSpecialText(title: "All future features + No Ads", image: "graduationcap", isLarge: isLarge)
+                    // HEADER
+                    VStack(spacing: 8) {
+                        Text("SPECIAL")
+                            .font(.system(size: 28, weight: .semibold))
+                            .foregroundStyle(.white)
+                        
+                        Text("-40%")
+                            .padding(.vertical, 4)
+                            .padding(.horizontal ,8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                    .fill(Color(red: 207 / 255, green: 68 / 255, blue: 68 / 255))
+                            )
+                            .font(.system(size: 72, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                        
                     }
-                    .fixedSize(horizontal: true, vertical: true)   // важливо: беремо фактичну ширину контенту
-                    .onSizeChange { featuresWidth = $0.width }      // зчитуємо ширину
-                    .padding(.horizontal, pad)
-                    //.frame(width: screenW, alignment: .top)
+                    .padding(.top, 32)
                     
-                    
-                    
-                    //                        .frame(width: screenW, height: geo.size.height, alignment: .top)
-                    
-                    
-                }
-                .frame(height: 110)
-                
-                // TIMER
-                HStack(alignment: .top, spacing: 12) {
-                    TimerBlockView(value: viewModel.hoursText,   label: "Hours")
-                    
-                    Text(":")
-                        .font(.system(size: 28, weight: .bold, design: .monospaced))
-                        .foregroundStyle(.white)
-                        .padding(.top, 12)
-                    
-                    TimerBlockView(value: viewModel.minutesText, label: "Minutes")
-                    
-                    Text(":")
-                        .font(.system(size: 28, weight: .bold, design: .monospaced))
-                        .foregroundStyle(.white)
-                        .padding(.top, 12)
-                    
-                    TimerBlockView(value: viewModel.secondsText, label: "Seconds")
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 50)
-                
-                Spacer()
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Try Water Eject for \(viewModel.weeklyOnlyPrice) per weeek")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundStyle(.white)
-                    
-                    Text("Unlock all feature")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
-                }
-                
-                
-                
-                //Spacer()
-                
-                // CTA
-                VStack(spacing: 12) {
-//                    Button {
-//                        Task { await handleCTA() }
-//                    } label: {
-//                        HStack {
-//                            if viewModel.isPurchasing {
-//                                ProgressView()
-//                                    .tint(.white)
-//                            } else {
-//                                Text("Subscribe Now")
-//                                    .font(.system(size: 17, weight: .semibold))
-//                            }
-//                        }
-//                        .frame(maxWidth: .infinity)
-//                        .padding(.vertical, 16)
-//                        .background(Color(red: 43/255, green: 217/255, blue: 156/255))
-//                        .foregroundStyle(.black)
-//                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-//                    }
-//                    .disabled(viewModel.isPurchasing)
-                    SpecialButton(title: "Subscribe Now") {
-                        Task { await handleCTA() }
+                    GeometryReader { geo in
+                        let screenW = geo.size.width
+                        let pad = max((screenW - featuresWidth) / 2, 16)
+                        
+                        
+                        VStack(spacing: isSmall ? 4 : isLarge ? 8 : 4) {
+                            HorizontalSpecialText(title: "Auto & Manual cleaning modes", image: "slider.vertical.3", isLarge: isLarge)
+                            HorizontalSpecialText(title: "5 pro-level sound tests", image: "gauge.open.with.lines.needle.33percent", isLarge: isLarge)
+                            HorizontalSpecialText(title: "Scientifically proven methods", image: "sparkles", isLarge: isLarge)
+                            HorizontalSpecialText(title: "All future features + No Ads", image: "graduationcap", isLarge: isLarge)
+                        }
+                        .fixedSize(horizontal: true, vertical: true)   // важливо: беремо фактичну ширину контенту
+                        .onSizeChange { featuresWidth = $0.width }      // зчитуємо ширину
+                        .padding(.horizontal, pad)
+                        //.frame(width: screenW, alignment: .top)
+                        
+                        
+                        
+                        //                        .frame(width: screenW, height: geo.size.height, alignment: .top)
+                        
+                        
                     }
-                    .disabled(viewModel.isPurchasing)
+                    .frame(height: 110)
                     
-                    Text("Just \(viewModel.weeklyOnlyPrice), then \(viewModel.weeklyFullPrice) week")
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                    // TIMER
+                    HStack(alignment: .top, spacing: 12) {
+                        TimerBlockView(value: viewModel.hoursText,   label: "Hours")
+                        
+                        Text(":")
+                            .font(.system(size: 28, weight: .bold, design: .monospaced))
+                            .foregroundStyle(.white)
+                            .padding(.top, 12)
+                        
+                        TimerBlockView(value: viewModel.minutesText, label: "Minutes")
+                        
+                        Text(":")
+                            .font(.system(size: 28, weight: .bold, design: .monospaced))
+                            .foregroundStyle(.white)
+                            .padding(.top, 12)
+                        
+                        TimerBlockView(value: viewModel.secondsText, label: "Seconds")
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 50)
                     
-                    HStack(spacing: 36) {
+                    Spacer()
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Try Water Eject for \(viewModel.weeklyOnlyPrice) per weeek")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white)
                         
-                        Button("Terms of Service") {
-                            
-                            webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
-                            
-                        }
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
-                        
-                        Button("Restore") {
-                            Task { await viewModel.restorePurchases() }
-                        }
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
-                        
-                        
-                        Button("Privacy Policy") {
-                            
-                            webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
-                            
-                        }
-                        
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                        Text("Unlock all feature")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
                     }
                     
-//                    Button {
-//                        onFinish()
-//                    } label: {
-//                        Text("Maybe later")
-//                            .font(.system(size: 15, weight: .medium))
-//                            .foregroundStyle(.white.opacity(0.8))
-//                    }
+                    
+                    
+                    //Spacer()
+                    
+                    // CTA
+                    VStack(spacing: 12) {
+                        //                    Button {
+                        //                        Task { await handleCTA() }
+                        //                    } label: {
+                        //                        HStack {
+                        //                            if viewModel.isPurchasing {
+                        //                                ProgressView()
+                        //                                    .tint(.white)
+                        //                            } else {
+                        //                                Text("Subscribe Now")
+                        //                                    .font(.system(size: 17, weight: .semibold))
+                        //                            }
+                        //                        }
+                        //                        .frame(maxWidth: .infinity)
+                        //                        .padding(.vertical, 16)
+                        //                        .background(Color(red: 43/255, green: 217/255, blue: 156/255))
+                        //                        .foregroundStyle(.black)
+                        //                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        //                    }
+                        //                    .disabled(viewModel.isPurchasing)
+                        SpecialButton(title: "Subscribe Now") {
+                            Task { await handleCTA() }
+                        }
+                        .disabled(viewModel.isPurchasing)
+                        
+                        Text("Just \(viewModel.weeklyOnlyPrice), then \(viewModel.weeklyFullPrice) week")
+                            .font(.system(size: 10))
+                            .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                        
+                        HStack(spacing: 36) {
+                            
+                            Button("Terms of Service") {
+                                
+                                webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
+                                
+                            }
+                            .font(.system(size: 10))
+                            .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                            
+                            Button("Restore") {
+                                Task { await viewModel.restorePurchases() }
+                            }
+                            .font(.system(size: 10))
+                            .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                            
+                            
+                            Button("Privacy Policy") {
+                                
+                                webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
+                                
+                            }
+                            
+                            .font(.system(size: 10))
+                            .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                        }
+                        
+                        //                    Button {
+                        //                        onFinish()
+                        //                    } label: {
+                        //                        Text("Maybe later")
+                        //                            .font(.system(size: 15, weight: .medium))
+                        //                            .foregroundStyle(.white.opacity(0.8))
+                        //                    }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
+                    
+                    // terms/restore можна докинути окремо, якщо треба
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 12)
                 
-                // terms/restore можна докинути окремо, якщо треба
             }
+            
+            Button(action: {
+
+                onFinish()
+            }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                    .padding(14)
+            }
+            .padding(.top, 20)
+            .padding(.trailing, 18)
+            
+
         }
         .task {
             await viewModel.loadPricing()
@@ -195,18 +213,19 @@ struct SpecialOfferView: View {
     private func handleCTA() async {
         let variant = PaywallAB.shared.variant().rawValue
         let entry   = paywallGate.currentContext?.rawValue ?? "special_offer"
-    
+        
         
         await viewModel.buySpecialOffer(
             variant: variant,
             entryPoint: entry,
             sessionId: sessionId,
-            onboardId: onboardId,
+            placeWhereBuy: placeWhereBuy,
             paywallId: paywallId
         )
         
         if viewModel.purchaseSucceeded {
             // можна додати окремий summary-лог, якщо хочеш
+            SpecialOfferNotificationManager.shared.cancelSpecialOffer()
             onFinish()
         }
     }
@@ -304,11 +323,11 @@ struct TimerBlockView: View {
         VStack(spacing: 6) {
             Text(value)
                 .font(.system(size: 32, weight: .bold, design: .monospaced)) // 👈 моноширинний шрифт
-                // або так:
-                // .font(.system(size: 32, weight: .bold))
-                // .monospacedDigit()
+            // або так:
+            // .font(.system(size: 32, weight: .bold))
+            // .monospacedDigit()
                 .foregroundStyle(.black)
-                //.frame(minWidth: 60) // 👈 фіксуємо ширину, щоб блочок не стискався/розтягувався
+            //.frame(minWidth: 60) // 👈 фіксуємо ширину, щоб блочок не стискався/розтягувався
                 .padding(.horizontal, 18)
                 .padding(.vertical, 6)
                 .background(
@@ -376,5 +395,5 @@ extension View {
 
 
 #Preview {
-    SpecialOfferView(onFinish: {print("hell")}, onboardId: "1")
+    SpecialOfferView(onFinish: {print("hell")}, placeWhereBuy: "1")
 }

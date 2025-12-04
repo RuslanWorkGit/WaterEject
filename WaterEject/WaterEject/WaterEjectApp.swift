@@ -15,7 +15,7 @@ import RevenueCat
 import Firebase
 import FirebaseFirestore
 import AppsFlyerLib
-
+import UserNotifications
 
 
 final class RCDelegateProxy: NSObject, PurchasesDelegate {
@@ -26,7 +26,7 @@ final class RCDelegateProxy: NSObject, PurchasesDelegate {
 }
 
 // MARK: - AppDelegate
-final class AppDelegate: NSObject, UIApplicationDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 //    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
 //    private let appleAppID      = "6749094272" // без префікса "id"
     
@@ -35,6 +35,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     // 👇 додано: прапорці для контролю start_app
     var sentStartAppThisForeground = false
     var isColdLaunch = true
+    var isProUser: Bool = false
+    weak var coordinator: AppCoordinator?
 
     func application(
         _ application: UIApplication,
@@ -50,10 +52,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             do {
                 let info = try await Purchases.shared.customerInfo()
                 SubscriptionMonitor.shared.process(customerInfo: info)
+                
+                let active = info.entitlements["pro_user"]?.isActive == true
+                        self.isProUser = active
             } catch {
                 print("CustomerInfo fetch error:", error.localizedDescription)
             }
         }
+
 
         // 1) Конфігурація AppsFlyer 
         let af = AppsFlyerLib.shared()
@@ -68,8 +74,45 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
         // 3) Одноразовий кастомний івент "install" — ПІСЛЯ configure()
         sendInstallIfNeeded()
+        
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+
+        // 🔹 2. Запит дозволу на локальні пуші (можеш перенести після онбордингу, якщо хочеш)
+        SpecialOfferNotificationManager.shared.requestAuthorization()
 
         return true
+    }
+    
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let request = response.notification.request
+        let userInfo = request.content.userInfo
+        let id = request.identifier
+
+        // наш локальний оффер-пуш
+        let isSpecialById       = (id == LocalNotificationId.specialOffer)
+        let isSpecialByUserInfo = (userInfo["special_offer"] as? Bool) == true
+
+        if isSpecialById || isSpecialByUserInfo {
+            // 1) для холодного запуску — флаг в UserDefaults
+            UserDefaults.standard.set(true, forKey: "launch_special_offer_from_push")
+
+            // 2) якщо апка вже жива — кинемо подію через NotificationCenter
+            NotificationCenter.default.post(name: .specialOfferPushTapped, object: nil)
+
+            // 3) extra-safety: якщо координатор уже під’єднаний — можна одразу показати
+            if let coordinator {
+                Task { @MainActor in
+                    coordinator.showSpecialOfferFromPush()
+                }
+            }
+        }
+
+        completionHandler()
     }
     
 
@@ -111,6 +154,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         Task { @MainActor in
             if let info = try? await Purchases.shared.customerInfo() {
                 SubscriptionMonitor.shared.process(customerInfo: info)
+                
+                let active = info.entitlements["pro_user"]?.isActive == true
+                           self.isProUser = active
             }
         }
     }
@@ -173,15 +219,21 @@ struct WaterEjectApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SpecialOfferView(onFinish: {print("hell")}, onboardId: "1")
-                .environmentObject(PaywallGate.shared)
-//            RootView()
-//                .environmentObject(coordinator)
+//            SpecialOfferView(onFinish: {print("hell")}, onboardId: "1")
 //                .environmentObject(PaywallGate.shared)
+            RootView()
+                .environmentObject(coordinator)
+                .environmentObject(PaywallGate.shared)
+                .onAppear {
+                                    // 👇 тут з’єднуємо делегат і координатор
+                                    appDelegate.coordinator = coordinator
+                                }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             switch newPhase {
             case .active:
+                SpecialOfferNotificationManager.shared.cancelSpecialOffer()
+                
                 if !appDelegate.sentStartAppThisForeground {
                     let payload: [String: Any] = [
                         "session_kind": appDelegate.isColdLaunch ? "cold" : "warm",
@@ -195,7 +247,18 @@ struct WaterEjectApp: App {
                 }
 
             case .background:
+                
                 appDelegate.sentStartAppThisForeground = false
+                
+                if appDelegate.isProUser {
+                            // якщо Pro — ніяких офферів
+                            SpecialOfferNotificationManager.shared.cancelSpecialOffer()
+                        } else {
+                            // юзер без підписки — плануємо оффер
+                            SpecialOfferNotificationManager.shared.scheduleSpecialOffer(after: 1 * 60)
+                        }
+                
+               // SpecialOfferNotificationManager.shared.scheduleSpecialOffer(after: 1 * 60)
 
             default:
                 break

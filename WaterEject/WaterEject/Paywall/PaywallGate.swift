@@ -80,6 +80,10 @@ final class PaywallGate: ObservableObject {
 
 
     func isPro() async -> Bool {
+        if UserDefaults.standard.bool(forKey: "special_offer_just_purchased") {
+                return true
+            }
+        
         do {
             let info = try await Purchases.shared.customerInfo()
             return info.entitlements[entitlementID]?.isActive == true

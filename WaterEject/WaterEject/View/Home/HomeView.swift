@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import RevenueCat
 
 
 enum Route: Hashable {
@@ -20,35 +21,15 @@ struct HomeView: View {
     @State private var path: [Route] = []
     @State private var didLogExposure = false
     
+    @State private var showSpecialOffer = false
+    @State private var didCheckSpecialOffer = false
+    
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
                 
                 Background()
                 
-//                VStack(spacing: 28) {
-//                    HStack {
-//                        Text("Speaker Cleaner")
-//                            .font(.system(size: 28, weight: .bold))
-//                            .foregroundColor(.white)
-//                        Spacer()
-//                    }
-//                    .padding(.horizontal, 34)
-//                    .padding(.top, 16)
-//                    
-//                    DeviceGridView { device in
-////                        Telemetry.shared.homeDeviceTap(device: device)
-////                                                // 2) лог навігації
-////                        Telemetry.shared.homeNavigateToModes(device: device)
-//                        
-//                        path.append(.modes(device))
-//                        //showModesScreen = true
-//                    }
-//                    
-//                    
-//                    Spacer()
-//                    
-//                }
                 VStack(spacing: 28) {
                     HStack {
                         Text("Speaker Cleaner")
@@ -58,23 +39,23 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 34)
                     .padding(.top, 16)
-
+                    
                     ViewThatFits(in: .vertical) {
                         DeviceGridView(size: 170, onDeviceTap: { device in path.append(.modes(device)) })
                         DeviceGridView(size: 158, onDeviceTap: { device in path.append(.modes(device)) })
                         DeviceGridView(size: 126, onDeviceTap: { device in path.append(.modes(device)) })
                         DeviceGridView(size: 118, onDeviceTap: { device in path.append(.modes(device)) })
                     }
-
+                    
                     Spacer()
                 }
             }
             .safeAreaInset(edge: .bottom) {
-              Color.clear.frame(height: 74) // висота твого таббара
+                Color.clear.frame(height: 74) // висота твого таббара
             }
             
             .onAppear {
-//                Telemetry.shared.homeExposure()
+                //                Telemetry.shared.homeExposure()
                 tabBarState.isHidden = false
             }   // ⟵ сховати
             
@@ -82,8 +63,8 @@ struct HomeView: View {
                 // ховаємо таб-бар лише коли ми НА СТЕКУ Home (є пуш у Modes/Start)
                 tabBarState.isHidden = !newPath.isEmpty
             }
-
-//            .onDisappear { tabBarState.isHidden = true }
+            
+            //            .onDisappear { tabBarState.isHidden = true }
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .modes(let device):
@@ -96,6 +77,26 @@ struct HomeView: View {
                     StartView(device: device, mode: mode)
                 }
             }
+            .task {
+                // щоб не перевіряти декілька разів при реконструкції в’ю
+                guard !didCheckSpecialOffer else { return }
+                didCheckSpecialOffer = true
+                
+                if await shouldShowSpecialOfferOnSecondLaunch() {
+                    await MainActor.run {
+                        showSpecialOffer = true
+                    }
+                }
+            }
+            // 🔽 сам fullScreenCover з SpecialOfferView
+            .fullScreenCover(isPresented: $showSpecialOffer) {
+                SpecialOfferView(
+                    onFinish: { showSpecialOffer = false },
+                    placeWhereBuy: "Buy on second show"
+                )
+                // PaywallGate вже передається як environmentObject з кореня,
+                // додатково нічого не треба
+            }
             
         }
     }
@@ -105,55 +106,47 @@ struct HomeView: View {
     HomeView()
 }
 
-//import SwiftUI
-//
-//struct DeviceButtonView: View {
-//    
-//    let device: CleaningDevice
-//    let action: (CleaningDevice) -> Void
-//    
-//    var body: some View {
-//        Button(action: { action(device) }) {
-//            ZStack {
-//                // Фон та overlay — ВСЕРЕДИНІ Button!
-//                Circle()
-//                    .fill(Color(red: 19 / 255, green: 21 / 255, blue: 23 / 255))
-//                Circle()
-//                    .fill(
-//                        LinearGradient(
-//                            colors: [
-//                                Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.1),
-//                                Color(red: 222 / 255, green: 233 / 255, blue: 255 / 255, opacity: 0.2)
-//                            ],
-//                            startPoint: .top,
-//                            endPoint: .bottom
-//                        )
-//                    )
-//                Circle()
-//                    .stroke(Color.white.opacity(0.25), lineWidth: 2)
-//                    .blur(radius: 0.5)
-//                    .offset(x: 0, y: 1)
-//                    .mask(
-//                        Circle().fill(
-//                            LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
-//                        )
-//                    )
-//                
-//                VStack(spacing: 12) {
-//                    Image(device.imageName)
-//                        .foregroundStyle(.white)
-//                    Text(device.displayName)
-//                        .font(.headline)
-//                        .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
-//                }
-//            }
-//            .frame(width: 150, height: 150)
-//        }
-//        .buttonStyle(.plain) // Щоб не було сірого ефекту system button
-//    }
-//}
+private enum AppDefaultsKeys {
+    static let appOpenCount     = "app_open_count"
+    static let specialOfferShown = "special_offer_shown"
+}
 
-import SwiftUI
+/// Перевірка: чи треба показати SpecialOffer після другого запуску
+private func shouldShowSpecialOfferOnSecondLaunch() async -> Bool {
+    let defaults = UserDefaults.standard
+    
+    // збільшуємо лічильник відкриттів (Прив'язуємося до появи HomeView)
+    let newCount = defaults.integer(forKey: AppDefaultsKeys.appOpenCount) + 1
+    defaults.set(newCount, forKey: AppDefaultsKeys.appOpenCount)
+    
+    // тільки з 2-го запуску
+    guard newCount >= 2 else { return false }
+    
+    // якщо вже показували оффер — більше не чіпаємо
+    if defaults.bool(forKey: AppDefaultsKeys.specialOfferShown) {
+        return false
+    }
+    
+    // перевірка, що юзер ще не Pro
+    do {
+        let info = try await Purchases.shared.customerInfo()
+        let isPro = info.entitlements["pro_user"]?.isActive == true
+        if isPro { return false }
+    } catch {
+        // якщо не змогли отримати info — краще нічого не показувати
+        return false
+    }
+    
+    // тут всі умови виконані → відмічаємо, що оффер вже показали
+    defaults.set(true, forKey: AppDefaultsKeys.specialOfferShown)
+    
+    // 🔽 ТУТ можна скидати лічильник, щоб оффер знову показувався через 2 заходи
+    // defaults.set(0, forKey: AppDefaultsKeys.appOpenCount)
+    
+    return true
+}
+
+
 
 struct DeviceButtonView: View {
     let device: CleaningDevice
@@ -181,8 +174,8 @@ struct DeviceButtonView: View {
                     Image(device.imageName)
                         .resizable()                // ← спочатку
                         .scaledToFit()
-//                        .renderingMode(.template)   // якщо потрібно тинтувати растрову іконку
-//                        .foregroundStyle(.white)    // або .foregroundColor(.white) на iOS 15+
+                    //                        .renderingMode(.template)   // якщо потрібно тинтувати растрову іконку
+                    //                        .foregroundStyle(.white)    // або .foregroundColor(.white) на iOS 15+
                         .frame(height: size * 0.45)
                     
                     Text(device.displayName)
@@ -201,11 +194,11 @@ struct DeviceButtonView: View {
 struct DeviceGridView: View {
     let size: CGFloat
     let onDeviceTap: (CleaningDevice) -> Void
-
+    
     var body: some View {
         VStack(spacing: 32) {
             DeviceButtonView(device: .iPhone,     size: size, action: onDeviceTap)
-
+            
             HStack(spacing: 32) {
                 DeviceButtonView(device: .airPodsPro, size: size, action: onDeviceTap)
                 DeviceButtonView(device: .airPods,    size: size, action: onDeviceTap)
@@ -218,30 +211,6 @@ struct DeviceGridView: View {
     }
 }
 
-
-
-//struct DeviceGridView: View {
-//    let onDeviceTap: (CleaningDevice) -> Void
-//    
-//    var body: some View {
-//        VStack(spacing: 32) {
-//            // Верхній (центральний) елемент
-//            DeviceButtonView(device: .iPhone, action: onDeviceTap)
-//            
-//            // Два ряди по 2 елементи
-//            HStack(spacing: 32) {
-//                DeviceButtonView(device: .airPodsPro, action: onDeviceTap)
-//                DeviceButtonView(device: .airPods, action: onDeviceTap)
-//            }
-//            HStack(spacing: 32) {
-//                DeviceButtonView(device: .airPodsMax, action: onDeviceTap)
-//                DeviceButtonView(device: .speakers, action: onDeviceTap)
-//            }
-//        }
-//        
-//        
-//    }
-//}
 
 extension String: Identifiable {
     public var id: String { self }

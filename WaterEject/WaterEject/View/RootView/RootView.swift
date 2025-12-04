@@ -25,20 +25,37 @@ struct RootView: View {
                     })
                     .onAppear { paywallGate.currentContext = .startViewAuto }
             case .onboarding:
-
                 
-//                OnboardingAB.shared.assignedOnboardingView() // ← ось тут
-//                    .onAppear {
-//                        print("🔥 Onboarding variant =", OnboardingAB.shared.variant().rawValue)
-//                    }
+                
+                //                OnboardingAB.shared.assignedOnboardingView() // ← ось тут
+                //                    .onAppear {
+                //                        print("🔥 Onboarding variant =", OnboardingAB.shared.variant().rawValue)
+                //                    }
                 OnboardingEntryView()
-
+                
             case .mainTabbar:
                 TabBarView()
+                
+            case .specialOfferFromPush:
+                SpecialOfferView(
+                    onFinish: {
+                        // після закриття / успішної покупки
+                        coordinator.showMainTabbar()
+                    },
+                    placeWhereBuy: "Push notification"
+                )
             }
         }
         .onAppear {
-
+            // якщо апку запустили тапом по пушу в killed-стані
+            if UserDefaults.standard.bool(forKey: "launch_special_offer_from_push") {
+                coordinator.showSpecialOfferFromPush()
+                UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .specialOfferPushTapped)) { _ in
+            coordinator.showSpecialOfferFromPush()
+            UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
         }
         .animation(nil, value: coordinator.currentScreen)
     }
@@ -47,7 +64,7 @@ struct RootView: View {
 
 struct OnboardingEntryView: View {
     @State private var isReady = false
-
+    
     var body: some View {
         Group {
             if isReady {
@@ -67,7 +84,7 @@ struct OnboardingEntryView: View {
                     isReady = true
                 }
             }
-
+            
             // 2) фолбек на випадок, якщо мережі нема або RC не відповів
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 if !isReady {

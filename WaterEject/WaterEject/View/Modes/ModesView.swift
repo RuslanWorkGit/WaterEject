@@ -109,7 +109,7 @@ struct CleaningModeCard: View {
                 RoundedRectangle(cornerRadius: 18)
                     .stroke(Color.white.opacity(0.05), lineWidth: 1)
             )
-//            .padding(.horizontal, 24)
+            //            .padding(.horizontal, 24)
             //.padding(.horizontal, isSmall ? 8 : 0)
             .padding(.vertical, 6)
         }
@@ -127,6 +127,7 @@ struct ModesView: View {
     @EnvironmentObject private var paywallGate: PaywallGate
     @EnvironmentObject private var tabBarState: TabBarState
     @Environment(\.dismiss) private var dismiss
+    @State private var showSpecialOffer = false
     
     @State private var pendingMode: CleaningMode?
     let device: CleaningDevice
@@ -195,14 +196,14 @@ struct ModesView: View {
                     
                 }
                 .padding(.top, 32)
-               // .padding(.horizontal, isSmall ? 32 : isLarge ? 4 : 8)
+                // .padding(.horizontal, isSmall ? 32 : isLarge ? 4 : 8)
             }
-//            .padding(.horizontal, 4)
+            //            .padding(.horizontal, 4)
             .contentMargins(.horizontal, isSmall ? 48 : isMini ? 40 : isLarge ? 16 : 32)
             //.contentMargins(.horizontal, 24)
             .scrollIndicators(.never)
         }
-
+        
         .navigationBarBackButtonHidden(true)
         .background(NavigationControllerCoordinator())
         // Тулбар: залишаємо СИСТЕМНУ стрілку назад (зі свайпом),
@@ -215,7 +216,7 @@ struct ModesView: View {
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-//                    Telemetry.shared.modesBackTap(device: device)
+                    //                    Telemetry.shared.modesBackTap(device: device)
                     dismiss()
                 } label: {
                     Image(systemName: "chevron.backward")
@@ -227,28 +228,38 @@ struct ModesView: View {
             }
         }
         .onAppear {
-/*            Telemetry.shared.modesExposure(device: device) */         // ← лог показу екрана
+            /*            Telemetry.shared.modesExposure(device: device) */         // ← лог показу екрана
         }
         // Колір системної стрілки
         .tint(Color(red: 161/255, green: 192/255, blue: 255/255))
-        // Лише стрілка без тексту "Back", якщо доступно (iOS 15+)
+        .fullScreenCover(isPresented: $showSpecialOffer) {
+            SpecialOfferView(
+                onFinish: {
+                    showSpecialOffer = false
+                },
+                placeWhereBuy: "Modes View"
+                
+            )
+            .environmentObject(paywallGate)
+        }
         
         // Пейвол лишається як модалка; після закриття відкриваємо StartView, якщо юзер став Pro
-        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
-            Task {
-                let converted = await paywallGate.isPro()
-                if let pending = pendingMode, await paywallGate.isPro() {
-//                    Telemetry.shared.modesPaywallDismissed(device: device, mode: pending, converted: converted)
-                            
-                    onStart(pending)
-                    pendingMode = nil
-                }
-                paywallGate.dismissPaywall()
-            }
-        }) { variant in
-            switch variant {
-//            case .A:
-//                PaywallFirstView(onFinish: {
+//        .fullScreenCover(item: $paywallGate.presentedVariant, onDismiss: {
+//            Task {
+//                let converted = await paywallGate.isPro()
+//                if let pending = pendingMode, await paywallGate.isPro() {
+//                    //                    Telemetry.shared.modesPaywallDismissed(device: device, mode: pending, converted: converted)
+//                    
+//                    onStart(pending)
+//                    pendingMode = nil
+//                }
+//                paywallGate.dismissPaywall()
+//            }
+//        }) { variant in
+//            switch variant {
+//                
+//            case .third:
+//                PaywallThirdView(onFinish: {
 //                    paywallGate.dismissPaywall()
 //                    Task {
 //                        if let pending = pendingMode, await paywallGate.isPro() {
@@ -257,8 +268,8 @@ struct ModesView: View {
 //                        }
 //                    }
 //                })
-//            case .B:
-//                PaywallSecondView(onFinish: {
+//            case .fourth:
+//                PaywallFourView(onFinish: {
 //                    paywallGate.dismissPaywall()
 //                    Task {
 //                        if let pending = pendingMode, await paywallGate.isPro() {
@@ -267,28 +278,8 @@ struct ModesView: View {
 //                        }
 //                    }
 //                })
-            case .third:
-                PaywallThirdView(onFinish: {
-                    paywallGate.dismissPaywall()
-                    Task {
-                        if let pending = pendingMode, await paywallGate.isPro() {
-                            onStart(pending)
-                            pendingMode = nil
-                        }
-                    }
-                })
-            case .fourth:
-                PaywallFourView(onFinish: {
-                    paywallGate.dismissPaywall()
-                    Task {
-                        if let pending = pendingMode, await paywallGate.isPro() {
-                            onStart(pending)
-                            pendingMode = nil
-                        }
-                    }
-                })
-            }
-        }
+//            }
+//        }
     }
     
     // MARK: - Helpers
@@ -296,14 +287,22 @@ struct ModesView: View {
     private func startIfAllowed(_ mode: CleaningMode) {
         Task {
             pendingMode = mode
-//            Telemetry.shared.modesModeTap(device: device, mode: mode)
+            //            Telemetry.shared.modesModeTap(device: device, mode: mode)
             let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
-            if allowed {
-//                Telemetry.shared.modesStartNavigate(device: device, mode: mode)
-                onStart(mode)          // пушимо StartView через Route у HomeView
-                pendingMode = nil
+            //            if allowed {
+            ////                Telemetry.shared.modesStartNavigate(device: device, mode: mode)
+            //                onStart(mode)          // пушимо StartView через Route у HomeView
+            //                pendingMode = nil
+            //            } else {
+            ////                Telemetry.shared.modesPaywallRequested(device: device, mode: mode)
+            //            }
+            if await paywallGate.isPro() {
+                // якщо вже Pro – просто відкриваємо режим
+                onStart(mode)   // твоя стара логіка
             } else {
-//                Telemetry.shared.modesPaywallRequested(device: device, mode: mode)
+                // якщо не Pro – показуємо SpecialOfferView
+                paywallGate.currentContext = .modesTap
+                showSpecialOffer = true
             }
         }
     }

@@ -147,22 +147,22 @@ final class SpecialOfferViewModel: ObservableObject {
         variant: String,
         entryPoint: String,
         sessionId: String,
-        onboardId: String?,
+        placeWhereBuy: String?,
         paywallId: String      // наприклад "special_offer_v_1.0"
     ) async {
         guard let pkg = weeklyPackage else {
             errorMessage = "Product not found"
-            Telemetry.shared.purchaseResult(
-                variant: variant,
-                status: "error",
-                rcCode: -2,
-                packageId: plan.productID,
-                pricePaid: nil,
-                currency: nil,
-                sessionId: sessionId,
-                onboardId: onboardId,
-                paywallId: paywallId
-            )
+//            Telemetry.shared.purchaseResult(
+//                variant: variant,
+//                status: "error",
+//                rcCode: -2,
+//                packageId: plan.productID,
+//                pricePaid: nil,
+//                currency: nil,
+//                sessionId: sessionId,
+//                onboardId: onboardId,
+//                paywallId: paywallId
+//            )
             return
         }
         
@@ -178,14 +178,14 @@ final class SpecialOfferViewModel: ObservableObject {
         ?? 0
         let currency = p.currencyCode
         
-        Telemetry.shared.purchaseStart(
-            variant: variant,
-            packageId: p.productIdentifier,
-            offeringId: pkg.identifier,
-            price: price,
-            currency: currency,
-            sessionId: sessionId
-        )
+//        Telemetry.shared.purchaseStart(
+//            variant: variant,
+//            packageId: p.productIdentifier,
+//            offeringId: pkg.identifier,
+//            price: price,
+//            currency: currency,
+//            sessionId: sessionId
+//        )
         
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
@@ -216,30 +216,26 @@ final class SpecialOfferViewModel: ObservableObject {
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
                 RCPriceCache.save(entitlementID: entitlementID, price: price, currency: currency ?? "USD")
                 
-                Telemetry.shared.purchaseResult(
-                    variant: variant,
-                    status: "success",
-                    rcCode: 0,
-                    packageId: p.productIdentifier,
-                    pricePaid: price,
-                    currency: currency,
-                    sessionId: sessionId,
-                    onboardId: onboardId,
-                    paywallId: paywallId
-                )
+                Telemetry.shared.specialOfferBuy(placewhereBuy: placeWhereBuy)
+                
+                SpecialOfferNotificationManager.shared.cancelSpecialOffer()  // ⬅️ додали
+                UserDefaults.standard.set(true, forKey: "special_offer_just_purchased")
+
+//                
+//                Telemetry.shared.purchaseResult(
+//                    variant: variant,
+//                    status: "success",
+//                    rcCode: 0,
+//                    packageId: p.productIdentifier,
+//                    pricePaid: price,
+//                    currency: currency,
+//                    sessionId: sessionId,
+//                    onboardId: onboardId,
+//                    paywallId: paywallId
+//                )
             } else {
                 errorMessage = "Subscription not active"
-                Telemetry.shared.purchaseResult(
-                    variant: variant,
-                    status: "error",
-                    rcCode: -3,
-                    packageId: p.productIdentifier,
-                    pricePaid: nil,
-                    currency: currency,
-                    sessionId: sessionId,
-                    onboardId: onboardId,
-                    paywallId: paywallId
-                )
+
             }
         } catch {
             let ns = error as NSError
@@ -247,17 +243,6 @@ final class SpecialOfferViewModel: ObservableObject {
             let status = (rcCode == 1) ? "user_cancelled" : "error"
             errorMessage = ns.localizedDescription
             
-            Telemetry.shared.purchaseResult(
-                variant: variant,
-                status: status,
-                rcCode: rcCode ?? -999,
-                packageId: plan.productID,
-                pricePaid: nil,
-                currency: nil,
-                sessionId: sessionId,
-                onboardId: onboardId,
-                paywallId: paywallId
-            )
         }
     }
     
