@@ -218,7 +218,7 @@ final class SpecialOfferViewModel: ObservableObject {
                 
                 Telemetry.shared.specialOfferBuy(placewhereBuy: placeWhereBuy)
                 
-                SpecialOfferNotificationManager.shared.cancelSpecialOffer()  // ⬅️ додали
+                SpecialOfferNotificationManager.shared.cancelAllSpecialOffers() // ⬅️ додали
                 UserDefaults.standard.set(true, forKey: "special_offer_just_purchased")
 
 //                

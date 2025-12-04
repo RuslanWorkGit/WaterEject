@@ -225,7 +225,7 @@ struct SpecialOfferView: View {
         
         if viewModel.purchaseSucceeded {
             // можна додати окремий summary-лог, якщо хочеш
-            SpecialOfferNotificationManager.shared.cancelSpecialOffer()
+            SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
             onFinish()
         }
     }

@@ -92,22 +92,35 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let request = response.notification.request
         let userInfo = request.content.userInfo
         let id = request.identifier
-
-        // наш локальний оффер-пуш
-        let isSpecialById       = (id == LocalNotificationId.specialOffer)
+        
         let isSpecialByUserInfo = (userInfo["special_offer"] as? Bool) == true
 
-        if isSpecialById || isSpecialByUserInfo {
-            // 1) для холодного запуску — флаг в UserDefaults
+        // Визначаємо source для placeWhereBuy
+        var placeWhereBuy = "Push notification 5 min"
+        if id == LocalNotificationId.specialOfferAfter7Days {
+            placeWhereBuy = "7 days notification buy"
+        }
+
+        let isSpecial =
+            id == LocalNotificationId.specialOfferAfterClose ||
+            id == LocalNotificationId.specialOfferAfter7Days ||
+            isSpecialByUserInfo
+
+        if isSpecial {
+            // 1) для холодного запуску — флаг + source в UserDefaults
             UserDefaults.standard.set(true, forKey: "launch_special_offer_from_push")
+            UserDefaults.standard.set(placeWhereBuy, forKey: "special_offer_place_where_buy")
 
-            // 2) якщо апка вже жива — кинемо подію через NotificationCenter
-            NotificationCenter.default.post(name: .specialOfferPushTapped, object: nil)
+            // 2) якщо апка вже жива — NotificationCenter
+            NotificationCenter.default.post(
+                name: .specialOfferPushTapped,
+                object: placeWhereBuy
+            )
 
-            // 3) extra-safety: якщо координатор уже під’єднаний — можна одразу показати
+            // 3) якщо координатор вже є — показуємо одразу
             if let coordinator {
                 Task { @MainActor in
-                    coordinator.showSpecialOfferFromPush()
+                    coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
                 }
             }
         }
@@ -232,7 +245,7 @@ struct WaterEjectApp: App {
         .onChange(of: scenePhase) { oldPhase, newPhase in
             switch newPhase {
             case .active:
-                SpecialOfferNotificationManager.shared.cancelSpecialOffer()
+                SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
                 
                 if !appDelegate.sentStartAppThisForeground {
                     let payload: [String: Any] = [
@@ -252,10 +265,12 @@ struct WaterEjectApp: App {
                 
                 if appDelegate.isProUser {
                             // якщо Pro — ніяких офферів
-                            SpecialOfferNotificationManager.shared.cancelSpecialOffer()
+                    SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
                         } else {
                             // юзер без підписки — плануємо оффер
-                            SpecialOfferNotificationManager.shared.scheduleSpecialOffer(after: 1 * 60)
+                            SpecialOfferNotificationManager.shared.scheduleAfterClose()
+                                                // 7 днів неактивності
+                                                SpecialOfferNotificationManager.shared.scheduleAfter7Days()
                         }
                 
                // SpecialOfferNotificationManager.shared.scheduleSpecialOffer(after: 1 * 60)

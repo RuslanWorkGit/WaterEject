@@ -22,6 +22,7 @@ final class AppCoordinator: ObservableObject {
 
     
     @Published var currentScreen: Screen = .boot
+    @Published var specialOfferPlaceWhereBuy: String = "Push notification"
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     
     private var launchedFromPush = false
@@ -83,10 +84,11 @@ final class AppCoordinator: ObservableObject {
         currentScreen = .mainTabbar
     }
     
-    func showSpecialOfferFromPush() {
-        launchedFromPush = true
+    func showSpecialOfferFromPush(placeWhereBuy: String = "Push notification") {
+            self.specialOfferPlaceWhereBuy = placeWhereBuy
             currentScreen = .specialOfferFromPush
         }
+
     
 
 }

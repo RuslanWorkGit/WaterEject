@@ -38,23 +38,25 @@ struct RootView: View {
                 
             case .specialOfferFromPush:
                 SpecialOfferView(
-                    onFinish: {
-                        // після закриття / успішної покупки
-                        coordinator.showMainTabbar()
-                    },
-                    placeWhereBuy: "Push notification"
-                )
+                        onFinish: {
+                            coordinator.showMainTabbar()
+                        },
+                        placeWhereBuy: coordinator.specialOfferPlaceWhereBuy
+                    )
             }
         }
         .onAppear {
             // якщо апку запустили тапом по пушу в killed-стані
             if UserDefaults.standard.bool(forKey: "launch_special_offer_from_push") {
-                coordinator.showSpecialOfferFromPush()
+                let placeWhereBuy = UserDefaults.standard.string(forKey: "special_offer_place_where_buy")
+                    ?? "Push notification"
+                coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
                 UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .specialOfferPushTapped)) { _ in
-            coordinator.showSpecialOfferFromPush()
+        .onReceive(NotificationCenter.default.publisher(for: .specialOfferPushTapped)) { notif in
+            let placeWhereBuy = notif.object as? String ?? "Push notification"
+            coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
             UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
         }
         .animation(nil, value: coordinator.currentScreen)
