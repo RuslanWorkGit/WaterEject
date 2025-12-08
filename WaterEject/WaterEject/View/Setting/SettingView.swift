@@ -23,12 +23,13 @@ struct SettingView: View {
     @State private var showSevenOnboarding = false
     @State private var showEightOnboarding = false
     @State private var showNineOnboarding = false
+    @State private var showTenOnboarding = false
     
     var body: some View {
         NavigationStack {
             ZStack {
                 Background()
-
+                
                 ScrollView {
                     VStack(spacing: 24) {
                         HStack {
@@ -37,10 +38,10 @@ struct SettingView: View {
                                 .foregroundColor(.white)
                             Spacer()
                         }
-
+                        
                         // 👇 Тут з’явиться грід з вашими апками
                         OurAppsSection()
-
+                        
                         Text("Help center")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(Color.gray)
@@ -59,82 +60,89 @@ struct SettingView: View {
                             .buttonStyle(PillButtonStyle())
                         }
                         
-//                        Text("Help center")
-//                            .font(.system(size: 20, weight: .bold))
-//                            .foregroundStyle(Color.gray)
-//                        
-//                        VStack(spacing: 12) {
-//                            
-//
-////
-//                            Button("onboardFive") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showFiveOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
-//                            
-//                            Button("onboardSix") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showSixOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
-//                            
-//                            Button("onboardSeven") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showSevenOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
-//                            
-//                            Button("onboardEight") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showEightOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
-//                            
-//                            Button("onboardNine") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showNineOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
+                        Text("Help center")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(Color.gray)
+                        
+                        VStack(spacing: 12) {
+                            //
+                            //
+                            ////
+                            //                            Button("onboardFive") {
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showFiveOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
+                            //
+                            //                            Button("onboardSix") {
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showSixOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
+                            //
+                            //                            Button("onboardSeven") {
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showSevenOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
+                            //
+                                                        Button("onboardEight") {
+                                                            tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                                            showEightOnboarding = true
+                            
+                                                        }
+                                                        .buttonStyle(PillButtonStyle())
+                            //
+                            //                            Button("onboardNine") {
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showNineOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
+                            
+                            Button("onboardTen") {
+                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                                showTenOnboarding = true
+                                
+                            }
+                            .buttonStyle(PillButtonStyle())
                             
                             
-//                            Button("FirstOnboard") {
-//                                
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showFirstOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
-//                            
-//                            Button("SecondOnboard") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showSecondOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
-//                            
-//                            Button("ThirdOnboard") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showThirdOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
-//                            
-//                            Button("OldOnboard") {
-//                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
-//                                showOldOnboarding = true
-//                                
-//                            }
-//                            .buttonStyle(PillButtonStyle())
+                            //                            Button("FirstOnboard") {
+                            //
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showFirstOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
+                            //
+                            //                            Button("SecondOnboard") {
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showSecondOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
+                            //
+                            //                            Button("ThirdOnboard") {
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showThirdOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
+                            //
+                            //                            Button("OldOnboard") {
+                            //                                tabBarState.isHidden = true           // ← сховаємо таббар на час онбордингу
+                            //                                showOldOnboarding = true
+                            //
+                            //                            }
+                            //                            .buttonStyle(PillButtonStyle())
                             
-//                        }
-   
-
+                        }
+                        
+                        
                     }
                     .padding(.horizontal, 32)
                     .padding(.top, 16)
@@ -142,13 +150,13 @@ struct SettingView: View {
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .safeAreaInset(edge: .bottom) {
-              Color.clear.frame(height: 100) // висота твого таббара
+                Color.clear.frame(height: 100) // висота твого таббара
             }
         }
         
         .onAppear {
-            tabBarState.isHidden = false 
-//            Telemetry.shared.settingExposure()
+            tabBarState.isHidden = false
+            //            Telemetry.shared.settingExposure()
         }
         .sheet(item: $webViewURL, content: { url in
             SafariView(url: url)
@@ -184,6 +192,12 @@ struct SettingView: View {
             OnboardingFlowViewNine()
                 .environmentObject(coordinator)    // пробросимо координатор
         }
+        .fullScreenCover(isPresented: $showTenOnboarding, onDismiss: {
+            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        }) {
+            OnboardingFlowViewTen()
+                .environmentObject(coordinator)    // пробросимо координатор
+        }
         
         .fullScreenCover(isPresented: $showEightOnboarding, onDismiss: {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)
@@ -194,34 +208,34 @@ struct SettingView: View {
                 .environmentObject(coordinator)    // пробросимо координатор
         }
         
-//        .fullScreenCover(isPresented: $showFirstOnboarding, onDismiss: {
-//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
-//        }) {
-//            OnboardingFlowViewOne()
-//                .environmentObject(coordinator)    // пробросимо координатор
-//        }
-//        
-//        .fullScreenCover(isPresented: $showSecondOnboarding, onDismiss: {
-//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
-//        }) {
-//            OnboardingFlowViewTwo()
-//                .environmentObject(coordinator)    // пробросимо координатор
-//        }
-//        
-//        .fullScreenCover(isPresented: $showThirdOnboarding, onDismiss: {
-//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
-//        }) {
-//            OnboardingFlowViewThree()
-//                .environmentObject(coordinator)    // пробросимо координатор
-//        }
-//        
-//        
-//        .fullScreenCover(isPresented: $showOldOnboarding, onDismiss: {
-//            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
-//        }) {
-//            OnboardingFlowView()
-//                .environmentObject(coordinator)    // пробросимо координатор
-//        }
+        //        .fullScreenCover(isPresented: $showFirstOnboarding, onDismiss: {
+        //            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        //        }) {
+        //            OnboardingFlowViewOne()
+        //                .environmentObject(coordinator)    // пробросимо координатор
+        //        }
+        //
+        //        .fullScreenCover(isPresented: $showSecondOnboarding, onDismiss: {
+        //            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        //        }) {
+        //            OnboardingFlowViewTwo()
+        //                .environmentObject(coordinator)    // пробросимо координатор
+        //        }
+        //
+        //        .fullScreenCover(isPresented: $showThirdOnboarding, onDismiss: {
+        //            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        //        }) {
+        //            OnboardingFlowViewThree()
+        //                .environmentObject(coordinator)    // пробросимо координатор
+        //        }
+        //
+        //
+        //        .fullScreenCover(isPresented: $showOldOnboarding, onDismiss: {
+        //            tabBarState.isHidden = false           // повернемо таббар (якщо треба)
+        //        }) {
+        //            OnboardingFlowView()
+        //                .environmentObject(coordinator)    // пробросимо координатор
+        //        }
     }
 }
 
@@ -260,14 +274,14 @@ import FirebaseFirestore
 struct OurAppsSection: View {
     private let db: Firestore
     @StateObject private var vm: PromoAppsVM
-
+    
     init() {
         let app = FirebaseApp.app(name: "SharedCatalog")!
         let database = Firestore.firestore(app: app)
         self.db = database                            // <- зберегли для логів
         _vm = StateObject(wrappedValue: PromoAppsVM(db: database))
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Our Apps")
@@ -298,13 +312,13 @@ struct OurAppsSection: View {
                                         .overlay(
                                             ProgressView().scaleEffect(0.9)
                                         )
-
+                                    
                                 case .success(let image):
                                     image
                                         .resizable()
                                         .scaledToFill()
                                         .transition(.opacity) // приємний фейд-ін
-
+                                    
                                 case .failure:
                                     // 🔁 Фолбек, якщо картинку не вдалося завантажити
                                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -314,14 +328,14 @@ struct OurAppsSection: View {
                                                 .font(.title2)
                                                 .foregroundColor(.gray)
                                         )
-
+                                    
                                 @unknown default:
                                     EmptyView()
                                 }
                             }
                             .frame(width: 56, height: 56)
                             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
+                            
                             Text(app.name)
                                 .foregroundStyle(Color.gray)
                                 .font(.footnote)

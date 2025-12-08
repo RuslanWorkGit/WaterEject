@@ -612,6 +612,7 @@ enum OnboardTag: String, Codable {
     case v7 = "Onboard_7"
     case v8 = "Onboard_8"
     case v9 = "Onboard_9"
+    case v10 = "Onboard_10"
     case modes = "Modes"
 }
 
@@ -692,6 +693,7 @@ extension OnboardTag {
         case .v7: return "Onboard_v_7"
         case .v8: return "Onboard_v_8"
         case .v9: return "Onboard_v_9"
+        case .v10: return "Onboard_v_10"
         case .modes: return "Modes"
         }
     }

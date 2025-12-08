@@ -36,10 +36,10 @@ struct FirstWelcomeView: View {
                 
             
                 
-                Image("BlueLineImg")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(.horizontal, -10)
+                ReviewsCarouselView()
+                                   .padding(.top, 150)
+                                   .padding(.horizontal, 16)
+
                 
                 Spacer()
                 
@@ -114,5 +114,121 @@ struct OnboardNewStyle<Content: View>: View {
         }
     }
 }
+
+private struct ReviewsCarouselView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    enum Slide: Int, CaseIterable {
+        case maria, daniel, kevin, sophie
+    }
+
+    @State private var current: Slide = .maria
+    private let timer = Timer.publish(every: 4.0, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            Group {
+                switch current {
+                case .maria:
+                    OnboardingReviewBlock(
+                        name: "Maria",
+                        title: "It saved my iPhone!",
+                        bodyText: "I tried countless methods to fix my phone, but nothing worked. Then I discovered this speaker cleaner app! It brought my phone back to life!"
+                    )
+
+                case .daniel:
+                    OnboardingReviewBlock(
+                        name: "Daniel",
+                        title: "Finally fixed the muffled sound!",
+                        bodyText: "I spilled water on my phone and the speaker became super quiet. This app pushed the water out in seconds — the sound is clear again!"
+                    )
+
+                case .kevin:
+                    OnboardingReviewBlock(
+                        name: "Kevin",
+                        title: "Saved me from going to repair!",
+                        bodyText: "I thought I'd have to replace my speaker after a shower accident. This app literally saved me money — the speaker now works like new."
+                    )
+
+                case .sophie:
+                    OnboardingReviewBlock(
+                        name: "Sophie",
+                        title: "Worked better than rice!",
+                        bodyText: "I tried drying my phone for hours, but the sound was still distorted. One cycle in this app and everything was back to normal. Highly recommend!"
+                    )
+                }
+            }
+            .id(current)
+            .transition(
+                .asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal:   .move(edge: .leading).combined(with: .opacity)
+                )
+            )
+            // картка приклеєна до верху видимої області
+            .frame(maxWidth: .infinity,
+                   maxHeight: .infinity,
+                   alignment: .top)
+        }
+        .frame(height: 230) // однакова висота під усі 4 картки
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: current)
+        .onReceive(timer) { _ in
+            let all = Slide.allCases
+            guard let idx = all.firstIndex(of: current) else { return }
+            let next = all[(idx + 1) % all.count]
+            current = next
+        }
+    }
+}
+
+private struct OnboardingReviewBlock: View {
+    let name: String
+    let title: String
+    let bodyText: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+
+            // сама карточка
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top) {
+                    StarsRow()
+                    Spacer()
+                    Text(name)
+                        .font(.custom("Montserrat-SemiBold", size: 16))
+                        .foregroundColor(.black)
+                }
+
+                Text(title)
+                    .font(.custom("Montserrat-ExtraBold", size: 20))
+                    .foregroundColor(.black)
+
+                Text(bodyText)
+                    .font(.custom("Montserrat-Medium", size: 14))
+                    .foregroundColor(.black.opacity(0.8))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(18)
+            .background(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color.white)
+                    .shadow(color: .black.opacity(0.10), radius: 24, x: 0, y: 10)
+            )
+        }
+    }
+}
+
+private struct StarsRow: View {
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<5, id: \.self) { _ in
+                Image(systemName: "star.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(Color(red: 250/255, green: 204/255, blue: 21/255))
+            }
+        }
+    }
+}
+
 
 
