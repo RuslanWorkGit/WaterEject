@@ -14,7 +14,7 @@ struct SpecialOfferView: View {
     @EnvironmentObject private var paywallGate: PaywallGate
     
     let onFinish: () -> Void
-    let placeWhereBuy: String?
+    let placeWhereBuy: String
     
     @State private var sessionId = UUID().uuidString
     @State private var featuresWidth: CGFloat = 0

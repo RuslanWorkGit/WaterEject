@@ -123,7 +123,10 @@ private struct ReviewsCarouselView: View {
     }
 
     @State private var current: Slide = .maria
-    private let timer = Timer.publish(every: 4.0, on: .main, in: .common).autoconnect()
+    @State private var isForward: Bool = true          // 👈 напрямок
+    @State private var autoAdvanceWorkItem: DispatchWorkItem?
+
+    private let interval: TimeInterval = 2.5
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -135,21 +138,18 @@ private struct ReviewsCarouselView: View {
                         title: "It saved my iPhone!",
                         bodyText: "I tried countless methods to fix my phone, but nothing worked. Then I discovered this speaker cleaner app! It brought my phone back to life!"
                     )
-
                 case .daniel:
                     OnboardingReviewBlock(
                         name: "Daniel",
                         title: "Finally fixed the muffled sound!",
                         bodyText: "I spilled water on my phone and the speaker became super quiet. This app pushed the water out in seconds — the sound is clear again!"
                     )
-
                 case .kevin:
                     OnboardingReviewBlock(
                         name: "Kevin",
                         title: "Saved me from going to repair!",
                         bodyText: "I thought I'd have to replace my speaker after a shower accident. This app literally saved me money — the speaker now works like new."
                     )
-
                 case .sophie:
                     OnboardingReviewBlock(
                         name: "Sophie",
@@ -161,25 +161,77 @@ private struct ReviewsCarouselView: View {
             .id(current)
             .transition(
                 .asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal:   .move(edge: .leading).combined(with: .opacity)
+                    insertion: .move(edge: isForward ? .trailing : .leading)  // 👈 напрямок для появи
+                        .combined(with: .opacity),
+                    removal:   .move(edge: isForward ? .leading : .trailing)  // 👈 напрямок для зникнення
+                        .combined(with: .opacity)
                 )
             )
-            // картка приклеєна до верху видимої області
             .frame(maxWidth: .infinity,
                    maxHeight: .infinity,
                    alignment: .top)
         }
-        .frame(height: 230) // однакова висота під усі 4 картки
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: current)
-        .onReceive(timer) { _ in
-            let all = Slide.allCases
-            guard let idx = all.firstIndex(of: current) else { return }
-            let next = all[(idx + 1) % all.count]
-            current = next
+        .frame(height: 230)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.35), value: current)
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 20)
+                .onEnded { value in
+                    let translation = value.translation.width
+                    let threshold: CGFloat = 40
+                    guard abs(translation) > threshold else { return }
+
+                    if translation < 0 {
+                        // свайп ліворуч → вперед
+                        goNext()
+                    } else {
+                        // свайп праворуч → назад
+                        goPrevious()
+                    }
+
+                    restartAutoAdvance()
+                }
+        )
+        .onAppear { restartAutoAdvance() }
+        .onDisappear { autoAdvanceWorkItem?.cancel() }
+    }
+
+    // MARK: - Навігація
+
+    private func goNext() {
+        let all = Slide.allCases
+        guard let idx = all.firstIndex(of: current) else { return }
+        let next = all[(idx + 1) % all.count]
+
+        isForward = true              // 👈 переходимо вперед
+        current = next
+    }
+
+    private func goPrevious() {
+        let all = Slide.allCases
+        guard let idx = all.firstIndex(of: current) else { return }
+        let prev = all[(idx - 1 + all.count) % all.count]
+
+        isForward = false             // 👈 переходимо назад
+        current = prev
+    }
+
+    // MARK: - Авто-перелистування
+
+    private func restartAutoAdvance() {
+        autoAdvanceWorkItem?.cancel()
+        guard !reduceMotion else { return }
+
+        let work = DispatchWorkItem {
+            goNext()
+            restartAutoAdvance()
         }
+        autoAdvanceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: work)
     }
 }
+
+
 
 private struct OnboardingReviewBlock: View {
     let name: String
