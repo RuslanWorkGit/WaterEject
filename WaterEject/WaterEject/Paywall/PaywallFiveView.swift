@@ -34,12 +34,19 @@ struct PaywallFiveView: View {
     @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
+    
+    
     enum InfoCard: Int, CaseIterable {
             case reviews, features, stats
         }
+        
+        @State private var currentInfoCard: InfoCard = .reviews
+        
+        // 🔹 нове: напрямок анімації + “ручний” таймер
+        @State private var isForward: Bool = true
+        @State private var autoAdvanceWorkItem: DispatchWorkItem?
+        private let infoCardInterval: TimeInterval = 2.5
     
-    @State private var currentInfoCard: InfoCard = .reviews
-        let cardTimer = Timer.publish(every: 3.5, on: .main, in: .common).autoconnect()
     
     
     
@@ -119,49 +126,60 @@ struct PaywallFiveView: View {
                     .padding(.bottom, 0)
                     .padding(.top, 180)
                     
-                    // MARK: - Карусель карток (reviews / features / stats)
                     
                     
 
+
+                    
                     ZStack(alignment: .top) {
                         Group {
                             switch currentInfoCard {
                             case .reviews:
                                 ReviewsCardView()
-                                    .frame(height: 180)
                             case .features:
                                 FeaturesCardView()
-                                    .frame(height: 180)
                             case .stats:
                                 StatisticCardView()
-                                    .frame(height: 180)
                             }
                         }
-                        .id(currentInfoCard) // важливо для transition
+                        .id(currentInfoCard)
                         .transition(
                             .asymmetric(
-                                insertion: .move(edge: .trailing).combined(with: .opacity),
-                                removal:   .move(edge: .leading).combined(with: .opacity)
+                                insertion: .move(edge: isForward ? .trailing : .leading)
+                                    .combined(with: .opacity),
+                                removal: .move(edge: isForward ? .leading : .trailing)
+                                    .combined(with: .opacity)
                             )
                         )
+                        .frame(maxWidth: .infinity,
+                               maxHeight: .infinity,
+                               alignment: .top)
                     }
-                    
+                    .frame(height: 180)
                     .padding()
-                    .opacity(appearReviews ? 1 : 0)        // перша поява разом з пейволом
-                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.45), value: currentInfoCard)
-                    .onReceive(cardTimer) { _ in
-                        guard appearReviews else { return }
+                    .opacity(appearReviews ? 1 : 0)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.35),
+                               value: currentInfoCard)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 20)
+                            .onEnded { value in
+                                let translation = value.translation.width
+                                let threshold: CGFloat = 40
+                                guard abs(translation) > threshold else { return }
+                                
+                                if translation < 0 {
+                                    // свайп ліворуч → наступна
+                                    goNextCard(animated: true)
+                                } else {
+                                    // свайп праворуч → попередня
+                                    goPreviousCard(animated: true)
+                                }
+                                
+                                restartAutoAdvance()
+                            }
+                    )
 
-                        let all = InfoCard.allCases
-                        guard let idx = all.firstIndex(of: currentInfoCard) else { return }
-                        let next = all[(idx + 1) % all.count]
-
-                        if reduceMotion {
-                            currentInfoCard = next
-                        } else {
-                            currentInfoCard = next   // ⚠️ БЕЗ withAnimation
-                        }
-                    }
 
                     Spacer(minLength: 0)
                     
@@ -363,6 +381,8 @@ struct PaywallFiveView: View {
                    }
                }
             
+            restartAutoAdvance()
+            
         }
         .task {
             DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
@@ -374,6 +394,50 @@ struct PaywallFiveView: View {
         }
         .onDisappear { pulse = false }
         
+    }
+    
+    private func goNextCard(animated: Bool) {
+            let all = InfoCard.allCases
+            guard let idx = all.firstIndex(of: currentInfoCard) else { return }
+            let next = all[(idx + 1) % all.count]
+            
+            isForward = true
+            
+            if animated && !reduceMotion {
+                withAnimation { currentInfoCard = next }
+            } else {
+                currentInfoCard = next
+            }
+        }
+        
+        private func goPreviousCard(animated: Bool) {
+            let all = InfoCard.allCases
+            guard let idx = all.firstIndex(of: currentInfoCard) else { return }
+            let prev = all[(idx - 1 + all.count) % all.count]
+            
+            isForward = false
+            
+            if animated && !reduceMotion {
+                withAnimation { currentInfoCard = prev }
+            } else {
+                currentInfoCard = prev
+            }
+        }
+        
+        // MARK: - Авто-перелистування + перезапуск
+        
+    private func restartAutoAdvance() {
+        autoAdvanceWorkItem?.cancel()
+
+        guard !reduceMotion else { return }
+
+        let work = DispatchWorkItem {
+            goNextCard(animated: true)
+            restartAutoAdvance()
+        }
+
+        autoAdvanceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + infoCardInterval, execute: work)
     }
     
 }

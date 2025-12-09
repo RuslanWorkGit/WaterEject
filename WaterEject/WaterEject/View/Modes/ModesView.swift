@@ -288,14 +288,7 @@ struct ModesView: View {
         Task {
             pendingMode = mode
             //            Telemetry.shared.modesModeTap(device: device, mode: mode)
-            let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
-            //            if allowed {
-            ////                Telemetry.shared.modesStartNavigate(device: device, mode: mode)
-            //                onStart(mode)          // пушимо StartView через Route у HomeView
-            //                pendingMode = nil
-            //            } else {
-            ////                Telemetry.shared.modesPaywallRequested(device: device, mode: mode)
-            //            }
+            //let allowed = await paywallGate.requireProOrPresentPaywall(context: .modesTap)
             if await paywallGate.isPro() {
                 // якщо вже Pro – просто відкриваємо режим
                 onStart(mode)   // твоя стара логіка
