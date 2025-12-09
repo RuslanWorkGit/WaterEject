@@ -139,6 +139,15 @@ final class PaywallViewModel: ObservableObject {
                   "cpa_value": 0
                 ])
                 
+                let planId = plan.analyticsValue
+
+                if let onboardId = onboardId {
+                    Telemetry.shared.funnelPurchaseSuccess(
+                        onboardId: onboardId,
+                        plan: planId
+                    )
+                }
+                
                 let cpaFlag = "af_subscribe_cpa_sent \(Purchases.shared.appUserID)"
                     if !UserDefaults.standard.bool(forKey: cpaFlag) {
                         AppsFlyerLib.shared().logEvent("subscribe_cpa", withValues: [

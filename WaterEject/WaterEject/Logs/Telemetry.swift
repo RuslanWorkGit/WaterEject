@@ -804,3 +804,43 @@ extension Telemetry {
     
 }
 
+
+extension Telemetry {
+
+    ///
+    func sceneDidBecomeActive(onboardId: String) {
+        Analytics.logEvent("app_open", parameters: [
+            "onboard_id": onboardId
+        ])
+    }
+
+    func funnelOnboardStart(onboardId: String) {
+        Analytics.logEvent("start_onboard", parameters: base([
+            "onboard_id": onboardId
+        ]))
+    }
+    
+    func funnelPlanChosen(onboardId: String, plan: String) {
+        Analytics.logEvent("choose_plan", parameters: base([
+            "onboard_id": onboardId,
+            "plan": plan
+        ]))
+    }
+    
+    func funnelGoToPurchase(onboardId: String, plan: String) {
+        Analytics.logEvent("go_to_purchase", parameters: base([
+            "onboard_id": onboardId,
+            "plan": plan
+        ]))
+    }
+    
+    func funnelPurchaseSuccess(onboardId: String, plan: String) {
+        Analytics.logEvent("purchase_success", parameters: base([
+            "onboard_id": onboardId,
+            "plan": plan
+        ]))
+    }
+    
+    
+    
+}

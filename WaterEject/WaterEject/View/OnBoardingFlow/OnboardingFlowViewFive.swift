@@ -115,6 +115,9 @@ struct OnboardingFlowViewFive: View {
                 Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId)
             }
         }
+        .onAppear {
+            Telemetry.shared.sceneDidBecomeActive(onboardId: onboardId)
+        }
     }
 
     // MARK: - Навігація

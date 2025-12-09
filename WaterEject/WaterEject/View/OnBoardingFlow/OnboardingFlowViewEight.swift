@@ -100,6 +100,9 @@ struct OnboardingFlowViewEight: View {
                 appendStep(currentStep)
             }
         }
+        .onAppear {
+            Telemetry.shared.sceneDidBecomeActive(onboardId: onboardId)
+        }
     }
 
     // MARK: - Навігація

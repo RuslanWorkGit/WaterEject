@@ -193,7 +193,14 @@ struct PaywallFiveView: View {
                             sublabel: nil,
                             saveText: viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
-                            onTap: { viewModel.selectedPlan = .weekly }
+                            onTap: { viewModel.selectedPlan = .weekly
+                                if let onboardId = onboardId {
+                                            Telemetry.shared.funnelPlanChosen(
+                                                onboardId: onboardId,
+                                                plan: PaywallPlan.weekly.analyticsValue
+                                            )
+                                        }
+                            }
                         )
                         
                         PaywallFourPlanCard(
@@ -202,7 +209,14 @@ struct PaywallFiveView: View {
                             sublabel: "Best Value",
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
-                            onTap: { viewModel.selectedPlan = .yearly }
+                            onTap: { viewModel.selectedPlan = .yearly
+                                if let onboardId = onboardId {
+                                            Telemetry.shared.funnelPlanChosen(
+                                                onboardId: onboardId,
+                                                plan: PaywallPlan.yearly.analyticsValue
+                                            )
+                                        }
+                            }
                         )
                     }
                     .padding(.top, isSmall ? 12 : isLarge ? 30 : 20)
@@ -227,8 +241,16 @@ struct PaywallFiveView: View {
                         
                         Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
+                        
+                        if let onboardId = onboardId {
+                            Telemetry.shared.funnelGoToPurchase(
+                                onboardId: onboardId,
+                                plan: plan.analyticsValue
+                            )
+                        }
+
                         Task {
-                            let paywallId = "paywall_v_3.0"
+                            let paywallId = "paywall_v_5.0"
                             await viewModel.buyWithRevenueCat(
                                 plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                             )
