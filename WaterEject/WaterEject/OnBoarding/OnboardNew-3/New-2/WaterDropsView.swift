@@ -81,7 +81,7 @@ struct OnboardWaterDrops<Content: View>: View {
                         
                         
                         
-                        NewOboardButton(title: ctaTitle, action: ctaAction, arrow: true)
+                        NewTwoOboardButton(title: ctaTitle, action: ctaAction, arrow: true)
                             .padding(.horizontal, 40)
                             .frame(minHeight: 52) // ключ
                             .frame(width: .infinity)
@@ -94,6 +94,37 @@ struct OnboardWaterDrops<Content: View>: View {
                 .padding(.bottom, 0)
                 
         }
+    }
+}
+
+struct NewTwoOboardButton: View {
+    let title: String
+    let action: () -> Void
+    var arrow: Bool = false
+    
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(minHeight: 64)
+                .frame(maxWidth: .infinity)
+            //.contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            
+        }
+        //.buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)) // як на скріні
+                .innerShadow(
+                    RoundedRectangle(cornerRadius: 16),
+                    color: .white, opacity: 0.25,
+                    x: 0, y: 1, blur: 0, spread: 2
+                )
+        )
+
+        
     }
 }
 
