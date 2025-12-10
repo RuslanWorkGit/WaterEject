@@ -166,6 +166,8 @@ struct OnboardingFlowViewEight: View {
             return "step_2"
         case .stepThree:
             return "step_3"
+        case .stepFour:
+            return "step_4"
         case .paywall:
             return "paywall"
         }
@@ -185,13 +187,16 @@ struct OnboardingFlowViewEight: View {
         case .stepTwo:
             BlueLinesView(index: 1, action: { goTo(.stepThree, forward: true) })
         case .stepThree:
-            MeetView(index: 2, action: { goTo(.paywall, forward: true) })
+            MeetOneView(index: 2, action: { goTo(.stepFour, forward: true) })
+            
+        case .stepFour:
+            MeetView(index: 3, action: { goTo(.paywall, forward: true) })
         
         case .paywall:
             
             PaywallAB.shared
                    .onboardingPaywallView(
-                       for: .v8,                       // тег онборду (Onbord_v_3.3)
+                       for: .v8,                       
                        onFinish: finishOnboarding,
                        startDelay: slideDuration + 0.0,
                        stepsVisited: stepsVisited

@@ -201,7 +201,8 @@ struct OnboardingFlowViewTen: View {
                     onboardId: onboardId,
                     startDelay: slideDuration + 0.1,   // 0.55 s
                     summaryTag: .v10,
-                    stepsVisited: stepsVisited
+                    stepsVisited: stepsVisited,
+                    startAnimations: startAnimations
 
                 )
 

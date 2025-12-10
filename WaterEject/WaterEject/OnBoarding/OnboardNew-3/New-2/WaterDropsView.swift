@@ -17,7 +17,7 @@ struct WaterDropsView: View {
     
     var body: some View {
         
-        OnboardWaterDrops(ctaTitle: "Start Cleaning", ctaAction: handleCTA, pages: 3, pageIndex: index, fixedWidth: 260) {
+        OnboardWaterDrops(ctaTitle: "Start Cleaning", ctaAction: handleCTA, pages: 4, pageIndex: index, fixedWidth: 260) {
             
             Color(red: 225 / 255, green: 233 / 255, blue: 239 / 255).ignoresSafeArea()
             

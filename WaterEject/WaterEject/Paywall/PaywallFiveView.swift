@@ -25,15 +25,16 @@ struct PaywallFiveView: View {
     @State private var appearTitle = false
     @State private var appearList  = false
     @State private var appearCards = false
-    @State private var appearReviews = false
     @State private var startDelay: Double = 0.35
     @State private var featuresWidth: CGFloat = 0
     
+    @State private var showInfoCardContent = false
     //@State private var isFreeTrialEnabled = true
     
     @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
+    @State private var didShowFirstCard = false
+    @State private var appearReviews = false
     
     
     enum InfoCard: Int, CaseIterable {
@@ -56,13 +57,15 @@ struct PaywallFiveView: View {
     let summaryTag: OnboardTag?     // ⬅️ нове: для "Onbord_v_3.x"
     let stepsVisited: [String]?     // ⬅️ нове: пройдені екрани
     private let exitDuration: Double = 0.6
+    let startAnimations: Bool
     
-    init(onFinish: @escaping () -> Void, onboardId: String? = nil, startDelay: Double = 0.35, summaryTag: OnboardTag? = nil, stepsVisited: [String]? = nil) {
+    init(onFinish: @escaping () -> Void, onboardId: String? = nil, startDelay: Double = 0.35, summaryTag: OnboardTag? = nil, stepsVisited: [String]? = nil, startAnimations: Bool = true ) {
         self.onFinish = onFinish
         self.onboardId = onboardId
         self._startDelay = State(initialValue: startDelay)
         self.summaryTag = summaryTag
         self.stepsVisited = stepsVisited
+        self.startAnimations = startAnimations
     }
     
     
@@ -131,6 +134,67 @@ struct PaywallFiveView: View {
 
 
                     
+//                    ZStack(alignment: .top) {
+//                        Group {
+//                            switch currentInfoCard {
+//                            case .reviews:
+//                                ReviewsCardView()
+//                            case .features:
+//                                FeaturesCardView()
+//                            case .stats:
+//                                StatisticCardView()
+//                            }
+//                        }
+//                        .id(currentInfoCard)
+//                        .transition(
+////                            .asymmetric(
+////                                insertion: .move(edge: isForward ? .trailing : .leading)
+////                                    .combined(with: .opacity),
+////                                removal: .move(edge: isForward ? .leading : .trailing)
+////                                    .combined(with: .opacity)
+////                            )
+//                            didShowFirstCard
+//                                    ? .asymmetric(
+//                                        insertion: .move(edge: isForward ? .trailing : .leading)
+//                                            .combined(with: .opacity),
+//                                        removal: .move(edge: isForward ? .leading : .trailing)
+//                                            .combined(with: .opacity)
+//                                      )
+//                                    : .identity
+//                        )
+//                        .frame(maxWidth: .infinity,
+//                               maxHeight: .infinity,
+//                               alignment: .top)
+//                    }
+//                    .frame(height: 180)
+//                    .padding()
+//                    //.opacity(appearReviews ? 1 : 0)
+//                    .onAppear {
+//                        // як тільки блок вперше з’явився – далі вже можна включати transition
+//                        didShowFirstCard = true
+//                    }
+////                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.35),
+////                               value: currentInfoCard)
+//                    //.contentShape(Rectangle())
+//                    .gesture(
+//                        DragGesture(minimumDistance: 20)
+//                            .onEnded { value in
+//                                let translation = value.translation.width
+//                                let threshold: CGFloat = 40
+//                                guard abs(translation) > threshold else { return }
+//                                
+//                                if translation < 0 {
+//                                    // свайп ліворуч → наступна
+//                                    goNextCard(animated: true)
+//                                } else {
+//                                    // свайп праворуч → попередня
+//                                    goPreviousCard(animated: true)
+//                                }
+//                                
+//                                restartAutoAdvance()
+//                            }
+//                    )
+                    
                     ZStack(alignment: .top) {
                         Group {
                             switch currentInfoCard {
@@ -144,41 +208,58 @@ struct PaywallFiveView: View {
                         }
                         .id(currentInfoCard)
                         .transition(
-                            .asymmetric(
+                            didShowFirstCard
+                            ? .asymmetric(
                                 insertion: .move(edge: isForward ? .trailing : .leading)
                                     .combined(with: .opacity),
                                 removal: .move(edge: isForward ? .leading : .trailing)
                                     .combined(with: .opacity)
                             )
+                            : .identity
                         )
                         .frame(maxWidth: .infinity,
                                maxHeight: .infinity,
                                alignment: .top)
+                        .opacity(showInfoCardContent ? 1 : 0)      // ⬅️ ВАЖЛИВО
                     }
                     .frame(height: 180)
                     .padding()
                     .opacity(appearReviews ? 1 : 0)
-                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.35),
-                               value: currentInfoCard)
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture(minimumDistance: 20)
-                            .onEnded { value in
-                                let translation = value.translation.width
-                                let threshold: CGFloat = 40
-                                guard abs(translation) > threshold else { return }
-                                
-                                if translation < 0 {
-                                    // свайп ліворуч → наступна
-                                    goNextCard(animated: true)
-                                } else {
-                                    // свайп праворуч → попередня
-                                    goPreviousCard(animated: true)
-                                }
-                                
-                                restartAutoAdvance()
+                    .onAppear {
+                        // якщо екран показується як "поточний" (без слайду) – одразу показуємо
+                        if startAnimations {
+                            showInfoCardContent = true
+                            didShowFirstCard = true
+                        }
+                    }
+                    .onChange(of: startAnimations) { newValue in
+                        // коли OnboardingFlow закінчив слайд → дає true
+                        if newValue {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showInfoCardContent = true
                             }
-                    )
+                            didShowFirstCard = true
+                        }
+                    }
+                                        .gesture(
+                                            DragGesture(minimumDistance: 20)
+                                                .onEnded { value in
+                                                    let translation = value.translation.width
+                                                    let threshold: CGFloat = 40
+                                                    guard abs(translation) > threshold else { return }
+                    
+                                                    if translation < 0 {
+                                                        // свайп ліворуч → наступна
+                                                        goNextCard(animated: true)
+                                                    } else {
+                                                        // свайп праворуч → попередня
+                                                        goPreviousCard(animated: true)
+                                                    }
+                    
+                                                    restartAutoAdvance()
+                                                }
+                                        )
+
 
 
                     Spacer(minLength: 0)
@@ -397,11 +478,10 @@ struct PaywallFiveView: View {
             }
             Task { await viewModel.loadPricing() }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                   withAnimation(.easeOut(duration: 0.25)) {
-                       appearReviews = true
-                   }
-               }
+
+            withAnimation(.easeInOut(duration: 0.2)) {
+                appearReviews = true
+            }
             
             restartAutoAdvance()
             
@@ -517,33 +597,36 @@ struct ReviewsCardView: View {
     ]
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(reviews) { review in
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        StarsView(rating: review.rating)
+        ZStack {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(reviews) { review in
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            StarsView(rating: review.rating)
+                            
+                            Text(review.text)
+                                .font(.custom("Montserrat-Bold", size: 14))
+                                .foregroundColor(.black)
+                        }
                         
-                        Text(review.text)
-                            .font(.custom("Montserrat-Bold", size: 14))
+                        Spacer()
+                        
+                        Text(review.name)
+                            .font(.custom("Montserrat-Medium", size: 14))
                             .foregroundColor(.black)
-                    }
-                    
-                    Spacer()
-                    
-                    Text(review.name)
-                        .font(.custom("Montserrat-Medium", size: 14))
-                        .foregroundColor(.black)
-                        .padding(.top, 2) // трохи вирівняти по вертикалі
+                            .padding(.top, 2) // трохи вирівняти по вертикалі
                         
+                    }
                 }
             }
+            .padding(16)
         }
-        .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(Color.white)
                 .shadow(color: .black.opacity(0.06), radius: 20, x: 0, y: 8)
         )
+        .compositingGroup()
     }
 }
 

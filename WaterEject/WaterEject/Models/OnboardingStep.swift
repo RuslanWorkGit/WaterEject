@@ -81,6 +81,7 @@ enum OnboardingStepEight: Int, CaseIterable, Hashable {
     case stepOne
     case stepTwo
     case stepThree
+    case stepFour
     case paywall
 }
 
