@@ -83,7 +83,7 @@ struct MeetOneView: View {
             }
             .task {
                             while true {
-                                try? await Task.sleep(nanoseconds: UInt64(cardCycleDuration * 1_300_000_000))
+                                try? await Task.sleep(nanoseconds: UInt64(cardCycleDuration * 1_000_000_000))
 
                                 withAnimation(.spring(response: 0.75, dampingFraction: 0.85)) {
                                     expandedIndex = (expandedIndex + 1) % 3

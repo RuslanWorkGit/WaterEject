@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct BlueLinesView: View {
     let index: Int
@@ -43,11 +44,18 @@ struct BlueLinesView: View {
                 }
                 
             
-                
-                Image("BlueLineImg")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(.horizontal, -10)
+                ZStack {
+                    Image("BlueLineImg")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(.horizontal, -10)
+                    
+                        //Lottie
+                    
+                    LottieViewNew(name: "Waves", loopMode: .loop)
+                                            .allowsHitTesting(false) // щоб не перехоплювала тапи
+                                           // .padding(.horizontal, 20) // підлаштуй розмір за потреби
+                }
                 
                 Spacer()
                 
@@ -58,6 +66,45 @@ struct BlueLinesView: View {
         
     }
 }
+
+import SwiftUI
+import Lottie
+
+struct LottieViewNew: UIViewRepresentable {
+    let name: String
+    let loopMode: LottieLoopMode
+
+    init(name: String, loopMode: LottieLoopMode = .loop) {
+        self.name = name
+        self.loopMode = loopMode
+    }
+
+    func makeUIView(context: Context) -> some UIView {
+        let view = UIView(frame: .zero)
+
+        let animationView = LottieAnimationView(name: name)
+        animationView.contentMode = .scaleAspectFit
+        animationView.loopMode = loopMode
+        animationView.play()
+
+        animationView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(animationView)
+
+        NSLayoutConstraint.activate([
+            animationView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            animationView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            animationView.topAnchor.constraint(equalTo: view.topAnchor),
+            animationView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        return view
+    }
+
+    func updateUIView(_ uiView: UIViewType, context: Context) {
+        // тут нічого не треба, анімація вже крутиться в loop
+    }
+}
+
 
 #Preview {
     BlueLinesView(index: 1 ,action: { print("N")})

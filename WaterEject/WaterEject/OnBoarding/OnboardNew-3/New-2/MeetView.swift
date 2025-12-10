@@ -59,47 +59,6 @@ struct MeetView: View {
                         .scaleEffect(0.8)
                         .zIndex(2)
                     
-//                    FloatingCardView(
-//                        imageName: "FirstCard",
-//                        baseOffset: CGSize(width: -130, height: -200),
-//                        floatAmplitude: 6,
-//                        rotationAmplitude: 2,
-//                        animationDuration: 2.5,
-//                        delay: 0
-//                    )
-//                    .zIndex(1)
-//                    
-//                    FloatingCardView(
-//                        imageName: "SecondCard",
-//                        baseOffset: CGSize(width: 140, height: -100),
-//                        floatAmplitude: 6,
-//                        rotationAmplitude: -2,
-//                        animationDuration: 2.5,
-//                        delay: 2.5
-//                    )
-//                    .zIndex(1)
-//                    
-//                    FloatingCardView(
-//                        imageName: "ThirdCard",
-//                        baseOffset: CGSize(width: -140, height: 50),
-//                        floatAmplitude: 6,
-//                        rotationAmplitude: 2,
-//                        animationDuration: 2.5,
-//                        delay: 0
-//                    )
-//                    .zIndex(1)
-//                    
-//                    FloatingCardView(
-//                        imageName: "FourthCard",
-//                        baseOffset: CGSize(width: 140, height: 130),
-//                        floatAmplitude: 6,
-//                        rotationAmplitude: -2,
-//                        animationDuration: 2.5,
-//                        delay: 2.5
-//                    )
-//                    .zIndex(3)
-//                    
-//                }
                     // ГРУПА 1: First + Third
                                        FloatingCardView(
                                            imageName: "FirstCard",
@@ -148,7 +107,7 @@ struct MeetView: View {
                 
             }
             .task {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                try? await Task.sleep(nanoseconds: 0_500_000_000)
                 
                 await runGroupLoop()
             }
