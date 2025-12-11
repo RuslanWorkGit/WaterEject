@@ -10,14 +10,42 @@ import SwiftUI
 struct MeetOneView: View {
     let index: Int
     let action: () -> Void
+    @Binding var expandedIndex: Int
     private func handleCTA() {
-        
+        stopAutoCycle()
         action()
     }
-    @State private var expandedIndex: Int = 0
 
+    @State private var cardsCycleTask: Task<Void, Never>? = nil
+    
     // загальний час одного повного циклу для групи (секунди)
     private let cardCycleDuration: Double = 2.5
+    
+    private func startAutoCycle() {
+            // На всяк випадок скасовуємо попередній
+            cardsCycleTask?.cancel()
+            
+            cardsCycleTask = Task {
+                while !Task.isCancelled {
+                    try? await Task.sleep(
+                        nanoseconds: UInt64(cardCycleDuration * 1_000_000_000)
+                    )
+                    if Task.isCancelled { break }
+                    
+                    await MainActor.run {
+                        withAnimation(.spring(response: 0.75, dampingFraction: 0.85)) {
+                            expandedIndex = (expandedIndex + 1) % 3
+                        }
+                    }
+                }
+            }
+        }
+
+        private func stopAutoCycle() {
+            cardsCycleTask?.cancel()
+            cardsCycleTask = nil
+        }
+
     
     var body: some View {
         
@@ -48,49 +76,46 @@ struct MeetOneView: View {
                     
                 }
                 
-        
+                
                 Image("MeetLineOnboard")
                     .resizable()
                     .scaledToFit()
                 
                 HStack(spacing: 12) {
-                                    ModeInfoCard(
-                                        iconName: "slider",
-                                        title: "Frequency Control",
-                                        subtitle: "Adjust pitch for different device",
-                                        isExpanded: expandedIndex == 0
-                                    )
-
-                                    ModeInfoCard(
-                                        iconName: "music",
-                                        title: "Intensity Boost",
-                                        subtitle: "Select Bass or Loudness  ",
-                                        isExpanded: expandedIndex == 1
-                                    )
-
-                                    ModeInfoCard(
-                                        iconName: "userSetting",
-                                        title: "Custom Profiles",
-                                        subtitle: "Save your favorite settings for future use",
-                                        isExpanded: expandedIndex == 2
-                                    )
-                                }
-                                .padding(.horizontal, 20)
+                    ModeInfoCard(
+                        iconName: "slider",
+                        title: "Frequency Control",
+                        subtitle: "Adjust pitch for different device",
+                        isExpanded: expandedIndex == 0
+                    )
+                    
+                    ModeInfoCard(
+                        iconName: "music",
+                        title: "Intensity Boost",
+                        subtitle: "Select Bass or Loudness  ",
+                        isExpanded: expandedIndex == 1
+                    )
+                    
+                    ModeInfoCard(
+                        iconName: "userSetting",
+                        title: "Custom Profiles",
+                        subtitle: "Save your favorite settings for future use",
+                        isExpanded: expandedIndex == 2
+                    )
+                }
+                .padding(.horizontal, 20)
                 
                 Spacer()
                 
                 
             }
-            .task {
-                            while true {
-                                try? await Task.sleep(nanoseconds: UInt64(cardCycleDuration * 1_000_000_000))
-
-                                withAnimation(.spring(response: 0.75, dampingFraction: 0.85)) {
-                                    expandedIndex = (expandedIndex + 1) % 3
-                                }
-                            }
-                        }
-
+            .onAppear {
+                startAutoCycle()
+            }
+            .onDisappear {
+                stopAutoCycle()
+            }
+            
             
         }
         
@@ -104,7 +129,7 @@ struct ModeInfoCard: View {
     let title: String
     let subtitle: String
     let isExpanded: Bool
-
+    
     var body: some View {
         HStack(spacing: 6) {
             // Синій квадрат з іконкою
@@ -119,24 +144,24 @@ struct ModeInfoCard: View {
             .background(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .fill(Color(red: 38/255, green: 127/255, blue: 255/255))
-                        )
-           // .frame(width: 48, height: 48)
-
+            )
+            // .frame(width: 48, height: 48)
+            
             // Текст показуємо тільки коли розгорнута
             if isExpanded {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.black)
-
+                    
                     Text(subtitle)
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(Color(red: 90/255, green: 96/255, blue: 104/255))
                 }
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
             }
-
-
+            
+            
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
@@ -146,12 +171,12 @@ struct ModeInfoCard: View {
                 .fill(Color.white)
                 .shadow(color: .black.opacity(0.06), radius: 14, x: 0, y: 6)
         )
-        .animation(.spring(response: 0.75, dampingFraction: 0.85), value: isExpanded)
+        //.animation(.spring(response: 0.75, dampingFraction: 0.85), value: isExpanded)
     }
 }
 
 
 
 #Preview {
-    MeetOneView(index: 2 ,action: { print("N")})
+    //MeetOneView(index: 2 ,action: { print("N")}, expandedIndex: 1)
 }

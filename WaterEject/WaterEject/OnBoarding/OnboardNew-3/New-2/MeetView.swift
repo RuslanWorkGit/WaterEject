@@ -60,46 +60,90 @@ struct MeetView: View {
                         .zIndex(2)
                     
                     // ГРУПА 1: First + Third
-                                       FloatingCardView(
-                                           imageName: "FirstCard",
-                                           baseOffset: CGSize(width: isLarge ? -130 : -110, height: isLarge ? -200 : -180),
-                                           floatAmplitude: 6,
-                                           rotationAmplitude: -3,
-                                           cycleDuration: cardCycleDuration,
-                                           trigger: group13Trigger
-                                       )
-                                       .zIndex(1)
+//                                       FloatingCardView(
+//                                           imageName: "FirstCard",
+//                                           baseOffset: CGSize(width: isLarge ? -130 : -110, height: isLarge ? -200 : -180),
+//                                           floatAmplitude: 6,
+//                                           rotationAmplitude: -3,
+//                                           cycleDuration: cardCycleDuration,
+//                                           trigger: group13Trigger
+//                                       )
+//                                       .zIndex(1)
+//
+//                                       FloatingCardView(
+//                                           imageName: "ThirdCard",
+//                                           baseOffset: CGSize(width: isLarge ? -140 : -120, height: isLarge ? 50 : 30),
+//                                           floatAmplitude: 6,
+//                                           rotationAmplitude: -3,
+//                                           cycleDuration: cardCycleDuration,
+//                                           trigger: group13Trigger
+//                                       )
+//                                       .zIndex(1)
+//
+//                                       // ГРУПА 2: Second + Fourth
+//                                       FloatingCardView(
+//                                           imageName: "SecondCard",
+//                                           baseOffset: CGSize(width: isLarge ? 160 : 140, height: isLarge ? -100 : -80),
+//                                           floatAmplitude: 6,
+//                                           rotationAmplitude: 3,
+//                                           cycleDuration: cardCycleDuration,
+//                                           trigger: group24Trigger
+//                                       )
+//                                       .zIndex(1)
+//
+//                                       FloatingCardView(
+//                                           imageName: "FourthCard",
+//                                           baseOffset: CGSize(width: isLarge ? 140 : 120, height: isLarge ? 130 : 120),
+//                                           floatAmplitude: 6,
+//                                           rotationAmplitude: 3,
+//                                           cycleDuration: cardCycleDuration,
+//                                           trigger: group24Trigger
+//                                       )
+//                                       .zIndex(3)
+                    
+                    FloatingCardView(
+                            imageName: "FirstCard",
+                            baseOffset: CGSize(width: isLarge ? -130 : -110,
+                                               height: isLarge ? -200 : -180),
+                            floatAmplitude: 6,
+                            rotationAmplitude: -3,
+                            animationDuration: 2.2,
+                            initialDelay: 0.0
+                        )
+                        .zIndex(1)
 
-                                       FloatingCardView(
-                                           imageName: "ThirdCard",
-                                           baseOffset: CGSize(width: isLarge ? -140 : -120, height: isLarge ? 50 : 30),
-                                           floatAmplitude: 6,
-                                           rotationAmplitude: -3,
-                                           cycleDuration: cardCycleDuration,
-                                           trigger: group13Trigger
-                                       )
-                                       .zIndex(1)
+                        FloatingCardView(
+                            imageName: "SecondCard",
+                            baseOffset: CGSize(width: isLarge ? 160 : 140,
+                                               height: isLarge ? -100 : -80),
+                            floatAmplitude: 7,
+                            rotationAmplitude: 3,
+                            animationDuration: 2.9,
+                            initialDelay: 0.3
+                        )
+                        .zIndex(1)
 
-                                       // ГРУПА 2: Second + Fourth
-                                       FloatingCardView(
-                                           imageName: "SecondCard",
-                                           baseOffset: CGSize(width: isLarge ? 160 : 140, height: isLarge ? -100 : -80),
-                                           floatAmplitude: 6,
-                                           rotationAmplitude: 3,
-                                           cycleDuration: cardCycleDuration,
-                                           trigger: group24Trigger
-                                       )
-                                       .zIndex(1)
+                        FloatingCardView(
+                            imageName: "ThirdCard",
+                            baseOffset: CGSize(width: isLarge ? -140 : -120,
+                                               height: isLarge ? 50 : 30),
+                            floatAmplitude: 5,
+                            rotationAmplitude: -2.5,
+                            animationDuration: 2.6,
+                            initialDelay: 0.15
+                        )
+                        .zIndex(1)
 
-                                       FloatingCardView(
-                                           imageName: "FourthCard",
-                                           baseOffset: CGSize(width: isLarge ? 140 : 120, height: isLarge ? 130 : 120),
-                                           floatAmplitude: 6,
-                                           rotationAmplitude: 3,
-                                           cycleDuration: cardCycleDuration,
-                                           trigger: group24Trigger
-                                       )
-                                       .zIndex(3)
+                        FloatingCardView(
+                            imageName: "FourthCard",
+                            baseOffset: CGSize(width: isLarge ? 140 : 120,
+                                               height: isLarge ? 130 : 120),
+                            floatAmplitude: 8,
+                            rotationAmplitude: 3.5,
+                            animationDuration: 2.4,
+                            initialDelay: 0.45
+                        )
+                        .zIndex(3)
                                    }
                 
                 Spacer()
@@ -130,85 +174,90 @@ struct MeetView: View {
 }
 
 
+
+
 //struct FloatingCardView: View {
 //    let imageName: String
-//    let baseOffset: CGSize      // початкове розташування як у тебе в ZStack
-//    let floatAmplitude: CGFloat // наскільки вверх/вниз ходить
-//    let rotationAmplitude: Double // макс. кут повороту
-//    let animationDuration: Double
-//    let delay: Double           // щоб картки не рухались синхронно
-//    
-//    @State private var isAnimating = false
-//    
+//    let baseOffset: CGSize      // базове розташування в ZStack
+//    let floatAmplitude: CGFloat // наскільки вгору/вниз ходить
+//    let rotationAmplitude: Double // макс. кут повороту (в градусах)
+//    let cycleDuration: Double   // повний цикл: вниз+поворот → назад
+//
+//    /// Кожна зміна trigger запускає один повний цикл анімації
+//    let trigger: Int
+//
+//    @State private var isForward = false
+//
 //    var body: some View {
 //        Image(imageName)
+//            // обертання навколо центру
 //            .rotationEffect(
-//                .degrees(isAnimating ? -rotationAmplitude : rotationAmplitude),
+//                .degrees(isForward ? rotationAmplitude : -rotationAmplitude),
 //                anchor: .center
 //            )
-//            .offset(x: baseOffset.width,
-//                    y: baseOffset.height + (isAnimating ? -floatAmplitude : floatAmplitude))
-//        
-//            .onAppear {
-//                withAnimation(
-//                    .easeInOut(duration: animationDuration)
-//                    .repeatForever(autoreverses: true)
-//                    .delay(delay)
-//                ) {
-//                    isAnimating = true
-//                }
+//            // рух вгору / вниз
+//            .offset(
+//                x: baseOffset.width,
+//                y: baseOffset.height + (isForward ? -floatAmplitude : floatAmplitude)
+//            )
+//            // реагуємо на зміну trigger
+//            .onChange(of: trigger) { _ in
+//                runOneCycle()
 //            }
+//    }
+//
+//    private func runOneCycle() {
+//        // половина часу — вперед, половина — назад
+//        let half = cycleDuration / 2
+//
+//        // фаза "вперед"
+//        withAnimation(.easeInOut(duration: half)) {
+//            isForward = true
+//        }
+//
+//        // фаза "назад"
+//        DispatchQueue.main.asyncAfter(deadline: .now() + half) {
+//            withAnimation(.easeInOut(duration: half)) {
+//                isForward = false
+//            }
+//        }
 //    }
 //}
 
 struct FloatingCardView: View {
     let imageName: String
-    let baseOffset: CGSize      // базове розташування в ZStack
-    let floatAmplitude: CGFloat // наскільки вгору/вниз ходить
-    let rotationAmplitude: Double // макс. кут повороту (в градусах)
-    let cycleDuration: Double   // повний цикл: вниз+поворот → назад
+    let baseOffset: CGSize          // базове положення в ZStack
+    let floatAmplitude: CGFloat     // наскільки вгору/вниз ходить
+    let rotationAmplitude: Double   // макс. кут повороту
+    let animationDuration: Double   // тривалість повного ходу «вниз-вгору»
+    let initialDelay: Double        // стартова затримка, щоб не були в фазі
 
-    /// Кожна зміна trigger запускає один повний цикл анімації
-    let trigger: Int
-
-    @State private var isForward = false
+    @State private var isUp = false
 
     var body: some View {
         Image(imageName)
-            // обертання навколо центру
             .rotationEffect(
-                .degrees(isForward ? rotationAmplitude : -rotationAmplitude),
+                .degrees(isUp ? rotationAmplitude : -rotationAmplitude),
                 anchor: .center
             )
-            // рух вгору / вниз
             .offset(
                 x: baseOffset.width,
-                y: baseOffset.height + (isForward ? -floatAmplitude : floatAmplitude)
+                y: baseOffset.height + (isUp ? -floatAmplitude : floatAmplitude)
             )
-            // реагуємо на зміну trigger
-            .onChange(of: trigger) { _ in
-                runOneCycle()
+            .onAppear {
+                // невеликий рандом, щоб ще більше розсинхронити
+                let extraJitter = Double.random(in: 0...0.4)
+
+                withAnimation(
+                    .easeInOut(duration: animationDuration)
+                        .delay(initialDelay + extraJitter)
+                        .repeatForever(autoreverses: true)
+                ) {
+                    isUp = true
+                }
             }
-    }
-
-    private func runOneCycle() {
-        // половина часу — вперед, половина — назад
-        let half = cycleDuration / 2
-
-        // фаза "вперед"
-        withAnimation(.easeInOut(duration: half)) {
-            isForward = true
-        }
-
-        // фаза "назад"
-        DispatchQueue.main.asyncAfter(deadline: .now() + half) {
-            withAnimation(.easeInOut(duration: half)) {
-                isForward = false
-            }
-        }
     }
 }
-
 
 
 

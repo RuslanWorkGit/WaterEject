@@ -33,6 +33,7 @@ struct OnboardingFlowViewEight: View {
     
     @State private var childAnimate = false
     private let slideDuration: Double = 0.5
+    @State private var modesExpandedIndex: Int = 0
     
     
     private func appendStep(_ step: OnboardingStepEight) {
@@ -111,6 +112,25 @@ struct OnboardingFlowViewEight: View {
         isAnimating = true
         isForward = forward
         childAnimate = false
+        
+        if step == .paywall {
+            isAnimating = true
+
+            // НЕ чіпаємо prevStep → MeetView залишається тим самим інстансом
+            incomingStep = step
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
+                currentStep = step
+                incomingStep = nil
+                isAnimating = false
+
+                Telemetry.shared.onbScreenView(flowId: flowId,
+                                               screenId: screenId(for: step))
+                PaywallGate.shared.currentContext = .onboarding
+            }
+
+            return
+        }
 
         // фіксуємо старий і запускаємо оверлей
         prevStep = currentStep
@@ -187,7 +207,7 @@ struct OnboardingFlowViewEight: View {
         case .stepTwo:
             BlueLinesView(index: 1, action: { goTo(.stepThree, forward: true) })
         case .stepThree:
-            MeetOneView(index: 2, action: { goTo(.stepFour, forward: true) })
+            MeetOneView(index: 2, action: { goTo(.stepFour, forward: true) }, expandedIndex: $modesExpandedIndex )
             
         case .stepFour:
             MeetView(index: 3, action: { goTo(.paywall, forward: true) })

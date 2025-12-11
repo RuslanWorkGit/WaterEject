@@ -15,6 +15,7 @@ struct WaterDropsView: View {
         action()
     }
     
+    
     var body: some View {
         
         OnboardWaterDrops(ctaTitle: "Start Cleaning", ctaAction: handleCTA, pages: 4, pageIndex: index, fixedWidth: 260) {
@@ -27,26 +28,32 @@ struct WaterDropsView: View {
                         .foregroundStyle(.black)
                         .multilineTextAlignment(.center)
                         .padding(.top, 64)
-                        //.padding(.bottom, 12)
+                    //.padding(.bottom, 12)
                     
                     Text("From Your Speakers").font(.system(size: 26, weight: .semibold))
                         .foregroundStyle(.black)
                         .multilineTextAlignment(.center)
-                        //.padding(.top, 40)
+                    //.padding(.top, 40)
                         .padding(.bottom, 12)
                     
                     Text("Sound waves push moisture out safely.")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
-
+                    
                 }
                 
                 Spacer()
                 
-                Image("DropsImg")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(.horizontal, 30)
+                ZStack {
+                    Image("DropsImg-1")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(.horizontal, 30)
+                    
+                    RotatingSmallImage()
+                    
+                }
+                
                 
                 
             }
@@ -93,7 +100,7 @@ struct OnboardWaterDrops<Content: View>: View {
                 
                 .padding(.bottom, 0)
                 
-        }
+            }
     }
 }
 
@@ -123,7 +130,7 @@ struct NewTwoOboardButton: View {
                     x: 0, y: 1, blur: 0, spread: 2
                 )
         )
-
+        
         
     }
 }
@@ -134,7 +141,7 @@ struct PageDots: View {
     
     private let active = Color(red: 49/255, green: 125/255, blue: 236/255) // #317DEC
     private let inactive = Color(red: 220/255, green: 224/255, blue: 230/255) // сірі точки
-
+    
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<total, id: \.self) { i in
@@ -157,7 +164,26 @@ struct PageDots: View {
     }
 }
 
+struct RotatingSmallImage: View {
+    /// один повний оберт за 30 секунд (можеш поміняти)
+    private let rotationPeriod: TimeInterval = 30
+
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            let t = timeline.date.timeIntervalSinceReferenceDate
+            let progress = t.truncatingRemainder(dividingBy: rotationPeriod) / rotationPeriod
+            let angle = Angle.degrees(progress * 360)
+
+            Image("small")
+                .resizable()
+                .scaledToFit()
+                .padding(.horizontal, 30)
+                .rotationEffect(angle)
+        }
+    }
+}
+
 
 #Preview {
-    WaterDropsView(index: 0 ,action: { print("N")})
+    // WaterDropsView(index: 0 ,action: { print("N")}, rotateSmall: .constant(true) )
 }

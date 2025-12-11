@@ -43,23 +43,14 @@ struct ThirdWaveView: View {
             
                 //Lottie
                 
-                LottieSwiftUIView(
-                    name: "NewWaveLine",
-                    loopMode: .loop,
-                    speed: 0.8,
-                    contentMode: .scaleAspectFit
-                )
+                ThirdWaveLottieView()
+                                        .allowsHitTesting(false)
+                                        .padding(.horizontal, -10)
           // ← головний контролер розміру
-                .frame(maxWidth: .infinity)   // по ширині як екран
-                .padding(.horizontal, -10)
-                .padding(.top, 24)
-                
+//                .frame(maxWidth: .infinity)   // по ширині як екран
+//                .padding(.horizontal, -10)
+//                .padding(.top, 24)
 
-                
-//                Image("OnboardWaves")
-//                    .resizable()
-//                    .scaledToFit()
-//                    .padding(.horizontal, -10)
                 
                 Spacer()
                 
@@ -97,42 +88,46 @@ struct ThirdWaveView: View {
     }
 }
 
-struct LottieSwiftUIView: UIViewRepresentable {
-    let name: String
-    var loopMode: LottieLoopMode = .loop
-    var speed: CGFloat = 1.0
-    var contentMode: UIView.ContentMode = .scaleAspectFit
-
-    func makeUIView(context: Context) -> UIView {
-        let container = UIView()
-        container.backgroundColor = .clear
-
-        let animationView = LottieAnimationView(name: name)
-        animationView.translatesAutoresizingMaskIntoConstraints = false
-        animationView.loopMode = loopMode
-        animationView.animationSpeed = speed
-        animationView.contentMode = contentMode
-        animationView.backgroundBehavior = .pauseAndRestore
-
-        container.addSubview(animationView)
-
-        // Жорстко фіксуємо розмір анімації всередині контейнера
-        NSLayoutConstraint.activate([
-            animationView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            animationView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            animationView.widthAnchor.constraint(equalTo: container.widthAnchor, multiplier: 1),
-            animationView.heightAnchor.constraint(equalTo: container.heightAnchor, multiplier: 1)
-        ])
-
-        animationView.play()
-        return container
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        // якщо треба оновлювати speed / loopMode — можна знайти animationView по subviews
+final class ThirdWaveAnimationCache {
+    static let shared = ThirdWaveAnimationCache()
+    
+    let animationView: LottieAnimationView
+    
+    private init() {
+        let view = LottieAnimationView(name: "NewWaveLine") // твій json
+        view.contentMode = .scaleAspectFit
+        view.loopMode = .loop
+        view.animationSpeed = 0.8
+        view.play()
+        self.animationView = view
     }
 }
 
+struct ThirdWaveLottieView: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView(frame: .zero)
+        let animationView = ThirdWaveAnimationCache.shared.animationView
+        
+        if animationView.superview !== container {
+            animationView.removeFromSuperview()
+            animationView.translatesAutoresizingMaskIntoConstraints = false
+            container.addSubview(animationView)
+            
+            NSLayoutConstraint.activate([
+                animationView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                animationView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                animationView.topAnchor.constraint(equalTo: container.topAnchor),
+                animationView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+            ])
+        }
+        
+        return container
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        // нічого не треба — анімація вже крутиться в loop
+    }
+}
 
 
 

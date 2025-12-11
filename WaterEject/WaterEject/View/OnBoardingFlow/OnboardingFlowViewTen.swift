@@ -27,7 +27,7 @@ struct OnboardingFlowViewTen: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
     
-    
+    @StateObject private var reviewsCarouselModel = ReviewsCarouselModel()
     
     @State private var childAnimate = false
     private let slideDuration: Double = 0.5
@@ -175,6 +175,7 @@ struct OnboardingFlowViewTen: View {
         switch step {
         case .stepOne:
             FirstWelcomeView(action: { goTo(.stepTwo, forward: true) }, textButton: "Continue")
+                .environmentObject(reviewsCarouselModel)
             
         case .stepTwo:
 

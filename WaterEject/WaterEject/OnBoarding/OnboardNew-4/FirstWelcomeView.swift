@@ -115,23 +115,33 @@ struct OnboardNewStyle<Content: View>: View {
     }
 }
 
+enum Slide: Int, CaseIterable {
+    case maria, daniel, kevin, sophie
+}
+
+final class ReviewsCarouselModel: ObservableObject {
+    @Published var current: Slide = .maria
+    @Published var isForward: Bool = true
+}
+
+
 private struct ReviewsCarouselView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject private var model: ReviewsCarouselModel
+        @Environment(\.accessibilityReduceMotion) var reduceMotion
 
-    enum Slide: Int, CaseIterable {
-        case maria, daniel, kevin, sophie
-    }
+        @State private var autoAdvanceWorkItem: DispatchWorkItem?
+        @State private var didShowOnce = false
 
-    @State private var current: Slide = .maria
-    @State private var isForward: Bool = true          // 👈 напрямок
-    @State private var autoAdvanceWorkItem: DispatchWorkItem?
 
-    private let interval: TimeInterval = 2.5
+
+
+
+    private let interval: TimeInterval = 2.0
 
     var body: some View {
         ZStack(alignment: .top) {
             Group {
-                switch current {
+                switch model.current {
                 case .maria:
                     OnboardingReviewBlock(
                         name: "Maria",
@@ -158,12 +168,12 @@ private struct ReviewsCarouselView: View {
                     )
                 }
             }
-            .id(current)
+            .id(model.current)
             .transition(
                 .asymmetric(
-                    insertion: .move(edge: isForward ? .trailing : .leading)  // 👈 напрямок для появи
+                    insertion: .move(edge: model.isForward ? .trailing : .leading)  // 👈 напрямок для появи
                         .combined(with: .opacity),
-                    removal:   .move(edge: isForward ? .leading : .trailing)  // 👈 напрямок для зникнення
+                    removal:   .move(edge: model.isForward ? .leading : .trailing)  // 👈 напрямок для зникнення
                         .combined(with: .opacity)
                 )
             )
@@ -172,7 +182,7 @@ private struct ReviewsCarouselView: View {
                    alignment: .top)
         }
         .frame(height: 230)
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.35), value: current)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.35), value: model.current)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 20)
@@ -200,20 +210,20 @@ private struct ReviewsCarouselView: View {
 
     private func goNext() {
         let all = Slide.allCases
-        guard let idx = all.firstIndex(of: current) else { return }
+        guard let idx = all.firstIndex(of: model.current) else { return }
         let next = all[(idx + 1) % all.count]
 
-        isForward = true              // 👈 переходимо вперед
-        current = next
+        model.isForward = true              // 👈 переходимо вперед
+        model.current = next
     }
 
     private func goPrevious() {
         let all = Slide.allCases
-        guard let idx = all.firstIndex(of: current) else { return }
+        guard let idx = all.firstIndex(of: model.current) else { return }
         let prev = all[(idx - 1 + all.count) % all.count]
 
-        isForward = false             // 👈 переходимо назад
-        current = prev
+        model.isForward = false             // 👈 переходимо назад
+        model.current = prev
     }
 
     // MARK: - Авто-перелистування
