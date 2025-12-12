@@ -89,6 +89,8 @@ struct OnboardingFlowViewOne: View {
                 //onbLastShownTS = Date().timeIntervalSince1970
                 //Telemetry.shared.onboardFlowMark(.v31)
                 
+                Telemetry.shared.funnelOnboardStart(onboardId: onboardId)
+                
                 Telemetry.shared.onboardStarted(onboardId: onboardId)
                 
                 Telemetry.shared.onbFlowStart(flowId: flowId)

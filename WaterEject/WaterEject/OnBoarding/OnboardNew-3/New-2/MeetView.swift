@@ -105,9 +105,9 @@ struct MeetView: View {
                             imageName: "FirstCard",
                             baseOffset: CGSize(width: isLarge ? -130 : -110,
                                                height: isLarge ? -200 : -180),
-                            floatAmplitude: 6,
-                            rotationAmplitude: -3,
-                            animationDuration: 2.2,
+                            floatAmplitude: 3,
+                            rotationAmplitude: -1,
+                            animationDuration: 1.0,
                             initialDelay: 0.0
                         )
                         .zIndex(1)
@@ -116,10 +116,10 @@ struct MeetView: View {
                             imageName: "SecondCard",
                             baseOffset: CGSize(width: isLarge ? 160 : 140,
                                                height: isLarge ? -100 : -80),
-                            floatAmplitude: 7,
-                            rotationAmplitude: 3,
-                            animationDuration: 2.9,
-                            initialDelay: 0.3
+                            floatAmplitude: 3,
+                            rotationAmplitude: 1,
+                            animationDuration: 1.0,
+                            initialDelay: 0.0
                         )
                         .zIndex(1)
 
@@ -127,10 +127,10 @@ struct MeetView: View {
                             imageName: "ThirdCard",
                             baseOffset: CGSize(width: isLarge ? -140 : -120,
                                                height: isLarge ? 50 : 30),
-                            floatAmplitude: 5,
-                            rotationAmplitude: -2.5,
-                            animationDuration: 2.6,
-                            initialDelay: 0.15
+                            floatAmplitude: 3,
+                            rotationAmplitude: -1.0,
+                            animationDuration: 1.0,
+                            initialDelay: 0.0
                         )
                         .zIndex(1)
 
@@ -138,10 +138,10 @@ struct MeetView: View {
                             imageName: "FourthCard",
                             baseOffset: CGSize(width: isLarge ? 140 : 120,
                                                height: isLarge ? 130 : 120),
-                            floatAmplitude: 8,
-                            rotationAmplitude: 3.5,
-                            animationDuration: 2.4,
-                            initialDelay: 0.45
+                            floatAmplitude: 3,
+                            rotationAmplitude: 1.0,
+                            animationDuration: 1.0,
+                            initialDelay: 0.0
                         )
                         .zIndex(3)
                                    }

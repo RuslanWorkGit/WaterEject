@@ -19,7 +19,7 @@ struct MeetOneView: View {
     @State private var cardsCycleTask: Task<Void, Never>? = nil
     
     // загальний час одного повного циклу для групи (секунди)
-    private let cardCycleDuration: Double = 2.5
+    private let cardCycleDuration: Double = 1.8
     
     private func startAutoCycle() {
             // На всяк випадок скасовуємо попередній
@@ -33,7 +33,7 @@ struct MeetOneView: View {
                     if Task.isCancelled { break }
                     
                     await MainActor.run {
-                        withAnimation(.spring(response: 0.75, dampingFraction: 0.85)) {
+                        withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) {
                             expandedIndex = (expandedIndex + 1) % 3
                         }
                     }

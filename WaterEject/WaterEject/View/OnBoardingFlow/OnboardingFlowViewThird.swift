@@ -88,6 +88,7 @@ struct OnboardingFlowViewThree: View {
             .task {
                 //onbLastShownTS = Date().timeIntervalSince1970
                // Telemetry.shared.onboardFlowMark(.v33)
+                Telemetry.shared.funnelOnboardStart(onboardId: onboardId)
                 
                 Telemetry.shared.onboardStarted(onboardId: onboardId)
                 
