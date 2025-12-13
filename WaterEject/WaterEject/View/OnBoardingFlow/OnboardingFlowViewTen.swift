@@ -199,22 +199,34 @@ struct OnboardingFlowViewTen: View {
 //                       persist(tag: .v41)
 //                   }
             
-            PaywallFiveView(
-                    onFinish: finishOnboarding,
-                    onboardId: onboardId,
-                    startDelay: slideDuration + 0.1,   // 0.55 s
-                    summaryTag: .v10,
-                    stepsVisited: stepsVisited,
-                    startAnimations: startAnimations
-
-                )
-
-            .onAppear {
-                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
-                    paywallShown = true        // <-- тут, а не вище
-                    persist(tag: .v10)      // якщо зберігаєш прогрес
-
-            }
+            PaywallAB.shared
+                   .onboardingPaywallView(
+                       for: .v10,                      
+                       onFinish: finishOnboarding,
+                       startDelay: slideDuration + 0.0,
+                       stepsVisited: stepsVisited
+                   )
+                   .onAppear {
+                       paywallShown = true
+                       persist(tag: .v10)
+                   }
+            
+//            PaywallFiveView(
+//                    onFinish: finishOnboarding,
+//                    onboardId: onboardId,
+//                    startDelay: slideDuration + 0.1,   // 0.55 s
+//                    summaryTag: .v10,
+//                    stepsVisited: stepsVisited,
+//                    startAnimations: startAnimations
+//
+//                )
+//
+//            .onAppear {
+//                    //Telemetry.shared.onbScreenView(flowId: flowId, screenId: "paywall")
+//                    paywallShown = true        // <-- тут, а не вище
+//                    persist(tag: .v10)      // якщо зберігаєш прогрес
+//
+//            }
         }
     }
 

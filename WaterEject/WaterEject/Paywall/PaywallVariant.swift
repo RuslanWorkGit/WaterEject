@@ -14,6 +14,7 @@ import SwiftUI
 enum PaywallVariant: String, Identifiable {
     case third    = "third"  // наш основний
     case fourth   = "fourth"  // НОВИЙ PaywallFourView
+    case fifth     = "fifth"
 //    case A        = "A"
 //    case B        = "B"
     
@@ -33,7 +34,8 @@ final class PaywallAB {
             
             // ⬇️ нові ключі
             "paywall3_enabled": true as NSObject,
-            "paywall4_enabled": true as NSObject
+            "paywall4_enabled": true as NSObject,
+            "paywall5_enabled": true as NSObject
         ])
     }
     
@@ -57,6 +59,8 @@ final class PaywallAB {
             return rc["paywall3_enabled"].boolValue
         case .fourth:
             return rc["paywall4_enabled"].boolValue
+        case .fifth:
+            return rc["paywall5_enabled"].boolValue
 //        case .A, .B:
 //            return true
         }
@@ -68,6 +72,8 @@ final class PaywallAB {
             return .third       // старий пейвол основний
         case .v5, .v6, .v7, .v8, .v9: // нові флоу 5/6/7/8
             return .fourth      // новий пейвол основний
+        case .v10:
+            return .fifth
         default:
             return .fourth
         }
@@ -139,6 +145,17 @@ final class PaywallAB {
                     stepsVisited: stepsVisited
                 )
             )
+            
+        case .fifth:
+            return AnyView(
+                PaywallFiveView(
+                    onFinish: onFinish,
+                    onboardId: tag.rawValue,
+                    startDelay: startDelay,
+                    summaryTag: tag,
+                    stepsVisited: stepsVisited
+            )
+                )
 
 //        case .A, .B:
 //            // якщо колись захочеш ще варіанти – тут можна розширити
@@ -207,6 +224,10 @@ final class PaywallAB {
             // НОВИЙ пейвол як варіант
             return AnyView(
                 PaywallFourView(onFinish: onFinish)
+            )
+        case .fifth:
+            return  AnyView(
+                PaywallFiveView(onFinish: onFinish)
             )
 //        case .A:
 //            return AnyView(PaywallStubView(title: "Paywall A (stub)", onClose: onFinish))
