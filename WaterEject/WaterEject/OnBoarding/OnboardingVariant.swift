@@ -22,6 +22,7 @@ enum OnboardingVariant: String, Identifiable, CaseIterable {
     case G = "Onb_8" // OnboardAnimationView
     case H = "Onb_9" // OnboardAnimationView
     case J = "Onb_3_1" // OnboardingFlowViewOne
+    case K = "Onb_10" // OnboardAnimationView
     
     var id: String { rawValue }
 }
@@ -46,7 +47,8 @@ final class OnboardingAB {
                 "Onb_6_enabled": true as NSObject,
                 "Onb_7_enabled": true as NSObject,
                 "Onb_8_enabled": true as NSObject,
-                "Onb_9_enabled": true as NSObject
+                "Onb_9_enabled": true as NSObject,
+                "Onb_10_enabled": true as NSObject
             ])
         }
     
@@ -143,6 +145,8 @@ final class OnboardingAB {
             return AnyView(OnboardingFlowViewNine())
         case .J:
             return AnyView(OnboardingFlowViewOne())
+        case .K:
+            return AnyView(OnboardingFlowViewTen())
         }
     }
 }

@@ -133,6 +133,10 @@ struct StereoView: View {
                 PaywallFourView(onFinish: {
                     paywallGate.dismissPaywall()
                 })
+            case .fifth:
+                PaywallFiveView(onFinish: {
+                    paywallGate.dismissPaywall()
+                })
             }
         }
     }
