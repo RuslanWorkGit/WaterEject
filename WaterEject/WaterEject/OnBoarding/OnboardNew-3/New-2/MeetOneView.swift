@@ -59,20 +59,27 @@ struct MeetOneView: View {
             VStack() {
                 VStack(alignment: .center) {
                     Text("Meet the Cleaning Modes")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundStyle(.black)
+                        .font(.system(size: 32, weight: .bold))
                         .multilineTextAlignment(.center)
-                        .padding(.top, 64)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 44)
+
+        
                     //.padding(.bottom, 12)
                     
                     
                     
                     Text("Each one is tuned for a specific purpose — from deep water ejection to frequency modulation.")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
                         .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                         .foregroundStyle(Color(red: 59/255, green: 65/255, blue: 72/255))
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 22)
                     
                 }
                 
@@ -178,5 +185,5 @@ struct ModeInfoCard: View {
 
 
 #Preview {
-    //MeetOneView(index: 2 ,action: { print("N")}, expandedIndex: 1)
+    MeetOneView(index: 2 ,action: { print("N")}, expandedIndex: .constant(0))
 }
