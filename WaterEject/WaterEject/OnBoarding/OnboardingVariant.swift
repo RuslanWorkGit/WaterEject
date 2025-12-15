@@ -32,7 +32,7 @@ final class OnboardingAB {
     
     private init() {
             let settings = RemoteConfigSettings()
-            settings.minimumFetchInterval = 1800 // на проді зроби 3600+
+            settings.minimumFetchInterval = 0 // на проді зроби 3600+
             rc.configSettings = settings
             
             rc.setDefaults([
@@ -54,6 +54,7 @@ final class OnboardingAB {
     
     private let rc = RemoteConfig.remoteConfig()
     private let storageKey = "onboarding_variant_v2"
+    private let rcSignatureKey = "onboarding_rc_signature_v1"
     
     private func isEnabled(_ variant: OnboardingVariant) -> Bool {
         let key = "\(variant.rawValue)_enabled"   // наприклад "Onb_3.3_enabled"
@@ -83,7 +84,33 @@ final class OnboardingAB {
         }
     }
     
+    private func currentRCSignature() -> String {
+        let force = rc["onb_force"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // важливо: включаємо всі прапорці, щоб будь-яка зміна RC міняла signature
+        let flags = OnboardingVariant.allCases
+            .map { "\($0.rawValue)=\(isEnabled($0) ? 1 : 0)" }
+            .joined(separator: "|")
+
+        return "force=\(force)|flags=\(flags)"
+    }
+
+    @discardableResult
+    func syncAssignmentIfRCChanged() -> Bool {
+        let sig = currentRCSignature()
+        let old = UserDefaults.standard.string(forKey: rcSignatureKey)
+
+        guard old != sig else { return false }
+
+        UserDefaults.standard.set(sig, forKey: rcSignatureKey)
+        UserDefaults.standard.removeObject(forKey: storageKey)   // 👈 скидаємо кеш варіанта
+        return true
+    }
+    
     func variant() -> OnboardingVariant {
+        
+        _ = syncAssignmentIfRCChanged()
+        
             // 1) спроба взяти закешований варіант, але тільки якщо він ще enabled
             if let raw = UserDefaults.standard.string(forKey: storageKey),
                let v = OnboardingVariant(rawValue: raw),

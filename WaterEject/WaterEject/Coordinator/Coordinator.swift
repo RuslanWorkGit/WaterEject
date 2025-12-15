@@ -71,6 +71,8 @@ final class AppCoordinator: ObservableObject {
                }
            }
        }
+    
+    
        
     
     func showOnboarding() {
@@ -82,6 +84,18 @@ final class AppCoordinator: ObservableObject {
     
     func showMainTabbar() {
         currentScreen = .mainTabbar
+    }
+    
+    func routeAfterBoot() {
+        Task { [weak self] in
+            guard let self else { return }
+
+            if await PaywallGate.shared.isPro() {
+                self.currentScreen = .mainTabbar
+                return
+            }
+            self.currentScreen = self.hasSeenOnboarding ? .paywall : .onboarding
+        }
     }
     
     func showSpecialOfferFromPush(placeWhereBuy: String = "Push notification") {

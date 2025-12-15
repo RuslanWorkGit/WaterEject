@@ -226,8 +226,8 @@ struct WaterEjectApp: App {
             print("shared apps ids =", snap?.documents.map { $0.documentID } ?? [], "err:", err as Any)
         }
 
-        OnboardingAB.shared.fetchRemoteConfig()
-        PaywallAB.shared.fetchRemoteConfig()
+//        OnboardingAB.shared.fetchRemoteConfig()
+//        PaywallAB.shared.fetchRemoteConfig()
     }
 
     var body: some Scene {

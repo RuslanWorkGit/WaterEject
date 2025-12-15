@@ -42,6 +42,12 @@ final class PaywallAB {
     private let rc = RemoteConfig.remoteConfig()
     private let storageKey = "paywall_variant_v1"
     
+    private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
+
+    private func enabledPaywalls() -> [PaywallVariant] {
+        allPaywalls.filter { isEnabled($0) }
+    }
+    
     func fetchRemoteConfig(completion: (() -> Void)? = nil) {
         rc.fetchAndActivate { _, _ in completion?() }
     }
@@ -79,37 +85,74 @@ final class PaywallAB {
         }
     }
     
+//    func onboardingPaywallVariant(for tag: OnboardTag) -> PaywallVariant {
+//        // 0) форс з RC — як і було, має абсолютний пріоритет
+//        let forceKey = rc["paywall_force"].stringValue
+//        if !forceKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+//           let forced = parseForcedVariant(forceKey) {
+//            return forced
+//        }
+//
+//        let primary  = primaryOnboardingVariant(for: tag)
+//        let fallback: PaywallVariant = (primary == .third ? .fourth : .third)
+//
+//        let primaryEnabled  = isEnabled(primary)
+//        let fallbackEnabled = isEnabled(fallback)
+//
+//        switch (primaryEnabled, fallbackEnabled) {
+//        case (true, false):
+//            // увімкнений тільки primary → показуємо його
+//            return primary
+//
+//        case (false, true):
+//            // увімкнений тільки fallback → показуємо його
+//            return fallback
+//
+//        case (false, false):
+//            // обидва вимкнені → безпечний фолбек (щоб не впасти)
+//            return primary
+//
+//        case (true, true):
+//            // ⬅️ коли ОБИДВА true робимо стабільний “рандом” 50/50
+//            let seed = stableUserID() + "|\(tag.rawValue)|paywallAB"
+//            let bucket = abs(seed.hashValue) % 2
+//            return (bucket == 0) ? primary : fallback
+//        }
+//    }
+    
     func onboardingPaywallVariant(for tag: OnboardTag) -> PaywallVariant {
-        // 0) форс з RC — як і було, має абсолютний пріоритет
+        // 0) RC force
         let forceKey = rc["paywall_force"].stringValue
         if !forceKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
            let forced = parseForcedVariant(forceKey) {
             return forced
         }
 
-        let primary  = primaryOnboardingVariant(for: tag)
-        let fallback: PaywallVariant = (primary == .third ? .fourth : .third)
+        // ✅ 1) якщо увімкнений лише 1 пейвол — він для всіх онбордів
+        let enabled = enabledPaywalls()
+        if enabled.count == 1 { return enabled[0] }
 
-        let primaryEnabled  = isEnabled(primary)
-        let fallbackEnabled = isEnabled(fallback)
+        let primary = primaryOnboardingVariant(for: tag)
+
+        // якщо раптом всі вимкнені
+        guard !enabled.isEmpty else { return primary }
+
+        // fallback = перший увімкнений, який не primary
+        let fallback = enabled.first(where: { $0 != primary }) ?? primary
+
+        let primaryEnabled = enabled.contains(primary)
+        let fallbackEnabled = enabled.contains(fallback)
 
         switch (primaryEnabled, fallbackEnabled) {
-        case (true, false):
-            // увімкнений тільки primary → показуємо його
-            return primary
-
-        case (false, true):
-            // увімкнений тільки fallback → показуємо його
-            return fallback
-
+        case (true, false): return primary
+        case (false, true): return fallback
         case (false, false):
-            // обидва вимкнені → безпечний фолбек (щоб не впасти)
-            return primary
-
+            return enabled[0] // ✅ не повертаємо primary, якщо він вимкнений
         case (true, true):
-            // ⬅️ коли ОБИДВА true робимо стабільний “рандом” 50/50
+            // стабільний вибір (див. пункт про hashValue нижче)
             let seed = stableUserID() + "|\(tag.rawValue)|paywallAB"
             let bucket = abs(seed.hashValue) % 2
+
             return (bucket == 0) ? primary : fallback
         }
     }
@@ -185,6 +228,7 @@ final class PaywallAB {
         case "THIRD", "C", "PAYWALL3": return .third
         case "FOURTH", "PAYWALL4", "D":      // ⬅️ додали
             return .fourth
+        case "FIFTH", "PAYWALL5":  return .fifth
         default:       return nil
         }
     }

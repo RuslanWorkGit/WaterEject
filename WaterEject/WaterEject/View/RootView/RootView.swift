@@ -17,7 +17,7 @@ struct RootView: View {
             switch coordinator.currentScreen {
             case .boot:
                 // Можна поставити свій SplashView/лого/чорний фон
-                Color.black.ignoresSafeArea()
+                BootRCView()
             case .paywall:
                 PaywallAB.shared
                     .assignedPaywallView(onFinish: {
@@ -61,6 +61,52 @@ struct RootView: View {
         }
         .animation(nil, value: coordinator.currentScreen)
     }
+}
+
+
+struct BootRCView: View {
+    @EnvironmentObject var coordinator: AppCoordinator
+    @State private var didProceed = false
+
+    var body: some View {
+        Color.black.ignoresSafeArea()
+            .onAppear { bootstrap() }
+    }
+
+    private func bootstrap() {
+        guard !didProceed else { return }
+
+        let group = DispatchGroup()
+
+        group.enter()
+        OnboardingAB.shared.fetchRemoteConfig { group.leave() }
+
+        group.enter()
+        PaywallAB.shared.fetchRemoteConfig { group.leave() }
+
+        group.notify(queue: .main) { proceed() }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            proceed() // fallback якщо немає мережі
+        }
+    }
+
+    private func proceed() {
+        guard !didProceed else { return }
+        didProceed = true
+
+        // ✅ після fetchAndActivate — синхронізуємо призначення
+        let onbChanged = OnboardingAB.shared.syncAssignmentIfRCChanged()
+        _ = OnboardingAB.shared.variant() // щоб одразу записати новий варіант у UserDefaults
+
+//        // (опціонально) якщо хочеш, щоб онборд показався знову навіть тим, хто вже проходив:
+//        if onbChanged {
+//            UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
+//        }
+
+        coordinator.routeAfterBoot()
+    }
+
 }
 
 

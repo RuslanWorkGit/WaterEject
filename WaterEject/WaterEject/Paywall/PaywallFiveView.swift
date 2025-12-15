@@ -220,25 +220,73 @@ struct PaywallFiveView: View {
                         .frame(maxWidth: .infinity,
                                maxHeight: .infinity,
                                alignment: .top)
-                        .opacity(showInfoCardContent ? 1 : 0)      // ⬅️ ВАЖЛИВО
+                        //.opacity(showInfoCardContent ? 1 : 0)      // ⬅️ ВАЖЛИВО
+                       // .opacity(appearReviews ? 1 : 0)
                     }
                     .frame(height: 180)
                     .padding()
                     .opacity(appearReviews ? 1 : 0)
+//                    .onAppear {
+//                        // якщо екран показується як "поточний" (без слайду) – одразу показуємо
+//                        if startAnimations {
+//                            showInfoCardContent = true
+//                            didShowFirstCard = true
+//                            appearReviews = true          // ✅ не було
+//                                    restartAutoAdvance()
+//                        }
+//                    }
+//                    .onChange(of: startAnimations) { newValue in
+//                        // коли OnboardingFlow закінчив слайд → дає true
+//                        if newValue {
+//                            appearReviews = false
+//                                   showInfoCardContent = false
+//                                   didShowFirstCard = true
+//                            
+//                            withAnimation(.easeInOut(duration: 0.2)) {
+//                                appearReviews = true
+//                                showInfoCardContent = true
+//                            }
+//                            
+//                            restartAutoAdvance()
+//                            
+//                            
+//
+//                        } else {
+//                            appearReviews = false
+//                                    showInfoCardContent = false
+//                                    autoAdvanceWorkItem?.cancel()
+//                        }
+//                        
+//                    }
                     .onAppear {
-                        // якщо екран показується як "поточний" (без слайду) – одразу показуємо
                         if startAnimations {
-                            showInfoCardContent = true
                             didShowFirstCard = true
+                            appearReviews = false
+
+                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                                withAnimation(.easeOut(duration: 0.28)) {
+                                    appearReviews = true
+                                }
+                            }
+
+                            restartAutoAdvance()
                         }
                     }
-                    .onChange(of: startAnimations) { newValue in
-                        // коли OnboardingFlow закінчив слайд → дає true
-                        if newValue {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                showInfoCardContent = true
-                            }
+                    .onChange(of: startAnimations) {
+                        if startAnimations {
                             didShowFirstCard = true
+                            appearReviews = false
+
+                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.1) {
+                                withAnimation(.easeOut(duration: 0.28)) {
+                                    appearReviews = true
+                                }
+                            }
+
+                            restartAutoAdvance()
+                        } else {
+                            appearReviews = false
+                            autoAdvanceWorkItem?.cancel()
                         }
                     }
                                         .gesture(
@@ -479,11 +527,12 @@ struct PaywallFiveView: View {
             Task { await viewModel.loadPricing() }
             
 
-            withAnimation(.easeInOut(duration: 0.2)) {
-                appearReviews = true
-            }
             
-            restartAutoAdvance()
+//            withAnimation(.easeInOut(duration: 0.2)) {
+//                appearReviews = true
+//            }
+//            
+//            restartAutoAdvance()
             
         }
         .task {
@@ -494,7 +543,11 @@ struct PaywallFiveView: View {
                 }
             }
         }
-        .onDisappear { pulse = false }
+        .onDisappear {
+            pulse = false
+            autoAdvanceWorkItem?.cancel()
+                autoAdvanceWorkItem = nil
+        }
         
     }
     
