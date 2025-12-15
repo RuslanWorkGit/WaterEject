@@ -38,15 +38,15 @@ struct PaywallFiveView: View {
     
     
     enum InfoCard: Int, CaseIterable {
-            case reviews, features, stats
-        }
-        
-        @State private var currentInfoCard: InfoCard = .reviews
-        
-        // 🔹 нове: напрямок анімації + “ручний” таймер
-        @State private var isForward: Bool = true
-        @State private var autoAdvanceWorkItem: DispatchWorkItem?
-        private let infoCardInterval: TimeInterval = 2.5
+        case reviews, features, stats
+    }
+    
+    @State private var currentInfoCard: InfoCard = .reviews
+    
+    // 🔹 нове: напрямок анімації + “ручний” таймер
+    @State private var isForward: Bool = true
+    @State private var autoAdvanceWorkItem: DispatchWorkItem?
+    private let infoCardInterval: TimeInterval = 2.5
     
     
     
@@ -115,202 +115,108 @@ struct PaywallFiveView: View {
                 
                 VStack(alignment: .center) {
                     
-                    //Spacer()
+                    Spacer()
                     
-                    
-                    (
-                        Text("Remove Water Fast")
-                            .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                    VStack(spacing: 8) {
                         
-                    )
-                    .font(.system(size: 38, weight: .semibold))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 0)
-                    .padding(.top, 180)
-                    
-                    
-                    
-
-
-                    
-//                    ZStack(alignment: .top) {
-//                        Group {
-//                            switch currentInfoCard {
-//                            case .reviews:
-//                                ReviewsCardView()
-//                            case .features:
-//                                FeaturesCardView()
-//                            case .stats:
-//                                StatisticCardView()
-//                            }
-//                        }
-//                        .id(currentInfoCard)
-//                        .transition(
-////                            .asymmetric(
-////                                insertion: .move(edge: isForward ? .trailing : .leading)
-////                                    .combined(with: .opacity),
-////                                removal: .move(edge: isForward ? .leading : .trailing)
-////                                    .combined(with: .opacity)
-////                            )
-//                            didShowFirstCard
-//                                    ? .asymmetric(
-//                                        insertion: .move(edge: isForward ? .trailing : .leading)
-//                                            .combined(with: .opacity),
-//                                        removal: .move(edge: isForward ? .leading : .trailing)
-//                                            .combined(with: .opacity)
-//                                      )
-//                                    : .identity
-//                        )
-//                        .frame(maxWidth: .infinity,
-//                               maxHeight: .infinity,
-//                               alignment: .top)
-//                    }
-//                    .frame(height: 180)
-//                    .padding()
-//                    //.opacity(appearReviews ? 1 : 0)
-//                    .onAppear {
-//                        // як тільки блок вперше з’явився – далі вже можна включати transition
-//                        didShowFirstCard = true
-//                    }
-////                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.35),
-////                               value: currentInfoCard)
-//                    //.contentShape(Rectangle())
-//                    .gesture(
-//                        DragGesture(minimumDistance: 20)
-//                            .onEnded { value in
-//                                let translation = value.translation.width
-//                                let threshold: CGFloat = 40
-//                                guard abs(translation) > threshold else { return }
-//                                
-//                                if translation < 0 {
-//                                    // свайп ліворуч → наступна
-//                                    goNextCard(animated: true)
-//                                } else {
-//                                    // свайп праворуч → попередня
-//                                    goPreviousCard(animated: true)
-//                                }
-//                                
-//                                restartAutoAdvance()
-//                            }
-//                    )
-                    
-                    ZStack(alignment: .top) {
-                        Group {
-                            switch currentInfoCard {
-                            case .reviews:
-                                ReviewsCardView()
-                            case .features:
-                                FeaturesCardView()
-                            case .stats:
-                                StatisticCardView()
-                            }
-                        }
-                        .id(currentInfoCard)
-                        .transition(
-                            didShowFirstCard
-                            ? .asymmetric(
-                                insertion: .move(edge: isForward ? .trailing : .leading)
-                                    .combined(with: .opacity),
-                                removal: .move(edge: isForward ? .leading : .trailing)
-                                    .combined(with: .opacity)
-                            )
-                            : .identity
+                        
+                        
+                        (
+                            Text("Remove Water Fast")
+                                .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                            
                         )
-                        .frame(maxWidth: .infinity,
-                               maxHeight: .infinity,
-                               alignment: .top)
-                        //.opacity(showInfoCardContent ? 1 : 0)      // ⬅️ ВАЖЛИВО
-                       // .opacity(appearReviews ? 1 : 0)
-                    }
-                    .frame(height: 180)
-                    .padding()
-                    .opacity(appearReviews ? 1 : 0)
-//                    .onAppear {
-//                        // якщо екран показується як "поточний" (без слайду) – одразу показуємо
-//                        if startAnimations {
-//                            showInfoCardContent = true
-//                            didShowFirstCard = true
-//                            appearReviews = true          // ✅ не було
-//                                    restartAutoAdvance()
-//                        }
-//                    }
-//                    .onChange(of: startAnimations) { newValue in
-//                        // коли OnboardingFlow закінчив слайд → дає true
-//                        if newValue {
-//                            appearReviews = false
-//                                   showInfoCardContent = false
-//                                   didShowFirstCard = true
-//                            
-//                            withAnimation(.easeInOut(duration: 0.2)) {
-//                                appearReviews = true
-//                                showInfoCardContent = true
-//                            }
-//                            
-//                            restartAutoAdvance()
-//                            
-//                            
-//
-//                        } else {
-//                            appearReviews = false
-//                                    showInfoCardContent = false
-//                                    autoAdvanceWorkItem?.cancel()
-//                        }
-//                        
-//                    }
-                    .onAppear {
-                        if startAnimations {
-                            didShowFirstCard = true
-                            appearReviews = false
-
-                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
-                                withAnimation(.easeOut(duration: 0.28)) {
-                                    appearReviews = true
+                        .font(.system(size: 38, weight: .semibold))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 0)
+                        //.padding(.top, 180)
+                        
+                        
+                        
+                        ZStack(alignment: .top) {
+                            Group {
+                                switch currentInfoCard {
+                                case .reviews:
+                                    ReviewsCardView()
+                                case .features:
+                                    FeaturesCardView()
+                                case .stats:
+                                    StatisticCardView()
                                 }
                             }
-
-                            restartAutoAdvance()
+                            .id(currentInfoCard)
+                            .transition(
+                                didShowFirstCard
+                                ? .asymmetric(
+                                    insertion: .move(edge: isForward ? .trailing : .leading)
+                                        .combined(with: .opacity),
+                                    removal: .move(edge: isForward ? .leading : .trailing)
+                                        .combined(with: .opacity)
+                                )
+                                : .identity
+                            )
+                            .frame(maxWidth: .infinity,
+                                   maxHeight: .infinity,
+                                   alignment: .top)
                         }
-                    }
-                    .onChange(of: startAnimations) {
-                        if startAnimations {
-                            didShowFirstCard = true
-                            appearReviews = false
-
-                            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.1) {
-                                withAnimation(.easeOut(duration: 0.28)) {
-                                    appearReviews = true
+                        .frame(height: 180)
+                        //.padding()
+                        .opacity(appearReviews ? 1 : 0)
+                        
+                        .onAppear {
+                            if startAnimations {
+                                didShowFirstCard = true
+                                appearReviews = false
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                                    withAnimation(.easeOut(duration: 0.28)) {
+                                        appearReviews = true
+                                    }
                                 }
+                                
+                                restartAutoAdvance()
                             }
-
-                            restartAutoAdvance()
-                        } else {
-                            appearReviews = false
-                            autoAdvanceWorkItem?.cancel()
                         }
+                        .onChange(of: startAnimations) {
+                            if startAnimations {
+                                didShowFirstCard = true
+                                appearReviews = false
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.1) {
+                                    withAnimation(.easeOut(duration: 0.28)) {
+                                        appearReviews = true
+                                    }
+                                }
+                                
+                                restartAutoAdvance()
+                            } else {
+                                appearReviews = false
+                                autoAdvanceWorkItem?.cancel()
+                            }
+                        }
+                        .gesture(
+                            DragGesture(minimumDistance: 20)
+                                .onEnded { value in
+                                    let translation = value.translation.width
+                                    let threshold: CGFloat = 40
+                                    guard abs(translation) > threshold else { return }
+                                    
+                                    if translation < 0 {
+                                        // свайп ліворуч → наступна
+                                        goNextCard(animated: true)
+                                    } else {
+                                        // свайп праворуч → попередня
+                                        goPreviousCard(animated: true)
+                                    }
+                                    
+                                    restartAutoAdvance()
+                                }
+                        )
                     }
-                                        .gesture(
-                                            DragGesture(minimumDistance: 20)
-                                                .onEnded { value in
-                                                    let translation = value.translation.width
-                                                    let threshold: CGFloat = 40
-                                                    guard abs(translation) > threshold else { return }
                     
-                                                    if translation < 0 {
-                                                        // свайп ліворуч → наступна
-                                                        goNextCard(animated: true)
-                                                    } else {
-                                                        // свайп праворуч → попередня
-                                                        goPreviousCard(animated: true)
-                                                    }
                     
-                                                    restartAutoAdvance()
-                                                }
-                                        )
-
-
-
-                    Spacer(minLength: 0)
+                    //Spacer(minLength: 0)
                     
                     //Spacer()
                     
@@ -324,11 +230,11 @@ struct PaywallFiveView: View {
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: { viewModel.selectedPlan = .weekly
                                 if let onboardId = onboardId {
-                                            Telemetry.shared.funnelPlanChosen(
-                                                onboardId: onboardId,
-                                                plan: PaywallPlan.weekly.analyticsValue
-                                            )
-                                        }
+                                    Telemetry.shared.funnelPlanChosen(
+                                        onboardId: onboardId,
+                                        plan: PaywallPlan.weekly.analyticsValue
+                                    )
+                                }
                             }
                         )
                         
@@ -340,16 +246,15 @@ struct PaywallFiveView: View {
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: { viewModel.selectedPlan = .yearly
                                 if let onboardId = onboardId {
-                                            Telemetry.shared.funnelPlanChosen(
-                                                onboardId: onboardId,
-                                                plan: PaywallPlan.yearly.analyticsValue
-                                            )
-                                        }
+                                    Telemetry.shared.funnelPlanChosen(
+                                        onboardId: onboardId,
+                                        plan: PaywallPlan.yearly.analyticsValue
+                                    )
+                                }
                             }
                         )
                     }
                     .padding(.top, isSmall ? 12 : isLarge ? 30 : 20)
-                    //.padding(.horizontal, 14)
                     .padding(.bottom, 12)
                     
                     HStack {
@@ -377,7 +282,7 @@ struct PaywallFiveView: View {
                                 plan: plan.analyticsValue
                             )
                         }
-
+                        
                         Task {
                             let paywallId = "paywall_v_5.0"
                             await viewModel.buyWithRevenueCat(
@@ -410,7 +315,7 @@ struct PaywallFiveView: View {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
                         Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
+                            .foregroundStyle(.white)
                         
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
@@ -437,7 +342,7 @@ struct PaywallFiveView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 4)
                     
-          
+                    
                     
                     
                     HStack(spacing: 36) {
@@ -472,7 +377,7 @@ struct PaywallFiveView: View {
                     
                     
                 }
-//                .frame(maxHeight: .infinity, alignment: .top)
+                //                .frame(maxHeight: .infinity, alignment: .top)
                 .frame(maxHeight: .infinity)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -508,7 +413,7 @@ struct PaywallFiveView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
-
+        
         
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
@@ -526,13 +431,13 @@ struct PaywallFiveView: View {
             }
             Task { await viewModel.loadPricing() }
             
-
             
-//            withAnimation(.easeInOut(duration: 0.2)) {
-//                appearReviews = true
-//            }
-//            
-//            restartAutoAdvance()
+            
+            //            withAnimation(.easeInOut(duration: 0.2)) {
+            //                appearReviews = true
+            //            }
+            //
+            //            restartAutoAdvance()
             
         }
         .task {
@@ -546,51 +451,51 @@ struct PaywallFiveView: View {
         .onDisappear {
             pulse = false
             autoAdvanceWorkItem?.cancel()
-                autoAdvanceWorkItem = nil
+            autoAdvanceWorkItem = nil
         }
         
     }
     
     private func goNextCard(animated: Bool) {
-            let all = InfoCard.allCases
-            guard let idx = all.firstIndex(of: currentInfoCard) else { return }
-            let next = all[(idx + 1) % all.count]
-            
-            isForward = true
-            
-            if animated && !reduceMotion {
-                withAnimation { currentInfoCard = next }
-            } else {
-                currentInfoCard = next
-            }
+        let all = InfoCard.allCases
+        guard let idx = all.firstIndex(of: currentInfoCard) else { return }
+        let next = all[(idx + 1) % all.count]
+        
+        isForward = true
+        
+        if animated && !reduceMotion {
+            withAnimation { currentInfoCard = next }
+        } else {
+            currentInfoCard = next
         }
+    }
+    
+    private func goPreviousCard(animated: Bool) {
+        let all = InfoCard.allCases
+        guard let idx = all.firstIndex(of: currentInfoCard) else { return }
+        let prev = all[(idx - 1 + all.count) % all.count]
         
-        private func goPreviousCard(animated: Bool) {
-            let all = InfoCard.allCases
-            guard let idx = all.firstIndex(of: currentInfoCard) else { return }
-            let prev = all[(idx - 1 + all.count) % all.count]
-            
-            isForward = false
-            
-            if animated && !reduceMotion {
-                withAnimation { currentInfoCard = prev }
-            } else {
-                currentInfoCard = prev
-            }
+        isForward = false
+        
+        if animated && !reduceMotion {
+            withAnimation { currentInfoCard = prev }
+        } else {
+            currentInfoCard = prev
         }
-        
-        // MARK: - Авто-перелистування + перезапуск
-        
+    }
+    
+    // MARK: - Авто-перелистування + перезапуск
+    
     private func restartAutoAdvance() {
         autoAdvanceWorkItem?.cancel()
-
+        
         guard !reduceMotion else { return }
-
+        
         let work = DispatchWorkItem {
             goNextCard(animated: true)
             restartAutoAdvance()
         }
-
+        
         autoAdvanceWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + infoCardInterval, execute: work)
     }
@@ -722,37 +627,43 @@ struct FeaturesCardView: View {
 
 struct StatisticCardView: View {
     
-
+    
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-       
-                HStack(alignment: .center, spacing: 20) {
-                    
-                    Image("Left")
-                    
-                    VStack(spacing: 8) {
-                        Text("MORE THAN")
-                            .font(.custom("Montserrat-SemiBold", size: 20))
-                            .foregroundColor(.black)
-                            .fixedSize(horizontal: false, vertical: true)
-                        
-                        Text("1,000,000")
-                            .font(.custom("Montserrat-Bold", size: 20))
-                            .foregroundColor(.black)
-                            .fixedSize(horizontal: false, vertical: true)
-                        
-                        Text("SATISFIED USERS")
-                            .font(.custom("Montserrat-SemiBold", size: 20))
-                            .foregroundColor(.black)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+            
+            HStack(alignment: .center, spacing: 20) {
                 
+                Image("Left")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 80)
+                
+                VStack(spacing: 6) {
+                    Text("MORE THAN")
+                        .font(.custom("Montserrat-SemiBold", size: 20))
+                        .foregroundColor(.black)
+                        //.fixedSize(horizontal: false, vertical: true)
                     
-                    Image("Right")
-  
-                   
+                    Text("1,000,000")
+                        .font(.custom("Montserrat-Bold", size: 20))
+                        .foregroundColor(.black)
+                        //.fixedSize(horizontal: false, vertical: true)
+                    
+                    Text("SATISFIED USERS")
+                        .font(.custom("Montserrat-SemiBold", size: 20))
+                        .foregroundColor(.black)
+                        //.fixedSize(horizontal: false, vertical: true)
                 }
+                
+                
+                Image("Right")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 80)
+                
+                
+            }
             
         }
         .padding(20)
