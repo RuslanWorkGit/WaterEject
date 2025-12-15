@@ -841,6 +841,21 @@ extension Telemetry {
         ]))
     }
     
+    func keywordsLog(keywordId: String) {
+        
+        
+        var params = baseParams()
+        params["keyword_id"] = keywordId   // (це твій “keywordID”, але в snake_case)
+        Analytics.logEvent("keywords_log", parameters: params)
+    }
+    
+    func keywordsLogOnStart(keywordId: String) {
+        logRaw("keywords_log_start", params: [
+            "keyword_id": keywordId,
+            "source": "stored_on_start"   // ✅ щоб відрізняти від конверсії
+        ])
+    }
+    
     
     
 }

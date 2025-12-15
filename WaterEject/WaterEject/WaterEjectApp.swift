@@ -16,6 +16,7 @@ import Firebase
 import FirebaseFirestore
 import AppsFlyerLib
 import UserNotifications
+import FirebaseAnalytics
 
 
 final class RCDelegateProxy: NSObject, PurchasesDelegate {
@@ -26,11 +27,15 @@ final class RCDelegateProxy: NSObject, PurchasesDelegate {
 }
 
 // MARK: - AppDelegate
-final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, AppsFlyerLibDelegate {
+
     private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
     private let appleAppID      = "6749094272" // без префікса "id"
     
     private var lastAFStartTs: TimeInterval = 0
+    
+    private let asaKeywordKey = "asaKeywordId"
+    private var didLogKeywordOnStart = false
 
     // 👇 додано: прапорці для контролю start_app
     var sentStartAppThisForeground = false
@@ -66,6 +71,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         af.appsFlyerDevKey = appsFlyerDevKey
         af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
+        
+        af.delegate = self
+        
         #if DEBUG
         af.isDebug = false
         #endif
@@ -74,6 +82,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
         // 3) Одноразовий кастомний івент "install" — ПІСЛЯ configure()
         sendInstallIfNeeded()
+        //self.logStoredKeywordOnStartIfNeeded()
         
         let center = UNUserNotificationCenter.current()
         center.delegate = self
@@ -157,11 +166,57 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     }
     
+    private func logStoredKeywordOnStartIfNeeded() {
+        guard !didLogKeywordOnStart else { return }
+        didLogKeywordOnStart = true
+
+        let stored = UserDefaults.standard.string(forKey: asaKeywordKey) ?? "nil"
+        Telemetry.shared.keywordsLogOnStart(keywordId: stored)
+    }
+    
+    func onConversionDataSuccess(_ installData: [AnyHashable : Any]) {
+
+        // AppsFlyer радить дивитись тільки Non-organic (реклама) :contentReference[oaicite:4]{index=4}
+        let status = installData["af_status"] as? String
+        guard status == "Non-organic" else { return }
+
+        // 1) Спробуємо “ID” (якщо раптом прилетить), інакше візьмемо keyword string
+        let keywordID = extractASAKeywordID(from: installData) ?? "not_set"
+
+        // Збережемо для майбутнього онбордингу (на 1-му способі це максимум)
+        UserDefaults.standard.set(keywordID, forKey: "asaKeywordId")
+
+        // Firebase log (через Telemetry)
+        Telemetry.shared.keywordsLog(keywordId: keywordID)
+    }
+    
+    func onConversionDataFail(_ error: Error) {
+        print("❌ AppsFlyer conversion data error:", error.localizedDescription)
+    }
+
+    private func extractASAKeywordID(from data: [AnyHashable: Any]) -> String? {
+        // можливі ключі (залежить від інтеграції/провайдера)
+        let idKeys = ["keyword_id", "keywordId", "af_keyword_id", "af_keywordId", "af_keywordid"]
+        for k in idKeys {
+            if let v = data[k] { return String(describing: v) }
+        }
+
+        // у PDF є варіанти: af_keyword або af_keywords :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
+        if let v = data["af_keyword"] as? String, !v.isEmpty { return v }
+        if let v = data["af_keywords"] as? String, !v.isEmpty { return v }
+
+        return nil
+    }
+    
     func applicationDidBecomeActive(_ application: UIApplication) {
 
 
         // запускаємо SDK (але НЕ прив’язуємо start_app до completion)
         AppsFlyerLib.shared().start()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            self.logStoredKeywordOnStartIfNeeded()
+        }
 
         // як і було: підтягнути CustomerInfo
         Task { @MainActor in

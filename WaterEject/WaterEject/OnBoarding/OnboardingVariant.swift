@@ -39,15 +39,15 @@ final class OnboardingAB {
                 "onb_force": "" as NSObject,
                 
                 // 🔹 прапорці для кожного онборду
-                "Onb_4_enabled": true as NSObject,
-                "Onb_3_1_enabled": true as NSObject,
-                "Onb_3_2_enabled": true as NSObject,
-                "Onb_3_3_enabled": true as NSObject,
-                "Onb_5_enabled": true as NSObject,
-                "Onb_6_enabled": true as NSObject,
-                "Onb_7_enabled": true as NSObject,
+                "Onb_4_enabled": false as NSObject,
+                "Onb_3_1_enabled": false as NSObject,
+                "Onb_3_2_enabled": false as NSObject,
+                "Onb_3_3_enabled": false as NSObject,
+                "Onb_5_enabled": false as NSObject,
+                "Onb_6_enabled": false as NSObject,
+                "Onb_7_enabled": false as NSObject,
                 "Onb_8_enabled": true as NSObject,
-                "Onb_9_enabled": true as NSObject,
+                "Onb_9_enabled": false as NSObject,
                 "Onb_10_enabled": true as NSObject
             ])
         }
@@ -131,7 +131,9 @@ final class OnboardingAB {
             let enabled = OnboardingVariant.allCases.filter { isEnabled($0) }
             
             // 4) якщо раптом у RC усі вимкнули (або ще не підвантажилось) – фолбек на дефолтний пул
-            let pool = enabled.isEmpty ? OnboardingVariant.allCases : enabled
+            let fallbackPool: [OnboardingVariant] = [.G, .K]
+            let pool = enabled.isEmpty ? fallbackPool : enabled
+//            let pool = enabled.isEmpty ? OnboardingVariant.allCases : enabled
             // тут дефолтний ти контролюєш тим, як будеш розподіляти або можеш явно вибрати, наприклад:
             // let fallback: OnboardingVariant = .G
             
