@@ -140,7 +140,8 @@ struct ModesView: View {
         let isLarge = UIScreen.main.bounds.height > 900
         
         ZStack {
-            Background()
+            BackgroundNew()
+            //Background()
             ScrollView {
                 VStack(spacing: 28) {
                     

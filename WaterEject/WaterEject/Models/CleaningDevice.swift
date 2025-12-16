@@ -26,6 +26,16 @@ enum CleaningDevice: String, CaseIterable, Hashable, Identifiable {
         }
     }
     
+    var imageNameNew: String {
+        switch self {
+        case .iPhone: return "devicesNew"
+        case .airPodsPro: return "airpodsProNew"
+        case .airPods: return "airpodsNew"
+        case .airPodsMax: return "airpodsMaxNew"
+        case .speakers: return "speakerNew"
+        }
+    }
+    
     var bigImageName: String {
         switch self {
         case .iPhone: return "devicesBig"

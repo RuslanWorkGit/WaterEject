@@ -28,9 +28,11 @@ struct HomeView: View {
         NavigationStack(path: $path) {
             ZStack {
                 
-                Background()
+                //Background()
                 
-                VStack(spacing: 28) {
+                BackgroundNew()
+                
+                VStack(spacing: 40) {
                     HStack {
                         Text("Speaker Cleaner")
                             .font(.system(size: 28, weight: .bold))
@@ -40,11 +42,18 @@ struct HomeView: View {
                     .padding(.horizontal, 34)
                     .padding(.top, 16)
                     
+//                    ViewThatFits(in: .vertical) {
+//                        DeviceGridView(size: 170, onDeviceTap: { device in path.append(.modes(device)) })
+//                        DeviceGridView(size: 158, onDeviceTap: { device in path.append(.modes(device)) })
+//                        DeviceGridView(size: 126, onDeviceTap: { device in path.append(.modes(device)) })
+//                        DeviceGridView(size: 118, onDeviceTap: { device in path.append(.modes(device)) })
+//                    }
+                    
                     ViewThatFits(in: .vertical) {
-                        DeviceGridView(size: 170, onDeviceTap: { device in path.append(.modes(device)) })
-                        DeviceGridView(size: 158, onDeviceTap: { device in path.append(.modes(device)) })
-                        DeviceGridView(size: 126, onDeviceTap: { device in path.append(.modes(device)) })
-                        DeviceGridView(size: 118, onDeviceTap: { device in path.append(.modes(device)) })
+                        DeviceSqureGridView(size: 170, onDeviceTap: { device in path.append(.modes(device)) })
+                        DeviceSqureGridView(size: 158, onDeviceTap: { device in path.append(.modes(device)) })
+                        DeviceSqureGridView(size: 126, onDeviceTap: { device in path.append(.modes(device)) })
+                        DeviceSqureGridView(size: 118, onDeviceTap: { device in path.append(.modes(device)) })
                     }
                     
                     Spacer()
@@ -103,7 +112,12 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    ZStack{
+        BackgroundNew()
+        DeviceSqureGridView(size: 170, onDeviceTap: { new in  })
+    }
+    
+        
 }
 
 private enum AppDefaultsKeys {
@@ -206,6 +220,80 @@ struct DeviceGridView: View {
             HStack(spacing: 32) {
                 DeviceButtonView(device: .airPodsMax, size: size, action: onDeviceTap)
                 DeviceButtonView(device: .speakers,   size: size, action: onDeviceTap)
+            }
+        }
+    }
+}
+
+struct DeviceSquareButtonView: View {
+    let device: CleaningDevice
+    let size: CGFloat
+    let action: (CleaningDevice) -> Void
+    
+    var body: some View {
+        Button { action(device) } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 24).fill(Color(red: 19/255, green: 21/255, blue: 23/255))
+                RoundedRectangle(cornerRadius: 24).fill(
+                    LinearGradient(colors: [
+                        Color(red: 31 / 255, green: 34 / 255, blue: 37 / 255),
+                        Color(red: 27 / 255, green: 30 / 255, blue: 30 / 255)
+                    ], startPoint: .top, endPoint: .bottom)
+                )
+                .strokeBorder(Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255), lineWidth: 1.0)
+//                RoundedRectangle(cornerRadius: 24)
+//                    .stroke(.white.opacity(0.25), lineWidth: 2)
+//                    .blur(radius: 0.5)
+//                    .offset(y: 1)
+//                    .mask(Circle().fill(LinearGradient(colors: [.black, .clear],
+//                                                       startPoint: .top, endPoint: .bottom)))
+                
+                
+                
+                VStack(spacing: 0) {
+                    Image(device.imageNameNew)
+                        .resizable()                // ← спочатку
+                        .scaledToFit()
+                        .frame(height: device == .speakers ? size * 0.5 : size * 0.7)
+                    
+                    Text(device.displayName)
+                        .font(.custom("Montserrat-Medium", size: 14))
+                        .foregroundStyle(Color(red: 247/255, green: 247/255, blue: 247/255))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                }
+            }
+            .frame(width: size, height: size)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct DeviceSqureGridView: View {
+    let size: CGFloat
+    let onDeviceTap: (CleaningDevice) -> Void
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            
+            HStack(spacing: 16) {
+                DeviceSquareButtonView(device: .iPhone,     size: size, action: onDeviceTap)
+                DeviceSquareButtonView(device: .airPodsPro, size: size, action: onDeviceTap)
+            }
+           
+            
+            HStack(spacing: 16) {
+                DeviceSquareButtonView(device: .airPodsPro, size: size, action: onDeviceTap)
+                DeviceSquareButtonView(device: .airPodsMax, size: size, action: onDeviceTap)
+            }
+            HStack(spacing: 16) {
+                //DeviceSquareButtonView(device: .airPodsMax, size: size, action: onDeviceTap)
+                DeviceSquareButtonView(device: .speakers,   size: size, action: onDeviceTap)
+                
+                DeviceSquareButtonView(device: .speakers,   size: size, action: onDeviceTap)
+                    .opacity(0)
+                    .disabled(true)
+                
             }
         }
     }

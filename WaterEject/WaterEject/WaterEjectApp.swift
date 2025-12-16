@@ -270,6 +270,9 @@ struct WaterEjectApp: App {
 
         // Firebase
         FirebaseApp.configure()
+        
+        Analytics.setAnalyticsCollectionEnabled(false)
+        
         if let path = Bundle.main.path(forResource: "GoogleService-Info-Shared", ofType: "plist"),
            let opts = FirebaseOptions(contentsOfFile: path) {
             FirebaseApp.configure(name: "SharedCatalog", options: opts)
