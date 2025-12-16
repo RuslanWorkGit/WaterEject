@@ -143,7 +143,7 @@ struct ModesView: View {
             BackgroundNew()
             //Background()
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: 16) {
                     
                     // --- Контент списку режимів ---
                     CleaningModeCard(

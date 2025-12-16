@@ -183,7 +183,7 @@ struct PaywallFiveView: View {
                                 didShowFirstCard = true
                                 appearReviews = false
                                 
-                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.1) {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.5) {
                                     withAnimation(.easeOut(duration: 0.28)) {
                                         appearReviews = true
                                     }
