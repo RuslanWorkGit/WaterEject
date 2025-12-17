@@ -50,7 +50,11 @@ struct PaywallFiveView: View {
     
     
     
-    
+        let reviews: [Review] = [
+            .init(text: "It saved my iPhone!",               name: "Maria",  rating: 5),
+            .init(text: "Saved me from going to repair!",    name: "Kevin",  rating: 5),
+            .init(text: "Worked better than rice!",          name: "Sophie", rating: 5)
+        ]
     
     let onFinish: () -> Void
     let onboardId: String?
@@ -133,12 +137,16 @@ struct PaywallFiveView: View {
                         //.padding(.top, 180)
                         
                         
+//                        ReviewsCardView(reviews: reviews)
+
                         
                         ZStack(alignment: .top) {
                             Group {
                                 switch currentInfoCard {
                                 case .reviews:
-                                    ReviewsCardView()
+                                    ReviewsCardView(reviews: reviews)
+//                                        .drawingGroup()
+                                        .compositingGroup()
                                 case .features:
                                     FeaturesCardView()
                                 case .stats:
@@ -162,7 +170,7 @@ struct PaywallFiveView: View {
                         }
                         .frame(height: 180)
                         //.padding()
-                        .opacity(appearReviews ? 1 : 0)
+                        //.opacity(appearReviews ? 1 : 0)
                         
                         .onAppear {
                             if startAnimations {
@@ -500,6 +508,8 @@ struct PaywallFiveView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + infoCardInterval, execute: work)
     }
     
+    
+    
 }
 
 
@@ -545,37 +555,178 @@ struct StarsView: View {
     }
 }
 
+struct PaywallFivePlanCard: View {
+    let title: String
+    let price: String
+    let sublabel: String?
+    let saveText: String
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 16) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color.gray.opacity(0.3))
+                    .font(.system(size: 28, weight: .light))
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(title)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(.black)
+                        Spacer()
+                        
+                    }
+                    Text(price)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(Color(red: 170/255, green: 178/255, blue: 191/255))
+                }
+                
+                
+                
+                VStack {
+                    if let sublabel = sublabel {
+                        Text(sublabel)
+                            .font(.system(size: 12))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .background(Color(red: 81/255, green: 132/255, blue: 234/255).opacity(0.14))
+                            .foregroundStyle(Color(red: 81/255, green: 132/255, blue: 234/255))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    
+                    
+                    Text(saveText)
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color(red: 196/255, green: 196/255, blue: 197/255))
+                    
+                }
+            }
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.white)
+                    //                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    //                        .fill(Color.white.opacity(0.15))
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(
+                        isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5),
+                        lineWidth: 1
+                    )
+                
+            )
+            .shadow(
+                color: isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.08) : .clear,
+                radius: 8, x: 0, y: 4
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 4)
+    }
+}
+
 
 struct ReviewsCardView: View {
     
-    let reviews: [Review] = [
-        .init(text: "It saved my iPhone!",               name: "Maria",  rating: 5),
-        .init(text: "Saved me from going to repair!",    name: "Kevin",  rating: 5),
-        .init(text: "Worked better than rice!",          name: "Sophie", rating: 5)
-    ]
+    let reviews: [Review]
+//    let reviews: [Review] = [
+//        .init(text: "It saved my iPhone!",               name: "Maria",  rating: 5),
+//        .init(text: "Saved me from going to repair!",    name: "Kevin",  rating: 5),
+//        .init(text: "Worked better than rice!",          name: "Sophie", rating: 5)
+//    ]
+    
+    
     
     var body: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(reviews) { review in
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            StarsView(rating: review.rating)
-                            
-                            Text(review.text)
-                                .font(.custom("Montserrat-Bold", size: 14))
-                                .foregroundColor(.black)
-                        }
+//                ForEach(reviews) { review in
+//                    HStack(alignment: .top) {
+//                        VStack(alignment: .leading, spacing: 4) {
+//                            StarsView(rating: review.rating)
+//                            
+//                            Text(review.text)
+//                                .font(.custom("Montserrat-Bold", size: 14))
+//                                .foregroundColor(.black)
+//                        }
+//                        
+//                        Spacer()
+//                        
+//                        Text(review.name)
+//                            .font(.custom("Montserrat-Medium", size: 14))
+//                            .foregroundColor(.black)
+//                            .padding(.top, 2) // трохи вирівняти по вертикалі
+//                        
+//                    }
+//                }
+                
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        StarsView(rating: reviews[0].rating)
                         
-                        Spacer()
-                        
-                        Text(review.name)
-                            .font(.custom("Montserrat-Medium", size: 14))
+                        Text(reviews[0].text)
+                            .font(.custom("Montserrat-Bold", size: 14))
                             .foregroundColor(.black)
-                            .padding(.top, 2) // трохи вирівняти по вертикалі
-                        
                     }
+                    
+                    Spacer()
+                    
+                    Text(reviews[0].name)
+                        .font(.custom("Montserrat-Medium", size: 14))
+                        .foregroundColor(.black)
+                        .padding(.top, 2) // трохи вирівняти по вертикалі
+                    
                 }
+
+                
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        StarsView(rating: reviews[1].rating)
+                        
+                        Text(reviews[1].text)
+                            .font(.custom("Montserrat-Bold", size: 14))
+                            .foregroundColor(.black)
+                    }
+                    
+                    Spacer()
+                    
+                    Text(reviews[1].name)
+                        .font(.custom("Montserrat-Medium", size: 14))
+                        .foregroundColor(.black)
+                        .padding(.top, 2) // трохи вирівняти по вертикалі
+                    
+                }
+
+                
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        StarsView(rating: reviews[2].rating)
+                        
+                        Text(reviews[2].text)
+                            .font(.custom("Montserrat-Bold", size: 14))
+                            .foregroundColor(.black)
+                    }
+                    
+                    Spacer()
+                    
+                    Text(reviews[2].name)
+                        .font(.custom("Montserrat-Medium", size: 14))
+                        .foregroundColor(.black)
+                        .padding(.top, 2) // трохи вирівняти по вертикалі
+                    
+                }
+
+                
+                
+
+                
+                
             }
             .padding(16)
         }
