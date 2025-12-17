@@ -136,7 +136,7 @@ private struct ReviewsCarouselView: View {
 
 
 
-    private let interval: TimeInterval = 1.1
+    private let interval: TimeInterval = 1.4
 
     var body: some View {
         ZStack(alignment: .top) {

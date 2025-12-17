@@ -271,7 +271,7 @@ struct WaterEjectApp: App {
         // Firebase
         FirebaseApp.configure()
         
-        Analytics.setAnalyticsCollectionEnabled(false)
+        //Analytics.setAnalyticsCollectionEnabled(false)
         
         if let path = Bundle.main.path(forResource: "GoogleService-Info-Shared", ofType: "plist"),
            let opts = FirebaseOptions(contentsOfFile: path) {
@@ -295,6 +295,7 @@ struct WaterEjectApp: App {
             RootView()
                 .environmentObject(coordinator)
                 .environmentObject(PaywallGate.shared)
+                .environmentObject(ReviewFlowManager.shared)
                 .onAppear {
                                     // 👇 тут з’єднуємо делегат і координатор
                                     appDelegate.coordinator = coordinator

@@ -7,12 +7,15 @@
 
 import SwiftUI
 
+
 struct StartView: View {
     @StateObject private var viewModel = StartViewModel()
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var paywallGate: PaywallGate
     @EnvironmentObject private var tabBarState: TabBarState
     @State private var showVolumeAlert: Bool = false
+    @StateObject private var reviewFlow = ReviewFlowManager.shared
+    @Environment(\.requestReview) private var requestReview
     let device: CleaningDevice
     let mode: CleaningMode
     
@@ -177,9 +180,113 @@ struct StartView: View {
         .onChange(of: viewModel.finishedAt) { _, ts in
             guard ts != nil else { return }
             print("✅ Mode finished at \(ts!) → asking for review")
-            ReviewPrompter.recordCompletion()
-            Task { await ReviewPrompter.maybeAsk() }
+            //ReviewPrompter.recordCompletion()
+//            ReviewFlowManager.shared.recordSuccessfulCleaning(
+//                   device: device.displayName,
+//                   mode: mode.modeName
+//               )
+            
+            ReviewFlowManager.shared.recordSuccessfulCleaning(
+                device: device.displayName,
+                mode: mode.modeName
+            )
+            //Task { await ReviewPrompter.maybeAsk() }
         }
+//        .sheet(item: $reviewFlow.sheet) { sheet in
+//            switch sheet {
+//            case .initialLike:
+//                ReviewInitialLikeSheet(
+//                    onLike: { reviewFlow.userLiked() },
+//                    onDislike: { reviewFlow.userDisliked() },
+//                    onLater: { reviewFlow.userLater() }
+//                )
+//
+//            case .starRating:
+//                ReviewStarsSheet(
+//                    onSelect: { stars in
+//                        reviewFlow.userPickedStars(stars)
+//                        if stars >= 4 {
+//                            requestReview()
+//                        }
+//                    },
+//                    onLater: { reviewFlow.dismiss() }
+//                )
+//
+//            case .feedback(let stars):
+//                ReviewFeedbackSheet(
+//                    stars: stars,
+//                    onSubmit: { text in reviewFlow.submitFeedback(text: text, stars: stars) },
+//                    onCancel: { reviewFlow.dismiss() }
+//                )
+//            }
+//        }
+        // 1) Initial like
+        .alert(
+            "Did the cleaning help?",
+            isPresented: Binding(
+                get: { reviewFlow.route == .initialLike },
+                set: { if !$0, reviewFlow.route == .initialLike { reviewFlow.dismiss() } }
+            )
+        ) {
+            
+            HStack {
+                Button("👍 Yes") { reviewFlow.userLiked() }
+                Button("👎 No") { reviewFlow.userDisliked() }
+            }
+           
+            Button("Later", role: .cancel) { reviewFlow.userLater() }
+        } message: {
+            Text("Your answer helps us improve WaterEject.")
+        }
+        
+        .overlay {
+            if reviewFlow.route == .starRating {
+                StarRatingPopup(
+                    onRate: { star in
+                        reviewFlow.userPickedStars(star)
+                        if star >= 4 {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { requestReview() }
+                        }
+                    },
+                    onLater: { reviewFlow.dismiss() }
+                )
+                .transition(.opacity.combined(with: .scale))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: reviewFlow.route)
+
+        // 3) Feedback (1 рядок)
+        .alert(
+            reviewFlow.feedbackStars == nil ? "What didn’t you like?" : "How can we improve?",
+            isPresented: Binding(
+                get: {
+                    if case .feedback = reviewFlow.route { return true }
+                    return false
+                },
+                set: { isPresented in
+                    if !isPresented { reviewFlow.dismiss() }
+                }
+            )
+        ) {
+            TextField("Write a short message…", text: $reviewFlow.feedbackText)
+
+            Button("Send") {
+                let stars = reviewFlow.feedbackStars
+                let text = reviewFlow.feedbackText.trimmingCharacters(in: .whitespacesAndNewlines)
+                reviewFlow.submitFeedback(text: text, stars: stars)
+            }
+            .disabled(reviewFlow.feedbackText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            Button("Cancel", role: .cancel) { reviewFlow.dismiss() }
+        } message: {
+            if let s = reviewFlow.feedbackStars {
+                Text("You rated \(s)/5. Tell us what to fix.")
+            } else {
+                Text("Tell us what went wrong.")
+            }
+        }
+
+
         
     }
 }
@@ -216,13 +323,6 @@ struct SelectedModeCard: View {
             
             Spacer()
             
-            // Кнопка-іконка
-            //            Button(action: onSettings) {
-            //                Image(systemName: "gearshape")
-            //                    .font(.system(size: 26))
-            //                    .foregroundStyle(.white.opacity(0.45))
-            //                    .padding(2)
-            //            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 18)
@@ -241,6 +341,50 @@ struct SelectedModeCard: View {
     }
 }
 
+struct StarRatingPopup: View {
+    let onRate: (Int) -> Void
+    let onLater: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.15)
+                .ignoresSafeArea()
+                .onTapGesture { onLater() }
+
+            VStack(spacing: 12) {
+                Text("Rate WaterEject")
+                    .font(.system(size: 22, weight: .semibold))
+
+                HStack(spacing: 12) {
+                    ForEach(1...5, id: \.self) { star in
+                        Button {
+                            onRate(star)
+                        } label: {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                                .font(.system(size: 28))
+                        }
+                    }
+                }
+
+                Button("Later", role: .cancel) { onLater() }
+                    .foregroundStyle(.secondary)
+                    .font(.system(size: 16, weight: .medium))
+            }
+            .padding(25)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .padding(.horizontal, 24)
+        }
+    }
+}
+
+
 #Preview {
-    StartView(device: .iPhone , mode: .nanoShake)
+    StarRatingPopup { n in
+        
+    } onLater: {
+        
+    }
+
+   // StartView(device: .iPhone , mode: .nanoShake)
 }

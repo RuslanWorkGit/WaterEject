@@ -146,7 +146,7 @@ struct PaywallFiveView: View {
                                 case .reviews:
                                     ReviewsCardView(reviews: reviews)
 //                                        .drawingGroup()
-                                        .compositingGroup()
+
                                 case .features:
                                     FeaturesCardView()
                                 case .stats:
