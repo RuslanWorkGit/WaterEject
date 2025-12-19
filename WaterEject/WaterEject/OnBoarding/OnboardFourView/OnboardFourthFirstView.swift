@@ -92,7 +92,14 @@ struct PillButtonNew: View {
     
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            
+            generator.prepare()
+            generator.impactOccurred()
+            
+            action()
+        }) {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
@@ -140,10 +147,10 @@ struct SelectableChipOne: View {
         } label: {
             HStack(spacing: 12) {
                 Image(isSelected ? "fillCheckmark" : "emptyCheckmark")
-//                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-//                    .imageScale(.large)
-//                    .font(.system(size: 18, weight: .semibold))
-//                    .foregroundStyle(isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255) : Color(red: 195 / 255, green: 198 / 255, blue: 205 / 255))
+                //                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                //                    .imageScale(.large)
+                //                    .font(.system(size: 18, weight: .semibold))
+                //                    .foregroundStyle(isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255) : Color(red: 195 / 255, green: 198 / 255, blue: 205 / 255))
                 
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))

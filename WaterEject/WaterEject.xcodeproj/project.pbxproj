@@ -314,6 +314,7 @@
 				INFOPLIST_FILE = WaterEject/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Water Eject Clear Sound";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to perform the audio test";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "Your permission allows us to measure ads performance and improve the app experience.Your permission allows us to measure ads performance and improve the app experience.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -349,6 +350,7 @@
 				INFOPLIST_FILE = WaterEject/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Water Eject Clear Sound";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to perform the audio test";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "Your permission allows us to measure ads performance and improve the app experience.Your permission allows us to measure ads performance and improve the app experience.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

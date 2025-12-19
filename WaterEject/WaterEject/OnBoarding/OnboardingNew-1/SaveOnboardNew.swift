@@ -173,7 +173,13 @@ struct PillButton: View {
     
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            
+            generator.prepare()
+            generator.impactOccurred()
+            action()
+        }) {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)

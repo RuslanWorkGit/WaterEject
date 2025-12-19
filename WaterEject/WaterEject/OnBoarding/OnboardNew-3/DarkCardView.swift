@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DarkCardView: View {
-
+    
     var cards: [Color] = [
         Color(red: 2/255, green: 125/255, blue: 244/255),
         Color(red: 2/255, green: 125/255, blue: 244/255),
@@ -22,7 +22,7 @@ struct DarkCardView: View {
         StatusCardView2(imageName: "BlackCardThree"),
         StatusCardView2(imageName: "BlackCardFour")
     ]
-
+    
     var text: [String] = [
         "Did water get inside?",
         "Does it sound distorted?",
@@ -43,8 +43,8 @@ struct DarkCardView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var showText: Bool = true
     @State private var isAnimating = false
-//    @State private var topCardIndex: Int = 0
-//    @State private var colorIndex: Int = 0
+    //    @State private var topCardIndex: Int = 0
+    //    @State private var colorIndex: Int = 0
     
     @Binding var topCardIndex: Int
     @Binding var colorIndex: Int
@@ -52,10 +52,10 @@ struct DarkCardView: View {
     private var isLastCard: Bool {
         topCardIndex >= myCards.count - 1
     }
-
+    
     var width: CGFloat = 220
     var height: CGFloat = 160
-
+    
     var body: some View {
         
         OnboardCustomNew(ctaTitle: "Start Cleaning", ctaAction: handleCTA, fixedWidth: 260) {
@@ -72,7 +72,7 @@ struct DarkCardView: View {
                             .foregroundStyle(Color(red: 2/255, green: 125/255, blue: 244/255)) +
                         Text("your \nspeaker ").font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(.white)
-      
+                        
                     )
                     
                     .multilineTextAlignment(.leading)
@@ -122,14 +122,14 @@ struct DarkCardView: View {
                             .fill(cards[min(topCardIndex, cards.count - 1)])    // кольори можна лишити тільки для бейджа
                     )
                     .opacity(showText ? 1 : 0)
-                    //.padding(.top, 220)
+                //.padding(.top, 220)
                 
                 Spacer()
             }
         }
         .contentShape(Rectangle())
-
-
+        
+        
     }
     
     func anim() {
@@ -139,7 +139,7 @@ struct DarkCardView: View {
         
         withAnimation(.smooth(duration: 0.3)) {
             showText = false
-           
+            
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -149,22 +149,22 @@ struct DarkCardView: View {
                 } else {
                     colorIndex = 0
                 }
-                                
+                
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 withAnimation(.smooth(duration: 0.5)) {
                     showText = true
                 }
             }
-
+            
         }
-
+        
         // 1) виносимо верхню картку вправо
         withAnimation(.smooth(duration: 0.7)) {
             dragOffset.height = targetOffset
-           
+            
         }
-
+        
         // 2) після невеликої паузи змінюємо індекс і повертаємо в нуль
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             withAnimation(.smooth(duration: 0.8)) {
@@ -176,7 +176,7 @@ struct DarkCardView: View {
             }
         }
     }
-
+    
 }
 
 #Preview {
@@ -208,7 +208,7 @@ struct StatusCardView2: View {
                 .scaledToFit()
                 .frame(width: 240)
         }
-
+        
     }
 }
 
@@ -219,7 +219,14 @@ struct NewOboardButton: View {
     
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            
+            generator.prepare()
+            generator.impactOccurred()
+            action()
+        }
+        ) {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
@@ -238,7 +245,7 @@ struct NewOboardButton: View {
                     x: 0, y: 1, blur: 0, spread: 2
                 )
         )
-
+        
         
     }
 }
@@ -259,7 +266,7 @@ struct OnboardCustomNew<Content: View>: View {
                     NewOboardButton(title: ctaTitle, action: ctaAction, arrow: true)
                         .padding(.horizontal, 32)
                         .frame(minHeight: 52) // ключ
-//                        .frame(width: fixedWidth)
+                    //                        .frame(width: fixedWidth)
                     Spacer()
                 }
                 

@@ -17,6 +17,7 @@ import FirebaseFirestore
 import AppsFlyerLib
 import UserNotifications
 import FirebaseAnalytics
+import AppTrackingTransparency
 
 
 final class RCDelegateProxy: NSObject, PurchasesDelegate {
@@ -28,9 +29,89 @@ final class RCDelegateProxy: NSObject, PurchasesDelegate {
 
 // MARK: - AppDelegate
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, AppsFlyerLibDelegate {
+    
+    
+    private var didHandleATT = false
+    private(set) var didStartAppsFlyer = false
+    
+//    private func requestATTThenStartTrackingIfNeeded() {
+//        print("requestATTThenStartTrackingIfNeeded fired ✅")
+//        
+//        guard !didHandleATT else { return }
+//        didHandleATT = true
+//
+//        if #available(iOS 14, *) {
+//            let status = ATTrackingManager.trackingAuthorizationStatus
+//            print("ATT status:", ATTrackingManager.trackingAuthorizationStatus.rawValue)
+//            if status == .notDetermined {
+//                ATTrackingManager.requestTrackingAuthorization { status in
+//                    DispatchQueue.main.async { [weak self] in
+//                        self?.startTrackingStack()
+//                    }
+//                    print("NSUserTrackingUsageDescription =",
+//                          Bundle.main.object(forInfoDictionaryKey: "NSUserTrackingUsageDescription") ?? "nil")
+//                    print("ATT completion status:", status.rawValue)
+//                }
+//            } else {
+//                startTrackingStack()
+//            }
+//        } else {
+//            startTrackingStack()
+//        }
+//    }
+    
+    private func requestATTThenStartTrackingIfNeeded() {
+        if #available(iOS 14, *) {
 
-    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
-    private let appleAppID      = "6749094272" // без префікса "id"
+            // ✅ тільки коли апка реально active
+            guard UIApplication.shared.applicationState == .active else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                    self?.requestATTThenStartTrackingIfNeeded()
+                }
+                return
+            }
+
+            let status = ATTrackingManager.trackingAuthorizationStatus
+            print("ATT status:", status.rawValue)
+
+            if status == .notDetermined {
+                ATTrackingManager.requestTrackingAuthorization { [weak self] newStatus in
+                    DispatchQueue.main.async {
+                        print("ATT completion status:", newStatus.rawValue)
+
+                        // ❗️якщо все ще notDetermined — поп-ап не показали (запит не збережено)
+                        guard newStatus != .notDetermined else { return }
+
+                        self?.didHandleATT = true
+                        self?.startTrackingStack()
+                    }
+                }
+            } else {
+                didHandleATT = true
+                startTrackingStack()
+            }
+
+        } else {
+            didHandleATT = true
+            startTrackingStack()
+        }
+    }
+    
+    private func startTrackingStack() {
+        // ✅ стартуємо AppsFlyer тільки після ATT
+        startAppsFlyer()
+        didStartAppsFlyer = true
+
+        // ✅ івенти AppsFlyer теж після ATT
+        sendInstallIfNeeded()
+        
+        DispatchQueue.main.async { [weak self] in
+               self?.logStartAppIfNeeded()
+           }
+    }
+
+//    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
+//    private let appleAppID      = "6749094272" // без префікса "id"
     
     private var lastAFStartTs: TimeInterval = 0
     
@@ -47,6 +128,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
+        
+        //requestATTThenStartTrackingIfNeeded()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    self.logStoredKeywordOnStartIfNeeded()
+                }
 
         // 0) Спершу конфігурація RevenueCat, щоб був appUserID
         Purchases.configure(withAPIKey: "appl_lVJsBEhDCcyoBVhDgoyaBHruByh")
@@ -68,8 +155,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
         // 1) Конфігурація AppsFlyer 
         let af = AppsFlyerLib.shared()
-        af.appsFlyerDevKey = appsFlyerDevKey
-        af.appleAppID = appleAppID
+//        af.appsFlyerDevKey = appsFlyerDevKey
+//        af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
         
         af.delegate = self
@@ -78,17 +165,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         af.isDebug = false
         #endif
 
-        startAppsFlyer()
+        //startAppsFlyer()
 
         // 3) Одноразовий кастомний івент "install" — ПІСЛЯ configure()
-        sendInstallIfNeeded()
+        //sendInstallIfNeeded()
         //self.logStoredKeywordOnStartIfNeeded()
         
         let center = UNUserNotificationCenter.current()
         center.delegate = self
 
-        // 🔹 2. Запит дозволу на локальні пуші (можеш перенести після онбордингу, якщо хочеш)
-        SpecialOfferNotificationManager.shared.requestAuthorization()
 
         return true
     }
@@ -212,7 +297,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
 
         // запускаємо SDK (але НЕ прив’язуємо start_app до completion)
-        AppsFlyerLib.shared().start()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.requestATTThenStartTrackingIfNeeded()
+        }
+        //AppsFlyerLib.shared().start()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             self.logStoredKeywordOnStartIfNeeded()
@@ -248,6 +336,31 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(cString: $0) }
         }
     }
+    
+    private func logStartAppIfNeeded() {
+        guard didStartAppsFlyer else { return }
+        guard !sentStartAppThisForeground else { return }
+
+        let payload: [String: Any] = [
+            "session_kind": isColdLaunch ? "cold" : "warm",
+            "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
+            "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "",
+            "os": UIDevice.current.systemVersion
+        ]
+
+        AppsFlyerLib.shared().logEvent("start_app", withValues: payload)
+        sentStartAppThisForeground = true
+        isColdLaunch = false
+    }
+    
+    func sceneBecameActive() {
+        print("sceneBecameActive fired ✅")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.requestATTThenStartTrackingIfNeeded()
+            }
+        logStartAppIfNeeded()
+    }
+
 }
 
 @main
@@ -271,7 +384,7 @@ struct WaterEjectApp: App {
         // Firebase
         FirebaseApp.configure()
         
-        //Analytics.setAnalyticsCollectionEnabled(false)
+        Analytics.setAnalyticsCollectionEnabled(false)
         
         if let path = Bundle.main.path(forResource: "GoogleService-Info-Shared", ofType: "plist"),
            let opts = FirebaseOptions(contentsOfFile: path) {
@@ -306,17 +419,7 @@ struct WaterEjectApp: App {
             case .active:
                 SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
                 
-                if !appDelegate.sentStartAppThisForeground {
-                    let payload: [String: Any] = [
-                        "session_kind": appDelegate.isColdLaunch ? "cold" : "warm",
-                        "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
-                        "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "",
-                        "os": UIDevice.current.systemVersion
-                    ]
-                    AppsFlyerLib.shared().logEvent("start_app", withValues: payload)
-                    appDelegate.sentStartAppThisForeground = true
-                    appDelegate.isColdLaunch = false
-                }
+                appDelegate.sceneBecameActive()
 
             case .background:
                 

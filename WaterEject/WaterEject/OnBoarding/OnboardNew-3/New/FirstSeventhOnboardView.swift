@@ -13,10 +13,10 @@ struct FirstSeventhOnboardView: View {
     
     let action: () -> Void
     private func handleCTA() {
-       
+        
         action()
     }
-
+    
     
     var body: some View {
         let isLarge = UIScreen.main.bounds.height > 900
@@ -30,9 +30,9 @@ struct FirstSeventhOnboardView: View {
             Text("💦 Water got into your speakers?")
                 .foregroundStyle(.black)
                 .font(.system(size: isLarge ? 26 : 24, weight: .bold))
-
-
-    }
+            
+            
+        }
     }
 }
 
@@ -48,7 +48,14 @@ struct NewSecondOboardButton: View {
     
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            
+            generator.prepare()
+            generator.impactOccurred()
+            
+            action()
+        }) {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
@@ -67,7 +74,7 @@ struct NewSecondOboardButton: View {
                     x: 0, y: 1, blur: 0, spread: 2
                 )
         )
-
+        
         
     }
 }
@@ -84,10 +91,10 @@ struct OnboardCustomNewSecond<Content: View>: View {
             .safeAreaInset(edge: .bottom) {
                 HStack { // гарантує однакову геометрію
                     Spacer()
-//                    NewSecondOboardButton(title: ctaTitle, action: ctaAction, arrow: true)
-//                        .padding(.horizontal, 32)
-//                        .frame(minHeight: 52) // ключ
-//                        .frame(width: fixedWidth)
+                    //                    NewSecondOboardButton(title: ctaTitle, action: ctaAction, arrow: true)
+                    //                        .padding(.horizontal, 32)
+                    //                        .frame(minHeight: 52) // ключ
+                    //                        .frame(width: fixedWidth)
                     Spacer()
                 }
                 

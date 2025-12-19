@@ -11,6 +11,8 @@ struct RootView: View {
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     @EnvironmentObject var coordinator: AppCoordinator
     @EnvironmentObject var paywallGate: PaywallGate
+    @AppStorage("didAskNotifications") private var didAskNotifications = false
+    @State private var lastScreen: AppCoordinator.Screen = .boot
     
     var body: some View {
         Group {
@@ -53,6 +55,18 @@ struct RootView: View {
                 coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
                 UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
             }
+            
+            lastScreen = coordinator.currentScreen
+        }
+        .onChange(of: coordinator.currentScreen) { newScreen in
+            defer { lastScreen = newScreen }
+
+            // ✅ тільки коли ВИЙШЛИ з онбордингу
+            guard lastScreen == .onboarding, newScreen != .onboarding else { return }
+            guard !didAskNotifications else { return }
+
+            didAskNotifications = true
+            SpecialOfferNotificationManager.shared.requestAuthorization()
         }
         .onReceive(NotificationCenter.default.publisher(for: .specialOfferPushTapped)) { notif in
             let placeWhereBuy = notif.object as? String ?? "Push notification"

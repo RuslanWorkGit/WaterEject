@@ -18,7 +18,7 @@ struct ThirdWaveView: View {
     
     var body: some View {
         
-        OnboardWaterDrops(ctaTitle: textButton, ctaAction: handleCTA, pages: 0, fixedWidth: 260) {
+        OnboardNewStyle(ctaTitle: textButton, ctaAction: handleCTA, fixedWidth: 260) {
             
             Color(red: 215 / 255, green: 222 / 255, blue: 231 / 255).ignoresSafeArea()
             
