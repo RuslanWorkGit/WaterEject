@@ -496,7 +496,7 @@ struct PaywallFourPlanCard: View {
                     
                     Text(saveText)
                         .font(.system(size: 12))
-                        .foregroundStyle(Color(red: 196/255, green: 196/255, blue: 197/255))
+                        .foregroundStyle(Color(red: 166/255, green: 166/255, blue: 167/255))
                     
                 }
             }
