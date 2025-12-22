@@ -116,6 +116,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     private var lastAFStartTs: TimeInterval = 0
     
     private let asaKeywordKey = "asaKeywordId"
+    private let asaKeywordTextKey = "asaKeywordText"
     private var didLogKeywordOnStart = false
 
     // 👇 додано: прапорці для контролю start_app
@@ -255,42 +256,82 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         guard !didLogKeywordOnStart else { return }
         didLogKeywordOnStart = true
 
-        let stored = UserDefaults.standard.string(forKey: asaKeywordKey) ?? "nil"
-        Telemetry.shared.keywordsLogOnStart(keywordId: stored)
+        let storedId = UserDefaults.standard.string(forKey: asaKeywordKey)
+        let storedText = UserDefaults.standard.string(forKey: asaKeywordTextKey)
+
+        Telemetry.shared.keywordsLogOnStart(keywordId: storedId, keywordText: storedText)
     }
     
     func onConversionDataSuccess(_ installData: [AnyHashable : Any]) {
-
-        // AppsFlyer радить дивитись тільки Non-organic (реклама) :contentReference[oaicite:4]{index=4}
         let status = installData["af_status"] as? String
         guard status == "Non-organic" else { return }
 
-        // 1) Спробуємо “ID” (якщо раптом прилетить), інакше візьмемо keyword string
-        let keywordID = extractASAKeywordID(from: installData) ?? "not_set"
+        let info = extractASAKeywordInfo(from: installData)
 
-        // Збережемо для майбутнього онбордингу (на 1-му способі це максимум)
-        UserDefaults.standard.set(keywordID, forKey: "asaKeywordId")
+        // якщо текст прийшов числом — майже точно це ID
+        let keywordId = info.id ?? (info.text.flatMap { isAllDigits($0) ? $0 : nil })
+        let keywordText = (info.text.flatMap { isAllDigits($0) ? nil : $0 })
 
-        // Firebase log (через Telemetry)
-        Telemetry.shared.keywordsLog(keywordId: keywordID)
+        if let keywordId, !keywordId.isEmpty {
+            UserDefaults.standard.set(keywordId, forKey: asaKeywordKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: asaKeywordKey)
+        }
+
+        if let keywordText, !keywordText.isEmpty {
+            UserDefaults.standard.set(keywordText, forKey: asaKeywordTextKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: asaKeywordTextKey)
+        }
+
+        Telemetry.shared.keywordsLog(
+            keywordId: keywordId,
+            keywordText: keywordText,
+            source: "appsFlyer_conversion"
+        )
     }
     
     func onConversionDataFail(_ error: Error) {
         print("❌ AppsFlyer conversion data error:", error.localizedDescription)
     }
 
-    private func extractASAKeywordID(from data: [AnyHashable: Any]) -> String? {
-        // можливі ключі (залежить від інтеграції/провайдера)
+//    private func extractASAKeywordID(from data: [AnyHashable: Any]) -> String? {
+//        // можливі ключі (залежить від інтеграції/провайдера)
+//        let idKeys = ["keyword_id", "keywordId", "af_keyword_id", "af_keywordId", "af_keywordid"]
+//        for k in idKeys {
+//            if let v = data[k] { return String(describing: v) }
+//        }
+//
+//        // у PDF є варіанти: af_keyword або af_keywords :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
+//        if let v = data["af_keyword"] as? String, !v.isEmpty { return v }
+//        if let v = data["af_keywords"] as? String, !v.isEmpty { return v }
+//
+//        return nil
+//    }
+    
+    private func extractASAKeywordInfo(from data: [AnyHashable: Any]) -> (id: String?, text: String?) {
         let idKeys = ["keyword_id", "keywordId", "af_keyword_id", "af_keywordId", "af_keywordid"]
+        var id: String?
         for k in idKeys {
-            if let v = data[k] { return String(describing: v) }
+            if let v = data[k] { id = String(describing: v); break }
         }
 
-        // у PDF є варіанти: af_keyword або af_keywords :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
-        if let v = data["af_keyword"] as? String, !v.isEmpty { return v }
-        if let v = data["af_keywords"] as? String, !v.isEmpty { return v }
+        // можливі ключі з “людським” текстом (залежить від інтеграції)
+        let textKeys = ["keyword", "keyword_text", "asa_keyword", "asaKeyword", "search_term", "af_keyword", "af_keywords"]
+        var text: String?
+        for k in textKeys {
+            if let v = data[k] as? String, !v.isEmpty { text = v; break }
+            if let v = data[k], !(v is NSNull) {
+                let s = String(describing: v)
+                if !s.isEmpty { text = s; break }
+            }
+        }
 
-        return nil
+        return (id, text)
+    }
+    
+    private func isAllDigits(_ s: String) -> Bool {
+        !s.isEmpty && s.allSatisfy { $0.isNumber }
     }
     
     func applicationDidBecomeActive(_ application: UIApplication) {
