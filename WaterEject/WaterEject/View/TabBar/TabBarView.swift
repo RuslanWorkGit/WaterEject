@@ -20,7 +20,8 @@ struct TabBarView: View {
             Group {
                 switch selectedTab {
                 case .home:
-                    HomeView()
+                    NewHomeView()
+                    //HomeView()
                         .environmentObject(PaywallGate.shared)
                 case .test:
                     NavigationStack {

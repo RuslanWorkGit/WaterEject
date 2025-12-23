@@ -7,7 +7,7 @@ import SwiftUI
 
 struct OnboardingFlowViewEight: View {
     let someAction: () -> ()
-    private let flowId = "onboard_8_steps"
+    private let flowId = "onboard_8_1_steps"
     private let onboardId = OnboardTag.v8.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
