@@ -13,7 +13,7 @@ struct BackgroundNew: View {
     var startCleaning: Bool = false
     
     var body: some View {
-        LinearGradient(colors: [Color(red: 19 / 255, green: 21 / 255, blue: 23 / 255), Color(red: 29 / 255, green: 34 / 255, blue: 42 / 255)], startPoint: .top, endPoint: .bottom)
+        LinearGradient(colors: [Color(red: 39 / 255, green: 44 / 255, blue: 48 / 255), Color(red: 27 / 255, green: 30 / 255, blue: 33 / 255)], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
         
 

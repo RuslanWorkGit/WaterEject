@@ -75,7 +75,7 @@ struct NewCleaningModeCard: View {
             .padding(18)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
                     .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 4)
             )
             .overlay(
