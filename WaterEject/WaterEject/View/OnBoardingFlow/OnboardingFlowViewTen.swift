@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OnboardingFlowViewTen: View {
-    private let flowId = "onboard_10_steps"
+    private let flowId = "onboard_10_1_steps"
     private let onboardId = OnboardTag.v10.rawValue
     
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
@@ -176,12 +176,13 @@ struct OnboardingFlowViewTen: View {
     private func screen(for step: OnboardingStepTen, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
         switch step {
         case .stepOne:
-            FirstWelcomeView(action: { goTo(.stepTwo, forward: true) }, textButton: "Continue")
-                .environmentObject(reviewsCarouselModel)
+            SecondWomenView(action: { goTo(.stepTwo, forward: true) }, textButton: "Continue")
             
         case .stepTwo:
 
-            SecondWomenView(action: { goTo(.stepThree, forward: true) }, textButton: "Continue")
+
+            FirstWelcomeView(action: { goTo(.stepThree, forward: true) }, textButton: "Continue")
+                .environmentObject(reviewsCarouselModel)
         case .stepThree:
             ThirdWaveView(action: { goTo(.paywall, forward: true) }, textButton: "Continue")
 

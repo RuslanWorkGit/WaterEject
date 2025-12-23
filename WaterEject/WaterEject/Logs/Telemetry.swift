@@ -610,9 +610,9 @@ enum OnboardTag: String, Codable {
     case v5 = "Onboard_5"
     case v6 = "Onboard_6"
     case v7 = "Onboard_7"
-    case v8 = "Onboard_8"
+    case v8 = "Onboard_8_1"
     case v9 = "Onboard_9"
-    case v10 = "Onboard_10"
+    case v10 = "Onboard_10_1"
     case modes = "Modes"
 }
 

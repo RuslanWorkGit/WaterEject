@@ -19,6 +19,7 @@ struct OnboardingFlowViewEight: View {
     @State private var overlayX: CGFloat = 0                       // ← офсет оверлея
     @State private var isAnimating = false
     @State private var isForward = true
+    @StateObject private var reviewsCarouselModel = ReviewsCarouselModel()
     
     @State private var topCardIndex: Int = 0
     @State private var colorIndex: Int = 0
@@ -204,13 +205,14 @@ struct OnboardingFlowViewEight: View {
             //StartOnboardView(action: { goTo(.wallet, forward: true) }, startAnimations: startAnimations, staticDisplay: staticDisplay)
             
             WaterDropsView(index: 0, action: { goTo(.stepTwo, forward: true) })
-
+            
             //OnboardFourthFirstView(action: { goTo(.paywall, forward: true) })
         case .stepTwo:
             BlueLinesView(index: 1, action: { goTo(.stepThree, forward: true) })
         case .stepThree:
-            MeetOneView(index: 2, action: { goTo(.stepFour, forward: true) }, expandedIndex: $modesExpandedIndex )
-            
+//            MeetOneView(index: 2, action: { goTo(.stepFour, forward: true) }, expandedIndex: $modesExpandedIndex )
+            FirstWelcomeView(action: { goTo(.stepFour, forward: true) }, textButton: "Continue")
+                .environmentObject(reviewsCarouselModel)
         case .stepFour:
             MeetView(index: 3, action: { goTo(.paywall, forward: true) })
         
