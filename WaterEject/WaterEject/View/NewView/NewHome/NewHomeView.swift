@@ -17,7 +17,7 @@ import RevenueCat
 
 enum NewRoute: Hashable {
     case sevenDaysModes
-    case sevenDaysStart(CleaningMode)
+    case sevenDaysStart(NewCleaningMode)
 }
 
 struct NewHomeView: View {
@@ -33,7 +33,16 @@ struct NewHomeView: View {
     
     private let sevenDaysDefaultDevice: CleaningDevice = .iPhone
     
+    @EnvironmentObject private var paywallGate: PaywallGate
+    @Environment(\.dismiss) private var dismiss
+    @State private var pendingMode: NewCleaningMode?
+
+    
     var body: some View {
+        let isSmall = UIScreen.main.bounds.height < 700
+        let isMini = UIScreen.main.bounds.height < 850
+        let isLarge = UIScreen.main.bounds.height > 900
+        
         NavigationStack(path: $path) {
             ZStack {
                 
@@ -55,6 +64,21 @@ struct NewHomeView: View {
                     SevenDayPlanCardView(completedDays: sevenDaysCompleted) {
                         path.append(.sevenDaysModes)
                     }
+                    .padding(.horizontal, 24)
+                    
+                    BigCardStartCleaningView(
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
+                        day: "Day 1",
+                        mainText: "Water \nRemoval",
+                        deviceIcon: "SmallWave",
+                        firstHesh: "#Clean",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
+                        secondHesh: "#LowFrequence",
+                        time: "60 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
                     .padding(.horizontal, 24)
                     
                     Spacer()
@@ -86,7 +110,7 @@ struct NewHomeView: View {
                                         }
                     
                 case .sevenDaysStart(let mode):
-                    StartView(device: sevenDaysDefaultDevice, mode: mode)
+                    NewStartView(device: sevenDaysDefaultDevice, mode: mode)
                 }
             }
             .task {
@@ -109,6 +133,19 @@ struct NewHomeView: View {
                 
             }
             
+        }
+    }
+    
+    private func startIfAllowed(_ mode: NewCleaningMode) {
+        Task {
+            pendingMode = mode
+            if await paywallGate.isPro() {
+               // onStart(mode)
+                path.append(.sevenDaysStart(mode))
+            } else {
+                paywallGate.currentContext = .modesTap
+                showSpecialOffer = true
+            }
         }
     }
 }

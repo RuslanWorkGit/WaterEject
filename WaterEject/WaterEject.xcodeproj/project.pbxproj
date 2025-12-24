@@ -27,6 +27,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				View/NewView/NewHome/Untitled.swift,
 			);
 			target = 9BA1E0642E328F970027AD07 /* WaterEject */;
 		};

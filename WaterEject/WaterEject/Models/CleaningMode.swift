@@ -71,3 +71,35 @@ extension CleaningMode {
 
     }
 }
+
+
+import Foundation
+
+enum NewCleaningMode: String, CaseIterable, Identifiable {
+    case waterRemoval
+
+
+
+    var id: String { rawValue }
+
+
+    
+    var modeName: String {
+        switch self {
+        case .waterRemoval: return "Water Removal"
+
+        }
+    }
+
+    var explainText: String {
+        switch self {
+        case .waterRemoval: return "Use basic sound frequencies to quickly remove visible water and dust from the speakers"
+
+
+        }
+    }
+    
+
+
+}
+

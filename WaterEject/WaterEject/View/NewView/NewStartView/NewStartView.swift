@@ -1,14 +1,15 @@
 //
-//  StartView.swift
+//  NewStartView.swift
 //  WaterEject
 //
-//  Created by Ruslan Liulka on 01.08.2025.
+//  Created by Ruslan Liulka on 24.12.2025.
 //
+
 
 import SwiftUI
 
 
-struct StartView: View {
+struct NewStartView: View {
     @StateObject private var viewModel = StartViewModel()
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var paywallGate: PaywallGate
@@ -17,7 +18,7 @@ struct StartView: View {
     @StateObject private var reviewFlow = ReviewFlowManager.shared
     @Environment(\.requestReview) private var requestReview
     let device: CleaningDevice
-    let mode: CleaningMode
+    let mode: NewCleaningMode
     
     var body: some View {
         let isLarge = UIScreen.main.bounds.height > 900
@@ -158,18 +159,10 @@ struct StartView: View {
                                        // початок очищення (лог до запуску/після — на твій вибір; тут — до)
 //                                       Telemetry.shared.startCleaningBegin(device: device, mode: mode, duration: 25)
                     switch mode {
-                    case .sonicPulse:
+                    case .waterRemoval:
                         viewModel.playCleaningSequence()
                         viewModel.startTimer()
-                    case .nanoShake:
-                        viewModel.playSomeWav()
-                        viewModel.startTimer()
-                    case .dynamicEject:
-                        viewModel.playCleaningSequenceTwo()
-                        viewModel.startTimer()
-                    case .hydroGuard:
-                        viewModel.playCleaningSequenceThree()
-                        viewModel.startTimer()
+
                     }
                 },
                 secondaryButton: .cancel({
@@ -185,6 +178,7 @@ struct StartView: View {
 //                   device: device.displayName,
 //                   mode: mode.modeName
 //               )
+            SevenDayPlanProgress.markCompletedToday()
             
             ReviewFlowManager.shared.recordSuccessfulCleaning(
                 device: device.displayName,
@@ -294,97 +288,4 @@ struct StartView: View {
 
 
 
-struct SelectedModeCard: View {
-    let deviceIcon: String      // ім'я зображення для іконки пристрою
-    let title: String           // довга назва режиму
-    var isActive: Bool = false
-    let onSettings: () -> Void  // дія на натискання шестерні
-    
-    var body: some View {
-        HStack(spacing: 14) {
-            // Іконка пристрою
-            Image(deviceIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 36, height: 36)
-                .padding(.leading, 4)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Selected mode:")
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundStyle(.white.opacity(0.6))
-                Text(title)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-            .padding(.vertical, 8)
-            
-            Spacer()
-            
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 18)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.05))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isActive ? Color(red: 81/255, green: 132/255, blue: 234/255) : Color.clear, lineWidth: 1)
-            
-        )
-        
-        
-        .animation(.easeInOut(duration: 0.3), value: isActive)
-    }
-}
 
-struct StarRatingPopup: View {
-    let onRate: (Int) -> Void
-    let onLater: () -> Void
-
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.15)
-                .ignoresSafeArea()
-                .onTapGesture { onLater() }
-
-            VStack(spacing: 12) {
-                Text("Rate WaterEject")
-                    .font(.system(size: 22, weight: .semibold))
-
-                HStack(spacing: 12) {
-                    ForEach(1...5, id: \.self) { star in
-                        Button {
-                            onRate(star)
-                        } label: {
-                            Image(systemName: "star.fill")
-                                .foregroundStyle(.yellow)
-                                .font(.system(size: 28))
-                        }
-                    }
-                }
-
-                Button("Later", role: .cancel) { onLater() }
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 16, weight: .medium))
-            }
-            .padding(25)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .padding(.horizontal, 24)
-        }
-    }
-}
-
-
-//#Preview {
-//    StarRatingPopup { n in
-//        
-//    } onLater: {
-//        
-//    }
-//
-//   // StartView(device: .iPhone , mode: .nanoShake)
-//}

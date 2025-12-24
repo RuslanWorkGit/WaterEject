@@ -11,24 +11,31 @@ import SwiftUI
 struct NewCleaningModeCard: View {
     // Пропси для повторного використання
     let icon: String
-    let mode: CleaningMode
+    let mode: NewCleaningMode
     let deviceIcon: String
-    let deviceName: String
+    let firstHesh: String
     let deviceColor: Color
-    let freq: String
+    let secondHesh: String
     let time: String
     let isSmall: Bool
-    let onModeAction: (CleaningMode) -> Void
+    let onModeAction: (NewCleaningMode) -> Void
     
     var body: some View {
         
         Button {
             onModeAction(mode)
         } label: {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .top, spacing: 12) {
                     ZStack {
-                        IconCard(icon: icon)
+                        
+                        Image(icon)
+                            .padding(18)
+                            .background(
+                                Circle()
+                                    .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
+                            )
+                       // IconCard(icon: icon)
                         
                     }
                     .frame(width: 48, height: 48)
@@ -36,40 +43,48 @@ struct NewCleaningModeCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             Text(mode.modeName)
-                                .font(.system(size: isSmall ? 14 : 18, weight: .semibold))
-                                .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
+                                .font(.system(size: isSmall ? 14 : 16, weight: .semibold))
+                                .foregroundStyle(.white)
                             
                         }
                         Text(mode.explainText)
-                            .font(.system(size: isSmall ? 12 : 14))
-                            .foregroundColor(Color.white.opacity(0.55))
+                            .multilineTextAlignment(.leading)
+                            .font(.system(size: isSmall ? 10 : 10))
+                            .foregroundColor(Color.white.opacity(0.8))
                     }
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 10)
                 }
                 
                 Divider().background(Color.white.opacity(0.1))
                 
                 HStack(spacing: 10) {
-                    Image(deviceIcon)
                     
-                    Text(deviceName)
-                        .font(.system(size: isSmall ? 14 : 15, weight: .medium))
-                        .foregroundStyle(deviceColor)
-                    Text("•")
-                        .font(.system(size: isSmall ? 14 : 15))
-                        .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
-                    Text(freq)
-                        .font(.system(size: isSmall ? 14 : 15))
-                        .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
-                    Spacer()
-                    Text(time)
-                    //.font(.system(size: 12))
-                        .font(.system(size: isSmall ? 10 : 12, weight: .regular))
+                    Text(firstHesh)
+                        .font(.system(size: isSmall ? 12 : 12, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.6))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 5)
-                        .background(Color.white.opacity(0.05))
-                        .clipShape(Capsule())
+                        .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                   
+                    Text(secondHesh)
+                        .font(.system(size: isSmall ? 12 : 12))
+                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 5)
+                        .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    Spacer()
+                    Image(systemName: "clock")
+                        .font(.system(size: isSmall ? 14 : 16, weight: .regular))
+                        .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                    Text(time)
+                    //.font(.system(size: 12))
+                        .font(.system(size: isSmall ? 10 : 12, weight: .medium))
+                        .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+
                 }
             }
             .padding(18)
@@ -78,10 +93,7 @@ struct NewCleaningModeCard: View {
                     .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
                     .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 4)
             )
-            .overlay(
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
-            )
+
             //            .padding(.horizontal, 24)
             //.padding(.horizontal, isSmall ? 8 : 0)
             .padding(.vertical, 6)
@@ -92,7 +104,12 @@ struct NewCleaningModeCard: View {
 }
 
 #Preview {
-    NewCleaningModeCard(icon: "Drop", mode: .dynamicEject, deviceIcon: "SmallWave", deviceName: "Speaker", deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), freq: "21", time: "25", isSmall: true) { new in
-        
+    ZStack {
+        BackgroundNew()
+        NewCleaningModeCard(icon: "NewWaterDrop", mode: .waterRemoval, deviceIcon: "SmallWave", firstHesh: "#Clean", deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), secondHesh: "#LowFrequency", time: "25 seconds", isSmall: true) { new in
+            
+        }
+        .padding(.horizontal, 16)
+
     }
 }

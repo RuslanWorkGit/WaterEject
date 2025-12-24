@@ -11,9 +11,9 @@ struct SevenDaysModesView: View {
     @EnvironmentObject private var paywallGate: PaywallGate
     @Environment(\.dismiss) private var dismiss
     @State private var showSpecialOffer = false
-    @State private var pendingMode: CleaningMode?
+    @State private var pendingMode: NewCleaningMode?
 
-    let onStart: (CleaningMode) -> Void
+    let onStart: (NewCleaningMode) -> Void
 
     var body: some View {
         let isSmall = UIScreen.main.bounds.height < 700
@@ -38,53 +38,90 @@ struct SevenDaysModesView: View {
                 
                 
                 
-                VStack(spacing: 12) {
+                VStack(spacing: 4) {
                     
                     
                     NewCleaningModeCard(
-                        icon: "Drop",
-                        mode: .sonicPulse,
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
                         deviceIcon: "SmallDynamic",
-                        deviceName: "Speaker",
+                        firstHesh: "Speaker",
                         deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
+                        secondHesh: "175HZ Vibro",
+                        time: "60 seconds",
                         isSmall: isSmall,
                         onModeAction: { mode in startIfAllowed(mode) }
                     )
                     
                     NewCleaningModeCard(
-                        icon: "Dynamic",
-                        mode: .nanoShake,
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
                         deviceIcon: "SmallDynamic",
-                        deviceName: "Speaker",
+                        firstHesh: "Speaker",
                         deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
+                        secondHesh: "175HZ Vibro",
+                        time: "60 seconds",
                         isSmall: isSmall,
                         onModeAction: { mode in startIfAllowed(mode) }
                     )
                     
                     NewCleaningModeCard(
-                        icon: "Drop",
-                        mode: .dynamicEject,
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
                         deviceIcon: "SmallDrop",
-                        deviceName: "Water",
+                        firstHesh: "Water",
                         deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
+                        secondHesh: "175HZ Vibro",
+                        time: "60 seconds",
                         isSmall: isSmall,
                         onModeAction: { mode in startIfAllowed(mode) }
                     )
                     
                     NewCleaningModeCard(
-                        icon: "Drop",
-                        mode: .hydroGuard,
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
                         deviceIcon: "SmallWave",
-                        deviceName: "Speaker",
+                        firstHesh: "Speaker",
                         deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
-                        freq: "175HZ Vibro",
-                        time: "25 seconds",
+                        secondHesh: "175HZ Vibro",
+                        time: "60 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
+                    
+                    NewCleaningModeCard(
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
+                        deviceIcon: "SmallWave",
+                        firstHesh: "Speaker",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
+                        secondHesh: "175HZ Vibro",
+                        time: "60 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
+                    
+                    
+                    NewCleaningModeCard(
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
+                        deviceIcon: "SmallWave",
+                        firstHesh: "Speaker",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
+                        secondHesh: "175HZ Vibro",
+                        time: "60 seconds",
+                        isSmall: isSmall,
+                        onModeAction: { mode in startIfAllowed(mode) }
+                    )
+                    
+                    NewCleaningModeCard(
+                        icon: "NewWaterDrop",
+                        mode: .waterRemoval,
+                        deviceIcon: "SmallWave",
+                        firstHesh: "Speaker",
+                        deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
+                        secondHesh: "175HZ Vibro",
+                        time: "60 seconds",
                         isSmall: isSmall,
                         onModeAction: { mode in startIfAllowed(mode) }
                     )
@@ -103,29 +140,7 @@ struct SevenDaysModesView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .background(NavigationControllerCoordinator())
-//        .toolbar {
-//            ToolbarItem(placement: .principal) {
-//                VStack {
-//                    Text("7-day cleaning Plan")
-//                        .font(.system(size: 24, weight: .bold))
-//                        .foregroundColor(.white)
-//                    
-//                    Text("7-day cleaning Plan")
-//                        .font(.system(size: 12, weight: .regular))
-//                        .foregroundColor(.white)
-//                }
-//               
-//            }
-//            
-//
-//            ToolbarItem(placement: .topBarLeading) {
-//                Button { dismiss() } label: {
-//                    Image(systemName: "chevron.backward")
-//                        .foregroundStyle(Color(red: 161/255, green: 192/255, blue: 255/255))
-//                        .font(.system(size: 23))
-//                }
-//            }
-//        }
+
         .tint(Color(red: 161/255, green: 192/255, blue: 255/255))
         .fullScreenCover(isPresented: $showSpecialOffer) {
             SpecialOfferView(
@@ -136,7 +151,7 @@ struct SevenDaysModesView: View {
         }
     }
 
-    private func startIfAllowed(_ mode: CleaningMode) {
+    private func startIfAllowed(_ mode: NewCleaningMode) {
         Task {
             pendingMode = mode
             if await paywallGate.isPro() {
@@ -174,43 +189,6 @@ struct CurvedHeaderShape: Shape {
 
 
 
-//struct SevenDaysHeaderView: View {
-//    let title: String
-//    let subtitle: String
-//    let onBack: () -> Void
-//
-//    var body: some View {
-//        GeometryReader { geo in
-//            let top = geo.safeAreaInsets.top
-//            let headerHeight: CGFloat = 200
-//
-//            ZStack(alignment: .top) {
-//                CurvedHeaderShape(curveHeight: 40)
-//                    .fill(Color(red: 28/255, green: 74/255, blue: 115/255))
-//                    .frame(height: headerHeight)
-//                    .ignoresSafeArea(edges: .top)
-//
-//                // Back + title/subtitle
-//                VStack(spacing: 10) {
-//
-//                    Text(title)
-//                        .font(.system(size: 34, weight: .bold))
-//                        .foregroundStyle(.white)
-//                        .multilineTextAlignment(.center)
-//
-//                    Text(subtitle)
-//                        .font(.system(size: 16, weight: .regular))
-//                        .foregroundStyle(Color.white.opacity(0.85))
-//                        .multilineTextAlignment(.center)
-//                        .padding(.horizontal, 24)
-//                }
-//                //.padding(.top,46) // відступ під статусбар + "навігаційну" зону
-//            }
-//            .frame(height: headerHeight)
-//        }
-//        .frame(height: 200) // має збігатися з headerHeight
-//    }
-//}
 
 struct SevenDaysHeaderView: View {
     let headerHeight: CGFloat
