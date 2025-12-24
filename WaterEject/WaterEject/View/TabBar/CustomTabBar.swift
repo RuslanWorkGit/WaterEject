@@ -80,7 +80,7 @@ struct CustomTabBar: View {
             
         }
         .padding(.horizontal, 26)
-        .padding(.vertical, 16)
+        .padding(.vertical, 12)
         .background(
             Color(red: 35/255, green: 37/255, blue: 41/255)
                 .ignoresSafeArea(.container, edges: .bottom)
@@ -111,7 +111,7 @@ struct TabBarButton: View {
                     .foregroundColor(isSelected ? Color(red: 161/255, green: 192/255, blue: 255/255) : .gray)
             }
             .frame(minWidth: 0, maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 12)
             
             
         }

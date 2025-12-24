@@ -50,7 +50,7 @@ struct NewHomeView: View {
                 
                 BackgroundNew()
                 
-                VStack(spacing: 40) {
+                VStack(spacing: 16) {
                     HStack {
                         Text("Speaker Cleaner")
                             .font(.system(size: 28, weight: .bold))
@@ -79,6 +79,11 @@ struct NewHomeView: View {
                         isSmall: isSmall,
                         onModeAction: { mode in startIfAllowed(mode) }
                     )
+                    .padding(.horizontal, 24)
+                    
+                    TurboCleaningCardView(icon: "Lightning", mode: .waterRemoval, mainText: "Turbo Cleaning", secondText: "Advaced", isSmall: isSmall) { mode in
+                        startIfAllowed(mode)
+                    }
                     .padding(.horizontal, 24)
                     
                     Spacer()
