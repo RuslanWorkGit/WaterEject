@@ -18,7 +18,36 @@ struct NewCleaningModeCard: View {
     let secondHesh: String
     let time: String
     let isSmall: Bool
+    let isLocked: Bool
+    let lockAssetName: String
     let onModeAction: (NewCleaningMode) -> Void
+    
+    
+    init(
+        icon: String,
+        mode: NewCleaningMode,
+        deviceIcon: String,
+        firstHesh: String,
+        deviceColor: Color,
+        secondHesh: String,
+        time: String,
+        isSmall: Bool,
+        isLocked: Bool = false,
+        lockAssetName: String = "lock",
+        onModeAction: @escaping (NewCleaningMode) -> Void
+    ) {
+        self.icon = icon
+        self.mode = mode
+        self.deviceIcon = deviceIcon
+        self.firstHesh = firstHesh
+        self.deviceColor = deviceColor
+        self.secondHesh = secondHesh
+        self.time = time
+        self.isSmall = isSmall
+        self.isLocked = isLocked
+        self.lockAssetName = lockAssetName
+        self.onModeAction = onModeAction
+    }
     
     var body: some View {
         
@@ -29,13 +58,24 @@ struct NewCleaningModeCard: View {
                 HStack(alignment: .top, spacing: 12) {
                     ZStack {
                         
-                        Image(icon)
-                            .padding(18)
+                        if isLocked {
+                            Image(lockAssetName) // твій asset
+                                .padding(18)
                             .background(
                                 Circle()
                                     .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
                             )
-                       // IconCard(icon: icon)
+                        } else {
+                            Image(icon)
+                                .padding(18)
+                                .background(
+                                    Circle()
+                                        .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
+                                )
+
+                        }
+                        
+                        // IconCard(icon: icon)
                         
                     }
                     .frame(width: 48, height: 48)
@@ -67,7 +107,7 @@ struct NewCleaningModeCard: View {
                         .padding(.vertical, 5)
                         .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                   
+                    
                     Text(secondHesh)
                         .font(.system(size: isSmall ? 12 : 12))
                         .foregroundStyle(.white.opacity(0.6))
@@ -84,7 +124,7 @@ struct NewCleaningModeCard: View {
                     //.font(.system(size: 12))
                         .font(.system(size: isSmall ? 10 : 12, weight: .medium))
                         .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-
+                    
                 }
             }
             .padding(18)
@@ -93,11 +133,12 @@ struct NewCleaningModeCard: View {
                     .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
                     .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 4)
             )
-
+            
             //            .padding(.horizontal, 24)
             //.padding(.horizontal, isSmall ? 8 : 0)
             .padding(.vertical, 6)
         }
+        .disabled(isLocked)
         
     }
     
@@ -110,6 +151,6 @@ struct NewCleaningModeCard: View {
             
         }
         .padding(.horizontal, 16)
-
+        
     }
 }

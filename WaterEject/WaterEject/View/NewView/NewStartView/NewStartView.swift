@@ -181,6 +181,7 @@ struct NewStartView: View {
 //                   mode: mode.modeName
 //               )
             SevenDayPlanProgress.markCompletedToday()
+            SevenDayPlanNotificationScheduler.scheduleForNextDayIfNeeded()
             
             ReviewFlowManager.shared.recordSuccessfulCleaning(
                 device: device.displayName,

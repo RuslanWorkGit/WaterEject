@@ -10,6 +10,8 @@ import Foundation
 enum SevenDayPlanProgress {
     static let daysKey = "seven_day_plan_completed_days"
     static let lastDateKey = "seven_day_plan_last_completed_date"
+    
+    static let unlockDelaySeconds: TimeInterval = 0
 
     static var completedDays: Int {
         get { min(UserDefaults.standard.integer(forKey: daysKey), 7) }
@@ -18,21 +20,39 @@ enum SevenDayPlanProgress {
             UserDefaults.standard.set(clamped, forKey: daysKey)
         }
     }
+    
+    
+    static func canStartNextDay(now: Date = Date()) -> Bool {
+        guard let last = UserDefaults.standard.object(forKey: lastDateKey) as? Date else {
+            return true // ще нічого не проходили
+        }
+
+        let calendar = Calendar.current
+        let startOfLastDay = calendar.startOfDay(for: last)
+
+        guard let startOfNextDay = calendar.date(byAdding: .day, value: 1, to: startOfLastDay) else {
+            return true
+        }
+
+        return now >= startOfNextDay.addingTimeInterval(unlockDelaySeconds)
+    }
 
     /// Викликати при успішному завершенні чистки.
     /// Захищає від кількох інкрементів за один день.
     static func markCompletedToday() {
-        let defaults = UserDefaults.standard
-        let now = Date()
         let calendar = Calendar.current
+        let now = Date()
 
-        if let last = defaults.object(forKey: lastDateKey) as? Date,
-           calendar.isDate(last, inSameDayAs: now) {
+        if let lastDate = UserDefaults.standard.object(forKey: lastDateKey) as? Date,
+           calendar.isDate(lastDate, inSameDayAs: now) {
             return
         }
 
-        defaults.set(now, forKey: lastDateKey)
-        completedDays = min(completedDays + 1, 7)
+        var days = UserDefaults.standard.integer(forKey: daysKey)
+        if days < 7 { days += 1 }
+
+        UserDefaults.standard.set(days, forKey: daysKey)
+        UserDefaults.standard.set(now, forKey: lastDateKey)
     }
 
     static func reset() {

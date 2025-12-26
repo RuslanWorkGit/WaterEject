@@ -26,6 +26,9 @@ struct NewHomeView: View {
     @State private var selectedDevice: CleaningDevice?
     @State private var path: [NewRoute] = []
     @State private var didLogExposure = false
+//    private var sevenDaysCompleted: Int = 0
+    
+    @AppStorage(SevenDayPlanProgress.daysKey)
     private var sevenDaysCompleted: Int = 0
     
     @State private var showSpecialOffer = false

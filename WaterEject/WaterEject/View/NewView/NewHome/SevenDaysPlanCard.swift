@@ -72,7 +72,7 @@ struct SevenDayPlanCardView: View {
 
             Text("\(day)")
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(isCompleted ? active : inactiveText)
+                .foregroundStyle(isCompleted ? .white : inactiveText)
         }
     }
 }
