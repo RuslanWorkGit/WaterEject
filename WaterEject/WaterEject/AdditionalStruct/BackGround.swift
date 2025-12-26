@@ -67,7 +67,7 @@ struct Background: View {
 
 #Preview {
     ZStack {
-        Background()
+        Background(startCleaning: true)
         
     }
 }

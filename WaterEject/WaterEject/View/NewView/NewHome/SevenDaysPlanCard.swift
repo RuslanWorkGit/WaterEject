@@ -58,10 +58,7 @@ struct SevenDayPlanCardView: View {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .fill(Color(red: 28 / 255, green: 45 / 255, blue: 61 / 255))
             )
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
-            )
+
         }
         .buttonStyle(.plain)
     }

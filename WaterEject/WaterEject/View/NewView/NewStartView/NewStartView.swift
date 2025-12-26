@@ -26,7 +26,7 @@ struct NewStartView: View {
         ZStack {
             Background(startCleaning: viewModel.startCleaning)
             
-            VStack(spacing: 28) {
+            VStack(spacing: 8) {
                 
                 ZStack {
                     Text(device.displayName)
@@ -64,9 +64,11 @@ struct NewStartView: View {
                 
                 
                 VStack {
-                    Image(device.bigImageName)
                     
-                        .padding(.top, 60)
+                    Image("Iphone17")
+                    //Image(device.bigImageName)
+                    
+                        //.padding(.top, 60)
                     
                     
                 }
