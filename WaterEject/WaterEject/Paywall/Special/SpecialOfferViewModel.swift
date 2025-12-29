@@ -195,6 +195,13 @@ final class SpecialOfferViewModel: ObservableObject {
             if active {
                 let txId = result.transaction?.transactionIdentifier
                 
+    
+                    Telemetry.shared.funnelPurchaseSuccess(
+                        onboardId: "Special_offer",
+                        plan: "weekly"
+                    )
+                
+                
                 AF.log(.subscribe, [
                   "af_revenue": price,
                   "af_currency": currency ?? "USD",

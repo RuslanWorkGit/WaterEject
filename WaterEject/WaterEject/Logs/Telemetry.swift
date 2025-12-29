@@ -691,9 +691,9 @@ extension OnboardTag {
         case .v5: return "Onboard_v_5"
         case .v6: return "Onboard_v_6"
         case .v7: return "Onboard_v_7"
-        case .v8: return "Onboard_v_8"
+        case .v8: return "Onboard_v_8_1"
         case .v9: return "Onboard_v_9"
-        case .v10: return "Onboard_v_10"
+        case .v10: return "Onboard_v_10_1"
         case .modes: return "Modes"
         }
     }
@@ -835,7 +835,7 @@ extension Telemetry {
     }
     
     func funnelPurchaseSuccess(onboardId: String, plan: String) {
-        Analytics.logEvent("purchase_success", parameters: base([
+        Analytics.logEvent("purchase_success_event", parameters: base([
             "onboard_id": onboardId,
             "plan": plan
         ]))

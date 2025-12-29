@@ -58,29 +58,69 @@ struct SevenDaysModesView: View {
                 
                 
                 
-                VStack(spacing: 4) {
+                VStack(alignment: .leading ,spacing: 4) {
                     ForEach(1...7, id: \.self) { day in
                         
-                        
-                        NewCleaningModeCard(
-                            icon: "NewWaterDrop",
-                            mode: .waterRemoval,
-                            deviceIcon: "SmallDynamic",
-                            firstHesh: "Speaker",
-                            deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
-                            secondHesh: "175HZ Vibro",
-                            time: "60 seconds",
-                            isSmall: isSmall,
-                            isLocked: isLocked(day: day),
-                            lockAssetName: "Lock"
-                        ) { mode in
-                            startIfAllowed(mode)
+                        HStack {
+                            
+//                            Circle()
+//                                .fill(.red)
+//                                .frame(width: 24, height: 24)
+                            
+                            Circle()
+                                    .fill(day <= completedDays ? Color(red: 2/255, green: 125/255, blue: 244/255) : Color(red: 49 / 255, green: 66 / 255, blue: 80 / 255))
+                                    .stroke(
+                                        day == completedDays + 1 ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : .clear,
+                                        style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round)
+                                    )
+                                    .frame(width: 24, height: 24)
+                                    .anchorPreference(key: TimelineCentersKey.self, value: .center) { [day: $0] }
+                                    .frame(width: 28, alignment: .center) // колонка під Circle (щоб було рівно)
+
+
+                            
+                            NewCleaningModeCard(
+                                icon: "NewWaterDrop",
+                                mode: .waterRemoval,
+                                deviceIcon: "SmallDynamic",
+                                firstHesh: "#Clean",
+                                deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
+                                secondHesh: "#LowFrequance",
+                                time: "60 seconds",
+                                isSmall: isSmall,
+                                isLocked: isLocked(day: day),
+                                lockAssetName: "Lock"
+                            ) { mode in
+                                startIfAllowed(mode)
+                            }
+
                         }
+                        
+                        
                     }
                                         
                     
                 }
-                .padding(.horizontal, isSmall ? 48 : isMini ? 40 : isLarge ? 16 : 32)
+                .backgroundPreferenceValue(TimelineCentersKey.self) { anchors in
+                    GeometryReader { proxy in
+                        let points: [CGPoint] = (1...7).compactMap { day in
+                            anchors[day].map { proxy[$0] }
+                        }
+
+                        Path { path in
+                            guard let first = points.first else { return }
+                            path.move(to: first)
+                            for p in points.dropFirst() {
+                                path.addLine(to: p)
+                            }
+                        }
+                        .stroke(
+                            Color(red: 49 / 255, green: 66 / 255, blue: 80 / 255),
+                            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
+                        )
+                    }
+                }
+                .padding(.horizontal, isSmall ? 24 : isMini ? 20 : isLarge ? 16 : 24)
                 //.padding(.top, 32)
                 .padding(.top, 12)
             }
@@ -191,6 +231,14 @@ struct SevenDaysHeaderView: View {
         }
         .frame(height: headerHeight)
         .ignoresSafeArea(edges: .top) // щоб синій зайшов під статусбар
+    }
+}
+
+private struct TimelineCentersKey: PreferenceKey {
+    static var defaultValue: [Int: Anchor<CGPoint>] = [:]
+
+    static func reduce(value: inout [Int: Anchor<CGPoint>], nextValue: () -> [Int: Anchor<CGPoint>]) {
+        value.merge(nextValue(), uniquingKeysWith: { $1 })
     }
 }
 
