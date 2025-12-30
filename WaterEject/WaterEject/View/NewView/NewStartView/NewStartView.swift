@@ -164,6 +164,24 @@ struct NewStartView: View {
                     case .waterRemoval:
                         viewModel.playCleaningSequence()
                         viewModel.startTimer()
+                    case .deepWaterClean:
+                        viewModel.playSomeWav()
+                        viewModel.startTimer()
+                    case .speakerCheck:
+                        viewModel.playCleaningSequenceTwo()
+                        viewModel.startTimer()
+                    case .intermediateCleaning:
+                        viewModel.playCleaningSequenceThree()
+                        viewModel.startTimer()
+                    case .dustResidueClean:
+                        viewModel.playCleaningSequence()
+                        viewModel.startTimer()
+                    case .soundBalanceRestore:
+                        viewModel.playCleaningSequenceTwo()
+                        viewModel.startTimer()
+                    case .finalDeepClean:
+                        viewModel.playCleaningSequenceThree()
+                        viewModel.startTimer()
 
                     }
                 },

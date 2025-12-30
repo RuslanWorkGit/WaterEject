@@ -61,11 +61,10 @@ struct SevenDaysModesView: View {
                 VStack(alignment: .leading ,spacing: 4) {
                     ForEach(1...7, id: \.self) { day in
                         
+                        let mode = NewCleaningMode.mode(forDay: day)
+                        
                         HStack {
-                            
-//                            Circle()
-//                                .fill(.red)
-//                                .frame(width: 24, height: 24)
+                        
                             
                             Circle()
                                     .fill(day <= completedDays ? Color(red: 2/255, green: 125/255, blue: 244/255) : Color(red: 49 / 255, green: 66 / 255, blue: 80 / 255))
@@ -80,19 +79,13 @@ struct SevenDaysModesView: View {
 
                             
                             NewCleaningModeCard(
-                                icon: "NewWaterDrop",
-                                mode: .waterRemoval,
-                                deviceIcon: "SmallDynamic",
-                                firstHesh: "#Clean",
-                                deviceColor: Color(red: 56/255, green: 255/255, blue: 185/255),
-                                secondHesh: "#LowFrequance",
-                                time: "60 seconds",
-                                isSmall: isSmall,
-                                isLocked: isLocked(day: day),
-                                lockAssetName: "Lock"
-                            ) { mode in
-                                startIfAllowed(mode)
-                            }
+                                        mode: mode,
+                                        isSmall: isSmall,
+                                        isLocked: isLocked(day: day),
+                                        lockAssetName: "Lock"
+                                    ) { mode in
+                                        startIfAllowed(mode)
+                                    }
 
                         }
                         

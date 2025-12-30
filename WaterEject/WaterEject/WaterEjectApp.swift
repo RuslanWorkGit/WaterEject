@@ -110,8 +110,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
            }
     }
 
-//    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
-//    private let appleAppID      = "6749094272" // без префікса "id"
+    private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
+    private let appleAppID      = "6749094272" // без префікса "id"
     
     private var lastAFStartTs: TimeInterval = 0
     
@@ -156,8 +156,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
         // 1) Конфігурація AppsFlyer 
         let af = AppsFlyerLib.shared()
-//        af.appsFlyerDevKey = appsFlyerDevKey
-//        af.appleAppID = appleAppID
+        af.appsFlyerDevKey = appsFlyerDevKey
+        af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
         
         af.delegate = self
