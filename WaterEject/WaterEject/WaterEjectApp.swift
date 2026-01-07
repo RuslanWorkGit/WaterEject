@@ -33,35 +33,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     
     private var didHandleATT = false
     private(set) var didStartAppsFlyer = false
-    
-//    private func requestATTThenStartTrackingIfNeeded() {
-//        print("requestATTThenStartTrackingIfNeeded fired ✅")
-//        
-//        guard !didHandleATT else { return }
-//        didHandleATT = true
-//
-//        if #available(iOS 14, *) {
-//            let status = ATTrackingManager.trackingAuthorizationStatus
-//            print("ATT status:", ATTrackingManager.trackingAuthorizationStatus.rawValue)
-//            if status == .notDetermined {
-//                ATTrackingManager.requestTrackingAuthorization { status in
-//                    DispatchQueue.main.async { [weak self] in
-//                        self?.startTrackingStack()
-//                    }
-//                    print("NSUserTrackingUsageDescription =",
-//                          Bundle.main.object(forInfoDictionaryKey: "NSUserTrackingUsageDescription") ?? "nil")
-//                    print("ATT completion status:", status.rawValue)
-//                }
-//            } else {
-//                startTrackingStack()
-//            }
-//        } else {
-//            startTrackingStack()
-//        }
-//    }
-    
+
     private func requestATTThenStartTrackingIfNeeded() {
         if #available(iOS 14, *) {
+            
+           
 
             // ✅ тільки коли апка реально active
             guard UIApplication.shared.applicationState == .active else {
@@ -70,6 +46,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                 }
                 return
             }
+            
+            guard !didHandleATT else { return }
+            //didHandleATT = true
 
             let status = ATTrackingManager.trackingAuthorizationStatus
             print("ATT status:", status.rawValue)
@@ -245,7 +224,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let values: [String: Any] = [
             "device_model_id": hardwareIdentifier()
         ]
-        AppsFlyerLib.shared().logEvent("install", withValues: values)
+        AppsFlyerLib.shared().logEvent("first_open", withValues: values)
         UserDefaults.standard.set(true, forKey: key)
         
 
@@ -396,10 +375,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     
     func sceneBecameActive() {
         print("sceneBecameActive fired ✅")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.requestATTThenStartTrackingIfNeeded()
-            }
-        logStartAppIfNeeded()
+        //DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                //self?.requestATTThenStartTrackingIfNeeded()
+           // }
+        //logStartAppIfNeeded()
     }
 
 }
