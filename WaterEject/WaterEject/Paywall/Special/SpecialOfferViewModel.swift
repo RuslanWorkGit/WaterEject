@@ -196,10 +196,16 @@ final class SpecialOfferViewModel: ObservableObject {
                 let txId = result.transaction?.transactionIdentifier
                 
     
-                    Telemetry.shared.funnelPurchaseSuccess(
-                        onboardId: "Special_offer",
-                        plan: "weekly"
-                    )
+//                    Telemetry.shared.funnelPurchaseSuccess(
+//                        onboardId: "Special_offer",
+//                        plan: "weekly"
+//                    )
+                
+                let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                Telemetry.shared.funnelPurchaseSuccess(
+                    onboardId: resolvedOnboardId,
+                    plan: "weekly"
+                )
                 
                 
                 AF.log(.subscribe, [

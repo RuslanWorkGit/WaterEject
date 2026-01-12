@@ -137,6 +137,13 @@ struct SpecialOfferView: View {
                         //                    }
                         //                    .disabled(viewModel.isPurchasing)
                         SpecialButton(title: "Subscribe Now") {
+                            
+                            let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                            Telemetry.shared.funnelGoToPurchase(
+                                onboardId: resolvedOnboardId,
+                                plan: "weekly"
+                            )
+                            
                             Task { await handleCTA() }
                         }
                         .disabled(viewModel.isPurchasing)
