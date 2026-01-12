@@ -237,12 +237,19 @@ struct PaywallFiveView: View {
                             saveText: viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: { viewModel.selectedPlan = .weekly
-                                if let onboardId = onboardId {
-                                    Telemetry.shared.funnelPlanChosen(
-                                        onboardId: onboardId,
-                                        plan: PaywallPlan.weekly.analyticsValue
-                                    )
-                                }
+                                
+                                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                                Telemetry.shared.funnelPlanChosen(
+                                    onboardId: resolvedOnboardId,
+                                    plan: PaywallPlan.weekly.analyticsValue
+                                )
+                                
+//                                if let onboardId = onboardId {
+//                                    Telemetry.shared.funnelPlanChosen(
+//                                        onboardId: onboardId,
+//                                        plan: PaywallPlan.weekly.analyticsValue
+//                                    )
+//                                }
                             }
                         )
                         
@@ -253,12 +260,19 @@ struct PaywallFiveView: View {
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: { viewModel.selectedPlan = .yearly
-                                if let onboardId = onboardId {
-                                    Telemetry.shared.funnelPlanChosen(
-                                        onboardId: onboardId,
-                                        plan: PaywallPlan.yearly.analyticsValue
-                                    )
-                                }
+                                
+                                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                                Telemetry.shared.funnelPlanChosen(
+                                    onboardId: resolvedOnboardId,
+                                    plan: PaywallPlan.yearly.analyticsValue
+                                )
+                                
+//                                if let onboardId = onboardId {
+//                                    Telemetry.shared.funnelPlanChosen(
+//                                        onboardId: onboardId,
+//                                        plan: PaywallPlan.yearly.analyticsValue
+//                                    )
+//                                }
                             }
                         )
                     }
@@ -284,12 +298,18 @@ struct PaywallFiveView: View {
                         Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
                         
-                        if let onboardId = onboardId {
-                            Telemetry.shared.funnelGoToPurchase(
-                                onboardId: onboardId,
-                                plan: plan.analyticsValue
-                            )
-                        }
+                        let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                        Telemetry.shared.funnelGoToPurchase(
+                            onboardId: resolvedOnboardId,
+                            plan: plan.analyticsValue
+                        )
+                        
+//                        if let onboardId = onboardId {
+//                            Telemetry.shared.funnelGoToPurchase(
+//                                onboardId: onboardId,
+//                                plan: plan.analyticsValue
+//                            )
+//                        }
                         
                         Task {
                             let paywallId = "paywall_v_5.0"

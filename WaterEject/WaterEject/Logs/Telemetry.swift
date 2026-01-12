@@ -518,6 +518,11 @@ extension Telemetry {
         return p
     }
     
+    private func resolvedOnboardId(_ onboardId: String?) -> String? {
+        if let onboardId, !onboardId.isEmpty { return onboardId }
+        return OnboardTag.lastFromUserDefaults()?.rawValue
+    }
+    
     // MARK: - Onboarding (flow-centric)
     func onbFlowStart(flowId: String) {
         Analytics.logEvent("onb_flow_start", parameters: base(["flow_id": flowId]))

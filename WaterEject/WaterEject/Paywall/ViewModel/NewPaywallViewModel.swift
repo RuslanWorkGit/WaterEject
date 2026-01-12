@@ -148,12 +148,18 @@ final class NewPaywallViewModel: ObservableObject {
                 
                 let planId = plan.analyticsValue
 
-                if let onboardId = onboardId {
-                    Telemetry.shared.funnelPurchaseSuccess(
-                        onboardId: onboardId,
-                        plan: planId
-                    )
-                }
+//                if let onboardId = onboardId {
+//                    Telemetry.shared.funnelPurchaseSuccess(
+//                        onboardId: onboardId,
+//                        plan: planId
+//                    )
+//                }
+                
+                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                Telemetry.shared.funnelPurchaseSuccess(
+                    onboardId: resolvedOnboardId,
+                    plan: planId
+                )
                 
                 let cpaFlag = "af_subscribe_cpa_sent \(Purchases.shared.appUserID)"
                     if !UserDefaults.standard.bool(forKey: cpaFlag) {

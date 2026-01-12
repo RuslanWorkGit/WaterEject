@@ -33,41 +33,62 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     
     private var didHandleATT = false
     private(set) var didStartAppsFlyer = false
-
+    
+    private var attRequestAttempts = 0
+    private var isRequestingATT = false
+    
     private func requestATTThenStartTrackingIfNeeded() {
         if #available(iOS 14, *) {
-            
-           
 
-            // ✅ тільки коли апка реально active
+            // ✅ only request when app is really active (otherwise iOS may not show the prompt)
             guard UIApplication.shared.applicationState == .active else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
                     self?.requestATTThenStartTrackingIfNeeded()
                 }
                 return
             }
-            
+
             guard !didHandleATT else { return }
-            //didHandleATT = true
+            guard !isRequestingATT else { return }
 
             let status = ATTrackingManager.trackingAuthorizationStatus
             print("ATT status:", status.rawValue)
 
-            if status == .notDetermined {
-                ATTrackingManager.requestTrackingAuthorization { [weak self] newStatus in
-                    DispatchQueue.main.async {
-                        print("ATT completion status:", newStatus.rawValue)
-
-                        // ❗️якщо все ще notDetermined — поп-ап не показали (запит не збережено)
-                        guard newStatus != .notDetermined else { return }
-
-                        self?.didHandleATT = true
-                        self?.startTrackingStack()
-                    }
-                }
-            } else {
+            // If the user already answered (or global tracking is OFF), there will be no popup — just proceed.
+            guard status == .notDetermined else {
                 didHandleATT = true
                 startTrackingStack()
+                return
+            }
+
+            // Request — sometimes iOS returns .notDetermined if it couldn’t show the prompt yet
+            isRequestingATT = true
+            ATTrackingManager.requestTrackingAuthorization { [weak self] newStatus in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    self.isRequestingATT = false
+                    print("ATT completion status:", newStatus.rawValue)
+
+                    if newStatus == .notDetermined {
+                        self.attRequestAttempts += 1
+
+                        // retry a couple of times (e.g. when another system alert is on screen)
+                        if self.attRequestAttempts <= 3 {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+                                self?.requestATTThenStartTrackingIfNeeded()
+                            }
+                            return
+                        }
+
+                        // give up blocking the stack — still start SDKs so analytics isn’t dead
+                        self.didHandleATT = true
+                        self.startTrackingStack()
+                        return
+                    }
+
+                    self.didHandleATT = true
+                    self.startTrackingStack()
+                }
             }
 
         } else {
@@ -75,6 +96,48 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             startTrackingStack()
         }
     }
+
+//    private func requestATTThenStartTrackingIfNeeded() {
+//        if #available(iOS 14, *) {
+//            
+//           
+//
+//            // ✅ тільки коли апка реально active
+//            guard UIApplication.shared.applicationState == .active else {
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+//                    self?.requestATTThenStartTrackingIfNeeded()
+//                }
+//                return
+//            }
+//            
+//            guard !didHandleATT else { return }
+//            //didHandleATT = true
+//
+//            let status = ATTrackingManager.trackingAuthorizationStatus
+//            print("ATT status:", status.rawValue)
+//
+//            if status == .notDetermined {
+//                ATTrackingManager.requestTrackingAuthorization { [weak self] newStatus in
+//                    DispatchQueue.main.async {
+//                        print("ATT completion status:", newStatus.rawValue)
+//
+//                        // ❗️якщо все ще notDetermined — поп-ап не показали (запит не збережено)
+//                        guard newStatus != .notDetermined else { return }
+//
+//                        self?.didHandleATT = true
+//                        self?.startTrackingStack()
+//                    }
+//                }
+//            } else {
+//                didHandleATT = true
+//                startTrackingStack()
+//            }
+//
+//        } else {
+//            didHandleATT = true
+//            startTrackingStack()
+//        }
+//    }
     
     private func startTrackingStack() {
         // ✅ стартуємо AppsFlyer тільки після ATT
@@ -109,7 +172,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
         
-        //requestATTThenStartTrackingIfNeeded()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            self?.requestATTThenStartTrackingIfNeeded()
+        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     self.logStoredKeywordOnStartIfNeeded()
@@ -375,9 +441,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     
     func sceneBecameActive() {
         print("sceneBecameActive fired ✅")
-        //DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                //self?.requestATTThenStartTrackingIfNeeded()
-           // }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.requestATTThenStartTrackingIfNeeded()
+            }
         //logStartAppIfNeeded()
     }
 
