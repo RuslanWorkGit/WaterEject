@@ -20,6 +20,10 @@ struct NewStartView: View {
     let device: CleaningDevice
     let mode: NewCleaningMode
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var padPadding: CGFloat { isPad ? 60 : 0 }
+    
     var body: some View {
         let isLarge = UIScreen.main.bounds.height > 900
         
@@ -30,7 +34,7 @@ struct NewStartView: View {
                 
                 ZStack {
                     Text(device.displayName)
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 28 * padScale, weight: .bold))
                         .foregroundStyle(.white)
                     
                     HStack {
@@ -66,9 +70,10 @@ struct NewStartView: View {
                 VStack {
                     
                     Image("Iphone17")
+                        .scaleEffect(padScale)
                     //Image(device.bigImageName)
                     
-                        //.padding(.top, 60)
+                        .padding(.top, padPadding)
                     
                     
                 }
@@ -78,10 +83,9 @@ struct NewStartView: View {
                 ZStack {
                     // Таймер
                     Text("00:\(String(format: "%02d", viewModel.countdown))")
-                        .font(.system(size: 48, weight: .bold))
+                        .font(.system(size: 48 * padScale, weight: .bold))
                         .foregroundColor(.white)
                         .opacity(viewModel.startCleaning ? 1 : 0)
-                    
                         .animation(.easeInOut, value: viewModel.startCleaning)
                     
                     // Кнопка
@@ -92,6 +96,7 @@ struct NewStartView: View {
                         
                     } label: {
                         Text("Start cleaning (25 sec)")
+                            .font(.system(size: 16 * padScale, weight: .medium))
                             .foregroundStyle(Color.white)
                             .padding(.vertical, 14)
                             .padding(.horizontal, 88)

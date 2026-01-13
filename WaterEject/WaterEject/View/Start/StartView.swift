@@ -300,21 +300,25 @@ struct SelectedModeCard: View {
     var isActive: Bool = false
     let onSettings: () -> Void  // дія на натискання шестерні
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var size: CGFloat { isPad ? 46 : 36}
+    
     var body: some View {
         HStack(spacing: 14) {
             // Іконка пристрою
             Image(deviceIcon)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 36, height: 36)
+                .frame(width: size, height: size)
                 .padding(.leading, 4)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("Selected mode:")
-                    .font(.system(size: 13, weight: .regular))
+                    .font(.system(size: 13 * padScale, weight: .regular))
                     .foregroundStyle(.white.opacity(0.6))
                 Text(title)
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 18 * padScale, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     .truncationMode(.tail)

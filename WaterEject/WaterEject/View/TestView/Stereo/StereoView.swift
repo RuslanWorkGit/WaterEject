@@ -28,12 +28,16 @@ struct StereoView: View {
     }
     private let exitDuration: Double = 0.35
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var size: CGFloat { isPad ? 40 : 8}
+    
     @State private var pendingSelectTest = false
     @EnvironmentObject private var paywallGate: PaywallGate
     
     var body: some View {
         VStack {
-            HStack(spacing: 8) {
+            HStack(spacing: size) {
                 SpeakerSwitchCard(title: "Left", imageName: "OneSpeaker", isOn: $isLeftOn)
                 SpeakerSwitchCard(title: "Right", imageName: "OneSpeaker", isOn: $isRightOn)
             }
@@ -67,7 +71,7 @@ struct StereoView: View {
                    
                 } label: {
                     Text(viewModel.isPlaying ? "Pause" : "Start Stereo")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16 * padScale, weight: .semibold))
                         .foregroundStyle(.white)
                     
                         .frame(maxWidth: .infinity)
@@ -80,7 +84,7 @@ struct StereoView: View {
                     handleCTA()
                 } label: {
                     Text("Continue")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16 * padScale, weight: .semibold))
                         .foregroundStyle(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -147,15 +151,20 @@ struct SpeakerSwitchCard: View {
     let imageName: String
     @Binding var isOn: Bool
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var sizeVertical: CGFloat { isPad ? 32 : 18}
+    
     var body: some View {
         Button(action: {
             isOn.toggle()
         }) {
-            VStack(spacing: 18) {
+            VStack(spacing: sizeVertical) {
                 Text(title)
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 20 * padScale, weight: .medium))
                     .foregroundColor(Color.white.opacity(0.7))
                 Image(imageName)
+                    .scaleEffect(padScale)
                 
                 Toggle("", isOn: $isOn)
                     .labelsHidden()
@@ -176,17 +185,20 @@ struct SpeakerSwitchCard: View {
 struct VolumeSliderView: View {
     @ObservedObject var viewModel: StereoViewModel
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         VStack {
             HStack(alignment: .center) {
                 Text("Volume")
                     .foregroundColor(.white)
-                    .font(.system(size: 17))
+                    .font(.system(size: 17 * padScale))
                 
                 Spacer()
                 
                 Text("\(Int(viewModel.volume * 100))%")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17 * padScale, weight: .semibold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 2)

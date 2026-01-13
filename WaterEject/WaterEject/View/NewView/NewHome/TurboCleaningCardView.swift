@@ -16,6 +16,9 @@ struct TurboCleaningCardView: View {
     let isSmall: Bool
     let onModeAction: (NewCleaningMode) -> Void
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         
         VStack(alignment: .leading, spacing: 32) {
@@ -23,7 +26,8 @@ struct TurboCleaningCardView: View {
                 ZStack {
                     
                     Image(icon)
-                        .padding(18)
+                        .scaleEffect(padScale)
+                        .padding(18 * padScale)
                         .background(
                             Circle()
                                 .fill(Color(red: 238 / 255, green: 176 / 255, blue: 0 ).opacity(0.08))
@@ -36,11 +40,11 @@ struct TurboCleaningCardView: View {
                 
                 VStack(alignment: .leading) {
                     Text(mainText)
-                        .font(.system(size: isSmall ? 16 : 18, weight: .semibold))
+                        .font(.system(size: (isSmall ? 16 : 18) * padScale, weight: .semibold))
                         .foregroundStyle(.white)
                     
                     Text(secondText)
-                        .font(.system(size: isSmall ? 12 : 12, weight: .regular))
+                        .font(.system(size: (isSmall ? 12 : 12) * padScale, weight: .regular))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                 }
                
@@ -51,6 +55,7 @@ struct TurboCleaningCardView: View {
                     onModeAction(mode)
                 } label: {
                     Text("Start")
+                        .font(.system(size: (isSmall ? 14 : 16) * padScale, weight: .medium))
                         .foregroundStyle(.white)
                         .padding(.vertical, 14)
                         .frame(maxWidth: .infinity)

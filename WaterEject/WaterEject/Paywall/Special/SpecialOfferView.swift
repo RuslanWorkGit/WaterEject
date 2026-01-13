@@ -21,6 +21,8 @@ struct SpecialOfferView: View {
     @State private var webViewURL: URL?
     
     private let paywallId = "special_offer_v_1.0"
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     
     var body: some View {
         let isSmall = UIScreen.main.bounds.height < 700
@@ -36,7 +38,7 @@ struct SpecialOfferView: View {
                     // HEADER
                     VStack(spacing: 8) {
                         Text("SPECIAL")
-                            .font(.system(size: 28, weight: .semibold))
+                            .font(.system(size: 28 * padScale, weight: .semibold))
                             .foregroundStyle(.white)
                         
                         Text("-40%")
@@ -46,7 +48,7 @@ struct SpecialOfferView: View {
                                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                                     .fill(Color(red: 207 / 255, green: 68 / 255, blue: 68 / 255))
                             )
-                            .font(.system(size: 72, weight: .medium))
+                            .font(.system(size: 72 * padScale, weight: .medium))
                             .foregroundStyle(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
@@ -103,11 +105,11 @@ struct SpecialOfferView: View {
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Try Water Eject for \(viewModel.weeklyOnlyPrice) per weeek")
-                            .font(.system(size: 22, weight: .bold))
+                            .font(.system(size: 22 * padScale, weight: .bold))
                             .foregroundStyle(.white)
                         
                         Text("Unlock all feature")
-                            .font(.system(size: 16))
+                            .font(.system(size: 16 * padScale))
                             .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
                     }
                     
@@ -244,11 +246,15 @@ struct HorizontalSpecialText: View {
     let isLarge: Bool
     private let color = Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var size: CGFloat { isPad ? 22 : 16 }
+    
     var body: some View {
         HStack {
             Image(systemName: image)
                 .resizable()
-                .frame(width: 16, height: 16)
+                .frame(width: size, height: size)
                 .foregroundStyle(Color(red: 30 / 255, green: 215 / 255, blue: 96 / 255))
             
             
@@ -260,7 +266,7 @@ struct HorizontalSpecialText: View {
             ////                        .fill(color.opacity(0.15))
             //                )
             Text(title)
-                .font(.system(size: isLarge ? 20 : 17, weight: .semibold))
+                .font(.system(size: (isLarge ? 20 : 17) * padScale, weight: .semibold))
                 .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 246 / 255))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -274,12 +280,14 @@ struct SpecialButton: View {
     let action: () -> Void
     var arrow: Bool = false
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     
     var body: some View {
         ZStack {
             Button(action: action) {
                 Text(title)
-                    .font(.custom("Manrope_SemiBold", size: 16))
+                    .font(.custom("Manrope_SemiBold", size: 16 * padScale))
                     .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
                     .frame(minHeight: 52)
                     .frame(maxWidth: .infinity)
@@ -326,10 +334,13 @@ struct TimerBlockView: View {
     let value: String
     let label: String
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         VStack(spacing: 6) {
             Text(value)
-                .font(.system(size: 32, weight: .bold, design: .monospaced)) // 👈 моноширинний шрифт
+                .font(.system(size: 32 * padScale, weight: .bold, design: .monospaced)) // 👈 моноширинний шрифт
             // або так:
             // .font(.system(size: 32, weight: .bold))
             // .monospacedDigit()
@@ -343,7 +354,7 @@ struct TimerBlockView: View {
                 )
             
             Text(label)
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 14 * padScale, weight: .medium))
                 .foregroundStyle(.white)
         }
     }

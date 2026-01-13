@@ -63,6 +63,10 @@ struct PaywallFiveView: View {
     private let exitDuration: Double = 0.6
     let startAnimations: Bool
     
+    
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     init(onFinish: @escaping () -> Void, onboardId: String? = nil, startDelay: Double = 0.35, summaryTag: OnboardTag? = nil, stepsVisited: [String]? = nil, startAnimations: Bool = true ) {
         self.onFinish = onFinish
         self.onboardId = onboardId
@@ -130,7 +134,7 @@ struct PaywallFiveView: View {
                                 .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
                             
                         )
-                        .font(.system(size: 38, weight: .semibold))
+                        .font(.system(size: 38 * padScale, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
                         .padding(.bottom, 0)
@@ -342,7 +346,7 @@ struct PaywallFiveView: View {
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
                         Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16 * padScale, weight: .semibold))
                             .foregroundStyle(.white)
                         
                             .frame(maxWidth: .infinity)
@@ -380,7 +384,7 @@ struct PaywallFiveView: View {
                         Button("Restore") {
                             Task { await viewModel.restorePurchases() }
                         }
-                        .font(.system(size: 10))
+                        .font(.system(size: 10 * padScale))
                         .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                         
                         
@@ -389,7 +393,7 @@ struct PaywallFiveView: View {
                             webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
                             
                         }
-                        .font(.system(size: 10))
+                        .font(.system(size: 10 * padScale))
                         .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                         
                         Button("Privacy Policy") {
@@ -398,7 +402,7 @@ struct PaywallFiveView: View {
                             
                         }
                         
-                        .font(.system(size: 10))
+                        .font(.system(size: 10 * padScale))
                         .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                     }
                     
@@ -564,11 +568,14 @@ struct Review: Identifiable {
 struct StarsView: View {
     let rating: Int
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         HStack(spacing: 4) {
             ForEach(0..<rating, id: \.self) { _ in
                 Image(systemName: "star.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 16 * padScale))
                     .foregroundColor(Color(red: 250/255, green: 204/255, blue: 21/255)) // жовтий
             }
         }
@@ -582,6 +589,8 @@ struct PaywallFivePlanCard: View {
     let saveText: String
     let isSelected: Bool
     let onTap: () -> Void
+    
+    
     
     var body: some View {
         Button(action: onTap) {
@@ -661,6 +670,8 @@ struct ReviewsCardView: View {
 //        .init(text: "Worked better than rice!",          name: "Sophie", rating: 5)
 //    ]
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     
     
     var body: some View {
@@ -691,14 +702,14 @@ struct ReviewsCardView: View {
                         StarsView(rating: reviews[0].rating)
                         
                         Text(reviews[0].text)
-                            .font(.custom("Montserrat-Bold", size: 14))
+                            .font(.custom("Montserrat-Bold", size: 14 * padScale))
                             .foregroundColor(.black)
                     }
                     
                     Spacer()
                     
                     Text(reviews[0].name)
-                        .font(.custom("Montserrat-Medium", size: 14))
+                        .font(.custom("Montserrat-Medium", size: 14 * padScale))
                         .foregroundColor(.black)
                         .padding(.top, 2) // трохи вирівняти по вертикалі
                     
@@ -710,14 +721,14 @@ struct ReviewsCardView: View {
                         StarsView(rating: reviews[1].rating)
                         
                         Text(reviews[1].text)
-                            .font(.custom("Montserrat-Bold", size: 14))
+                            .font(.custom("Montserrat-Bold", size: 14 * padScale))
                             .foregroundColor(.black)
                     }
                     
                     Spacer()
                     
                     Text(reviews[1].name)
-                        .font(.custom("Montserrat-Medium", size: 14))
+                        .font(.custom("Montserrat-Medium", size: 14 * padScale))
                         .foregroundColor(.black)
                         .padding(.top, 2) // трохи вирівняти по вертикалі
                     
@@ -729,14 +740,14 @@ struct ReviewsCardView: View {
                         StarsView(rating: reviews[2].rating)
                         
                         Text(reviews[2].text)
-                            .font(.custom("Montserrat-Bold", size: 14))
+                            .font(.custom("Montserrat-Bold", size: 14 * padScale))
                             .foregroundColor(.black)
                     }
                     
                     Spacer()
                     
                     Text(reviews[2].name)
-                        .font(.custom("Montserrat-Medium", size: 14))
+                        .font(.custom("Montserrat-Medium", size: 14 * padScale))
                         .foregroundColor(.black)
                         .padding(.top, 2) // трохи вирівняти по вертикалі
                     
@@ -767,6 +778,9 @@ struct FeatureItem: Identifiable {
 
 struct FeaturesCardView: View {
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     private let items: [FeatureItem] = [
         .init(emoji: "🎛️", text: "All sound & dB tools unlocked"),
         .init(emoji: "🔊", text: "Unlimited cleaning cycles"),
@@ -778,10 +792,10 @@ struct FeaturesCardView: View {
             ForEach(items) { item in
                 HStack(alignment: .center, spacing: 12) {
                     Text(item.emoji)
-                        .font(.system(size: 28))
+                        .font(.system(size: 28 * padScale))
                     
                     Text(item.text)
-                        .font(.custom("Montserrat-SemiBold", size: 18))
+                        .font(.custom("Montserrat-SemiBold", size: 18 * padScale))
                         .foregroundColor(.black)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -798,7 +812,8 @@ struct FeaturesCardView: View {
 
 struct StatisticCardView: View {
     
-    
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -808,21 +823,21 @@ struct StatisticCardView: View {
                 Image("Left")
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 80)
+                    .frame(height: 80 * padScale)
                 
                 VStack(spacing: 6) {
                     Text("MORE THAN")
-                        .font(.custom("Montserrat-SemiBold", size: 20))
+                        .font(.custom("Montserrat-SemiBold", size: 20 * padScale))
                         .foregroundColor(.black)
                         //.fixedSize(horizontal: false, vertical: true)
                     
                     Text("1,000,000")
-                        .font(.custom("Montserrat-Bold", size: 20))
+                        .font(.custom("Montserrat-Bold", size: 20 * padScale))
                         .foregroundColor(.black)
                         //.fixedSize(horizontal: false, vertical: true)
                     
                     Text("SATISFIED USERS")
-                        .font(.custom("Montserrat-SemiBold", size: 20))
+                        .font(.custom("Montserrat-SemiBold", size: 20 * padScale))
                         .foregroundColor(.black)
                         //.fixedSize(horizontal: false, vertical: true)
                 }
@@ -831,7 +846,7 @@ struct StatisticCardView: View {
                 Image("Right")
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 80)
+                    .frame(height: 80 * padScale)
                 
                 
             }

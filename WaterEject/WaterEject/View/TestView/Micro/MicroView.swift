@@ -33,6 +33,9 @@ struct MicroView: View {
     
     @State private var pendingSelectTest = false
     @EnvironmentObject private var paywallGate: PaywallGate
+    
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
 
     var body: some View {
         ZStack {
@@ -96,7 +99,7 @@ struct MicroView: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Recordings")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 20 * padScale, weight: .semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 24)
 
@@ -140,7 +143,7 @@ struct MicroView: View {
                     
                 } label: {
                     Text("Test Microphone")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16 * padScale, weight: .semibold))
                         .foregroundStyle(.white)
                     
                         .frame(maxWidth: .infinity)
@@ -153,7 +156,7 @@ struct MicroView: View {
                     handleCTA()
                 } label: {
                     Text("Continue")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16 * padScale, weight: .semibold))
                         .foregroundStyle(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)

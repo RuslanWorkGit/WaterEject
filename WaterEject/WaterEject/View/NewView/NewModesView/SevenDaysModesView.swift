@@ -17,6 +17,9 @@ struct SevenDaysModesView: View {
     private var completedDays: Int = 0
     @State private var now = Date()
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     private var unlockedMaxDay: Int {
         if SevenDayPlanProgress.canStartNextDay(now: now) {
             return min(completedDays + 1, 7)   // можна почати “наступний” день
@@ -185,6 +188,10 @@ struct SevenDaysHeaderView: View {
     let subtitle: String
     let onBack: () -> Void
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var size: CGFloat { isPad ? 54 : 44 }
+    
     var body: some View {
         GeometryReader { geo in
             let top = geo.safeAreaInsets.top
@@ -199,12 +206,12 @@ struct SevenDaysHeaderView: View {
                     Spacer().frame(height: top + 22)
                     
                     Text(title)
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.system(size: 24 * padScale, weight: .bold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                     
                     Text(subtitle)
-                        .font(.system(size: 14))
+                        .font(.system(size: 14 * padScale))
                         .foregroundStyle(Color.white.opacity(0.85))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
@@ -213,9 +220,9 @@ struct SevenDaysHeaderView: View {
                 
                 Button(action: onBack) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(.system(size: 24 * padScale, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
+                        .frame(width: size, height: size)
                     
                 }
                 //.padding(.top, top + 10)

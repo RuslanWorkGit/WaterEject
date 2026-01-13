@@ -460,23 +460,27 @@ struct PaywallFourPlanCard: View {
     let isSelected: Bool
     let onTap: () -> Void
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var size: CGFloat { isPad ? 88 : 72 }
+    
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 16) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color.gray.opacity(0.3))
-                    .font(.system(size: 28, weight: .light))
+                    .font(.system(size: 28 * padScale, weight: .light))
                 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(title)
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 20 * padScale, weight: .bold))
                             .foregroundStyle(.black)
                         Spacer()
                         
                     }
                     Text(price)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 12 * padScale, weight: .medium))
                         .foregroundStyle(Color(red: 170/255, green: 178/255, blue: 191/255))
                 }
                 
@@ -485,7 +489,7 @@ struct PaywallFourPlanCard: View {
                 VStack {
                     if let sublabel = sublabel {
                         Text(sublabel)
-                            .font(.system(size: 12))
+                            .font(.system(size: 12 * padScale))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
                             .background(Color(red: 81/255, green: 132/255, blue: 234/255).opacity(0.14))
@@ -495,13 +499,13 @@ struct PaywallFourPlanCard: View {
                     
                     
                     Text(saveText)
-                        .font(.system(size: 12))
+                        .font(.system(size: 12 * padScale))
                         .foregroundStyle(Color(red: 166/255, green: 166/255, blue: 167/255))
                     
                 }
             }
             .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
+            .frame(maxWidth: .infinity, minHeight: size, maxHeight: size)
             .background(
                 ZStack {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)

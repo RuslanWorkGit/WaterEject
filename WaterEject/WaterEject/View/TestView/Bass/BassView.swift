@@ -27,6 +27,9 @@ struct BassView: View {
     }
     private let exitDuration: Double = 0.35
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     @State private var pendingSelectTest = false
     @EnvironmentObject private var paywallGate: PaywallGate
     
@@ -53,26 +56,26 @@ struct BassView: View {
             HStack(spacing: 56) {
                 VStack {
                     Text("55.3")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 20 * padScale, weight: .semibold))
                         .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                     Text("average")
-                        .font(.system(size: 12))
+                        .font(.system(size: 12 * padScale))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                 }
                 VStack {
                     Text("27.8")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 20 * padScale, weight: .semibold))
                         .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                     Text("min")
-                        .font(.system(size: 12))
+                        .font(.system(size: 12 * padScale))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                 }
                 VStack {
                     Text("121.9")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 20 * padScale, weight: .semibold))
                         .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                     Text("max")
-                        .font(.system(size: 12))
+                        .font(.system(size: 12 * padScale))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                 }
             }
@@ -110,7 +113,7 @@ struct BassView: View {
             
             Button(action: handleCTA) {
                 Text("Continue")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 16 * padScale, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -169,6 +172,10 @@ struct BassView: View {
 }
 
 struct LoudnessBlock: View {
+    
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         ViewThatFits(in: .vertical) {
             block(font: 80, waveMaxH: 200)
@@ -182,7 +189,7 @@ struct LoudnessBlock: View {
     private func block(font: CGFloat, waveMaxH: CGFloat) -> some View {
         ZStack {
             Image("Lines")
-                .resizable()/*.scaledToFit().frame(maxHeight: waveMaxH)*/
+                .resizable()
 
             VStack(spacing: 15) {
                 Text("32dB")
@@ -206,6 +213,9 @@ struct TestClipCard: View {
     let isPlaying: Bool
     let isFinished: Bool
     let action: () -> Void
+    
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     
     private let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
     private let base = Color(red: 222/255, green: 233/255, blue: 255/255)
@@ -263,7 +273,7 @@ struct TestClipCard: View {
                 
                 VStack(spacing: 10) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 20 * padScale, weight: .bold))
                         .foregroundStyle(
                             isFinished
                             ? Color(red: 43/255, green: 217/255, blue: 156/255)
@@ -271,7 +281,7 @@ struct TestClipCard: View {
                         )
                     
                     Text(title)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 15 * padScale, weight: .semibold))
                         .foregroundStyle(
                             isFinished ? Color(red: 247/255, green: 247/255, blue: 247/255)
                             : isPlaying ? Color(red: 81/255, green: 132/255, blue: 234/255)

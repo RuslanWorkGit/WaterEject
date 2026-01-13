@@ -21,6 +21,10 @@ struct BigCardStartCleaningView: View {
     let isSmall: Bool
     let onModeAction: (NewCleaningMode) -> Void
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var padScaleImage: CGFloat { isPad ? 1.5 : 1.0 }
+    
     var body: some View {
         
         VStack(alignment: .leading, spacing: 32) {
@@ -28,7 +32,8 @@ struct BigCardStartCleaningView: View {
                 ZStack {
                     
                     Image(icon)
-                        .padding(18)
+                        .scaleEffect(padScale)
+                        .padding(18 * padScale)
                         .background(
                             Circle()
                                 .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
@@ -40,7 +45,7 @@ struct BigCardStartCleaningView: View {
                 .frame(width: 48, height: 48)
                 
                 Text(day)
-                    .font(.system(size: isSmall ? 16 : 18, weight: .medium))
+                    .font(.system(size: (isSmall ? 16 : 18) * padScale, weight: .medium))
                     .foregroundStyle(.white)
                 
 
@@ -49,7 +54,7 @@ struct BigCardStartCleaningView: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(mainText)
-                        .font(.system(size: isSmall ? 38 : 42, weight: .bold))
+                        .font(.system(size: (isSmall ? 38 : 42) * padScale, weight: .bold))
                         .foregroundStyle(.white)
                         .fixedSize(horizontal: false, vertical: true)
                     
@@ -61,13 +66,13 @@ struct BigCardStartCleaningView: View {
             VStack(alignment: .leading) {
                 
                 Text("Today’s areas")
-                    .font(.system(size: isSmall ? 12 : 12, weight: .medium))
+                    .font(.system(size: (isSmall ? 12 : 12) * padScale, weight: .medium))
                     .foregroundStyle(.white)
                 
                 HStack(spacing: 10) {
                     
                     Text(firstHesh)
-                        .font(.system(size: isSmall ? 12 : 12, weight: .medium))
+                        .font(.system(size: (isSmall ? 12 : 12) * padScale, weight: .medium))
                         .foregroundStyle(.white.opacity(0.6))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .padding(.horizontal, 6)
@@ -76,7 +81,7 @@ struct BigCardStartCleaningView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     
                     Text(secondHesh)
-                        .font(.system(size: isSmall ? 12 : 12))
+                        .font(.system(size: (isSmall ? 12 : 12) * padScale))
                         .foregroundStyle(.white.opacity(0.6))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .padding(.horizontal, 6)
@@ -93,6 +98,7 @@ struct BigCardStartCleaningView: View {
                         onModeAction(mode)
                     } label: {
                         Text("Start Cleaning")
+                            .font(.system(size: (isSmall ? 14 : 16) * padScale, weight: .medium))
                             .foregroundStyle(.white)
                             .padding(.vertical, 14)
                             .frame(maxWidth: .infinity)
@@ -105,7 +111,7 @@ struct BigCardStartCleaningView: View {
                     }
                     
                     Text("Best after rain or water exposure")
-                        .font(.system(size: isSmall ? 12 : 12))
+                        .font(.system(size: (isSmall ? 12 : 12) * padScale))
                         .foregroundStyle(.white.opacity(0.6))
                     
                 }
@@ -122,7 +128,7 @@ struct BigCardStartCleaningView: View {
                 .resizable()
                 .scaledToFit()
                 .offset(x: 18, y: -18)
-                .frame(width: 220)
+                .frame(width: 220 * padScaleImage)
             
         })
         .padding(18)

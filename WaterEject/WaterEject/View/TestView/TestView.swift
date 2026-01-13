@@ -16,6 +16,9 @@ struct TestView: View {
     @State private var loggedModes: Set<TestMode> = []
     @State private var didLogStart = false
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         ZStack {
             Background()
@@ -36,7 +39,7 @@ struct TestView: View {
                     
                     Text("\(viewModel.completedModesTest.count) / 4 passed")
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
-                        .font(.system(size: 12))
+                        .font(.system(size: 12 * padScale))
                         .padding(5)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
@@ -125,7 +128,7 @@ struct TestView: View {
                 }
             } label: {
                 Text(isLast ? "Finish" : "Continue")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 16 * padScale, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -149,6 +152,9 @@ struct FeatureCard: View {
     let isCompleted: Bool
     let onChangeCategory: (TestMode) -> Void
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         
         Button {
@@ -158,7 +164,7 @@ struct FeatureCard: View {
                 Image(testMode.imageName)
                 
                 Text(testMode.testName)
-                    .font(.system(size: 15))
+                    .font(.system(size: 15 * padScale))
                     .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
             }
             .frame(width: 96, height: 72)

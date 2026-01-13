@@ -11,25 +11,28 @@ import SwiftUI
 struct NewCleaningModeCard: View {
     // Пропси для повторного використання
     let mode: NewCleaningMode
-        let isSmall: Bool
-        let isLocked: Bool
-        let lockAssetName: String
-        let onModeAction: (NewCleaningMode) -> Void
+    let isSmall: Bool
+    let isLocked: Bool
+    let lockAssetName: String
+    let onModeAction: (NewCleaningMode) -> Void
+    
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     
     
     init(
-            mode: NewCleaningMode,
-            isSmall: Bool,
-            isLocked: Bool = false,
-            lockAssetName: String = "Lock",
-            onModeAction: @escaping (NewCleaningMode) -> Void
-        ) {
-            self.mode = mode
-            self.isSmall = isSmall
-            self.isLocked = isLocked
-            self.lockAssetName = lockAssetName
-            self.onModeAction = onModeAction
-        }
+        mode: NewCleaningMode,
+        isSmall: Bool,
+        isLocked: Bool = false,
+        lockAssetName: String = "Lock",
+        onModeAction: @escaping (NewCleaningMode) -> Void
+    ) {
+        self.mode = mode
+        self.isSmall = isSmall
+        self.isLocked = isLocked
+        self.lockAssetName = lockAssetName
+        self.onModeAction = onModeAction
+    }
     
     var body: some View {
         
@@ -42,19 +45,21 @@ struct NewCleaningModeCard: View {
                         
                         if isLocked {
                             Image(lockAssetName) // твій asset
-                                .padding(18)
-                            .background(
-                                Circle()
-                                    .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
-                            )
-                        } else {
-                            Image(mode.iconAssetName)
-                                .padding(18)
+                                .scaleEffect(padScale)
+                                .padding(18 * padScale)
                                 .background(
                                     Circle()
                                         .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
                                 )
-
+                        } else {
+                            Image(mode.iconAssetName)
+                                .scaleEffect(padScale)
+                                .padding(18 * padScale)
+                                .background(
+                                    Circle()
+                                        .fill(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
+                                )
+                            
                         }
                         
                         // IconCard(icon: icon)
@@ -65,13 +70,13 @@ struct NewCleaningModeCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             Text(mode.modeName)
-                                .font(.system(size: isSmall ? 14 : 16, weight: .semibold))
+                                .font(.system(size: (isSmall ? 14 : 16) * padScale, weight: .semibold))
                                 .foregroundStyle(.white)
                             
                         }
                         Text(mode.explainText)
                             .multilineTextAlignment(.leading)
-                            .font(.system(size: isSmall ? 10 : 10))
+                            .font(.system(size: (isSmall ? 10 : 10) * padScale))
                             .foregroundColor(Color.white.opacity(0.8))
                     }
                     .padding(.bottom, 10)
@@ -82,41 +87,25 @@ struct NewCleaningModeCard: View {
                 HStack(spacing: 6) {
                     
                     ForEach(Array(mode.tags.prefix(2)), id: \.self) { tag in
-                                        Text(tag)
-                                            .font(.system(size: isSmall ? 12 : 12, weight: .medium))
-                                            .foregroundStyle(Color(red: 196/255, green: 196/255, blue: 197/255))
-                                            .padding(.horizontal, 6)
-                                            .lineLimit(1)
-                                            .padding(.vertical, 5)
-                                            .background(Color(red: 2/255, green: 125/255, blue: 244/255).opacity(0.08))
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        Text(tag)
+                            .font(.system(size: (isSmall ? 12 : 12) * padScale, weight: .medium))
+                            .foregroundStyle(Color(red: 196/255, green: 196/255, blue: 197/255))
+                            .padding(.horizontal, 6)
+                            .lineLimit(1)
+                            .padding(.vertical, 5)
+                            .background(Color(red: 2/255, green: 125/255, blue: 244/255).opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         
-                                    }
+                    }
                     
-//                    Text(firstHesh)
-//                        .font(.system(size: isSmall ? 12 : 12, weight: .medium))
-//                        .foregroundStyle(.white.opacity(0.6))
-//                        .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
-//                        .padding(.horizontal, 6)
-//                        .padding(.vertical, 5)
-//                        .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
-//                        .clipShape(RoundedRectangle(cornerRadius: 8))
-//                    
-//                    Text(secondHesh)
-//                        .font(.system(size: isSmall ? 12 : 12))
-//                        .foregroundStyle(.white.opacity(0.6))
-//                        .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
-//                        .padding(.horizontal, 6)
-//                        .padding(.vertical, 5)
-//                        .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255).opacity(0.08))
-//                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
                     Spacer()
                     Image(systemName: "clock")
-                        .font(.system(size: isSmall ? 14 : 16, weight: .regular))
+                        .font(.system(size: (isSmall ? 14 : 16) * padScale, weight: .regular))
                         .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
                     Text(mode.durationText)
                     //.font(.system(size: 12))
-                        .font(.system(size: isSmall ? 10 : 12, weight: .medium))
+                        .font(.system(size: (isSmall ? 10 : 12) * padScale, weight: .medium))
                         .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
                     
                 }
@@ -142,9 +131,9 @@ struct NewCleaningModeCard: View {
 //    ZStack {
 //        BackgroundNew()
 //        NewCleaningModeCard(icon: "NewWaterDrop", mode: .waterRemoval, deviceIcon: "SmallWave", firstHesh: "#Clean", deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255), secondHesh: "#LowFrequency", time: "25 seconds", isSmall: true) { new in
-//            
+//
 //        }
 //        .padding(.horizontal, 16)
-//        
+//
 //    }
 //}

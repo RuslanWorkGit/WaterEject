@@ -30,6 +30,9 @@ struct VibroView: View {
     @State private var pendingSelectTest = false
     @EnvironmentObject private var paywallGate: PaywallGate
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    
     var body: some View {
         VStack(spacing: 8) {
 //            ZStack {
@@ -50,7 +53,7 @@ struct VibroView: View {
                 .offset(y: -20)
             
             Text("Patern")
-                .font(.system(size: 14))
+                .font(.system(size: 14 * padScale))
                 .foregroundStyle(.white.opacity(0.9))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
@@ -77,7 +80,7 @@ struct VibroView: View {
             .padding(.top, -10)
             
             Text("Intensity")
-                .font(.system(size: 14))
+                .font(.system(size: 14 * padScale))
                 .foregroundStyle(.white.opacity(0.9))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
@@ -116,7 +119,7 @@ struct VibroView: View {
                     
                 } label: {
                     Text("Test Vibration")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16 * padScale, weight: .semibold))
                         .foregroundStyle(.white)
                     
                         .frame(maxWidth: .infinity)
@@ -129,7 +132,7 @@ struct VibroView: View {
                     handleCTA()
                 } label: {
                     Text("Finish")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16 * padScale, weight: .semibold))
                         .foregroundStyle(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -189,18 +192,24 @@ struct VibroCard: View {
     let isCompleted: Bool
     let onChangeCategory: (VibroModel) -> Void
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+    private var width: CGFloat { isPad ? 114 : 96 }
+    private var height: CGFloat { isPad ? 90 : 72 }
+    
     var body: some View {
         Button {
             onChangeCategory(testMode)
         } label: {
             VStack(spacing: 8) {
                 Image(systemName: testMode.imageName)
+                    .scaleEffect(padScale)
                     .foregroundStyle(isCompleted ? Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255) : isSelected ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255) : Color(red: 179/255, green: 179/255, blue: 179/255))
                 Text(testMode.testName)
-                    .font(.system(size: 15))
+                    .font(.system(size: 15 * padScale))
                     .foregroundStyle(isCompleted ? Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255) : isSelected ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255) : Color(red: 179/255, green: 179/255, blue: 179/255))
             }
-            .frame(width: 96, height: 72)
+            .frame(width: width, height: height)
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(isCompleted ? Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255).opacity(0.14) : isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255).opacity(0.14) : Color.white.opacity(0.05))
@@ -229,6 +238,10 @@ struct VibroCard: View {
 }
 
 struct LoudnessBlockTwo: View {
+    
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.4 : 1.0 }
+    
     var body: some View {
         ViewThatFits(in: .vertical) {
             block(font: 80, waveMaxH: 180)
@@ -252,7 +265,8 @@ struct LoudnessBlockTwo: View {
                     .minimumScaleFactor(0.6)
 
                 ZStack {
-                    Image("Heart")/*.resizable().scaledToFit().frame(maxHeight: waveMaxH)*/
+                    Image("Heart")
+                        .scaleEffect(padScale)
                 }
             }
         }
@@ -266,18 +280,22 @@ struct IntensityPill: View {
     let isSelected: Bool
     let action: () -> Void
     
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Text(level.title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 15 * padScale, weight: .semibold))
                 
                 
                     .foregroundStyle(isSelected ? Color(red: 238 / 255, green: 255 / 255, blue: 246 / 255) :Color(red: 161 / 255, green: 192 / 255, blue:  255 / 255))
                 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 14 * padScale, weight: .bold))
                         .foregroundStyle(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
                 }
             }
