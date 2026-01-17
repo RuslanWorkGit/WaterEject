@@ -96,48 +96,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             startTrackingStack()
         }
     }
-
-//    private func requestATTThenStartTrackingIfNeeded() {
-//        if #available(iOS 14, *) {
-//            
-//           
-//
-//            // ✅ тільки коли апка реально active
-//            guard UIApplication.shared.applicationState == .active else {
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-//                    self?.requestATTThenStartTrackingIfNeeded()
-//                }
-//                return
-//            }
-//            
-//            guard !didHandleATT else { return }
-//            //didHandleATT = true
-//
-//            let status = ATTrackingManager.trackingAuthorizationStatus
-//            print("ATT status:", status.rawValue)
-//
-//            if status == .notDetermined {
-//                ATTrackingManager.requestTrackingAuthorization { [weak self] newStatus in
-//                    DispatchQueue.main.async {
-//                        print("ATT completion status:", newStatus.rawValue)
-//
-//                        // ❗️якщо все ще notDetermined — поп-ап не показали (запит не збережено)
-//                        guard newStatus != .notDetermined else { return }
-//
-//                        self?.didHandleATT = true
-//                        self?.startTrackingStack()
-//                    }
-//                }
-//            } else {
-//                didHandleATT = true
-//                startTrackingStack()
-//            }
-//
-//        } else {
-//            didHandleATT = true
-//            startTrackingStack()
-//        }
-//    }
     
     private func startTrackingStack() {
         // ✅ стартуємо AppsFlyer тільки після ATT
@@ -172,10 +130,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
         
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
-            self?.requestATTThenStartTrackingIfNeeded()
-        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     self.logStoredKeywordOnStartIfNeeded()
