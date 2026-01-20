@@ -345,30 +345,58 @@ struct PaywallFiveView: View {
                             }                        }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
-                        Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
-                            .font(.system(size: 16 * padScale, weight: .semibold))
-                            .foregroundStyle(.white)
                         
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                        
-                        //                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
-                            .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                        
-                            .scaleEffect(pulse ? 1.03 : 1.0)
-                            .shadow(
-                                color: Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)
-                                    .opacity(pulse ? 0.45 : 0.0),
-                                radius: pulse ? 18 : 6, x: 0, y: 0
-                            )
-                            .animation(
-                                reduceMotion ? nil :
-                                        .easeInOut(duration: 0.95).repeatForever(autoreverses: true),
-                                value: pulse
-                            )
+                        HStack {
+                            if viewModel.isPurchasing {
+                                ProgressView().tint(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                
+                                //                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                                    .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                
+                                    .scaleEffect(pulse ? 1.03 : 1.0)
+                                    .shadow(
+                                        color: Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)
+                                            .opacity(pulse ? 0.45 : 0.0),
+                                        radius: pulse ? 18 : 6, x: 0, y: 0
+                                    )
+                                    .animation(
+                                        reduceMotion ? nil :
+                                                .easeInOut(duration: 0.95).repeatForever(autoreverses: true),
+                                        value: pulse
+                                    )
+                            } else {
+                                Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
+                                    .font(.system(size: 16 * padScale, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                
+                                //                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
+                                    .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                
+                                    .scaleEffect(pulse ? 1.03 : 1.0)
+                                    .shadow(
+                                        color: Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)
+                                            .opacity(pulse ? 0.45 : 0.0),
+                                        radius: pulse ? 18 : 6, x: 0, y: 0
+                                    )
+                                    .animation(
+                                        reduceMotion ? nil :
+                                                .easeInOut(duration: 0.95).repeatForever(autoreverses: true),
+                                        value: pulse
+                                    )
+                            }
+                        }
+
                         
                     }
+                    .disabled(viewModel.isPurchasing || !appearVideo)
+                    .allowsHitTesting(appearVideo && !viewModel.isPurchasing)
                     .opacity(appearVideo ? 1 : 0)
                     
                     .padding(.horizontal, 24)

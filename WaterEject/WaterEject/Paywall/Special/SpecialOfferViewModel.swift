@@ -143,6 +143,14 @@ final class SpecialOfferViewModel: ObservableObject {
     
     // MARK: - Purchase
     
+    private func shouldSendSubscribeEvent(txId: String?) -> Bool {
+        guard let txId, !txId.isEmpty else { return true } // якщо нема txId — хоча б не блокуємо
+        let key = "af_subscribe_sent_\(txId)"
+        if UserDefaults.standard.bool(forKey: key) { return false }
+        UserDefaults.standard.set(true, forKey: key)
+        return true
+    }
+    
     func buySpecialOffer(
         variant: String,
         entryPoint: String,
@@ -150,27 +158,19 @@ final class SpecialOfferViewModel: ObservableObject {
         placeWhereBuy: String?,
         paywallId: String      // наприклад "special_offer_v_1.0"
     ) async {
+        
+        guard !isPurchasing else { return }
         guard let pkg = weeklyPackage else {
             errorMessage = "Product not found"
-//            Telemetry.shared.purchaseResult(
-//                variant: variant,
-//                status: "error",
-//                rcCode: -2,
-//                packageId: plan.productID,
-//                pricePaid: nil,
-//                currency: nil,
-//                sessionId: sessionId,
-//                onboardId: onboardId,
-//                paywallId: paywallId
-//            )
+
             return
         }
         
         isPurchasing = true
+        defer { isPurchasing = false }
+        
         errorMessage = nil
         purchaseSucceeded = false
-        
-        defer { isPurchasing = false }
         
         let p = pkg.storeProduct
         let price = (p.price as? NSNumber)?.doubleValue
@@ -178,14 +178,6 @@ final class SpecialOfferViewModel: ObservableObject {
         ?? 0
         let currency = p.currencyCode
         
-//        Telemetry.shared.purchaseStart(
-//            variant: variant,
-//            packageId: p.productIdentifier,
-//            offeringId: pkg.identifier,
-//            price: price,
-//            currency: currency,
-//            sessionId: sessionId
-//        )
         
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
@@ -195,11 +187,18 @@ final class SpecialOfferViewModel: ObservableObject {
             if active {
                 let txId = result.transaction?.transactionIdentifier
                 
-    
-//                    Telemetry.shared.funnelPurchaseSuccess(
-//                        onboardId: "Special_offer",
-//                        plan: "weekly"
-//                    )
+                if shouldSendSubscribeEvent(txId: txId) {    // <-- додати дедуп
+                        AF.log(.subscribe, [
+                          "af_revenue": price,
+                          "af_currency": currency ?? "USD",
+                          "af_content_id": p.productIdentifier,
+                          "af_order_id": txId ?? "",
+                          "transaction_id": txId ?? "",
+                          "paywall_id": paywallId,
+                          "plan": plan.analyticsValue,
+                          "rc_app_user_id": Purchases.shared.appUserID
+                        ])
+                      }
                 
                 let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
                 Telemetry.shared.funnelPurchaseSuccess(
@@ -208,12 +207,12 @@ final class SpecialOfferViewModel: ObservableObject {
                 )
                 
                 
-                AF.log(.subscribe, [
-                  "af_revenue": price,
-                  "af_currency": currency ?? "USD",
-                  "af_content_id": p.productIdentifier,
-                  "cpa_value": 0
-                ])
+//                AF.log(.subscribe, [
+//                  "af_revenue": price,
+//                  "af_currency": currency ?? "USD",
+//                  "af_content_id": p.productIdentifier,
+//                  "cpa_value": 0
+//                ])
                 
                 let cpaFlag = "af_subscribe_cpa_sent \(Purchases.shared.appUserID)"
                 if !UserDefaults.standard.bool(forKey: cpaFlag) {

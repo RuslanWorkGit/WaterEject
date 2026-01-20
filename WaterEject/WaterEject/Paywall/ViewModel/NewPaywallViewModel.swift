@@ -94,10 +94,18 @@ final class NewPaywallViewModel: ObservableObject {
         }
     }
     
+    private func shouldSendSubscribeEvent(txId: String?) -> Bool {
+        guard let txId, !txId.isEmpty else { return true } // якщо нема txId — хоча б не блокуємо
+        let key = "af_subscribe_sent_\(txId)"
+        if UserDefaults.standard.bool(forKey: key) { return false }
+        UserDefaults.standard.set(true, forKey: key)
+        return true
+    }
     
     // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
     func buyWithRevenueCat(plan: NewPaywallPlan, variant: String, entryPoint: String, sessionId: String, onboardId: String?, paywallId: String) async {
-        let paywallId = "paywall_v_3.0"
+        guard !isPurchasing else { return }
+        //let paywallId = "paywall_v_3.0"
         guard let pkg = packageByPlan[plan] else {
             errorMessage = "Product not found"
             Telemetry.shared.purchaseResult(
@@ -108,11 +116,11 @@ final class NewPaywallViewModel: ObservableObject {
         }
         
         isPurchasing = true
+        defer { isPurchasing = false }
+        
         errorMessage = nil
         purchaseSucceeded = false
 
-        defer { isPurchasing = false }
-        
         let p = pkg.storeProduct
         let price = (p.price as? NSNumber)?.doubleValue
         ?? (p.price as? NSDecimalNumber)?.doubleValue
@@ -129,6 +137,8 @@ final class NewPaywallViewModel: ObservableObject {
         )
         
         do {
+
+            
             let result = try await Purchases.shared.purchase(package: pkg)
             let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
             purchaseSucceeded = active
@@ -137,14 +147,27 @@ final class NewPaywallViewModel: ObservableObject {
                 let txId = result.transaction?.transactionIdentifier
   
                 
+                if shouldSendSubscribeEvent(txId: txId) {
+                    AF.log(.subscribe, [
+                      "af_revenue": price,
+                      "af_currency": currency ?? "USD",
+                      "af_content_id": p.productIdentifier,
+                      "af_order_id": txId ?? "",
+                      "transaction_id": txId ?? "",
+                      "paywall_id": paywallId,
+                      "plan": plan.analyticsValue,
+                      "rc_app_user_id": Purchases.shared.appUserID
+                    ])
 
+                }
                 
-                AF.log(.subscribe, [
-                  "af_revenue": price,               // Double
-                  "af_currency": currency ?? "USD",
-                  "af_content_id": p.productIdentifier,
-                  "cpa_value": 0
-                ])
+                
+//                AF.log(.subscribe, [
+//                  "af_revenue": price,               // Double
+//                  "af_currency": currency ?? "USD",
+//                  "af_content_id": p.productIdentifier,
+//                  "cpa_value": 0
+//                ])
                 
                 let planId = plan.analyticsValue
 
@@ -161,7 +184,7 @@ final class NewPaywallViewModel: ObservableObject {
                     plan: planId
                 )
                 
-                let cpaFlag = "af_subscribe_cpa_sent \(Purchases.shared.appUserID)"
+                let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
                     if !UserDefaults.standard.bool(forKey: cpaFlag) {
                         AppsFlyerLib.shared().logEvent("subscribe_cpa", withValues: [
                             "cpa_value": p.afPriceDouble,        // твоя CPA-ціль (можеш підставити інше число)
