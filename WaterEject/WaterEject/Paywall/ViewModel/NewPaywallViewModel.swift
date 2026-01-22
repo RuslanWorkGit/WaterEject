@@ -5,12 +5,7 @@
 //  Created by Ruslan Liulka on 20.11.2025.
 //
 
-//
-//  PaywallFirstViewModel.swift
-//  WaterEject
-//
-//  Created by Ruslan Liulka on 07.08.2025.
-//
+
 
 import Foundation
 import RevenueCat

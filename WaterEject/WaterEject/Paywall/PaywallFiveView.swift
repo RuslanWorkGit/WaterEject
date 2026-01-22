@@ -46,6 +46,7 @@ struct PaywallFiveView: View {
     // 🔹 нове: напрямок анімації + “ручний” таймер
     @State private var isForward: Bool = true
     @State private var autoAdvanceWorkItem: DispatchWorkItem?
+    @State private var didLogChoosePlan = false
     private let infoCardInterval: TimeInterval = 2.5
     
     
@@ -254,6 +255,7 @@ struct PaywallFiveView: View {
 //                                        plan: PaywallPlan.weekly.analyticsValue
 //                                    )
 //                                }
+                                didLogChoosePlan = true
                             }
                         )
                         
@@ -271,12 +273,7 @@ struct PaywallFiveView: View {
                                     plan: PaywallPlan.yearly.analyticsValue
                                 )
                                 
-//                                if let onboardId = onboardId {
-//                                    Telemetry.shared.funnelPlanChosen(
-//                                        onboardId: onboardId,
-//                                        plan: PaywallPlan.yearly.analyticsValue
-//                                    )
-//                                }
+                                didLogChoosePlan = true
                             }
                         )
                     }
@@ -298,11 +295,20 @@ struct PaywallFiveView: View {
                         let variant = PaywallAB.shared.variant().rawValue
                         let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
                         let plan    = viewModel.selectedPlan
+                        let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                        
+                        if !didLogChoosePlan {
+                            Telemetry.shared.funnelPlanChosen(
+                                onboardId: resolvedOnboardId,
+                                plan: plan.analyticsValue
+                            )
+                            didLogChoosePlan = true
+                        }
                         
                         Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
                         
-                        let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+          
                         Telemetry.shared.funnelGoToPurchase(
                             onboardId: resolvedOnboardId,
                             plan: plan.analyticsValue
@@ -317,6 +323,8 @@ struct PaywallFiveView: View {
                         
                         Task {
                             let paywallId = "paywall_v_5.0"
+                            
+                            
                             await viewModel.buyWithRevenueCat(
                                 plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                             )
