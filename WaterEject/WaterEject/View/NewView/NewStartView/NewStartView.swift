@@ -24,6 +24,18 @@ struct NewStartView: View {
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     private var padPadding: CGFloat { isPad ? 60 : 0 }
     
+    private var selectedDuration: Int {
+        switch mode {
+        case .waterRemoval:          return 45
+        case .deepWaterClean:        return 25
+        case .speakerCheck:          return 40
+        case .intermediateCleaning:  return 40
+        case .dustResidueClean:      return 45
+        case .soundBalanceRestore:   return 25
+        case .finalDeepClean:        return 40
+        }
+    }
+    
     var body: some View {
         let isLarge = UIScreen.main.bounds.height > 900
         
@@ -95,7 +107,7 @@ struct NewStartView: View {
 //                        Telemetry.shared.startPromptShown(device: device, mode: mode)
                         
                     } label: {
-                        Text("Start cleaning (25 sec)")
+                        Text("Start cleaning (\(selectedDuration) sec)")
                             .font(.system(size: 16 * padScale, weight: .medium))
                             .foregroundStyle(Color.white)
                             .padding(.vertical, 14)
@@ -168,25 +180,25 @@ struct NewStartView: View {
                     switch mode {
                     case .waterRemoval:
                         viewModel.playCleaningSequence()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 45)
                     case .deepWaterClean:
                         viewModel.playSomeWav()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 25)
                     case .speakerCheck:
                         viewModel.playCleaningSequenceTwo()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 40)
                     case .intermediateCleaning:
                         viewModel.playCleaningSequenceThree()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 40)
                     case .dustResidueClean:
                         viewModel.playCleaningSequence()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 45)
                     case .soundBalanceRestore:
                         viewModel.playCleaningSequenceTwo()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 25)
                     case .finalDeepClean:
                         viewModel.playCleaningSequenceThree()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 40)
 
                     }
                 },

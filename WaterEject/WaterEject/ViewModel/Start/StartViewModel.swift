@@ -33,7 +33,7 @@ final class StartViewModel: ObservableObject {
     func playCleaningSequence() {
         setupAudioSessionForPlayback()
         // Приклад: 4 файли, усі в папці проєкту (без розширення!)
-        seqPlayer.playSequence(soundNames: ["fifty-tone", "hundred-tone-v1", "hundred-tone-v2", "hundred-and-fifty-tone", "hundred-tone-v1"], duration: 5.0)
+        seqPlayer.playSequence(soundNames: ["fifty-tone", "hundred-tone-v1", "hundred-tone-v2", "hundred-and-fifty-tone", "hundred-tone-v1", "first", "fifth", "nine", "second"], duration: 5.0)
     }
     
     func playSomeWav() {
@@ -44,13 +44,13 @@ final class StartViewModel: ObservableObject {
     func playCleaningSequenceTwo() {
         setupAudioSessionForPlayback()
         // Приклад: 4 файли, усі в папці проєкту (без розширення!)
-        seqPlayer.playSequence(soundNames: ["first", "fifth", "nine", "second", "third"], duration: 5.0)
+        seqPlayer.playSequence(soundNames: ["first", "fifth", "nine", "second", "third", "fifty-tone", "hundred-tone-v1", "hundred-tone-v2"], duration: 5.0)
     }
     
     func playCleaningSequenceThree() {
         setupAudioSessionForPlayback()
         // Приклад: 4 файли, усі в папці проєкту (без розширення!)
-        seqPlayer.playSequence(soundNames: ["fourth", "sixth", "merge", "twoFifty", "ten"], duration: 5.0)
+        seqPlayer.playSequence(soundNames: ["fourth", "sixth", "merge", "twoFifty", "ten", "hundred-tone-v2", "hundred-and-fifty-tone", "hundred-tone-v1"], duration: 5.0)
     }
 
     
@@ -67,9 +67,9 @@ final class StartViewModel: ObservableObject {
     
     
     
-    func startTimer() {
+    func startTimer(duration: Int) {
         stopTimer()
-        countdown = 25
+        countdown = duration
         startCleaning = true
 
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -77,14 +77,13 @@ final class StartViewModel: ObservableObject {
             if self.countdown > 1 {
                 self.countdown -= 1
             } else {
-                // ⬇️ дійшли до 0: спочатку позначаємо фініш,
-                // а вже потім робимо звичний reset у stopTimer()
                 self.countdown = 0
-                self.finishedAt = Date()      // ⬅️ стабільний тригер
+                self.finishedAt = Date()
                 self.stopTimer()
             }
         }
     }
+    
     func stopAllPlayback(reason: String? = nil) {
             seqPlayer.stop()
             audioManager.stop()

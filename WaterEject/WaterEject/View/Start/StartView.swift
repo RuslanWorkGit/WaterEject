@@ -160,16 +160,16 @@ struct StartView: View {
                     switch mode {
                     case .sonicPulse:
                         viewModel.playCleaningSequence()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 25)
                     case .nanoShake:
                         viewModel.playSomeWav()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 25)
                     case .dynamicEject:
                         viewModel.playCleaningSequenceTwo()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 25)
                     case .hydroGuard:
                         viewModel.playCleaningSequenceThree()
-                        viewModel.startTimer()
+                        viewModel.startTimer(duration: 25)
                     }
                 },
                 secondaryButton: .cancel({
