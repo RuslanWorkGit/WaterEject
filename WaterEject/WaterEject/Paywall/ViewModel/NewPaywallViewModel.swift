@@ -141,6 +141,24 @@ final class NewPaywallViewModel: ObservableObject {
                 let tx = result.transaction
                 let txId = result.transaction?.transactionIdentifier
   
+                //let isLifetime = (plan == .lifetime)
+
+                if shouldSendJ2DEvent(txId: txId, suffix: "subscribed") {
+                    Task {
+                        do {
+                            try await J2DSubscriptionReporter.shared.sendSubscriptionEvent(
+                                platform: .watereject,
+                                userId: Purchases.shared.appUserID,
+                                event: .subscribed,
+                                type: .subscription,
+                                plan: selectedPlan.rawValue
+                            )
+                        } catch {
+                            // Важливо: не валимо покупку, просто лог
+                            print("J2D subscription/event failed:", error)
+                        }
+                    }
+                }
                 
                 if shouldSendSubscribeEvent(txId: txId) {
                     AF.log(.subscribe, [
@@ -244,6 +262,14 @@ final class NewPaywallViewModel: ObservableObject {
             errorMessage = ns.localizedDescription
             Telemetry.shared.restoreError(ns)
         }
+    }
+    
+    private func shouldSendJ2DEvent(txId: String?, suffix: String) -> Bool {
+        guard let txId, !txId.isEmpty else { return true }
+        let key = "j2d_sent_\(suffix)_\(txId)"
+        if UserDefaults.standard.bool(forKey: key) { return false }
+        UserDefaults.standard.set(true, forKey: key)
+        return true
     }
 }
 

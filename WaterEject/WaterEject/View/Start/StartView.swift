@@ -190,36 +190,9 @@ struct StartView: View {
                 device: device.displayName,
                 mode: mode.modeName
             )
-            //Task { await ReviewPrompter.maybeAsk() }
+
         }
-//        .sheet(item: $reviewFlow.sheet) { sheet in
-//            switch sheet {
-//            case .initialLike:
-//                ReviewInitialLikeSheet(
-//                    onLike: { reviewFlow.userLiked() },
-//                    onDislike: { reviewFlow.userDisliked() },
-//                    onLater: { reviewFlow.userLater() }
-//                )
-//
-//            case .starRating:
-//                ReviewStarsSheet(
-//                    onSelect: { stars in
-//                        reviewFlow.userPickedStars(stars)
-//                        if stars >= 4 {
-//                            requestReview()
-//                        }
-//                    },
-//                    onLater: { reviewFlow.dismiss() }
-//                )
-//
-//            case .feedback(let stars):
-//                ReviewFeedbackSheet(
-//                    stars: stars,
-//                    onSubmit: { text in reviewFlow.submitFeedback(text: text, stars: stars) },
-//                    onCancel: { reviewFlow.dismiss() }
-//                )
-//            }
-//        }
+
         // 1) Initial like
         .alert(
             "Did the cleaning help?",

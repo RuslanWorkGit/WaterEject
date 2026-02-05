@@ -40,6 +40,7 @@ private struct SavedState: Codable, Equatable {
     var latestPurchaseTs: TimeInterval?   // seconds
     var billingIssue: Bool
     var unsubscribed: Bool
+    var productId: String?
 }
 
 final class SubscriptionMonitor {
@@ -65,9 +66,28 @@ final class SubscriptionMonitor {
         }
     }
 
+    private func sendJ2D(_ event: J2DEvent, type: J2DSubscriptionType, plan: String?, date: Date? = nil) {
+        Task {
+            do {
+                try await J2DSubscriptionReporter.shared.sendSubscriptionEvent(
+                    platform: .watereject,
+                    userId: Purchases.shared.appUserID,
+                    event: event,
+                    type: type,
+                    plan: resolvePlan(from: plan),
+                    date: date ?? Date()
+                )
+            } catch {
+                print("❌ J2D state event failed:", event, error)
+            }
+        }
+    }
+    
     /// Викликай на лаунчі, при поверненні у фокус, після покупки і коли RC оновлює CustomerInfo
     func process(customerInfo: CustomerInfo) {
         guard let ent = customerInfo.entitlements[entitlementID] else { return }
+        
+        let isSubscriptionProduct = (ent.expirationDate != nil)
 
         let new = SavedState(
             isActive: ent.isActive,
@@ -78,27 +98,33 @@ final class SubscriptionMonitor {
             unsubscribed: ent.unsubscribeDetectedAt != nil
         )
         let old = load()
+        
+        let oldWasNonConsumable = (old?.isActive == true && old?.expirationTs == nil)
+        let newIsNonConsumableActive = (new.isActive && new.expirationTs == nil)
 
         // ---- Виявлення подій ----
 
         // 1) Скасування авто-пролонгації (user turned off renewal)
-        if new.unsubscribed, old?.unsubscribed == false || (old == nil && new.unsubscribed) {
+        if isSubscriptionProduct, new.unsubscribed, old?.unsubscribed == false || (old == nil && new.unsubscribed) {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
             AF.log(.subscription_cancelled, afPayload(revenue: 0.0, currency: cached?.currency))
+            sendJ2D(.unsubscribed, type: .subscription, plan: new.productId ?? old?.productId, date: ent.unsubscribeDetectedAt)
         }
 
 
         // 2) Ренювал (новий період почався): коли зросла expiration або з’явилась нова latestPurchase
-        if let newExp = new.expirationTs,
+        if  isSubscriptionProduct, let newExp = new.expirationTs,
            let oldExp = old?.expirationTs,
            new.isActive, newExp > oldExp + 1 {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
             AF.log(.subscription_renewed, afPayload(revenue: cached?.price, currency: cached?.currency))
-        } else if let newLP = new.latestPurchaseTs,
+            sendJ2D(.renewed, type: .subscription, plan: new.productId ?? old?.productId, date: ent.latestPurchaseDate ?? Date())
+        } else if  isSubscriptionProduct, let newLP = new.latestPurchaseTs,
                   let oldLP = old?.latestPurchaseTs,
                   new.isActive, newLP > oldLP + 1 {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
             AF.log(.subscription_renewed, afPayload(revenue: cached?.price, currency: cached?.currency))
+            sendJ2D(.renewed, type: .subscription, plan: new.productId ?? old?.productId, date: ent.latestPurchaseDate ?? Date())
         }
 
 
@@ -118,5 +144,12 @@ final class SubscriptionMonitor {
 
         // Зберегти новий стан
         save(new)
+    }
+    
+    private func resolvePlan(from productId: String?) -> String {
+        guard let id = productId else { return "unknown" }
+        if id == NewPaywallPlan.weekly.productID   { return NewPaywallPlan.weekly.rawValue }
+        if id == NewPaywallPlan.yearly.productID   { return NewPaywallPlan.yearly.rawValue }
+        return id // fallback: якщо раптом інший продукт
     }
 }
