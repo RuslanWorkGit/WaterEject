@@ -98,21 +98,52 @@ final class NewPaywallViewModel: ObservableObject {
     }
     
     // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
-    func buyWithRevenueCat(plan: NewPaywallPlan, variant: String, entryPoint: String, sessionId: String, onboardId: String?, paywallId: String) async {
-        guard !isPurchasing else { return }
-        //let paywallId = "paywall_v_3.0"
+    func buyWithRevenueCat(
+        plan: NewPaywallPlan,
+        variant: String,
+        entryPoint: String,
+        sessionId: String,
+        onboardId: String?,
+        paywallId: String
+    ) async -> TelemetryPurchaseAttemptResult {
+        guard !isPurchasing else {
+            return TelemetryPurchaseAttemptResult(
+                status: .failed,
+                packageId: plan.productID,
+                transactionId: nil,
+                rcCode: nil,
+                message: "Purchase already in progress",
+                reasonWhy: .unknown
+            )
+        }
+
         guard let pkg = packageByPlan[plan] else {
             errorMessage = "Product not found"
-            Telemetry.shared.purchaseResult(
-                variant: variant, status: "error", rcCode: -2,
-                packageId: plan.productID, pricePaid: nil, currency: nil, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
+            Telemetry.shared.handlePurchaseError(
+                paywallId: paywallId,
+                variant: variant,
+                entryPoint: entryPoint,
+                plan: plan.analyticsValue,
+                packageId: plan.productID,
+                rcCode: -2,
+                message: "Product not found",
+                fallbackReason: .productNotFound,
+                explicitPurchaseSource: nil,
+                explicitOnboardId: onboardId
             )
-            return
+            return TelemetryPurchaseAttemptResult(
+                status: .failed,
+                packageId: plan.productID,
+                transactionId: nil,
+                rcCode: -2,
+                message: "Product not found",
+                reasonWhy: .productNotFound
+            )
         }
-        
+
         isPurchasing = true
         defer { isPurchasing = false }
-        
+
         errorMessage = nil
         purchaseSucceeded = false
 
@@ -121,7 +152,7 @@ final class NewPaywallViewModel: ObservableObject {
         ?? (p.price as? NSDecimalNumber)?.doubleValue
         ?? 0
         let currency = p.currencyCode
-        
+
         Telemetry.shared.purchaseStart(
             variant: variant,
             packageId: p.productIdentifier,
@@ -130,18 +161,16 @@ final class NewPaywallViewModel: ObservableObject {
             currency: currency,
             sessionId: sessionId
         )
-        
-        do {
 
-            
+        do {
             let result = try await Purchases.shared.purchase(package: pkg)
             let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
             purchaseSucceeded = active
+
             if active {
-                let tx = result.transaction
                 let txId = result.transaction?.transactionIdentifier
-  
-                //let isLifetime = (plan == .lifetime)
+                let resolvedOnboardId = Telemetry.shared.resolveOnboardId(onboardId)
+                let purchaseSource = Telemetry.shared.resolvedPurchaseSource(for: nil)
 
                 if shouldSendJ2DEvent(txId: txId, suffix: "subscribed") {
                     Task {
@@ -153,95 +182,128 @@ final class NewPaywallViewModel: ObservableObject {
                                 type: .subscription,
                                 plan: selectedPlan.rawValue
                             )
+                            Telemetry.shared.logTechnicalDeliveryResult(
+                                deliveryStatus: "success",
+                                txId: txId,
+                                plan: plan.rawValue,
+                                event: J2DEvent.subscribed.rawValue,
+                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                purchaseSource: purchaseSource,
+                                onboardId: resolvedOnboardId
+                            )
                         } catch {
-                            // Важливо: не валимо покупку, просто лог
-                            print("J2D subscription/event failed:", error)
+                            Telemetry.shared.logTechnicalDeliveryResult(
+                                deliveryStatus: "error",
+                                txId: txId,
+                                plan: plan.rawValue,
+                                event: J2DEvent.subscribed.rawValue,
+                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                purchaseSource: purchaseSource,
+                                onboardId: resolvedOnboardId,
+                                errorMessage: error.localizedDescription
+                            )
                         }
                     }
                 }
-                
+
                 if shouldSendSubscribeEvent(txId: txId) {
                     AF.log(.subscribe, [
-                      "af_revenue": price,
-                      "af_currency": currency ?? "USD",
-                      "af_content_id": p.productIdentifier,
-                      "af_order_id": txId ?? "",
-                      "transaction_id": txId ?? "",
-                      "paywall_id": paywallId,
-                      "plan": plan.analyticsValue,
-                      "rc_app_user_id": Purchases.shared.appUserID
+                        "af_revenue": price,
+                        "af_currency": currency ?? "USD",
+                        "af_content_id": p.productIdentifier,
+                        "af_order_id": txId ?? "",
+                        "transaction_id": txId ?? "",
+                        "paywall_id": paywallId,
+                        "plan": plan.analyticsValue,
+                        "rc_app_user_id": Purchases.shared.appUserID
                     ])
-
                 }
-                
-                
-//                AF.log(.subscribe, [
-//                  "af_revenue": price,               // Double
-//                  "af_currency": currency ?? "USD",
-//                  "af_content_id": p.productIdentifier,
-//                  "cpa_value": 0
-//                ])
-                
-                let planId = plan.analyticsValue
 
-//                if let onboardId = onboardId {
-//                    Telemetry.shared.funnelPurchaseSuccess(
-//                        onboardId: onboardId,
-//                        plan: planId
-//                    )
-//                }
-                
-                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
-                Telemetry.shared.funnelPurchaseSuccess(
-                    onboardId: resolvedOnboardId,
-                    plan: planId
-                )
-                
                 let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
-                    if !UserDefaults.standard.bool(forKey: cpaFlag) {
-                        AppsFlyerLib.shared().logEvent("subscribe_cpa", withValues: [
-                            "cpa_value": p.afPriceDouble,        // твоя CPA-ціль (можеш підставити інше число)
-                            "af_currency": p.afCurrencyCode,
-                            "product_id": p.productIdentifier,
-                            "transaction_id": txId
-                        ])
-                        UserDefaults.standard.set(true, forKey: cpaFlag)
-                    }
-                
+                if !UserDefaults.standard.bool(forKey: cpaFlag) {
+                    AppsFlyerLib.shared().logEvent("subscribe_cpa", withValues: [
+                        "cpa_value": p.afPriceDouble,
+                        "af_currency": p.afCurrencyCode,
+                        "product_id": p.productIdentifier,
+                        "transaction_id": txId
+                    ])
+                    UserDefaults.standard.set(true, forKey: cpaFlag)
+                }
+
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
-                
                 RCPriceCache.save(entitlementID: "pro_user", price: price, currency: currency ?? "USD")
 
-            } else {
-                errorMessage = "Subscription not active"
-//                Telemetry.shared.purchaseResult(
-//                    variant: variant, status: "error", rcCode: -3,
-//                    packageId: p.productIdentifier, pricePaid: nil, currency: currency,
-//                    sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
-//                )
-                
+                Telemetry.shared.handleSuccessfulPurchase(
+                    paywallId: paywallId,
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    plan: plan.analyticsValue,
+                    packageId: p.productIdentifier,
+                    price: price,
+                    currency: currency,
+                    transactionId: txId,
+                    explicitPurchaseSource: nil,
+                    explicitOnboardId: onboardId
+                )
 
+                return TelemetryPurchaseAttemptResult(
+                    status: .success,
+                    packageId: p.productIdentifier,
+                    transactionId: txId,
+                    rcCode: nil,
+                    message: nil,
+                    reasonWhy: nil
+                )
             }
+
+            errorMessage = "Subscription not active"
+            Telemetry.shared.handlePurchaseError(
+                paywallId: paywallId,
+                variant: variant,
+                entryPoint: entryPoint,
+                plan: plan.analyticsValue,
+                packageId: p.productIdentifier,
+                rcCode: -3,
+                message: "Subscription not active",
+                fallbackReason: .inactiveAfterPurchase,
+                explicitPurchaseSource: nil,
+                explicitOnboardId: onboardId
+            )
+            return TelemetryPurchaseAttemptResult(
+                status: .failed,
+                packageId: p.productIdentifier,
+                transactionId: result.transaction?.transactionIdentifier,
+                rcCode: -3,
+                message: "Subscription not active",
+                reasonWhy: .inactiveAfterPurchase
+            )
         } catch {
             let ns = error as NSError
             let rcCode = ns.userInfo["RCErrorCodeKey"] as? Int
-            let status = (rcCode == 1) ? "user_cancelled" : "error"
+            let fallbackReason: TelemetryPurchaseFailureReason = (rcCode == 1) ? .userCancelled : .error
             errorMessage = ns.localizedDescription
-//            Telemetry.shared.purchaseResult(
-//                variant: variant, status: status, rcCode: rcCode,
-//                packageId: p.productIdentifier, pricePaid: nil, currency: currency,
-//                sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
-//            )
-            if status == "error" {
-//                Telemetry.shared.paywallPurchaseError(
-//                        variant: variant,
-//                        entryPoint: entryPoint,
-//                        packageId: p.productIdentifier,
-//                        rcCode: rcCode,
-//                        message: ns.localizedDescription,
-//                        sessionId: sessionId
-//                    )
-            }
+
+            Telemetry.shared.handlePurchaseError(
+                paywallId: paywallId,
+                variant: variant,
+                entryPoint: entryPoint,
+                plan: plan.analyticsValue,
+                packageId: p.productIdentifier,
+                rcCode: rcCode,
+                message: ns.localizedDescription,
+                fallbackReason: fallbackReason,
+                explicitPurchaseSource: nil,
+                explicitOnboardId: onboardId
+            )
+
+            return TelemetryPurchaseAttemptResult(
+                status: (rcCode == 1) ? .cancelled : .failed,
+                packageId: p.productIdentifier,
+                transactionId: nil,
+                rcCode: rcCode,
+                message: ns.localizedDescription,
+                reasonWhy: fallbackReason
+            )
         }
     }
     

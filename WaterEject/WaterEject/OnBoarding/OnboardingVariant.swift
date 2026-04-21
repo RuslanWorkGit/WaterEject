@@ -27,6 +27,32 @@ enum OnboardingVariant: String, Identifiable, CaseIterable {
     var id: String { rawValue }
 }
 
+extension OnboardingVariant {
+    var onboardTag: OnboardTag {
+        switch self {
+        case .A: return .v41
+        case .B: return .v32
+        case .C: return .v33
+        case .D: return .v5
+        case .E: return .v6
+        case .F: return .v7
+        case .G: return .v8
+        case .H: return .v9
+        case .J: return .v31
+        case .K: return .v10
+        }
+    }
+
+    var flowFamily: String {
+        switch self {
+        case .A, .B, .C, .J:
+            return "classic"
+        case .D, .E, .F, .G, .H, .K:
+            return "new"
+        }
+    }
+}
+
 final class OnboardingAB {
     static let shared = OnboardingAB()
     
@@ -83,6 +109,38 @@ final class OnboardingAB {
             UserDefaults.standard.set(true, forKey: key)
         }
     }
+
+    private func applyTelemetrySelection(_ variant: OnboardingVariant) {
+        let tag = variant.onboardTag
+        let bucket = abs((stableUserID() + "|\(variant.rawValue)|onboarding_variant_v2").hashValue) % 100
+        let keywordId = UserDefaults.standard.string(forKey: "asaKeywordId")
+        let keywordText = UserDefaults.standard.string(forKey: "asaKeywordText")
+
+        Telemetry.shared.setPresentedOnboardingContext(
+            brand: nil,
+            onboardId: tag.rawValue,
+            flowKey: variant.rawValue,
+            flowId: nil,
+            brandedFlow: nil,
+            onbExperimentId: "onboarding_variant_v2",
+            onbVariantId: variant.rawValue,
+            onbBucket: String(bucket)
+        )
+
+        Telemetry.shared.markOnboardingDistribution(
+            selectedOnboardId: tag.rawValue,
+            selectedFlowKey: variant.rawValue,
+            genericVariantId: variant.rawValue,
+            genericFlowFamily: variant.flowFamily,
+            decisionReason: "remote_config_assignment",
+            selectedPath: "generic",
+            brand: nil,
+            selectedBrand: nil,
+            detectedBrand: nil,
+            keywordId: keywordId,
+            keywordText: keywordText
+        )
+    }
     
     private func currentRCSignature() -> String {
         let force = rc["onb_force"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -116,6 +174,7 @@ final class OnboardingAB {
                let v = OnboardingVariant(rawValue: raw),
                isEnabled(v) {
                 applyTracking(v)
+                applyTelemetrySelection(v)
                 return v
             }
             
@@ -124,6 +183,7 @@ final class OnboardingAB {
                isEnabled(forced) {
                 UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
                 applyTracking(forced)
+                applyTelemetrySelection(forced)
                 return forced
             }
             
@@ -142,6 +202,7 @@ final class OnboardingAB {
             
             UserDefaults.standard.set(v.rawValue, forKey: storageKey)
             applyTracking(v)
+            applyTelemetrySelection(v)
             return v
         }
     

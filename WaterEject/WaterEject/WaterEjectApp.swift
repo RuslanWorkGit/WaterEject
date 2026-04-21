@@ -129,7 +129,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-        
+        Telemetry.shared.startKeywordAttributionMeasurement(source: "app_launch")
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     self.logStoredKeywordOnStartIfNeeded()
@@ -292,6 +292,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     
     func onConversionDataFail(_ error: Error) {
         print("❌ AppsFlyer conversion data error:", error.localizedDescription)
+        Telemetry.shared.logKeywordFailure(reason: error.localizedDescription, source: "appsFlyer_conversion")
     }
 
 //    private func extractASAKeywordID(from data: [AnyHashable: Any]) -> String? {
@@ -464,6 +465,7 @@ struct WaterEjectApp: App {
             case .background:
                 
                 appDelegate.sentStartAppThisForeground = false
+                Telemetry.shared.appMovedToBackground()
                 
                 if appDelegate.isProUser {
                             // якщо Pro — ніяких офферів

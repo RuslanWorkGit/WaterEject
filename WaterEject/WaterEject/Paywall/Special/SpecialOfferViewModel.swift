@@ -157,13 +157,40 @@ final class SpecialOfferViewModel: ObservableObject {
         sessionId: String,
         placeWhereBuy: String?,
         paywallId: String      // наприклад "special_offer_v_1.0"
-    ) async {
-        
-        guard !isPurchasing else { return }
+    ) async -> TelemetryPurchaseAttemptResult {
+        guard !isPurchasing else {
+            return TelemetryPurchaseAttemptResult(
+                status: .failed,
+                packageId: plan.productID,
+                transactionId: nil,
+                rcCode: nil,
+                message: "Purchase already in progress",
+                reasonWhy: .unknown
+            )
+        }
         guard let pkg = weeklyPackage else {
             errorMessage = "Product not found"
-
-            return
+            Telemetry.shared.handlePurchaseError(
+                paywallId: paywallId,
+                variant: variant,
+                entryPoint: entryPoint,
+                plan: plan.analyticsValue,
+                packageId: plan.productID,
+                rcCode: -2,
+                message: "Product not found",
+                fallbackReason: .productNotFound,
+                explicitPurchaseSource: Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy),
+                explicitOnboardId: OnboardTag.lastFromUserDefaults()?.rawValue,
+                placeWhereBuy: placeWhereBuy
+            )
+            return TelemetryPurchaseAttemptResult(
+                status: .failed,
+                packageId: plan.productID,
+                transactionId: nil,
+                rcCode: -2,
+                message: "Product not found",
+                reasonWhy: .productNotFound
+            )
         }
         
         isPurchasing = true
@@ -186,6 +213,42 @@ final class SpecialOfferViewModel: ObservableObject {
             
             if active {
                 let txId = result.transaction?.transactionIdentifier
+                let purchaseSource = Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy)
+                let resolvedOnboardId = Telemetry.shared.resolveOnboardId(OnboardTag.lastFromUserDefaults()?.rawValue)
+
+                if shouldSendJ2DEvent(txId: txId, suffix: "subscribed") {
+                    Task {
+                        do {
+                            try await J2DSubscriptionReporter.shared.sendSubscriptionEvent(
+                                platform: .watereject,
+                                userId: Purchases.shared.appUserID,
+                                event: .subscribed,
+                                type: .subscription,
+                                plan: plan.rawValue
+                            )
+                            Telemetry.shared.logTechnicalDeliveryResult(
+                                deliveryStatus: "success",
+                                txId: txId,
+                                plan: plan.rawValue,
+                                event: J2DEvent.subscribed.rawValue,
+                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                purchaseSource: purchaseSource,
+                                onboardId: resolvedOnboardId
+                            )
+                        } catch {
+                            Telemetry.shared.logTechnicalDeliveryResult(
+                                deliveryStatus: "error",
+                                txId: txId,
+                                plan: plan.rawValue,
+                                event: J2DEvent.subscribed.rawValue,
+                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                purchaseSource: purchaseSource,
+                                onboardId: resolvedOnboardId,
+                                errorMessage: error.localizedDescription
+                            )
+                        }
+                    }
+                }
                 
                 if shouldSendSubscribeEvent(txId: txId) {    // <-- додати дедуп
                         AF.log(.subscribe, [
@@ -199,20 +262,6 @@ final class SpecialOfferViewModel: ObservableObject {
                           "rc_app_user_id": Purchases.shared.appUserID
                         ])
                       }
-                
-                let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
-                Telemetry.shared.funnelPurchaseSuccess(
-                    onboardId: resolvedOnboardId,
-                    plan: "weekly"
-                )
-                
-                
-//                AF.log(.subscribe, [
-//                  "af_revenue": price,
-//                  "af_currency": currency ?? "USD",
-//                  "af_content_id": p.productIdentifier,
-//                  "cpa_value": 0
-//                ])
                 
                 let cpaFlag = "af_subscribe_cpa_sent \(Purchases.shared.appUserID)"
                 if !UserDefaults.standard.bool(forKey: cpaFlag) {
@@ -228,33 +277,91 @@ final class SpecialOfferViewModel: ObservableObject {
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
                 RCPriceCache.save(entitlementID: entitlementID, price: price, currency: currency ?? "USD")
                 
+                Telemetry.shared.handleSuccessfulPurchase(
+                    paywallId: paywallId,
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    plan: plan.analyticsValue,
+                    packageId: p.productIdentifier,
+                    price: price,
+                    currency: currency,
+                    transactionId: txId,
+                    explicitPurchaseSource: purchaseSource,
+                    explicitOnboardId: resolvedOnboardId,
+                    placeWhereBuy: placeWhereBuy,
+                    specialOfferVariant: "special_offer_v_1",
+                    offerText: nil
+                )
+                Telemetry.shared.specialOfferSuccess(
+                    onboardId: resolvedOnboardId,
+                    variant: variant,
+                    specialOfferVariant: "special_offer_v_1",
+                    plan: plan.analyticsValue,
+                    purchaseSource: purchaseSource,
+                    placeWhereBuy: placeWhereBuy ?? entryPoint
+                )
                 Telemetry.shared.specialOfferBuy(placewhereBuy: placeWhereBuy)
                 
                 SpecialOfferNotificationManager.shared.cancelAllSpecialOffers() // ⬅️ додали
                 UserDefaults.standard.set(true, forKey: "special_offer_just_purchased")
-
-//                
-//                Telemetry.shared.purchaseResult(
-//                    variant: variant,
-//                    status: "success",
-//                    rcCode: 0,
-//                    packageId: p.productIdentifier,
-//                    pricePaid: price,
-//                    currency: currency,
-//                    sessionId: sessionId,
-//                    onboardId: onboardId,
-//                    paywallId: paywallId
-//                )
+                return TelemetryPurchaseAttemptResult(
+                    status: .success,
+                    packageId: p.productIdentifier,
+                    transactionId: txId,
+                    rcCode: nil,
+                    message: nil,
+                    reasonWhy: nil
+                )
             } else {
                 errorMessage = "Subscription not active"
-
+                Telemetry.shared.handlePurchaseError(
+                    paywallId: paywallId,
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    plan: plan.analyticsValue,
+                    packageId: p.productIdentifier,
+                    rcCode: -3,
+                    message: "Subscription not active",
+                    fallbackReason: .inactiveAfterPurchase,
+                    explicitPurchaseSource: Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy),
+                    explicitOnboardId: OnboardTag.lastFromUserDefaults()?.rawValue,
+                    placeWhereBuy: placeWhereBuy
+                )
+                return TelemetryPurchaseAttemptResult(
+                    status: .failed,
+                    packageId: p.productIdentifier,
+                    transactionId: result.transaction?.transactionIdentifier,
+                    rcCode: -3,
+                    message: "Subscription not active",
+                    reasonWhy: .inactiveAfterPurchase
+                )
             }
         } catch {
             let ns = error as NSError
             let rcCode = ns.userInfo["RCErrorCodeKey"] as? Int
-            let status = (rcCode == 1) ? "user_cancelled" : "error"
             errorMessage = ns.localizedDescription
-            
+            let fallbackReason: TelemetryPurchaseFailureReason = (rcCode == 1) ? .userCancelled : .error
+            Telemetry.shared.handlePurchaseError(
+                paywallId: paywallId,
+                variant: variant,
+                entryPoint: entryPoint,
+                plan: plan.analyticsValue,
+                packageId: pkg.storeProduct.productIdentifier,
+                rcCode: rcCode,
+                message: ns.localizedDescription,
+                fallbackReason: fallbackReason,
+                explicitPurchaseSource: Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy),
+                explicitOnboardId: OnboardTag.lastFromUserDefaults()?.rawValue,
+                placeWhereBuy: placeWhereBuy
+            )
+            return TelemetryPurchaseAttemptResult(
+                status: (rcCode == 1) ? .cancelled : .failed,
+                packageId: pkg.storeProduct.productIdentifier,
+                transactionId: nil,
+                rcCode: rcCode,
+                message: ns.localizedDescription,
+                reasonWhy: fallbackReason
+            )
         }
     }
     
@@ -274,5 +381,13 @@ final class SpecialOfferViewModel: ObservableObject {
             errorMessage = ns.localizedDescription
             Telemetry.shared.restoreError(ns)
         }
+    }
+
+    private func shouldSendJ2DEvent(txId: String?, suffix: String) -> Bool {
+        guard let txId, !txId.isEmpty else { return true }
+        let key = "j2d_sent_\(suffix)_\(txId)"
+        if UserDefaults.standard.bool(forKey: key) { return false }
+        UserDefaults.standard.set(true, forKey: key)
+        return true
     }
 }

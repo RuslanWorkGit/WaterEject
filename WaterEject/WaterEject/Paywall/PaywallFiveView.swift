@@ -86,7 +86,7 @@ struct PaywallFiveView: View {
             Telemetry.shared.onbFlowSummary(
                 onboard: tag,
                 steps: stepsVisited ?? [],
-                paywallId: "paywall_v_4.0",
+                paywallId: "paywall_v_5.0",
                 plan: (status == .success ? plan.analyticsValue : nil), // ← лише для success
                 status: status,
                 entryPoint: entry
@@ -98,12 +98,12 @@ struct PaywallFiveView: View {
                 
                 let onboardTag = OnboardTag.lastFromUserDefaults() ?? .modes
                 
-                Telemetry.shared.modesPaywall(
-                    status: status,
-                    plan: status == .success ? plan.analyticsValue : nil,
-                    paywallId: "paywall_v_4.0",
-                    onboard: onboardTag,
-                    entryPoint: "modes"
+                    Telemetry.shared.modesPaywall(
+                        status: status,
+                        plan: status == .success ? plan.analyticsValue : nil,
+                        paywallId: "paywall_v_5.0",
+                        onboard: onboardTag,
+                        entryPoint: "modes"
                 )
                 
             }
@@ -246,7 +246,8 @@ struct PaywallFiveView: View {
                                 let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
                                 Telemetry.shared.funnelPlanChosen(
                                     onboardId: resolvedOnboardId,
-                                    plan: PaywallPlan.weekly.analyticsValue
+                                    plan: PaywallPlan.weekly.analyticsValue,
+                                    selectionMethod: "tap"
                                 )
                                 
 //                                if let onboardId = onboardId {
@@ -270,7 +271,8 @@ struct PaywallFiveView: View {
                                 let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
                                 Telemetry.shared.funnelPlanChosen(
                                     onboardId: resolvedOnboardId,
-                                    plan: PaywallPlan.yearly.analyticsValue
+                                    plan: PaywallPlan.yearly.analyticsValue,
+                                    selectionMethod: "tap"
                                 )
                                 
                                 didLogChoosePlan = true
@@ -300,7 +302,8 @@ struct PaywallFiveView: View {
                         if !didLogChoosePlan {
                             Telemetry.shared.funnelPlanChosen(
                                 onboardId: resolvedOnboardId,
-                                plan: plan.analyticsValue
+                                plan: plan.analyticsValue,
+                                selectionMethod: "default_on_continue"
                             )
                             didLogChoosePlan = true
                         }
@@ -325,32 +328,16 @@ struct PaywallFiveView: View {
                             let paywallId = "paywall_v_5.0"
                             
                             
-                            await viewModel.buyWithRevenueCat(
+                            let result = await viewModel.buyWithRevenueCat(
                                 plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                             )
-                            if viewModel.purchaseSucceeded {
-                                Telemetry.shared.purchaseSuccess(
-                                    variant: variant,
-                                    packageId: plan.analyticsValue, // або свій packageId
-                                    sessionId: sessionId,
-                                    onboardId: summaryTag?.rawValue
-                                )
-                                
+                            if result.isSuccess {
                                 logOnboardSummary(.success)
-                                
                                 onFinish()
                             } else {
-                                
                                 logOnboardSummary(.error)
-                                
-                                Telemetry.shared.purchaseError(
-                                    variant: variant, plan: plan.analyticsValue,
-                                    packageId: plan.analyticsValue,
-                                    rcCode: nil, message: "cancel_or_fail",
-                                    sessionId: sessionId,
-                                    onboardId: onboardId
-                                )
-                            }                        }
+                            }
+                        }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
                         
@@ -467,10 +454,16 @@ struct PaywallFiveView: View {
             }
             
             Button(action: {
+                let variant = PaywallAB.shared.variant().rawValue
+                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
                 logOnboardSummary(.close)
-                
-                Telemetry.shared.paywallClosed(source: .closeButton)
-                
+                Telemetry.shared.paywallClose(
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    reason: "close_button",
+                    sessionId: sessionId
+                )
+                Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -492,7 +485,13 @@ struct PaywallFiveView: View {
             if !didLogOpen {
                 let variant = PaywallAB.shared.variant().rawValue
                 let entry = paywallGate.currentContext?.rawValue ?? "unknown"
-                //Telemetry.shared.paywallExposure(variant: variant, entryPoint: entry, onboardId: onboardId)
+                Telemetry.shared.configurePaywallPresentation(
+                    paywallId: "paywall_v_5.0",
+                    variant: variant,
+                    entryPoint: entry,
+                    purchaseSource: Telemetry.shared.resolvedPurchaseSource(for: paywallGate.currentContext),
+                    onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue
+                )
                 didLogOpen = true
                 
                 

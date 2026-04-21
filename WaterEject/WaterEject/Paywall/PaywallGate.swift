@@ -19,7 +19,11 @@ final class PaywallGate: ObservableObject {
 
     // що саме показати (A/B). Використовується для .fullScreenCover
     @Published var presentedVariant: PaywallVariant?   // ваш тип із PaywallVariant.swift
-    @Published var currentContext: PaywallContext?
+    @Published var currentContext: PaywallContext? {
+        didSet {
+            Telemetry.shared.setPaywallContext(currentContext)
+        }
+    }
 
     private let entitlementID = "pro_user"
     private let variantKey    = "paywall_variant"      // зберігаємо обраний варіант
@@ -101,7 +105,9 @@ final class PaywallGate: ObservableObject {
         return true
     }
 
-    func dismissPaywall() { presentedVariant = nil }
+    func dismissPaywall() {
+        presentedVariant = nil
+    }
     
     func presentPaywallIfNeeded(context: PaywallContext) async {
         guard await shouldShowPaywall(context: context) else { return }

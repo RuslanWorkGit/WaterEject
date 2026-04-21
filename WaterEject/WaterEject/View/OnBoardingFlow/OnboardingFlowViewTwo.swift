@@ -132,12 +132,11 @@ struct OnboardingFlowViewTwo: View {
             isAnimating = false
             Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
             if step != .paywall {
-                //
-                    appendStep(step)
-                    persist(tag: .v32)
-                       incomingStep = nil
-                   }
-                   isAnimating = false
+                appendStep(step)
+                persist(tag: .v32)
+            } else {
+                PaywallGate.shared.currentContext = .onboarding
+            }
         }
     }
 

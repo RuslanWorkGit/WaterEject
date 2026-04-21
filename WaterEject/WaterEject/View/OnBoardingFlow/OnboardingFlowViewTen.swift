@@ -131,7 +131,7 @@ struct OnboardingFlowViewTen: View {
                 // Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
                 
                 appendStep(step)
-                persist(tag: .v41)
+                persist(tag: .v10)
             } else {
                 PaywallGate.shared.currentContext = .onboarding
             }

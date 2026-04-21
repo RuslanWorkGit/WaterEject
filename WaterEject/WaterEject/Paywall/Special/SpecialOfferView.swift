@@ -141,6 +141,14 @@ struct SpecialOfferView: View {
                         SpecialButton(title: "Subscribe Now") {
                             
                             let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                            Telemetry.shared.specialOfferGoToPurchase(
+                                onboardId: resolvedOnboardId,
+                                variant: PaywallAB.shared.variant().rawValue,
+                                specialOfferVariant: "special_offer_v_1",
+                                placeWhereGo: placeWhereBuy,
+                                offerText: "-40%",
+                                plan: "weekly"
+                            )
                             Telemetry.shared.funnelGoToPurchase(
                                 onboardId: resolvedOnboardId,
                                 plan: "weekly"
@@ -198,7 +206,14 @@ struct SpecialOfferView: View {
             }
             
             Button(action: {
-
+                let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue
+                Telemetry.shared.specialOfferClose(
+                    onboardId: resolvedOnboardId,
+                    variant: PaywallAB.shared.variant().rawValue,
+                    specialOfferVariant: "special_offer_v_1",
+                    placeWhereClose: placeWhereBuy,
+                    reason: "close_button"
+                )
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -214,6 +229,15 @@ struct SpecialOfferView: View {
         .task {
             await viewModel.loadPricing()
         }
+        .onAppear {
+            Telemetry.shared.specialOfferOpen(
+                onboardId: OnboardTag.lastFromUserDefaults()?.rawValue,
+                variant: PaywallAB.shared.variant().rawValue,
+                specialOfferVariant: "special_offer_v_1",
+                placeWhereOpen: placeWhereBuy,
+                offerText: "-40%"
+            )
+        }
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
@@ -224,7 +248,7 @@ struct SpecialOfferView: View {
         let entry   = paywallGate.currentContext?.rawValue ?? "special_offer"
         
         
-        await viewModel.buySpecialOffer(
+        let result = await viewModel.buySpecialOffer(
             variant: variant,
             entryPoint: entry,
             sessionId: sessionId,
@@ -232,7 +256,7 @@ struct SpecialOfferView: View {
             paywallId: paywallId
         )
         
-        if viewModel.purchaseSucceeded {
+        if result.isSuccess {
             // можна додати окремий summary-лог, якщо хочеш
             SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
             onFinish()

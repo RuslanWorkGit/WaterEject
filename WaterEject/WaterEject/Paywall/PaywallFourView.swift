@@ -31,6 +31,7 @@ struct PaywallFourView: View {
     //@State private var isFreeTrialEnabled = true
     
     @State private var pulse = false
+    @State private var didLogChoosePlan = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     
@@ -173,12 +174,13 @@ struct PaywallFourView: View {
                             saveText: viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: { viewModel.selectedPlan = .weekly
-                                if let onboardId = onboardId {
-                                            Telemetry.shared.funnelPlanChosen(
-                                                onboardId: onboardId,
-                                                plan: PaywallPlan.weekly.analyticsValue
-                                            )
-                                        }
+                                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                                Telemetry.shared.funnelPlanChosen(
+                                    onboardId: resolvedOnboardId,
+                                    plan: PaywallPlan.weekly.analyticsValue,
+                                    selectionMethod: "tap"
+                                )
+                                didLogChoosePlan = true
                             }
                         )
                         
@@ -190,12 +192,13 @@ struct PaywallFourView: View {
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: {
                                 viewModel.selectedPlan = .yearly
-                                if let onboardId = onboardId {
-                                            Telemetry.shared.funnelPlanChosen(
-                                                onboardId: onboardId,
-                                                plan: PaywallPlan.yearly.analyticsValue
-                                            )
-                                        }
+                                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+                                Telemetry.shared.funnelPlanChosen(
+                                    onboardId: resolvedOnboardId,
+                                    plan: PaywallPlan.yearly.analyticsValue,
+                                    selectionMethod: "tap"
+                                )
+                                didLogChoosePlan = true
                             }
                         )
                     }
@@ -218,45 +221,37 @@ struct PaywallFourView: View {
                         let variant = PaywallAB.shared.variant().rawValue
                         let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
                         let plan    = viewModel.selectedPlan
+                        let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+
+                        if !didLogChoosePlan {
+                            Telemetry.shared.funnelPlanChosen(
+                                onboardId: resolvedOnboardId,
+                                plan: plan.analyticsValue,
+                                selectionMethod: "default_on_continue"
+                            )
+                            didLogChoosePlan = true
+                        }
                         
                         Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
                         
-                        if let onboardId = onboardId {
-                            Telemetry.shared.funnelGoToPurchase(
-                                onboardId: onboardId,
-                                plan: plan.analyticsValue
-                            )
-                        }
+                        Telemetry.shared.funnelGoToPurchase(
+                            onboardId: resolvedOnboardId,
+                            plan: plan.analyticsValue
+                        )
                         
                         Task {
                             let paywallId = "paywall_v_4.0"
-                            await viewModel.buyWithRevenueCat(
+                            let result = await viewModel.buyWithRevenueCat(
                                 plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
                             )
-                            if viewModel.purchaseSucceeded {
-                                Telemetry.shared.purchaseSuccess(
-                                    variant: variant,
-                                    packageId: plan.analyticsValue, // або свій packageId
-                                    sessionId: sessionId,
-                                    onboardId: summaryTag?.rawValue
-                                )
-                                
+                            if result.isSuccess {
                                 logOnboardSummary(.success)
-                                
                                 onFinish()
                             } else {
-                                
                                 logOnboardSummary(.error)
-                                
-                                Telemetry.shared.purchaseError(
-                                    variant: variant, plan: plan.analyticsValue,
-                                    packageId: plan.analyticsValue,
-                                    rcCode: nil, message: "cancel_or_fail",
-                                    sessionId: sessionId,
-                                    onboardId: onboardId
-                                )
-                            }                        }
+                            }
+                        }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
                         Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
@@ -352,10 +347,16 @@ struct PaywallFourView: View {
                 //                                    reason: "close_button", sessionId: sessionId
                 //                                )
                 
+                let variant = PaywallAB.shared.variant().rawValue
+                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
                 logOnboardSummary(.close)
-                
-                Telemetry.shared.paywallClosed(source: .closeButton)
-                
+                Telemetry.shared.paywallClose(
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    reason: "close_button",
+                    sessionId: sessionId
+                )
+                Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
                 onFinish()
             }) {
                 Image(systemName: "xmark")
@@ -391,7 +392,13 @@ struct PaywallFourView: View {
             if !didLogOpen {
                 let variant = PaywallAB.shared.variant().rawValue
                 let entry = paywallGate.currentContext?.rawValue ?? "unknown"
-                //Telemetry.shared.paywallExposure(variant: variant, entryPoint: entry, onboardId: onboardId)
+                Telemetry.shared.configurePaywallPresentation(
+                    paywallId: "paywall_v_4.0",
+                    variant: variant,
+                    entryPoint: entry,
+                    purchaseSource: Telemetry.shared.resolvedPurchaseSource(for: paywallGate.currentContext),
+                    onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue
+                )
                 didLogOpen = true
             }
             Task { await viewModel.loadPricing() }
