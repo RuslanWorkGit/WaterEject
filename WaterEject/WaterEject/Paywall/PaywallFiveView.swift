@@ -63,6 +63,8 @@ struct PaywallFiveView: View {
     let stepsVisited: [String]?     // ⬅️ нове: пройдені екрани
     private let exitDuration: Double = 0.6
     let startAnimations: Bool
+    private let telemetryVariant = PaywallVariant.fifth.rawValue
+    private let telemetryPaywallId = "paywall_v_5.0"
     
     
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
@@ -81,14 +83,14 @@ struct PaywallFiveView: View {
     private func logOnboardSummary(_ status: PaywallStatus) {
         let plan    = viewModel.selectedPlan
         if let tag = summaryTag {
-            let variant = PaywallAB.shared.variant().rawValue
             let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
             Telemetry.shared.onbFlowSummary(
                 onboard: tag,
                 steps: stepsVisited ?? [],
-                paywallId: "paywall_v_5.0",
+                paywallId: telemetryPaywallId,
                 plan: (status == .success ? plan.analyticsValue : nil), // ← лише для success
                 status: status,
+                variant: telemetryVariant,
                 entryPoint: entry
             )
             OnboardingSessionStore.shared.clear()
@@ -101,7 +103,7 @@ struct PaywallFiveView: View {
                     Telemetry.shared.modesPaywall(
                         status: status,
                         plan: status == .success ? plan.analyticsValue : nil,
-                        paywallId: "paywall_v_5.0",
+                        paywallId: telemetryPaywallId,
                         onboard: onboardTag,
                         entryPoint: "modes"
                 )
@@ -294,7 +296,6 @@ struct PaywallFiveView: View {
                     
                     
                     Button {
-                        let variant = PaywallAB.shared.variant().rawValue
                         let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
                         let plan    = viewModel.selectedPlan
                         let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
@@ -308,7 +309,7 @@ struct PaywallFiveView: View {
                             didLogChoosePlan = true
                         }
                         
-                        Telemetry.shared.paywallCTATap(variant: variant, entryPoint: entry,
+                        Telemetry.shared.paywallCTATap(variant: telemetryVariant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
                         
           
@@ -325,11 +326,8 @@ struct PaywallFiveView: View {
 //                        }
                         
                         Task {
-                            let paywallId = "paywall_v_5.0"
-                            
-                            
                             let result = await viewModel.buyWithRevenueCat(
-                                plan: plan, variant: variant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: paywallId
+                                plan: plan, variant: telemetryVariant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: telemetryPaywallId
                             )
                             if result.isSuccess {
                                 logOnboardSummary(.success)
@@ -454,11 +452,10 @@ struct PaywallFiveView: View {
             }
             
             Button(action: {
-                let variant = PaywallAB.shared.variant().rawValue
                 let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
                 logOnboardSummary(.close)
                 Telemetry.shared.paywallClose(
-                    variant: variant,
+                    variant: telemetryVariant,
                     entryPoint: entryPoint,
                     reason: "close_button",
                     sessionId: sessionId
@@ -483,11 +480,10 @@ struct PaywallFiveView: View {
             if !reduceMotion { pulse = true }
             
             if !didLogOpen {
-                let variant = PaywallAB.shared.variant().rawValue
                 let entry = paywallGate.currentContext?.rawValue ?? "unknown"
                 Telemetry.shared.configurePaywallPresentation(
-                    paywallId: "paywall_v_5.0",
-                    variant: variant,
+                    paywallId: telemetryPaywallId,
+                    variant: telemetryVariant,
                     entryPoint: entry,
                     purchaseSource: Telemetry.shared.resolvedPurchaseSource(for: paywallGate.currentContext),
                     onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue

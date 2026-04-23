@@ -64,12 +64,11 @@ enum PaywallCloseSource: String {
 }
 
 enum PurchaseSource: String, Codable {
-    case afterOnboarding = "after_onboarding"
-    case devicesScreen = "devices_screen"
-    case playerScreen = "player_screen"
-    case djPultScreen = "dj_pult_screen"
-    case equalizerScreen = "equalizer_screen"
-    case freeTestFlow = "free_test_flow"
+    case onboarding = "onboarding"
+    case modesTap = "modes_tap"
+    case startViewAuto = "start_view_auto"
+    case startButton = "start_button"
+    case testTab = "test_tab"
     case specialOfferAfterTransactionAbandon = "special_offer_after_transaction_abandon"
     case specialOfferPushNotification = "special_offer_push_notification"
     case specialOfferPushNotification5Min = "special_offer_push_notification_5_min"
@@ -367,13 +366,15 @@ final class Telemetry {
     private func purchaseSource(for context: PaywallContext?) -> PurchaseSource {
         switch context {
         case .onboarding:
-            return .afterOnboarding
+            return .onboarding
         case .modesTap:
-            return .devicesScreen
+            return .modesTap
         case .testTab:
-            return .freeTestFlow
-        case .startButton, .startViewAuto:
-            return .otherScreen
+            return .testTab
+        case .startButton:
+            return .startButton
+        case .startViewAuto:
+            return .startViewAuto
         case .none:
             return .otherScreen
         }
@@ -1522,7 +1523,7 @@ extension Telemetry {
             ]
         )
 
-        syncRevenueCatAttributes(onboardId: resolvedOnboardId, brand: brand)
+        syncRevenueCatAttributes(onboardId: resolvedOnboardId)
     }
 
     func handlePurchaseError(
@@ -1571,14 +1572,10 @@ extension Telemetry {
         )
     }
 
-    func syncRevenueCatAttributes(onboardId: String?, brand: String?) {
+    func syncRevenueCatAttributes(onboardId: String?) {
         var attributes: [String: String] = [:]
         if let onboardId, !onboardId.isEmpty {
             attributes["onboard_id"] = onboardId
-        }
-        let resolvedBrand = brand ?? self.brand(fromOnboardId: onboardId)
-        if let resolvedBrand, !resolvedBrand.isEmpty {
-            attributes["brand"] = resolvedBrand
         }
         guard !attributes.isEmpty else { return }
         try? Purchases.shared.attribution.setAttributes(attributes)

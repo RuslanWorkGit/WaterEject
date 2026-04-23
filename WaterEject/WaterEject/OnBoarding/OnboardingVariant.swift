@@ -27,6 +27,16 @@ enum OnboardingVariant: String, Identifiable, CaseIterable {
     var id: String { rawValue }
 }
 
+private struct OnboardRemoteConfig: Decodable {
+    let version: Int
+    let flows: [String: OnboardRemoteFlow]
+}
+
+private struct OnboardRemoteFlow: Decodable {
+    let isOn: Bool
+    let trafficPercent: Int
+}
+
 extension OnboardingVariant {
     var onboardTag: OnboardTag {
         switch self {
@@ -55,6 +65,23 @@ extension OnboardingVariant {
 
 final class OnboardingAB {
     static let shared = OnboardingAB()
+    private static let defaultOnboardConfigJSON = """
+    {
+      "version": 1,
+      "flows": {
+        "Onb_4": { "isOn": false, "trafficPercent": 0 },
+        "Onb_3_1": { "isOn": false, "trafficPercent": 0 },
+        "Onb_3_2": { "isOn": false, "trafficPercent": 0 },
+        "Onb_3_3": { "isOn": false, "trafficPercent": 0 },
+        "Onb_5": { "isOn": false, "trafficPercent": 0 },
+        "Onb_6": { "isOn": false, "trafficPercent": 0 },
+        "Onb_7": { "isOn": false, "trafficPercent": 0 },
+        "Onb_8": { "isOn": true, "trafficPercent": 50 },
+        "Onb_9": { "isOn": false, "trafficPercent": 0 },
+        "Onb_10": { "isOn": true, "trafficPercent": 50 }
+      }
+    }
+    """
     
     private init() {
             let settings = RemoteConfigSettings()
@@ -63,6 +90,7 @@ final class OnboardingAB {
             
             rc.setDefaults([
                 "onb_force": "" as NSObject,
+                "onboard_config_json": Self.defaultOnboardConfigJSON as NSObject,
                 
                 // 🔹 прапорці для кожного онборду
                 "Onb_4_enabled": false as NSObject,
@@ -81,10 +109,76 @@ final class OnboardingAB {
     private let rc = RemoteConfig.remoteConfig()
     private let storageKey = "onboarding_variant_v2"
     private let rcSignatureKey = "onboarding_rc_signature_v1"
+    private let configJSONKey = "onboard_config_json"
     
-    private func isEnabled(_ variant: OnboardingVariant) -> Bool {
+    private func legacyIsEnabled(_ variant: OnboardingVariant) -> Bool {
         let key = "\(variant.rawValue)_enabled"   // наприклад "Onb_3.3_enabled"
         return rc[key].boolValue                  // якщо ключа нема – буде false
+    }
+
+    private func remoteConfigJSON() -> String {
+        rc[configJSONKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func onboardConfig() -> OnboardRemoteConfig? {
+        let json = remoteConfigJSON()
+        guard !json.isEmpty, let data = json.data(using: .utf8) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(OnboardRemoteConfig.self, from: data)
+    }
+
+    private func flowConfig(for variant: OnboardingVariant, in config: OnboardRemoteConfig) -> OnboardRemoteFlow? {
+        config.flows[variant.rawValue]
+    }
+
+    private func isEnabled(_ variant: OnboardingVariant, config: OnboardRemoteConfig?) -> Bool {
+        if let config, let flow = flowConfig(for: variant, in: config) {
+            return flow.isOn && flow.trafficPercent > 0
+        }
+        return legacyIsEnabled(variant)
+    }
+
+    private func enabledVariants(config: OnboardRemoteConfig?) -> [(variant: OnboardingVariant, trafficPercent: Int)] {
+        if let config {
+            return OnboardingVariant.allCases.compactMap { variant in
+                guard let flow = flowConfig(for: variant, in: config),
+                      flow.isOn,
+                      flow.trafficPercent > 0 else {
+                    return nil
+                }
+                return (variant, min(max(flow.trafficPercent, 0), 100))
+            }
+        }
+
+        return OnboardingVariant.allCases
+            .filter { legacyIsEnabled($0) }
+            .map { ($0, 1) }
+    }
+
+    private func stableBucket(seed: String, modulo: Int) -> Int {
+        guard modulo > 0 else { return 0 }
+        var hash: UInt64 = 14695981039346656037
+        for byte in seed.utf8 {
+            hash ^= UInt64(byte)
+            hash &*= 1099511628211
+        }
+        return Int(hash % UInt64(modulo))
+    }
+
+    private func weightedVariant(from pool: [(variant: OnboardingVariant, trafficPercent: Int)], seed: String) -> OnboardingVariant? {
+        let total = pool.reduce(0) { $0 + max($1.trafficPercent, 0) }
+        guard total > 0 else { return nil }
+
+        var bucket = stableBucket(seed: seed, modulo: total)
+        for item in pool {
+            let weight = max(item.trafficPercent, 0)
+            if bucket < weight {
+                return item.variant
+            }
+            bucket -= weight
+        }
+        return pool.last?.variant
     }
     
     func fetchRemoteConfig(completion: (() -> Void)? = nil) {
@@ -112,7 +206,7 @@ final class OnboardingAB {
 
     private func applyTelemetrySelection(_ variant: OnboardingVariant) {
         let tag = variant.onboardTag
-        let bucket = abs((stableUserID() + "|\(variant.rawValue)|onboarding_variant_v2").hashValue) % 100
+        let bucket = stableBucket(seed: stableUserID() + "|\(variant.rawValue)|onboarding_variant_v2", modulo: 100)
         let keywordId = UserDefaults.standard.string(forKey: "asaKeywordId")
         let keywordText = UserDefaults.standard.string(forKey: "asaKeywordText")
 
@@ -144,13 +238,14 @@ final class OnboardingAB {
     
     private func currentRCSignature() -> String {
         let force = rc["onb_force"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let configJSON = remoteConfigJSON()
 
         // важливо: включаємо всі прапорці, щоб будь-яка зміна RC міняла signature
         let flags = OnboardingVariant.allCases
-            .map { "\($0.rawValue)=\(isEnabled($0) ? 1 : 0)" }
+            .map { "\($0.rawValue)=\(legacyIsEnabled($0) ? 1 : 0)" }
             .joined(separator: "|")
 
-        return "force=\(force)|flags=\(flags)"
+        return "force=\(force)|json=\(configJSON)|legacy_flags=\(flags)"
     }
 
     @discardableResult
@@ -168,11 +263,12 @@ final class OnboardingAB {
     func variant() -> OnboardingVariant {
         
         _ = syncAssignmentIfRCChanged()
+        let config = onboardConfig()
         
             // 1) спроба взяти закешований варіант, але тільки якщо він ще enabled
             if let raw = UserDefaults.standard.string(forKey: storageKey),
                let v = OnboardingVariant(rawValue: raw),
-               isEnabled(v) {
+               isEnabled(v, config: config) {
                 applyTracking(v)
                 applyTelemetrySelection(v)
                 return v
@@ -180,7 +276,7 @@ final class OnboardingAB {
             
             // 2) форсований варіант із RC, якщо він існує і enabled
             if let forced = OnboardingVariant(rawValue: rc["onb_force"].stringValue),
-               isEnabled(forced) {
+               isEnabled(forced, config: config) {
                 UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
                 applyTracking(forced)
                 applyTelemetrySelection(forced)
@@ -188,17 +284,19 @@ final class OnboardingAB {
             }
             
             // 3) беремо тільки увімкнені онборди
-            let enabled = OnboardingVariant.allCases.filter { isEnabled($0) }
+            let enabled = enabledVariants(config: config)
             
             // 4) якщо раптом у RC усі вимкнули (або ще не підвантажилось) – фолбек на дефолтний пул
             let fallbackPool: [OnboardingVariant] = [.G, .K]
-            let pool = enabled.isEmpty ? fallbackPool : enabled
+            let pool = enabled.isEmpty ? fallbackPool.map { ($0, 1) } : enabled
 //            let pool = enabled.isEmpty ? OnboardingVariant.allCases : enabled
             // тут дефолтний ти контролюєш тим, як будеш розподіляти або можеш явно вибрати, наприклад:
             // let fallback: OnboardingVariant = .G
             
-            let bucket = abs(stableUserID().hashValue) % pool.count
-            let v = pool[bucket]
+            let v = weightedVariant(
+                from: pool,
+                seed: "\(stableUserID())|\(config?.version ?? 0)|onboard_config_json"
+            ) ?? .G
             
             UserDefaults.standard.set(v.rawValue, forKey: storageKey)
             applyTracking(v)
