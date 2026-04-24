@@ -181,7 +181,10 @@ final class PaywallViewModel: ObservableObject {
                                 userId: Purchases.shared.appUserID,
                                 event: .subscribed,
                                 type: .subscription,
-                                plan: plan.rawValue
+                                plan: plan.rawValue,
+                                purchaseSource: purchaseSource.rawValue,
+                                onboardId: resolvedOnboardId,
+                                paywallId: paywallId
                             )
                             Telemetry.shared.logTechnicalDeliveryResult(
                                 deliveryStatus: "success",
@@ -190,7 +193,8 @@ final class PaywallViewModel: ObservableObject {
                                 event: J2DEvent.subscribed.rawValue,
                                 subscriptionType: J2DSubscriptionType.subscription.rawValue,
                                 purchaseSource: purchaseSource,
-                                onboardId: resolvedOnboardId
+                                onboardId: resolvedOnboardId,
+                                paywallId: paywallId
                             )
                         } catch {
                             Telemetry.shared.logTechnicalDeliveryResult(
@@ -201,7 +205,8 @@ final class PaywallViewModel: ObservableObject {
                                 subscriptionType: J2DSubscriptionType.subscription.rawValue,
                                 purchaseSource: purchaseSource,
                                 onboardId: resolvedOnboardId,
-                                errorMessage: error.localizedDescription
+                                errorMessage: error.localizedDescription,
+                                paywallId: paywallId
                             )
                         }
                     }

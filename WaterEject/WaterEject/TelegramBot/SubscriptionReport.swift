@@ -51,6 +51,11 @@ struct J2DSubscriptionEventPayload: Encodable {
     let date: String
     let region: String?
     let language: String?
+    let purchase_source: String?
+    let onboard_id: String?
+    let paywall_id: String?
+    let place_where_buy: String?
+    let special_offer_variant: String?
 }
 
 enum J2DAPIError: Error {
@@ -73,6 +78,11 @@ final class J2DSubscriptionReporter {
         event: J2DEvent,
         type: J2DSubscriptionType,
         plan: String,
+        purchaseSource: String? = nil,
+        onboardId: String? = nil,
+        paywallId: String? = nil,
+        placeWhereBuy: String? = nil,
+        specialOfferVariant: String? = nil,
         region: String? = Locale.current.regionCode,
         language: String? = Locale.preferredLanguages.first.map { String($0.prefix(2)).uppercased() },
         date: Date = Date()
@@ -103,7 +113,12 @@ final class J2DSubscriptionReporter {
             plan: plan,
             date: iso.string(from: date),
             region: region,
-            language: language
+            language: language,
+            purchase_source: purchaseSource,
+            onboard_id: onboardId,
+            paywall_id: paywallId,
+            place_where_buy: placeWhereBuy,
+            special_offer_variant: specialOfferVariant
         )
 
         request.httpBody = try JSONEncoder().encode(payload)
@@ -117,4 +132,3 @@ final class J2DSubscriptionReporter {
         }
     }
 }
-

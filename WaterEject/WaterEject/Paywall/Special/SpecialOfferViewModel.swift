@@ -216,7 +216,7 @@ final class SpecialOfferViewModel: ObservableObject {
                 let purchaseSource = Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy)
                 let resolvedOnboardId = Telemetry.shared.resolveOnboardId(OnboardTag.lastFromUserDefaults()?.rawValue)
 
-                if shouldSendJ2DEvent(txId: txId, suffix: "subscribed") {
+                if shouldSendJ2DEvent(txId: txId, suffix: "special_offer_subscribed") {
                     Task {
                         do {
                             try await J2DSubscriptionReporter.shared.sendSubscriptionEvent(
@@ -224,27 +224,38 @@ final class SpecialOfferViewModel: ObservableObject {
                                 userId: Purchases.shared.appUserID,
                                 event: .subscribed,
                                 type: .subscription,
-                                plan: plan.rawValue
+                                plan: plan.rawValue,
+                                purchaseSource: purchaseSource.rawValue,
+                                onboardId: resolvedOnboardId,
+                                paywallId: paywallId,
+                                placeWhereBuy: placeWhereBuy,
+                                specialOfferVariant: "special_offer_v_1"
                             )
                             Telemetry.shared.logTechnicalDeliveryResult(
                                 deliveryStatus: "success",
                                 txId: txId,
                                 plan: plan.rawValue,
-                                event: J2DEvent.subscribed.rawValue,
+                                event: "special_offer_\(J2DEvent.subscribed.rawValue)",
                                 subscriptionType: J2DSubscriptionType.subscription.rawValue,
                                 purchaseSource: purchaseSource,
-                                onboardId: resolvedOnboardId
+                                onboardId: resolvedOnboardId,
+                                paywallId: paywallId,
+                                placeWhereBuy: placeWhereBuy,
+                                specialOfferVariant: "special_offer_v_1"
                             )
                         } catch {
                             Telemetry.shared.logTechnicalDeliveryResult(
                                 deliveryStatus: "error",
                                 txId: txId,
                                 plan: plan.rawValue,
-                                event: J2DEvent.subscribed.rawValue,
+                                event: "special_offer_\(J2DEvent.subscribed.rawValue)",
                                 subscriptionType: J2DSubscriptionType.subscription.rawValue,
                                 purchaseSource: purchaseSource,
                                 onboardId: resolvedOnboardId,
-                                errorMessage: error.localizedDescription
+                                errorMessage: error.localizedDescription,
+                                paywallId: paywallId,
+                                placeWhereBuy: placeWhereBuy,
+                                specialOfferVariant: "special_offer_v_1"
                             )
                         }
                     }

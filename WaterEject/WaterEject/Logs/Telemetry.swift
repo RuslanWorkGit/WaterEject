@@ -1591,7 +1591,10 @@ extension Telemetry {
         onboardId: String?,
         selectedDevice: String? = nil,
         keyword: String? = nil,
-        errorMessage: String? = nil
+        errorMessage: String? = nil,
+        paywallId: String? = nil,
+        placeWhereBuy: String? = nil,
+        specialOfferVariant: String? = nil
     ) {
         var params: [String: Any] = [
             "delivery_status": deliveryStatus,
@@ -1609,6 +1612,15 @@ extension Telemetry {
         }
         if let errorMessage {
             params["error_message"] = errorMessage
+        }
+        if let paywallId {
+            params["paywall_id"] = paywallId
+        }
+        if let placeWhereBuy {
+            params["place_where_buy"] = placeWhereBuy
+        }
+        if let specialOfferVariant {
+            params["special_offer_variant"] = specialOfferVariant
         }
 
         logEvent("SuccessBuyTelegram", explicitOnboardId: onboardId, extra: params)
