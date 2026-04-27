@@ -152,6 +152,7 @@ final class NewPaywallViewModel: ObservableObject {
         ?? (p.price as? NSDecimalNumber)?.doubleValue
         ?? 0
         let currency = p.currencyCode
+        let afCurrency = p.afCurrencyCode
 
         Telemetry.shared.purchaseStart(
             variant: variant,
@@ -212,31 +213,35 @@ final class NewPaywallViewModel: ObservableObject {
                 }
 
                 if shouldSendSubscribeEvent(txId: txId) {
-                    AF.log(.subscribe, [
-                        "af_revenue": price,
-                        "af_currency": currency ?? "USD",
-                        "af_content_id": p.productIdentifier,
-                        "af_order_id": txId ?? "",
-                        "transaction_id": txId ?? "",
-                        "paywall_id": paywallId,
-                        "plan": plan.analyticsValue,
-                        "rc_app_user_id": Purchases.shared.appUserID
-                    ])
+                    AF.log(
+                        .subscribe,
+                        AF.subscribeValues(
+                            productId: p.productIdentifier,
+                            revenue: price,
+                            currency: afCurrency,
+                            transactionId: txId,
+                            paywallId: paywallId,
+                            plan: plan.analyticsValue
+                        )
+                    )
                 }
 
                 let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
                 if !UserDefaults.standard.bool(forKey: cpaFlag) {
-                    AppsFlyerLib.shared().logEvent("subscribe_cpa", withValues: [
-                        "cpa_value": p.afPriceDouble,
-                        "af_currency": p.afCurrencyCode,
-                        "product_id": p.productIdentifier,
-                        "transaction_id": txId
-                    ])
+                    AF.log(
+                        .subscribe_cpa,
+                        AF.subscribeCPAValues(
+                            productId: p.productIdentifier,
+                            revenue: p.afPriceDouble,
+                            currency: afCurrency,
+                            transactionId: txId
+                        )
+                    )
                     UserDefaults.standard.set(true, forKey: cpaFlag)
                 }
 
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
-                RCPriceCache.save(entitlementID: "pro_user", price: price, currency: currency ?? "USD")
+                RCPriceCache.save(entitlementID: "pro_user", price: price, currency: afCurrency)
 
                 Telemetry.shared.handleSuccessfulPurchase(
                     paywallId: paywallId,
@@ -338,17 +343,4 @@ final class NewPaywallViewModel: ObservableObject {
         UserDefaults.standard.set(true, forKey: key)
         return true
     }
-}
-
-import AppsFlyerLib
-
-private extension StoreProduct {
-    var afCurrencyCode: String {
-        if let c = priceFormatter?.currencyCode, !c.isEmpty { return c }
-        if #available(iOS 16.0, *), let c = priceFormatter?.locale.currency?.identifier { return c }
-        if let c = priceFormatter?.locale.currencyCode { return c }
-        if #available(iOS 16.0, *), let c = Locale.current.currency?.identifier { return c }
-        return "USD"
-    }
-    var afPriceDouble: Double { (price as NSDecimalNumber).doubleValue }
 }

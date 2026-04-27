@@ -162,7 +162,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         af.delegate = self
         
         #if DEBUG
-        af.isDebug = false
+        af.isDebug = true
         #endif
 
         //startAppsFlyer()

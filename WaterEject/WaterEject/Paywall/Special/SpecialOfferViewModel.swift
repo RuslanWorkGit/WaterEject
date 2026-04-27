@@ -204,6 +204,7 @@ final class SpecialOfferViewModel: ObservableObject {
         ?? (p.price as? NSDecimalNumber)?.doubleValue
         ?? 0
         let currency = p.currencyCode
+        let afCurrency = p.afCurrencyCode
         
         
         do {
@@ -261,32 +262,36 @@ final class SpecialOfferViewModel: ObservableObject {
                     }
                 }
                 
-                if shouldSendSubscribeEvent(txId: txId) {    // <-- додати дедуп
-                        AF.log(.subscribe, [
-                          "af_revenue": price,
-                          "af_currency": currency ?? "USD",
-                          "af_content_id": p.productIdentifier,
-                          "af_order_id": txId ?? "",
-                          "transaction_id": txId ?? "",
-                          "paywall_id": paywallId,
-                          "plan": plan.analyticsValue,
-                          "rc_app_user_id": Purchases.shared.appUserID
-                        ])
-                      }
+                if shouldSendSubscribeEvent(txId: txId) {
+                    AF.log(
+                        .subscribe,
+                        AF.subscribeValues(
+                            productId: p.productIdentifier,
+                            revenue: price,
+                            currency: afCurrency,
+                            transactionId: txId,
+                            paywallId: paywallId,
+                            plan: plan.analyticsValue
+                        )
+                    )
+                }
                 
-                let cpaFlag = "af_subscribe_cpa_sent \(Purchases.shared.appUserID)"
+                let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
                 if !UserDefaults.standard.bool(forKey: cpaFlag) {
-//                    AppsFlyerLib.shared().logEvent("subscribe_cpa", withValues: [
-//                        "cpa_value": p.afPriceDouble,
-//                        "af_currency": p.afCurrencyCode,
-//                        "product_id": p.productIdentifier,
-//                        "transaction_id": txId ?? ""
-//                    ])
+                    AF.log(
+                        .subscribe_cpa,
+                        AF.subscribeCPAValues(
+                            productId: p.productIdentifier,
+                            revenue: p.afPriceDouble,
+                            currency: afCurrency,
+                            transactionId: txId
+                        )
+                    )
                     UserDefaults.standard.set(true, forKey: cpaFlag)
                 }
                 
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
-                RCPriceCache.save(entitlementID: entitlementID, price: price, currency: currency ?? "USD")
+                RCPriceCache.save(entitlementID: entitlementID, price: price, currency: afCurrency)
                 
                 Telemetry.shared.handleSuccessfulPurchase(
                     paywallId: paywallId,

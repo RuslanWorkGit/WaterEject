@@ -95,7 +95,8 @@ final class SubscriptionMonitor {
             expirationTs: ent.expirationDate?.timeIntervalSince1970,
             latestPurchaseTs: ent.latestPurchaseDate?.timeIntervalSince1970,
             billingIssue: ent.billingIssueDetectedAt != nil,
-            unsubscribed: ent.unsubscribeDetectedAt != nil
+            unsubscribed: ent.unsubscribeDetectedAt != nil,
+            productId: ent.productIdentifier
         )
         let old = load()
         
