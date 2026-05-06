@@ -1,0 +1,86 @@
+//
+//  OnboardingNewFirstViewTwo.swift
+//  WaterEject
+//
+//  Created by Ruslan Liulka on 06.05.2026.
+//
+
+import SwiftUI
+
+struct OnboardingNewFirstViewTwo: View {
+    let index: Int
+    let action: () -> Void
+    
+    
+    private func handleCTA() {
+        
+        action()
+    }
+    
+    
+    var body: some View {
+        
+        
+
+//        OnboardNewFirstForm(ctaTitle:String(localized: "Continue"), ctaAction: handleCTA, pages: 2, pageIndex: index, fixedWidth: 260) {
+        OnboardThirdForm(ctaTitle:String(localized: "Continue"), ctaAction: handleCTA, pages: 3, pageIndex: index, fixedWidth: 260) {
+            Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255)
+                .ignoresSafeArea()
+            
+            Image("FirstOnboardBGTwo")
+                .resizable()
+                .scaledToFit()
+                .ignoresSafeArea()
+            
+            VStack(spacing: 10) {
+                Spacer()
+                
+                ZStack(alignment: .bottom) {
+                   
+                   
+                    
+                    
+                }
+                
+                
+                Text("Restore Your Speaker’s Original Sound Easily")
+                    .font(.custom("Montserrat-SemiBold", size: 24))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+                
+                Text("Push water and dust out using advanced sonic technology. The same method used by Apple Watch.")
+                    .font(.custom("Montserrat-SemiBold", size: 16))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+                
+                
+            }
+            
+        }
+        
+//        .background(
+//            ZStack(alignment: .top) {
+//                Color(red: 29 / 255, green: 29 / 255, blue: 29 / 255)
+//                    .ignoresSafeArea()
+//
+//                Image("FirstOnboardBGOne")
+//                    .resizable()
+//                    .scaledToFit()
+//
+//                    //.scaleEffect(1.05)
+//            }
+//                .ignoresSafeArea()
+//        )
+        
+    }
+}
+
+
+#Preview {
+    OnboardingNewFirstViewTwo(index: 0) {
+        print("1")
+    }
+}
