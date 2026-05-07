@@ -559,6 +559,6 @@ private extension View {
 }
 
 
-//#Preview(body: {
-//    PaywallFourView(onFinish: {print("hello")})
-//})
+#Preview(body: {
+    PaywallFourView(onFinish: {print("hello")})
+})
