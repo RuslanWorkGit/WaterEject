@@ -22,7 +22,7 @@ struct NewWhitePaywall: View {
 
     private let sessionId = UUID().uuidString
     private let telemetryVariant = PaywallVariant.fourth.rawValue
-    private let telemetryPaywallId = "paywall_v_4.0"
+    private let telemetryPaywallId: String
 
     let onFinish: () -> Void
     let onboardId: String?
@@ -34,12 +34,14 @@ struct NewWhitePaywall: View {
         onboardId: String? = nil,
         startDelay: Double = 0.35,
         summaryTag: OnboardTag? = nil,
-        stepsVisited: [String]? = nil
+        stepsVisited: [String]? = nil,
+        paywallId: String = "paywall_v_4.0"
     ) {
         self.onFinish = onFinish
         self.onboardId = onboardId
         self.summaryTag = summaryTag
         self.stepsVisited = stepsVisited
+        self.telemetryPaywallId = paywallId
     }
 
     var body: some View {

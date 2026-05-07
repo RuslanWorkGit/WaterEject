@@ -1,15 +1,16 @@
 //
-//  NewBlackPaywallThird.swift
+//  NewBlackPaywallFourth.swift
 //  WaterEject
 //
 //  Created by Ruslan Liulka on 07.05.2026.
 //
 
+
 import SwiftUI
 import FirebaseAnalytics
 import RevenueCat
 
-struct NewBlackPaywallThird: View {
+struct NewBlackPaywallFourth: View {
     @StateObject private var viewModel = NewPaywallViewModel()
     @State private var sessionId = UUID().uuidString
     @State private var didLogChoosePlan = false
@@ -29,7 +30,7 @@ struct NewBlackPaywallThird: View {
         onboardId: String? = nil,
         summaryTag: OnboardTag? = nil,
         stepsVisited: [String]? = nil,
-        paywallId: String = "paywall_v_black_3.0"
+        paywallId: String = "paywall_v_black_4.0"
     ) {
         self.index = index
         self.action = action
@@ -39,18 +40,6 @@ struct NewBlackPaywallThird: View {
         self.telemetryPaywallId = paywallId
     }
 
-    private var yearlyPrice: String {
-        if let onlyPrice = viewModel.onlyPrice[.yearly], !onlyPrice.isEmpty {
-            return onlyPrice.replacingOccurrences(of: "for ", with: "")
-        }
-
-        if let periodPrice = viewModel.pricePerPeriod[.yearly]?.split(separator: "/").first {
-            return String(periodPrice)
-        }
-
-        return "$29.99"
-    }
-    
     private func handleCTA() {
         viewModel.selectedPlan = .yearly
         let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
@@ -102,77 +91,68 @@ struct NewBlackPaywallThird: View {
         )
         OnboardingSessionStore.shared.clear()
     }
-    
-    
+
     var body: some View {
-        
-        
+
+
 
 //        OnboardNewFirstForm(ctaTitle:String(localized: "Continue"), ctaAction: handleCTA, pages: 2, pageIndex: index, fixedWidth: 260) {
-        OnboardThirdForm(ctaTitle:String(localized: "Get Lifetime Access"), ctaAction: handleCTA, pages: 3, pageIndex: index, fixedWidth: 260) {
-//            Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255)
-//                .ignoresSafeArea()
-//            
-//            Image("FirstOnboardBGOne")
-//                .resizable()
-//                
-//                .ignoresSafeArea()
-//            
+        OnboardThirdForm(ctaTitle:String(localized: "Continue"), ctaAction: handleCTA, pages: 3, pageIndex: index, fixedWidth: 260) {
+            Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255)
+                .ignoresSafeArea()
+
+            Image("SecondOnboardBGTwo")
+                .resizable()
+                .scaledToFit()
+                //.scaleEffect(0.9)
+                .ignoresSafeArea()
+
             VStack(spacing: 10) {
                 Spacer()
-                
+
                 ZStack(alignment: .bottom) {
-                   
-                   
-                    
-                    
+
+
+
+
                 }
-                
-                
-                Text("Start Cleaning and Playing")
-                    .font(.custom("Montserrat-Bold", size: 26))
-                    .foregroundStyle(.white)
+
+
+                Text("98% Success Rate. Remove water now before internal corrosion starts.")
+                    .font(.custom("Montserrat-SemiBold", size: 18))
+                    .foregroundStyle(.white.opacity(1))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 16)
-                
-                Text("\(yearlyPrice) / year")
-                    .font(.custom("Montserrat-SemiBold", size: 16))
-                    .foregroundStyle(.white.opacity(0.6))
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 18)
-                    .padding(.horizontal, 30)
-                
-                
+
+
             }
-            
+
         }
-        
-        .background(
-            ZStack(alignment: .top) {
-                Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255)
-                    .ignoresSafeArea()
 
-                Image("paywallPhotoNewBlackThird")
-                    .resizable()
-                    .scaledToFit()
-
-                    //.scaleEffect(1.05)
-            }
-                .ignoresSafeArea()
-        )
+//        .background(
+//            ZStack(alignment: .top) {
+//                Color(red: 29 / 255, green: 29 / 255, blue: 29 / 255)
+//                    .ignoresSafeArea()
+//
+//                Image("FirstOnboardBGOne")
+//                    .resizable()
+//                    .scaledToFit()
+//
+//                    //.scaleEffect(1.05)
+//            }
+//                .ignoresSafeArea()
+//        )
         .onAppear {
             viewModel.selectedPlan = .yearly
             Task { await viewModel.loadPricing() }
         }
-        
+
     }
 }
 
 
-
 #Preview {
-    NewBlackPaywallThird(index: 0) {
+    NewBlackPaywallFourth(index: 2) {
         print("1")
     }
 }

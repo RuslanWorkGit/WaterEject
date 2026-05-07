@@ -24,7 +24,7 @@
     "_developerTeamID" : "LBA86YKHYN",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 786486635.19218004,
+    "_lastSynchronizedDate" : 799870184.81722403,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
@@ -117,7 +117,7 @@
           "internalID" : "6756081159",
           "introductoryOffer" : {
             "displayPrice" : "2.99",
-            "internalID" : "76AEBBF2",
+            "internalID" : "08FFEB34",
             "numberOfPeriods" : 1,
             "paymentMode" : "payAsYouGo",
             "subscriptionPeriod" : "P1W"

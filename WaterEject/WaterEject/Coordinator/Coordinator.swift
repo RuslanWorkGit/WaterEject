@@ -85,6 +85,11 @@ final class AppCoordinator: ObservableObject {
     func showMainTabbar() {
         currentScreen = .mainTabbar
     }
+
+    func onboardingDidFinish() {
+        hasSeenOnboarding = true
+        currentScreen = .mainTabbar
+    }
     
     func routeAfterBoot() {
         Task { [weak self] in
@@ -106,5 +111,4 @@ final class AppCoordinator: ObservableObject {
     
 
 }
-
 

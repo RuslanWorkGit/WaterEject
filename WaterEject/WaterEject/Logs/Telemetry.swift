@@ -149,6 +149,8 @@ private struct PurchaseTelemetryContext {
 }
 
 enum OnboardTag: String, Codable {
+    case new21 = "Onboard_new_2_1"
+    case branded2 = "Branded_Onboard_2"
     case v31 = "Onboard_3_1"
     case v32 = "Onboard_3_2"
     case v33 = "Onboard_3_3"
@@ -167,6 +169,8 @@ private let kOnboardLastTagKey = "onboard_last_tag_v1"
 extension OnboardTag {
     var summaryEventName: String {
         switch self {
+        case .new21: return "Onboard_new_v_2_1"
+        case .branded2: return "Onboard_branded_v_2"
         case .v31: return "Onboard_v_3_1"
         case .v32: return "Onboard_v_3_2"
         case .v33: return "Onboard_v_3_3"
