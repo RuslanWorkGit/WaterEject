@@ -1,14 +1,13 @@
 //
-//  OnboardingNewThirdViewOne.swift
+//  Untitled.swift
 //  WaterEject
 //
 //  Created by Ruslan Liulka on 07.05.2026.
 //
 
-
 import SwiftUI
 
-struct OnboardingNewThirdViewOne: View {
+struct OnboardingNewThirdViewTwo: View {
     let index: Int
     let action: () -> Void
     
@@ -28,10 +27,14 @@ struct OnboardingNewThirdViewOne: View {
             Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255)
                 .ignoresSafeArea()
             
-            Image("ThirdOnboardBGOne")
-                .resizable()
-                .scaledToFit()
-                .ignoresSafeArea()
+//            Image("FirstOnboardBGTwo")
+//                .resizable()
+//                .scaledToFit()
+//                .ignoresSafeArea()
+            
+            NewOnboardLottieView()
+                .scaleEffect(2)
+                   .allowsHitTesting(false)
             
             VStack(spacing: 10) {
                 Spacer()
@@ -44,18 +47,18 @@ struct OnboardingNewThirdViewOne: View {
                 }
                 
                 
-                Text("Water in your speaker?")
-                    .font(.custom("Montserrat-SemiBold", size: 24))
+                Text("Calibrating Sonic Frequency...")
+                    .font(.custom("Montserrat-SemiBold", size: 28))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 25)
                     .padding(.bottom, 16)
                 
-                Text("Push water and dust out using advanced sonic technology. The same method used by Apple Watch.")
+                Text("Generating low-frequency air pressure to push liquid out.")
                     .font(.custom("Montserrat-SemiBold", size: 16))
                     .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 30)
+                    .padding(.horizontal, 32)
                 
                 
             }
@@ -81,7 +84,7 @@ struct OnboardingNewThirdViewOne: View {
 
 
 #Preview {
-    OnboardingNewThirdViewOne(index: 0) {
+    OnboardingNewThirdViewTwo(index: 1) {
         print("1")
     }
 }
