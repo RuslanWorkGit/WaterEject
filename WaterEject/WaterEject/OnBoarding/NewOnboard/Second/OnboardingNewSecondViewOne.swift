@@ -1,13 +1,14 @@
 //
-//  OnboardingNewFirstViewTwo.swift
+//  New.swift
 //  WaterEject
 //
-//  Created by Ruslan Liulka on 06.05.2026.
+//  Created by Ruslan Liulka on 07.05.2026.
 //
+
 
 import SwiftUI
 
-struct OnboardingNewFirstViewTwo: View {
+struct OnboardingNewSecondViewOne: View {
     let index: Int
     let action: () -> Void
     
@@ -43,14 +44,14 @@ struct OnboardingNewFirstViewTwo: View {
                 }
                 
                 
-                Text("Clear Your Speakers from Liquid and Dust")
+                Text("Water in your speaker?")
                     .font(.custom("Montserrat-SemiBold", size: 24))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 16)
                 
-                Text("Deep-clean every speaker on your device with precision-tuned frequencies in seconds.")
+                Text("Push water and dust out using advanced sonic technology. The same method used by Apple Watch.")
                     .font(.custom("Montserrat-SemiBold", size: 16))
                     .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
@@ -80,7 +81,7 @@ struct OnboardingNewFirstViewTwo: View {
 
 
 #Preview {
-    OnboardingNewFirstViewTwo(index: 0) {
+    OnboardingNewSecondViewOne(index: 0) {
         print("1")
     }
 }

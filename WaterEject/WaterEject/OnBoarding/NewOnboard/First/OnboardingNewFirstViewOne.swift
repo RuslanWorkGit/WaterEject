@@ -145,7 +145,7 @@ struct OboardThirdNewButton: View {
         }) {
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.black)
+                .foregroundStyle(.white)
                 .frame(minHeight: 52)
                 .frame(maxWidth: .infinity)
             //.contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -154,10 +154,10 @@ struct OboardThirdNewButton: View {
         //.buttonStyle(.plain)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.white) // як на скріні
+                .fill(Color(red: 2/255, green: 125/255, blue: 244/255)) // як на скріні
                 .innerShadow(
                     RoundedRectangle(cornerRadius: 16),
-                    color: .white, opacity: 0.25,
+                    color: Color(red: 2/255, green: 125/255, blue: 244/255), opacity: 0.25,
                     x: 0, y: 1, blur: 0, spread: 2
                 )
         )

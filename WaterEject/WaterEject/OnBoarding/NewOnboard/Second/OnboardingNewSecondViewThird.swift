@@ -1,13 +1,14 @@
-//
-//  OnboardingNewFirstViewTwo.swift
+
+//  Untitled.swift
 //  WaterEject
 //
-//  Created by Ruslan Liulka on 06.05.2026.
+//  Created by Ruslan Liulka on 07.05.2026.
 //
+
 
 import SwiftUI
 
-struct OnboardingNewFirstViewTwo: View {
+struct OnboardingNewSecondViewThird: View {
     let index: Int
     let action: () -> Void
     
@@ -27,9 +28,10 @@ struct OnboardingNewFirstViewTwo: View {
             Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255)
                 .ignoresSafeArea()
             
-            Image("FirstOnboardBGTwo")
+            Image("SecondOnboardBGTwo")
                 .resizable()
                 .scaledToFit()
+                //.scaleEffect(0.9)
                 .ignoresSafeArea()
             
             VStack(spacing: 10) {
@@ -42,19 +44,12 @@ struct OnboardingNewFirstViewTwo: View {
                     
                 }
                 
-                
-                Text("Clear Your Speakers from Liquid and Dust")
-                    .font(.custom("Montserrat-SemiBold", size: 24))
-                    .foregroundStyle(.white)
+    
+                Text("98% Success Rate. Remove water now before internal corrosion starts.")
+                    .font(.custom("Montserrat-SemiBold", size: 18))
+                    .foregroundStyle(.white.opacity(1))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
-                
-                Text("Deep-clean every speaker on your device with precision-tuned frequencies in seconds.")
-                    .font(.custom("Montserrat-SemiBold", size: 16))
-                    .foregroundStyle(.white.opacity(0.6))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 30)
+                    .padding(.horizontal, 24)
                 
                 
             }
@@ -80,7 +75,7 @@ struct OnboardingNewFirstViewTwo: View {
 
 
 #Preview {
-    OnboardingNewFirstViewTwo(index: 0) {
+    OnboardingNewSecondViewThird(index: 2) {
         print("1")
     }
 }
