@@ -111,7 +111,7 @@ struct BootRCView: View {
 
         // ✅ після fetchAndActivate — синхронізуємо призначення
         let onbChanged = OnboardingAB.shared.syncAssignmentIfRCChanged()
-        _ = OnboardingAB.shared.variant() // щоб одразу записати новий варіант у UserDefaults
+        _ = OnboardingAB.shared.currentControlAssignment() // щоб одразу записати новий варіант у UserDefaults
 
 //        // (опціонально) якщо хочеш, щоб онборд показався знову навіть тим, хто вже проходив:
 //        if onbChanged {
@@ -141,7 +141,7 @@ struct OnboardingEntryView: View {
         .onAppear {
             // 1) тягнемо Remote Config
             OnboardingAB.shared.fetchRemoteConfig {
-                print("🔥 RC fetched, variant =", OnboardingAB.shared.variant().rawValue)
+                print("🔥 RC fetched, onboarding =", OnboardingAB.shared.selectedControlFlowId())
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isReady = true
                 }

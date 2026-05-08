@@ -4,9 +4,13 @@
 
 
 import SwiftUI
+import FirebaseAnalytics
 
 struct OnboardingFlowViewEight: View {
     let someAction: () -> ()
+    let controlFlowId: String?
+    let assignment: OnboardingAssignment?
+
     private let flowId = "onboard_8_1_steps"
     private let onboardId = OnboardTag.v8.rawValue
     
@@ -35,6 +39,16 @@ struct OnboardingFlowViewEight: View {
     @State private var childAnimate = false
     private let slideDuration: Double = 0.5
     @State private var modesExpandedIndex: Int = 0
+
+    init(
+        someAction: @escaping () -> (),
+        controlFlowId: String? = nil,
+        assignment: OnboardingAssignment? = nil
+    ) {
+        self.someAction = someAction
+        self.controlFlowId = controlFlowId
+        self.assignment = assignment
+    }
     
     
     private func appendStep(_ step: OnboardingStepEight) {
@@ -92,24 +106,27 @@ struct OnboardingFlowViewEight: View {
             }
             .task {
                 
-                Telemetry.shared.funnelOnboardStart(onboardId: onboardId)
+                Telemetry.shared.funnelOnboardStart(onboardId: analyticsOnboardId)
                 
-                Telemetry.shared.onboardStarted(onboardId: onboardId)
+                Telemetry.shared.onboardStarted(onboardId: analyticsOnboardId)
                 
-                Telemetry.shared.onbFlowStart(flowId: flowId)
-                Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: currentStep))
+                Telemetry.shared.onbFlowStart(flowId: analyticsFlowId)
+                logControlStart(currentStep)
+                Telemetry.shared.onbScreenView(flowId: analyticsFlowId, screenId: screenId(for: currentStep))
+                logControlStepView(currentStep)
                 
                 appendStep(currentStep)
             }
         }
         .onAppear {
-            Telemetry.shared.sceneDidBecomeActive(onboardId: onboardId)
+            Telemetry.shared.sceneDidBecomeActive(onboardId: analyticsOnboardId)
         }
     }
 
     // MARK: - Навігація
     private func goTo(_ step: OnboardingStepEight, forward: Bool) {
         guard !isAnimating, step != currentStep else { return }
+        logControlStepAction(currentStep, action: "continue")
         isAnimating = true
         isForward = forward
         childAnimate = false
@@ -125,8 +142,9 @@ struct OnboardingFlowViewEight: View {
                 incomingStep = nil
                 isAnimating = false
 
-                Telemetry.shared.onbScreenView(flowId: flowId,
+                Telemetry.shared.onbScreenView(flowId: analyticsFlowId,
                                                screenId: screenId(for: step))
+                logControlStepView(step)
                 PaywallGate.shared.currentContext = .onboarding
             }
 
@@ -145,7 +163,8 @@ struct OnboardingFlowViewEight: View {
             incomingStep = nil
             isAnimating = false
             
-            Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
+            Telemetry.shared.onbScreenView(flowId: analyticsFlowId, screenId: screenId(for: step))
+            logControlStepView(step)
             
             if step != .paywall {
 //                       incomingStep = nil
@@ -161,6 +180,7 @@ struct OnboardingFlowViewEight: View {
     }
 
     private func finishOnboarding() {
+        logControlComplete(stepId: "paywall")
         Telemetry.shared.onboardingFinish()
         //hasSeenOnboarding = true
         someAction()
@@ -195,6 +215,67 @@ struct OnboardingFlowViewEight: View {
 
     }
 
+    private var analyticsFlowId: String {
+        controlFlowId ?? flowId
+    }
+
+    private var analyticsOnboardId: String {
+        controlFlowId ?? onboardId
+    }
+
+    private var shouldLogControlEvents: Bool {
+        controlFlowId != nil || assignment != nil
+    }
+
+    private func controlParams(_ params: [String: Any]) -> [String: Any] {
+        var enriched = params
+        if let assignment {
+            enriched["experiment_id"] = assignment.experimentId
+            enriched["bucket"] = assignment.bucket
+            enriched["tier"] = assignment.tier
+        }
+        return enriched
+    }
+
+    private func logControlStepView(_ step: OnboardingStepEight) {
+        guard shouldLogControlEvents else { return }
+        let stepId = screenId(for: step)
+        Analytics.logEvent("onboarding_step_view", parameters: controlParams([
+            "flow_id": analyticsFlowId,
+            "step_id": stepId,
+            "variant": analyticsFlowId
+        ]))
+        Telemetry.shared.setActiveOnboarding(flowId: analyticsFlowId, stepId: stepId, screenId: stepId)
+    }
+
+    private func logControlStart(_ step: OnboardingStepEight) {
+        guard shouldLogControlEvents else { return }
+        Analytics.logEvent("onboarding_start", parameters: controlParams([
+            "flow_id": analyticsFlowId,
+            "step_id": screenId(for: step),
+            "variant": analyticsFlowId
+        ]))
+    }
+
+    private func logControlStepAction(_ step: OnboardingStepEight, action: String) {
+        guard shouldLogControlEvents else { return }
+        Analytics.logEvent("onboarding_step_action", parameters: controlParams([
+            "flow_id": analyticsFlowId,
+            "step_id": screenId(for: step),
+            "action": action,
+            "variant": analyticsFlowId
+        ]))
+    }
+
+    private func logControlComplete(stepId: String) {
+        guard shouldLogControlEvents else { return }
+        Analytics.logEvent("onboarding_complete", parameters: controlParams([
+            "flow_id": analyticsFlowId,
+            "step_id": stepId,
+            "variant": analyticsFlowId
+        ]))
+    }
+
     // MARK: - Рендер екрана та фону
     @ViewBuilder
     private func screen(for step: OnboardingStepEight, startAnimations: Bool = true, staticDisplay: Bool = false) -> some View {
@@ -221,7 +302,8 @@ struct OnboardingFlowViewEight: View {
                        for: .v8,                       
                        onFinish: finishOnboarding,
                        startDelay: slideDuration + 0.0,
-                       stepsVisited: stepsVisited
+                       stepsVisited: stepsVisited,
+                       onboardIdOverride: controlFlowId
                    )
                    .onAppear {
                        paywallShown = true

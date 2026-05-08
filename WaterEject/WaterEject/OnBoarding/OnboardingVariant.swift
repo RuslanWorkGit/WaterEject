@@ -19,16 +19,16 @@ enum OnboardingVariant: String, Identifiable, CaseIterable {
     case D = "Onb_5" // OnboardingFlowViewFive
     case E = "Onb_6" // OnboardingFlowViewSix
     case F = "Onb_7" // OnboardingFlowViewSeven
-    case G = "Onb_8" // OnboardAnimationView
+    case G = "onb_8_1" // OnboardAnimationView
     case H = "Onb_9" // OnboardAnimationView
     case J = "Onb_3_1" // OnboardingFlowViewOne
-    case K = "Onb_10" // OnboardAnimationView
-    case L = "Onb_new_first_black_yearly"
-    case M = "Onb_new_second_black"
-    case N = "Onb_new_third_black"
-    case O = "Onb_new_fourth_white"
-    case P = "Onb_new_fifth_white"
-    case Q = "Onb_new_sixth_black"
+    case K = "onb_10_1" // OnboardingFlowViewTen
+    case L = "new_onb_1"
+    case M = "new_onb_2"
+    case N = "new_onb_3"
+    case O = "new_onb_4"
+    case P = "new_onb_5"
+    case Q = "new_onb_6"
 
     var id: String { rawValue }
 }
@@ -88,7 +88,7 @@ final class OnboardingAB {
         "Onb_8": { "isOn": true, "trafficPercent": 50 },
         "Onb_9": { "isOn": false, "trafficPercent": 0 },
         "Onb_10": { "isOn": true, "trafficPercent": 50 },
-        "Onb_new_first_black_yearly": { "isOn": false, "trafficPercent": 0 },
+        "Onb_new_first_black_annual": { "isOn": false, "trafficPercent": 0 },
         "Onb_new_second_black": { "isOn": false, "trafficPercent": 0 },
         "Onb_new_third_black": { "isOn": false, "trafficPercent": 0 },
         "Onb_new_fourth_white": { "isOn": false, "trafficPercent": 0 },
@@ -106,6 +106,7 @@ final class OnboardingAB {
             rc.setDefaults([
                 "onb_force": "" as NSObject,
                 "onboard_config_json": Self.defaultOnboardConfigJSON as NSObject,
+                OnboardingControlProvider.remoteConfigKey: OnboardingControlProvider.shared.defaultControlJSON() as NSObject,
 
                 // 🔹 прапорці для кожного онборду
                 "Onb_4_enabled": false as NSObject,
@@ -118,7 +119,7 @@ final class OnboardingAB {
                 "Onb_8_enabled": true as NSObject,
                 "Onb_9_enabled": false as NSObject,
                 "Onb_10_enabled": true as NSObject,
-                "Onb_new_first_black_yearly_enabled": false as NSObject,
+                "Onb_new_first_black_annual_enabled": false as NSObject,
                 "Onb_new_second_black_enabled": false as NSObject,
                 "Onb_new_third_black_enabled": false as NSObject,
                 "Onb_new_fourth_white_enabled": false as NSObject,
@@ -203,7 +204,10 @@ final class OnboardingAB {
     }
 
     func fetchRemoteConfig(completion: (() -> Void)? = nil) {
-        rc.fetchAndActivate { _, _ in completion?() }
+        rc.fetchAndActivate { [weak self] _, _ in
+            self?.updateControlProviderFromRemoteConfig()
+            completion?()
+        }
     }
 
     private func stableUserID() -> String {
@@ -271,63 +275,88 @@ final class OnboardingAB {
 
     @discardableResult
     func syncAssignmentIfRCChanged() -> Bool {
-        let sig = currentRCSignature()
-        let old = UserDefaults.standard.string(forKey: rcSignatureKey)
-
-        guard old != sig else { return false }
-
-        UserDefaults.standard.set(sig, forKey: rcSignatureKey)
-        UserDefaults.standard.removeObject(forKey: storageKey)   // 👈 скидаємо кеш варіанта
+        updateControlProviderFromRemoteConfig()
         return true
     }
 
     func variant() -> OnboardingVariant {
-
-        _ = syncAssignmentIfRCChanged()
-        let config = onboardConfig()
-
-            // 1) спроба взяти закешований варіант, але тільки якщо він ще enabled
-            if let raw = UserDefaults.standard.string(forKey: storageKey),
-               let v = OnboardingVariant(rawValue: raw),
-               isEnabled(v, config: config) {
-                applyTracking(v)
-                applyTelemetrySelection(v)
-                return v
-            }
-
-            // 2) форсований варіант із RC, якщо він існує і enabled
-            if let forced = OnboardingVariant(rawValue: rc["onb_force"].stringValue),
-               isEnabled(forced, config: config) {
-                UserDefaults.standard.set(forced.rawValue, forKey: storageKey)
-                applyTracking(forced)
-                applyTelemetrySelection(forced)
-                return forced
-            }
-
-            // 3) беремо тільки увімкнені онборди
-            let enabled = enabledVariants(config: config)
-
-            // 4) якщо раптом у RC усі вимкнули (або ще не підвантажилось) – фолбек на дефолтний пул
-            let fallbackPool: [OnboardingVariant] = [.G, .K]
-            let pool = enabled.isEmpty ? fallbackPool.map { ($0, 1) } : enabled
-//            let pool = enabled.isEmpty ? OnboardingVariant.allCases : enabled
-            // тут дефолтний ти контролюєш тим, як будеш розподіляти або можеш явно вибрати, наприклад:
-            // let fallback: OnboardingVariant = .G
-
-            let v = weightedVariant(
-                from: pool,
-                seed: "\(stableUserID())|\(config?.version ?? 0)|onboard_config_json"
-            ) ?? .G
-
-            UserDefaults.standard.set(v.rawValue, forKey: storageKey)
-            applyTracking(v)
-            applyTelemetrySelection(v)
-            return v
+        switch currentControlAssignment().flowId {
+        case "new_onb_1": return .L
+        case "new_onb_2": return .M
+        case "new_onb_3": return .N
+        case "new_onb_4": return .O
+        case "new_onb_5": return .P
+        case "new_onb_6": return .Q
+        case "onb_10_1": return .K
+        case "onb_8_1": return .G
+        default: return .G
         }
+    }
 
+    func currentControlAssignment() -> OnboardingAssignment {
+        updateControlProviderFromRemoteConfig()
+        let assignment = OnboardingControlProvider.shared.currentAssignment(userId: stableUserID())
+        applyControlTelemetry(assignment)
+        return assignment
+    }
+
+    func selectedControlFlowId() -> String {
+        currentControlAssignment().flowId
+    }
+
+    func debugControlSummary() -> String {
+        OnboardingControlProvider.shared.debugSummary()
+    }
+
+    private func updateControlProviderFromRemoteConfig() {
+        OnboardingControlProvider.shared.updateFromRemoteConfig(
+            rc[OnboardingControlProvider.remoteConfigKey].stringValue
+        )
+    }
+
+    private func applyControlTelemetry(_ assignment: OnboardingAssignment) {
+        Analytics.setUserProperty(assignment.flowId, forName: "onboarding_variant")
+        Purchases.shared.attribution.setAttributes(["onboarding_variant": assignment.flowId])
+
+        Telemetry.shared.setPresentedOnboardingContext(
+            brand: nil,
+            onboardId: assignment.flowId,
+            flowKey: assignment.flowId,
+            flowId: assignment.flowId,
+            brandedFlow: nil,
+            onbExperimentId: assignment.experimentId,
+            onbVariantId: assignment.flowId,
+            onbBucket: String(assignment.bucket)
+        )
+    }
 
     // Повертаємо конкретний флоу
     func assignedOnboardingView() -> AnyView {
+        let assignment = currentControlAssignment()
+
+        switch assignment.flowId {
+        case "new_onb_1":
+            return AnyView(NewFirstBlackAnnualOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
+        case "new_onb_2":
+            return AnyView(NewSecondBlackOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
+        case "new_onb_3":
+            return AnyView(NewThirdBlackOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
+        case "new_onb_4":
+            return AnyView(NewFourthWhiteOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
+        case "new_onb_5":
+            return AnyView(NewFifthWhiteOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
+        case "new_onb_6":
+            return AnyView(NewSixthBlackOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
+        case "onb_8_1":
+            return AnyView(OnboardAnimationView(controlFlowId: assignment.flowId, assignment: assignment))
+        case "onb_10_1":
+            return AnyView(OnboardingFlowViewTen(controlFlowId: assignment.flowId, assignment: assignment))
+        default:
+            return AnyView(OnboardAnimationView())
+        }
+    }
+
+    func legacyAssignedOnboardingView() -> AnyView {
         switch variant() {
         case .A:
             // старий флоу 4.1
@@ -357,7 +386,7 @@ final class OnboardingAB {
         case .K:
             return AnyView(OnboardingFlowViewTen())
         case .L:
-            return AnyView(NewFirstBlackYearlyOnboardingFlowView(flowKey: OnboardingVariant.L.rawValue))
+            return AnyView(NewFirstBlackAnnualOnboardingFlowView(flowKey: OnboardingVariant.L.rawValue))
         case .M:
             return AnyView(NewSecondBlackOnboardingFlowView(flowKey: OnboardingVariant.M.rawValue))
         case .N:

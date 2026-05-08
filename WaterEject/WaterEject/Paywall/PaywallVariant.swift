@@ -162,16 +162,18 @@ final class PaywallAB {
         for tag: OnboardTag,
         onFinish: @escaping () -> Void,
         startDelay: Double,
-        stepsVisited: [String]?
+        stepsVisited: [String]?,
+        onboardIdOverride: String? = nil
     ) -> AnyView {
         let variant = onboardingPaywallVariant(for: tag)
+        let onboardId = onboardIdOverride ?? tag.rawValue
 
         switch variant {
         case .third:
             return AnyView(
                 PaywallThirdView(
                     onFinish: onFinish,
-                    onboardId: tag.rawValue,
+                    onboardId: onboardId,
                     startDelay: startDelay,
                     summaryTag: tag,
                     stepsVisited: stepsVisited
@@ -182,7 +184,7 @@ final class PaywallAB {
             return AnyView(
                 PaywallFourView(
                     onFinish: onFinish,
-                    onboardId: tag.rawValue,
+                    onboardId: onboardId,
                     startDelay: startDelay,
                     summaryTag: tag,
                     stepsVisited: stepsVisited
@@ -193,7 +195,7 @@ final class PaywallAB {
             return AnyView(
                 PaywallFiveView(
                     onFinish: onFinish,
-                    onboardId: tag.rawValue,
+                    onboardId: onboardId,
                     startDelay: startDelay,
                     summaryTag: tag,
                     stepsVisited: stepsVisited

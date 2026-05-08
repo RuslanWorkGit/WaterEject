@@ -35,7 +35,7 @@ struct NewWhitePaywall: View {
         startDelay: Double = 0.35,
         summaryTag: OnboardTag? = nil,
         stepsVisited: [String]? = nil,
-        paywallId: String = "paywall_v_4.0"
+        paywallId: String = "paywall_new_white_1"
     ) {
         self.onFinish = onFinish
         self.onboardId = onboardId
@@ -83,12 +83,12 @@ struct NewWhitePaywall: View {
                             HStack(spacing: 14) {
                                 NewWhitePaywallPlanCard(
                                     title: "Annual",
-                                    price: price(for: .yearly, fallback: "$29.99"),
-                                    subtitle: "only $0.04/week",
+                                    price: price(for: .annual, fallback: "$29.99"),
+                                    subtitle: "\(price(for: .annual, fallback: "$29.99")) one-time purchase",
                                     badge: "Best Value",
-                                    isSelected: viewModel.selectedPlan == .yearly
+                                    isSelected: viewModel.selectedPlan == .annual
                                 ) {
-                                    selectPlan(.yearly, method: "tap")
+                                    selectPlan(.annual, method: "tap")
                                 }
 
                             NewWhitePaywallPlanCard(
@@ -239,7 +239,8 @@ struct NewWhitePaywall: View {
             variant: telemetryVariant,
             entryPoint: entry,
             plan: plan.analyticsValue,
-            onboardId: onboardId
+            onboardId: onboardId,
+            paywallId: telemetryPaywallId
         )
 
         Telemetry.shared.funnelGoToPurchase(
@@ -273,7 +274,9 @@ struct NewWhitePaywall: View {
             variant: telemetryVariant,
             entryPoint: entryPoint,
             reason: "close_button",
-            sessionId: sessionId
+            sessionId: sessionId,
+            paywallId: telemetryPaywallId,
+            onboardId: onboardId
         )
         Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
         onFinish()

@@ -64,11 +64,7 @@ final class AppCoordinator: ObservableObject {
 
                guard !self.launchedFromPush, self.currentScreen == .boot else { return }
                
-               if !self.hasSeenOnboarding {
-                   self.currentScreen = .onboarding
-               } else {
-                   self.currentScreen = .paywall
-               }
+               self.currentScreen = .onboarding
            }
        }
     
@@ -76,10 +72,7 @@ final class AppCoordinator: ObservableObject {
        
     
     func showOnboarding() {
-        if !hasSeenOnboarding {
-            currentScreen = .onboarding
-        }
-        
+        currentScreen = .onboarding
     }
     
     func showMainTabbar() {
@@ -99,7 +92,7 @@ final class AppCoordinator: ObservableObject {
                 self.currentScreen = .mainTabbar
                 return
             }
-            self.currentScreen = self.hasSeenOnboarding ? .paywall : .onboarding
+            self.currentScreen = .onboarding
         }
     }
     
@@ -111,4 +104,3 @@ final class AppCoordinator: ObservableObject {
     
 
 }
-

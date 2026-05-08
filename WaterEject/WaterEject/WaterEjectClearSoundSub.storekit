@@ -14,7 +14,21 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "29.99",
+      "familyShareable" : false,
+      "internalID" : "6767308912",
+      "localizations" : [
+        {
+          "description" : "Grants Pro Access to User",
+          "displayName" : "Pro Sub",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "KyryloVoinov.WaterEject.lifetime.access",
+      "referenceName" : "Lifetime Access",
+      "type" : "NonConsumable"
+    }
   ],
   "settings" : {
     "_applicationInternalID" : "6749094272",
@@ -24,7 +38,7 @@
     "_developerTeamID" : "LBA86YKHYN",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 799870184.81722403,
+    "_lastSynchronizedDate" : 799876879.79054296,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
@@ -117,7 +131,7 @@
           "internalID" : "6756081159",
           "introductoryOffer" : {
             "displayPrice" : "2.99",
-            "internalID" : "08FFEB34",
+            "internalID" : "77243F16",
             "numberOfPeriods" : 1,
             "paymentMode" : "payAsYouGo",
             "subscriptionPeriod" : "P1W"

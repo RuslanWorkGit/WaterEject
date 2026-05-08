@@ -12,7 +12,10 @@ import RevenueCat
 struct NewBlackPaywallThird: View {
     @StateObject private var viewModel = NewPaywallViewModel()
     @State private var sessionId = UUID().uuidString
+    @State private var didLogOpen = false
     @State private var didLogChoosePlan = false
+
+    @EnvironmentObject private var paywallGate: PaywallGate
 
     let index: Int
     let action: () -> Void
@@ -29,7 +32,7 @@ struct NewBlackPaywallThird: View {
         onboardId: String? = nil,
         summaryTag: OnboardTag? = nil,
         stepsVisited: [String]? = nil,
-        paywallId: String = "paywall_v_black_3.0"
+        paywallId: String = "paywall_new_black_3"
     ) {
         self.index = index
         self.action = action
@@ -39,12 +42,12 @@ struct NewBlackPaywallThird: View {
         self.telemetryPaywallId = paywallId
     }
 
-    private var yearlyPrice: String {
-        if let onlyPrice = viewModel.onlyPrice[.yearly], !onlyPrice.isEmpty {
+    private var annualPrice: String {
+        if let onlyPrice = viewModel.onlyPrice[.annual], !onlyPrice.isEmpty {
             return onlyPrice.replacingOccurrences(of: "for ", with: "")
         }
 
-        if let periodPrice = viewModel.pricePerPeriod[.yearly]?.split(separator: "/").first {
+        if let periodPrice = viewModel.pricePerPeriod[.annual]?.split(separator: "/").first {
             return String(periodPrice)
         }
 
@@ -52,28 +55,37 @@ struct NewBlackPaywallThird: View {
     }
     
     private func handleCTA() {
-        viewModel.selectedPlan = .yearly
+        viewModel.selectedPlan = .annual
         let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+        let entry = entryPoint()
 
         if !didLogChoosePlan {
             Telemetry.shared.funnelPlanChosen(
                 onboardId: resolvedOnboardId,
-                plan: NewPaywallPlan.yearly.analyticsValue,
+                plan: NewPaywallPlan.annual.analyticsValue,
                 selectionMethod: "default_on_continue"
             )
             didLogChoosePlan = true
         }
 
+        Telemetry.shared.paywallCTATap(
+            variant: telemetryVariant,
+            entryPoint: entry,
+            plan: NewPaywallPlan.annual.analyticsValue,
+            onboardId: onboardId,
+            paywallId: telemetryPaywallId
+        )
+
         Telemetry.shared.funnelGoToPurchase(
             onboardId: resolvedOnboardId,
-            plan: NewPaywallPlan.yearly.analyticsValue
+            plan: NewPaywallPlan.annual.analyticsValue
         )
 
         Task {
             let result = await viewModel.buyWithRevenueCat(
-                plan: .yearly,
+                plan: .annual,
                 variant: telemetryVariant,
-                entryPoint: "onboarding",
+                entryPoint: entry,
                 sessionId: sessionId,
                 onboardId: onboardId,
                 paywallId: telemetryPaywallId
@@ -88,6 +100,23 @@ struct NewBlackPaywallThird: View {
         }
     }
 
+    private func entryPoint() -> String {
+        paywallGate.currentContext?.rawValue ?? "onboarding"
+    }
+
+    private func logOpenIfNeeded() {
+        guard !didLogOpen else { return }
+
+        Telemetry.shared.configurePaywallPresentation(
+            paywallId: telemetryPaywallId,
+            variant: telemetryVariant,
+            entryPoint: entryPoint(),
+            purchaseSource: Telemetry.shared.resolvedPurchaseSource(for: paywallGate.currentContext),
+            onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue
+        )
+        didLogOpen = true
+    }
+
     private func logOnboardSummary(_ status: PaywallStatus) {
         guard let summaryTag else { return }
 
@@ -95,10 +124,10 @@ struct NewBlackPaywallThird: View {
             onboard: summaryTag,
             steps: stepsVisited ?? [],
             paywallId: telemetryPaywallId,
-            plan: status == .success ? NewPaywallPlan.yearly.analyticsValue : nil,
+            plan: status == .success ? NewPaywallPlan.annual.analyticsValue : nil,
             status: status,
             variant: telemetryVariant,
-            entryPoint: "onboarding"
+            entryPoint: entryPoint()
         )
         OnboardingSessionStore.shared.clear()
     }
@@ -136,7 +165,7 @@ struct NewBlackPaywallThird: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 16)
                 
-                Text("\(yearlyPrice) / year")
+                Text("\(annualPrice) one-time")
                     .font(.custom("Montserrat-SemiBold", size: 16))
                     .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
@@ -162,7 +191,8 @@ struct NewBlackPaywallThird: View {
                 .ignoresSafeArea()
         )
         .onAppear {
-            viewModel.selectedPlan = .yearly
+            viewModel.selectedPlan = .annual
+            logOpenIfNeeded()
             Task { await viewModel.loadPricing() }
         }
         
@@ -175,4 +205,5 @@ struct NewBlackPaywallThird: View {
     NewBlackPaywallThird(index: 0) {
         print("1")
     }
+    .environmentObject(PaywallGate.shared)
 }

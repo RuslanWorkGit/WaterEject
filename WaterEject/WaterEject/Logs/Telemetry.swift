@@ -1092,9 +1092,16 @@ extension Telemetry {
         )
     }
 
-    func paywallClose(variant: String, entryPoint: String, reason: String, sessionId: String) {
-        let paywallId = paywallId(for: variant)
-        let onboardId = resolveOnboardId(nil)
+    func paywallClose(
+        variant: String,
+        entryPoint: String,
+        reason: String,
+        sessionId: String,
+        paywallId explicitPaywallId: String? = nil,
+        onboardId explicitOnboardId: String? = nil
+    ) {
+        let paywallId = explicitPaywallId ?? paywallId(for: variant)
+        let onboardId = resolveOnboardId(explicitOnboardId)
         let source = purchaseSource(for: currentPaywallContext())
         logEvent(
             "paywall_close",
@@ -1127,14 +1134,16 @@ extension Telemetry {
         offeringId: String?,
         price: Double?,
         currency: String?,
-        sessionId: String
+        sessionId: String,
+        paywallId explicitPaywallId: String? = nil,
+        onboardId explicitOnboardId: String? = nil
     ) {
         logEvent(
             "Purchase_Start",
-            explicitOnboardId: resolveOnboardId(nil),
+            explicitOnboardId: resolveOnboardId(explicitOnboardId),
             variant: variant,
             extra: [
-                "paywall_id": paywallId(for: variant),
+                "paywall_id": explicitPaywallId ?? paywallId(for: variant),
                 "package_id": packageId,
                 "offering_id": offeringId ?? "na",
                 "price_shown": price ?? 0,
@@ -1240,14 +1249,14 @@ extension Telemetry {
         )
     }
 
-    func paywallCTATap(flowId: String?, variant: String, entryPoint: String, plan: String) {
+    func paywallCTATap(flowId: String?, variant: String, entryPoint: String, plan: String, paywallId explicitPaywallId: String? = nil) {
         logEvent(
             "paywall_cta_tap",
             explicitOnboardId: resolveOnboardId(nil),
             variant: variant,
             extra: [
                 "flow_id": flowId ?? "unknown",
-                "paywall_id": paywallId(for: variant),
+                "paywall_id": explicitPaywallId ?? paywallId(for: variant),
                 "entry_point": entryPoint,
                 "plan": plan,
                 "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
@@ -1312,7 +1321,13 @@ extension Telemetry {
         )
     }
 
-    func paywallCTATap(variant: String, entryPoint: String, plan: String, onboardId: String?) {
+    func paywallCTATap(
+        variant: String,
+        entryPoint: String,
+        plan: String,
+        onboardId: String?,
+        paywallId explicitPaywallId: String? = nil
+    ) {
         let purchaseSource = purchaseSource(for: currentPaywallContext())
         let resolvedOnboardId = resolveOnboardId(onboardId)
         logEvent(
@@ -1320,7 +1335,7 @@ extension Telemetry {
             explicitOnboardId: resolvedOnboardId,
             variant: variant,
             extra: [
-                "paywall_id": paywallId(for: variant),
+                "paywall_id": explicitPaywallId ?? paywallId(for: variant),
                 "entry_point": entryPoint,
                 "plan": plan,
                 "purchase_source": purchaseSource.rawValue

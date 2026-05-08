@@ -10,20 +10,23 @@ import FirebaseAnalytics
 import FirebaseRemoteConfig
 import RevenueCat
 
-struct NewFirstBlackYearlyOnboardingFlowView: View {
+struct NewFirstBlackAnnualOnboardingFlowView: View {
     let flowKey: String
+    let assignment: OnboardingAssignment?
     let onFinish: (() -> Void)?
 
-    init(flowKey: String = "generic_flow2", onFinish: (() -> Void)? = nil) {
+    init(flowKey: String = "new_onb_1", assignment: OnboardingAssignment? = nil, onFinish: (() -> Void)? = nil) {
         self.flowKey = flowKey
+        self.assignment = assignment
         self.onFinish = onFinish
     }
 
     var body: some View {
         NewCustomOnboardingFlowView(
-            kind: .firstBlackYearly,
-            flowId: "onboard_new_first_2_step_black_yearly",
+            kind: .firstBlackAnnual,
+            flowId: "new_onb_1",
             flowKey: flowKey,
+            assignment: assignment,
             onFinish: onFinish
         )
     }
@@ -31,18 +34,21 @@ struct NewFirstBlackYearlyOnboardingFlowView: View {
 
 struct NewSecondBlackOnboardingFlowView: View {
     let flowKey: String
+    let assignment: OnboardingAssignment?
     let onFinish: (() -> Void)?
 
-    init(flowKey: String = "generic_flow2", onFinish: (() -> Void)? = nil) {
+    init(flowKey: String = "new_onb_2", assignment: OnboardingAssignment? = nil, onFinish: (() -> Void)? = nil) {
         self.flowKey = flowKey
+        self.assignment = assignment
         self.onFinish = onFinish
     }
 
     var body: some View {
         NewCustomOnboardingFlowView(
             kind: .secondBlack,
-            flowId: "onboard_new_second_3_step_black",
+            flowId: "new_onb_2",
             flowKey: flowKey,
+            assignment: assignment,
             onFinish: onFinish
         )
     }
@@ -50,18 +56,21 @@ struct NewSecondBlackOnboardingFlowView: View {
 
 struct NewThirdBlackOnboardingFlowView: View {
     let flowKey: String
+    let assignment: OnboardingAssignment?
     let onFinish: (() -> Void)?
 
-    init(flowKey: String = "generic_flow2", onFinish: (() -> Void)? = nil) {
+    init(flowKey: String = "new_onb_3", assignment: OnboardingAssignment? = nil, onFinish: (() -> Void)? = nil) {
         self.flowKey = flowKey
+        self.assignment = assignment
         self.onFinish = onFinish
     }
 
     var body: some View {
         NewCustomOnboardingFlowView(
             kind: .thirdBlack,
-            flowId: "onboard_new_third_2_step_black",
+            flowId: "new_onb_3",
             flowKey: flowKey,
+            assignment: assignment,
             onFinish: onFinish
         )
     }
@@ -69,18 +78,21 @@ struct NewThirdBlackOnboardingFlowView: View {
 
 struct NewFourthWhiteOnboardingFlowView: View {
     let flowKey: String
+    let assignment: OnboardingAssignment?
     let onFinish: (() -> Void)?
 
-    init(flowKey: String = "generic_flow2", onFinish: (() -> Void)? = nil) {
+    init(flowKey: String = "new_onb_4", assignment: OnboardingAssignment? = nil, onFinish: (() -> Void)? = nil) {
         self.flowKey = flowKey
+        self.assignment = assignment
         self.onFinish = onFinish
     }
 
     var body: some View {
         NewCustomOnboardingFlowView(
             kind: .fourthWhite,
-            flowId: "onboard_new_fourth_3_step_white",
+            flowId: "new_onb_4",
             flowKey: flowKey,
+            assignment: assignment,
             onFinish: onFinish
         )
     }
@@ -88,18 +100,21 @@ struct NewFourthWhiteOnboardingFlowView: View {
 
 struct NewFifthWhiteOnboardingFlowView: View {
     let flowKey: String
+    let assignment: OnboardingAssignment?
     let onFinish: (() -> Void)?
 
-    init(flowKey: String = "generic_flow2", onFinish: (() -> Void)? = nil) {
+    init(flowKey: String = "new_onb_5", assignment: OnboardingAssignment? = nil, onFinish: (() -> Void)? = nil) {
         self.flowKey = flowKey
+        self.assignment = assignment
         self.onFinish = onFinish
     }
 
     var body: some View {
         NewCustomOnboardingFlowView(
             kind: .fifthWhite,
-            flowId: "onboard_new_fifth_3_step_white",
+            flowId: "new_onb_5",
             flowKey: flowKey,
+            assignment: assignment,
             onFinish: onFinish
         )
     }
@@ -107,18 +122,21 @@ struct NewFifthWhiteOnboardingFlowView: View {
 
 struct NewSixthBlackOnboardingFlowView: View {
     let flowKey: String
+    let assignment: OnboardingAssignment?
     let onFinish: (() -> Void)?
 
-    init(flowKey: String = "generic_flow2", onFinish: (() -> Void)? = nil) {
+    init(flowKey: String = "new_onb_6", assignment: OnboardingAssignment? = nil, onFinish: (() -> Void)? = nil) {
         self.flowKey = flowKey
+        self.assignment = assignment
         self.onFinish = onFinish
     }
 
     var body: some View {
         NewCustomOnboardingFlowView(
             kind: .sixthBlack,
-            flowId: "onboard_new_sixth_2_step_black",
+            flowId: "new_onb_6",
             flowKey: flowKey,
+            assignment: assignment,
             onFinish: onFinish
         )
     }
@@ -130,6 +148,7 @@ private struct NewCustomOnboardingFlowView: View {
     let kind: NewCustomOnboardingFlowKind
     let flowId: String
     let flowKey: String
+    let assignment: OnboardingAssignment?
     let onFinish: (() -> Void)?
 
     @State private var rootStep: NewCustomOnboardingStep?
@@ -141,10 +160,8 @@ private struct NewCustomOnboardingFlowView: View {
     @State private var didFinish = false
     @State private var paywallShown = false
     @State private var onboardTag: OnboardTag = .new21
-    @State private var onboardId = OnboardTag.new21.rawValue
-    @State private var resolvedBrand: String?
-
-    private let paywallId = "paywall_v_2.0"
+    @State private var onboardId = "new_onb_1"
+    @State private var activeAssignment: OnboardingAssignment?
 
     var body: some View {
         Group {
@@ -172,7 +189,7 @@ private struct NewCustomOnboardingFlowView: View {
             switch step {
             case .stepOne:
                 switch kind {
-                case .firstBlackYearly:
+                case .firstBlackAnnual:
                     OnboardingNewFirstViewOne(index: index, action: continueFromCurrentStep)
                 case .secondBlack:
                     OnboardingNewSecondViewOne(index: index, action: continueFromCurrentStep)
@@ -188,7 +205,7 @@ private struct NewCustomOnboardingFlowView: View {
 
             case .stepTwo:
                 switch kind {
-                case .firstBlackYearly:
+                case .firstBlackAnnual:
                     OnboardingNewFirstViewTwo(index: index, action: continueFromCurrentStep)
                 case .secondBlack:
                     OnboardingNewSecondViewTwo(index: index, action: continueFromCurrentStep)
@@ -210,7 +227,7 @@ private struct NewCustomOnboardingFlowView: View {
                     OnboardingNewFourthViewThree(index: index, action: continueFromCurrentStep)
                 case .fifthWhite:
                     OnboardingNewFifthViewThree(index: index, action: continueFromCurrentStep)
-                case .firstBlackYearly, .thirdBlack, .sixthBlack:
+                case .firstBlackAnnual, .thirdBlack, .sixthBlack:
                     EmptyView()
                 }
 
@@ -228,14 +245,14 @@ private struct NewCustomOnboardingFlowView: View {
     @ViewBuilder
     private func paywallView(index: Int) -> some View {
         switch kind {
-        case .firstBlackYearly:
+        case .firstBlackAnnual:
             NewBlackPaywallThird(
                 index: index,
                 action: finishFromPaywall,
                 onboardId: onboardId,
                 summaryTag: onboardTag,
                 stepsVisited: stepsForPaywallSummary(),
-                paywallId: paywallId
+                paywallId: kind.paywallId
             )
 
         case .secondBlack:
@@ -244,7 +261,7 @@ private struct NewCustomOnboardingFlowView: View {
                 onboardId: onboardId,
                 summaryTag: onboardTag,
                 stepsVisited: stepsForPaywallSummary(),
-                paywallId: paywallId
+                paywallId: kind.paywallId
             )
 
         case .thirdBlack:
@@ -253,7 +270,7 @@ private struct NewCustomOnboardingFlowView: View {
                 onboardId: onboardId,
                 summaryTag: onboardTag,
                 stepsVisited: stepsForPaywallSummary(),
-                paywallId: paywallId
+                paywallId: kind.paywallId
             )
 
         case .fourthWhite, .fifthWhite:
@@ -262,7 +279,7 @@ private struct NewCustomOnboardingFlowView: View {
                 onboardId: onboardId,
                 summaryTag: onboardTag,
                 stepsVisited: stepsForPaywallSummary(),
-                paywallId: paywallId
+                paywallId: kind.paywallId
             )
 
         case .sixthBlack:
@@ -272,7 +289,7 @@ private struct NewCustomOnboardingFlowView: View {
                 onboardId: onboardId,
                 summaryTag: onboardTag,
                 stepsVisited: stepsForPaywallSummary(),
-                paywallId: paywallId
+                paywallId: kind.paywallId
             )
         }
     }
@@ -280,59 +297,72 @@ private struct NewCustomOnboardingFlowView: View {
     private func startFlowIfNeeded() {
         guard !didStart else { return }
 
-        let context = resolveOnboardingContext()
-        onboardTag = context.tag
-        onboardId = context.onboardId
-        resolvedBrand = context.brand
+        let resolvedAssignment = assignment ?? OnboardingControlProvider.shared.currentAssignment(
+            userId: OnboardingControlProvider.shared.stableUserId()
+        )
+        activeAssignment = resolvedAssignment
+        onboardTag = .new21
+        onboardId = flowId
 
         let configuredSteps = NewCustomOnboardingVisibleScreens.resolve(
-            flowKey: flowKey,
             flowId: flowId,
             defaultSteps: kind.defaultSteps
         )
         visibleSteps = configuredSteps
-        rootStep = configuredSteps.first ?? .paywall
+        rootStep = configuredSteps.first
 
         Telemetry.shared.setPresentedOnboardingContext(
-            brand: context.brand,
-            onboardId: context.tag.rawValue,
+            brand: nil,
+            onboardId: flowId,
             flowKey: flowKey,
             flowId: flowId,
-            brandedFlow: context.isBranded ? flowKey : nil
+            brandedFlow: nil,
+            onbExperimentId: resolvedAssignment.experimentId,
+            onbVariantId: flowId,
+            onbBucket: String(resolvedAssignment.bucket)
         )
-        Telemetry.shared.sceneDidBecomeActive(onboardId: context.onboardId)
-        Telemetry.shared.funnelOnboardStart(onboardId: context.onboardId)
-        Telemetry.shared.onboardStarted(onboardId: context.onboardId)
+        Telemetry.shared.sceneDidBecomeActive(onboardId: flowId)
+        Telemetry.shared.funnelOnboardStart(onboardId: flowId)
+        Telemetry.shared.onboardStarted(onboardId: flowId)
         Telemetry.shared.setPresentedOnboardingContext(
-            brand: context.brand,
-            onboardId: context.tag.rawValue,
+            brand: nil,
+            onboardId: flowId,
             flowKey: flowKey,
             flowId: flowId,
-            brandedFlow: context.isBranded ? flowKey : nil
+            brandedFlow: nil,
+            onbExperimentId: resolvedAssignment.experimentId,
+            onbVariantId: flowId,
+            onbBucket: String(resolvedAssignment.bucket)
         )
         Telemetry.shared.onbFlowStart(flowId: flowId)
-        OnboardTag.saveAsLast(context.tag)
+        OnboardTag.saveAsLast(.new21)
 
         didStart = true
 
         if let firstStep = configuredSteps.first {
             logOnboardingStart(step: firstStep)
             trackStepAppear(firstStep)
+        } else {
+            finishOnboarding(stepId: "complete")
         }
     }
 
     private func continueFromCurrentStep() {
-        guard let currentStep = currentStep(),
-              let nextStep = nextVisibleStep(after: currentStep) else {
+        guard let currentStep = currentStep() else {
             return
         }
 
-        Analytics.logEvent("onboarding_step_action", parameters: [
+        Analytics.logEvent("onboarding_step_action", parameters: analyticsParams([
             "flow_id": flowId,
             "step_id": currentStep.analyticsId,
             "action": "continue",
-            "variant": onboardId
-        ])
+            "variant": flowId
+        ]))
+
+        guard let nextStep = nextVisibleStep(after: currentStep) else {
+            finishOnboarding(stepId: currentStep.analyticsId)
+            return
+        }
 
         if nextStep == .paywall {
             preloadOnboardingPaywall(onboardId: onboardId)
@@ -347,11 +377,11 @@ private struct NewCustomOnboardingFlowView: View {
         appendVisitedStep(step.analyticsId)
 
         if !loggedStepViews.contains(step) {
-            Analytics.logEvent("onboarding_step_view", parameters: [
+            Analytics.logEvent("onboarding_step_view", parameters: analyticsParams([
                 "flow_id": flowId,
                 "step_id": step.analyticsId,
-                "variant": onboardId
-            ])
+                "variant": flowId
+            ]))
             loggedStepViews.insert(step)
         }
 
@@ -365,29 +395,30 @@ private struct NewCustomOnboardingFlowView: View {
             paywallShown = true
             persistSession()
             OnboardTag.saveAsLast(onboardTag)
-            if let resolvedBrand, !resolvedBrand.isEmpty {
-                UserDefaults.standard.set(resolvedBrand, forKey: "onboarding_last_brand_v1")
-            }
         } else {
             persistSession()
         }
     }
 
     private func finishFromPaywall() {
+        finishOnboarding(stepId: NewCustomOnboardingStep.paywall.analyticsId)
+    }
+
+    private func finishOnboarding(stepId: String) {
         guard !didFinish else { return }
         didFinish = true
 
-        Analytics.logEvent("onboarding_finish", parameters: [
+        Analytics.logEvent("onboarding_finish", parameters: analyticsParams([
             "flow_id": flowId,
-            "step_id": NewCustomOnboardingStep.paywall.analyticsId,
-            "variant": onboardId
-        ])
+            "step_id": stepId,
+            "variant": flowId
+        ]))
 
-        Analytics.logEvent("onboarding_complete", parameters: [
+        Analytics.logEvent("onboarding_complete", parameters: analyticsParams([
             "flow_id": flowId,
-            "step_id": NewCustomOnboardingStep.paywall.analyticsId,
-            "variant": onboardId
-        ])
+            "step_id": stepId,
+            "variant": flowId
+        ]))
 
         Telemetry.shared.clearActiveOnboarding()
         coordinator.onboardingDidFinish()
@@ -395,11 +426,11 @@ private struct NewCustomOnboardingFlowView: View {
     }
 
     private func logOnboardingStart(step: NewCustomOnboardingStep) {
-        Analytics.logEvent("onboarding_start", parameters: [
+        Analytics.logEvent("onboarding_start", parameters: analyticsParams([
             "flow_id": flowId,
             "step_id": step.analyticsId,
-            "variant": onboardId
-        ])
+            "variant": flowId
+        ]))
     }
 
     private func persistSession() {
@@ -445,23 +476,19 @@ private struct NewCustomOnboardingFlowView: View {
         }
     }
 
-    private func resolveOnboardingContext() -> NewCustomOnboardingContext {
-        let isBranded = flowKey.hasPrefix("branded_")
-        let tag: OnboardTag = isBranded ? .branded2 : .new21
-        let brand = isBranded ? NewCustomOnboardingBrandResolver.resolve(from: coordinator, flowKey: flowKey) : nil
-        let resolvedOnboardId = Telemetry.shared.resolveOnboardId(tag.rawValue, brand: brand) ?? tag.rawValue
-
-        return NewCustomOnboardingContext(
-            tag: tag,
-            onboardId: resolvedOnboardId,
-            brand: brand,
-            isBranded: isBranded
-        )
+    private func analyticsParams(_ params: [String: Any]) -> [String: Any] {
+        var enriched = params
+        if let activeAssignment {
+            enriched["experiment_id"] = activeAssignment.experimentId
+            enriched["bucket"] = activeAssignment.bucket
+            enriched["tier"] = activeAssignment.tier
+        }
+        return enriched
     }
 }
 
 private enum NewCustomOnboardingFlowKind {
-    case firstBlackYearly
+    case firstBlackAnnual
     case secondBlack
     case thirdBlack
     case fourthWhite
@@ -470,10 +497,25 @@ private enum NewCustomOnboardingFlowKind {
 
     var defaultSteps: [NewCustomOnboardingStep] {
         switch self {
-        case .firstBlackYearly, .thirdBlack, .sixthBlack:
+        case .firstBlackAnnual, .thirdBlack, .sixthBlack:
             return [.stepOne, .stepTwo, .paywall]
         case .secondBlack, .fourthWhite, .fifthWhite:
             return [.stepOne, .stepTwo, .stepThree, .paywall]
+        }
+    }
+
+    var paywallId: String {
+        switch self {
+        case .firstBlackAnnual:
+            return "paywall_new_black_3"
+        case .secondBlack:
+            return "paywall_new_black_2"
+        case .thirdBlack:
+            return "paywall_new_black_1"
+        case .fourthWhite, .fifthWhite:
+            return "paywall_new_white_1"
+        case .sixthBlack:
+            return "paywall_new_black_4"
         }
     }
 }
@@ -503,117 +545,18 @@ private enum NewCustomOnboardingStep: String, Hashable, CaseIterable {
     }
 }
 
-private struct NewCustomOnboardingContext {
-    let tag: OnboardTag
-    let onboardId: String
-    let brand: String?
-    let isBranded: Bool
-}
-
-private enum NewCustomOnboardingBrandResolver {
-    static func resolve(from coordinator: AppCoordinator, flowKey: String) -> String {
-        if let onboardingBrand = stringProperty(named: "onboardingBrand", in: coordinator) {
-            return onboardingBrand
-        }
-
-        if let brand = stringProperty(named: "brand", in: coordinator) {
-            return brand
-        }
-
-        if let contextBrand = Telemetry.shared.presentedOnboardingContext()?.brand,
-           !contextBrand.isEmpty {
-            return contextBrand
-        }
-
-        let keyBrand = flowKey
-            .replacingOccurrences(of: "branded_", with: "")
-            .split(separator: "_")
-            .first
-            .map(String.init)
-
-        return keyBrand?.isEmpty == false ? keyBrand!.lowercased() : "generic"
-    }
-
-    private static func stringProperty(named name: String, in object: Any) -> String? {
-        for child in Mirror(reflecting: object).children where child.label == name {
-            if let value = child.value as? String,
-               !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return value.lowercased()
-            }
-        }
-        return nil
-    }
-}
-
 private enum NewCustomOnboardingVisibleScreens {
-    private static let remoteConfigKey = "new_custom_onboarding_visible_screens_json"
-    private static let localJSONKey = "new_custom_onboarding_visible_screens_json"
-    private static let localListPrefix = "new_custom_onboarding_visible_screens_"
-
     static func resolve(
-        flowKey: String,
         flowId: String,
         defaultSteps: [NewCustomOnboardingStep]
     ) -> [NewCustomOnboardingStep] {
         let allowed = Set(defaultSteps.map(\.configId))
-
-        if let localList = UserDefaults.standard.string(forKey: localListPrefix + flowKey),
-           let steps = steps(from: localList, defaultSteps: defaultSteps, allowed: allowed) {
-            return steps
-        }
-
-        if let steps = stepsFromJSON(
-            UserDefaults.standard.string(forKey: localJSONKey),
-            flowKey: flowKey,
-            flowId: flowId,
-            defaultSteps: defaultSteps,
-            allowed: allowed
-        ) {
-            return steps
-        }
-
-        let remoteJSON = RemoteConfig.remoteConfig()[remoteConfigKey].stringValue
-        if let steps = stepsFromJSON(
-            remoteJSON,
-            flowKey: flowKey,
-            flowId: flowId,
-            defaultSteps: defaultSteps,
-            allowed: allowed
-        ) {
+        let controlScreens = OnboardingControlProvider.shared.visibleScreens(for: flowId)
+        if let steps = steps(from: controlScreens, defaultSteps: defaultSteps, allowed: allowed) {
             return steps
         }
 
         return defaultSteps
-    }
-
-    private static func stepsFromJSON(
-        _ json: String?,
-        flowKey: String,
-        flowId: String,
-        defaultSteps: [NewCustomOnboardingStep],
-        allowed: Set<String>
-    ) -> [NewCustomOnboardingStep]? {
-        guard let json,
-              !json.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              let data = json.data(using: .utf8),
-              let config = try? JSONDecoder().decode(NewCustomOnboardingVisibleConfig.self, from: data) else {
-            return nil
-        }
-
-        let flow = config.flows[flowKey] ?? config.flows[flowId]
-        guard let ids = flow?.visibleScreens ?? flow?.screens else { return nil }
-        return steps(from: ids, defaultSteps: defaultSteps, allowed: allowed)
-    }
-
-    private static func steps(
-        from csv: String,
-        defaultSteps: [NewCustomOnboardingStep],
-        allowed: Set<String>
-    ) -> [NewCustomOnboardingStep]? {
-        let ids = csv
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-        return steps(from: ids, defaultSteps: defaultSteps, allowed: allowed)
     }
 
     private static func steps(
@@ -622,18 +565,8 @@ private enum NewCustomOnboardingVisibleScreens {
         allowed: Set<String>
     ) -> [NewCustomOnboardingStep]? {
         let requested = Set(ids.filter { allowed.contains($0) })
-        guard !requested.isEmpty else { return nil }
 
         let steps = defaultSteps.filter { requested.contains($0.configId) }
-        return steps.isEmpty ? nil : steps
+        return steps
     }
-}
-
-private struct NewCustomOnboardingVisibleConfig: Decodable {
-    let flows: [String: NewCustomOnboardingVisibleFlow]
-}
-
-private struct NewCustomOnboardingVisibleFlow: Decodable {
-    let visibleScreens: [String]?
-    let screens: [String]?
 }

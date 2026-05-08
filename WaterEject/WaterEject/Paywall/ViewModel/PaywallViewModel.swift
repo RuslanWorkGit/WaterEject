@@ -156,7 +156,9 @@ final class PaywallViewModel: ObservableObject {
             offeringId: pkg.identifier,
             price: price,
             currency: currency,
-            sessionId: sessionId
+            sessionId: sessionId,
+            paywallId: paywallId,
+            onboardId: onboardId
         )
         
         do {

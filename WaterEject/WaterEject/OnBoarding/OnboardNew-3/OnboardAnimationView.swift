@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct OnboardAnimationView: View {
+    let controlFlowId: String?
+    let assignment: OnboardingAssignment?
+
     //let someAction: () -> ()
     @State private var dropOffset: CGFloat = -300   // стартує високо
     @State private var moveOffsetX: CGFloat = 0
@@ -23,6 +26,11 @@ struct OnboardAnimationView: View {
     @State private var mainCircle: AnyShapeStyle = AnyShapeStyle(Color.white)
     @State private var showOnboarding = false
     @EnvironmentObject private var coordinator: AppCoordinator
+
+    init(controlFlowId: String? = nil, assignment: OnboardingAssignment? = nil) {
+        self.controlFlowId = controlFlowId
+        self.assignment = assignment
+    }
     
     var body: some View {
         ZStack {
@@ -131,11 +139,15 @@ struct OnboardAnimationView: View {
         .fullScreenCover(isPresented: $showOnboarding, onDismiss: {
             //tabBarState.isHidden = false           // повернемо таббар (якщо треба)
         }) {
-            OnboardingFlowViewEight(someAction: {
+            OnboardingFlowViewEight(
+                someAction: {
                 showOnboarding = false
                 coordinator.showMainTabbar()
                 //someAction()
-            })
+                },
+                controlFlowId: controlFlowId,
+                assignment: assignment
+            )
                 .environmentObject(coordinator)    // пробросимо координатор
         }
         

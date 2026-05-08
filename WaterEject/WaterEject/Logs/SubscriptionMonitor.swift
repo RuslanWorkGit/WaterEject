@@ -151,6 +151,7 @@ final class SubscriptionMonitor {
         guard let id = productId else { return "unknown" }
         if id == NewPaywallPlan.weekly.productID   { return NewPaywallPlan.weekly.rawValue }
         if id == NewPaywallPlan.yearly.productID   { return NewPaywallPlan.yearly.rawValue }
+        if id == NewPaywallPlan.annual.productID   { return NewPaywallPlan.annual.rawValue }
         return id // fallback: якщо раптом інший продукт
     }
 }

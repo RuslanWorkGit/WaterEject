@@ -13,20 +13,42 @@ import StoreKit
 
 
 enum NewPaywallPlan: String, CaseIterable, Hashable {
-    case weekly, yearly
+    case weekly, yearly, annual
     
     var productID: String {
         switch self {
         case .weekly: return "kyryloVoinov.WaterEject.subscription.weekly"
         case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
+        case .annual: return "KyryloVoinov.WaterEject.lifetime.access"
         }
     }
     
     var title: String {
-        switch self { case .weekly: "7 days"; case .yearly: "12 months" }
+        switch self { case .weekly: "7 days"; case .yearly: "12 months"; case .annual: "Annual" }
     }
     
     var analyticsValue: String { rawValue }
+
+    var j2dEvent: J2DEvent {
+        switch self {
+        case .weekly, .yearly: return .subscribed
+        case .annual: return .purchased
+        }
+    }
+
+    var j2dType: J2DSubscriptionType {
+        switch self {
+        case .weekly, .yearly: return .subscription
+        case .annual: return .nonConsumable
+        }
+    }
+
+    var appsFlyerPurchaseEvent: AFEvent {
+        switch self {
+        case .weekly, .yearly: return .subscribe
+        case .annual: return .non_subscription_purchase
+        }
+    }
 }
 
 import Foundation
@@ -44,8 +66,8 @@ final class NewPaywallViewModel: ObservableObject {
     @Published private(set) var packageByPlan: [NewPaywallPlan: Package] = [:]
     
     // Готові рядки для UI
-    @Published private(set) var pricePerPeriod: [NewPaywallPlan: String] = [:] // "$3.99/week", "$12.99/year"
-    @Published private(set) var onlyPrice: [NewPaywallPlan: String] = [:]      // "for $3.99", "for $12.99"
+    @Published private(set) var pricePerPeriod: [NewPaywallPlan: String] = [:]
+    @Published private(set) var onlyPrice: [NewPaywallPlan: String] = [:]
     
     private let entitlementID = "pro_user"
     
@@ -62,6 +84,7 @@ final class NewPaywallViewModel: ObservableObject {
                 if wantedIDs.contains(id) {
                     if id == NewPaywallPlan.weekly.productID { map[.weekly] = pkg }
                     if id == NewPaywallPlan.yearly.productID  { map[.yearly]  = pkg }
+                    if id == NewPaywallPlan.annual.productID  { map[.annual]  = pkg }
                 }
             }
             self.packageByPlan = map
@@ -77,6 +100,7 @@ final class NewPaywallViewModel: ObservableObject {
                 switch plan {
                 case .weekly: period[plan] = "\(localized)/week"
                 case .yearly: period[plan] = "\(localized)/year"
+                case .annual: period[plan] = localized
                 }
                 only[plan]   = "for \(localized)"
             }
@@ -160,7 +184,9 @@ final class NewPaywallViewModel: ObservableObject {
             offeringId: pkg.identifier,
             price: price,
             currency: currency,
-            sessionId: sessionId
+            sessionId: sessionId,
+            paywallId: paywallId,
+            onboardId: onboardId
         )
 
         do {
@@ -173,15 +199,15 @@ final class NewPaywallViewModel: ObservableObject {
                 let resolvedOnboardId = Telemetry.shared.resolveOnboardId(onboardId)
                 let purchaseSource = Telemetry.shared.resolvedPurchaseSource(for: nil)
 
-                if shouldSendJ2DEvent(txId: txId, suffix: "subscribed") {
+                if shouldSendJ2DEvent(txId: txId, suffix: plan.j2dEvent.rawValue) {
                     Task {
                         do {
                             try await J2DSubscriptionReporter.shared.sendSubscriptionEvent(
                                 platform: .watereject,
                                 userId: Purchases.shared.appUserID,
-                                event: .subscribed,
-                                type: .subscription,
-                                plan: selectedPlan.rawValue,
+                                event: plan.j2dEvent,
+                                type: plan.j2dType,
+                                plan: plan.rawValue,
                                 purchaseSource: purchaseSource.rawValue,
                                 onboardId: resolvedOnboardId,
                                 paywallId: paywallId
@@ -190,8 +216,8 @@ final class NewPaywallViewModel: ObservableObject {
                                 deliveryStatus: "success",
                                 txId: txId,
                                 plan: plan.rawValue,
-                                event: J2DEvent.subscribed.rawValue,
-                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                event: plan.j2dEvent.rawValue,
+                                subscriptionType: plan.j2dType.rawValue,
                                 purchaseSource: purchaseSource,
                                 onboardId: resolvedOnboardId,
                                 paywallId: paywallId
@@ -201,8 +227,8 @@ final class NewPaywallViewModel: ObservableObject {
                                 deliveryStatus: "error",
                                 txId: txId,
                                 plan: plan.rawValue,
-                                event: J2DEvent.subscribed.rawValue,
-                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                event: plan.j2dEvent.rawValue,
+                                subscriptionType: plan.j2dType.rawValue,
                                 purchaseSource: purchaseSource,
                                 onboardId: resolvedOnboardId,
                                 errorMessage: error.localizedDescription,
@@ -214,7 +240,7 @@ final class NewPaywallViewModel: ObservableObject {
 
                 if shouldSendSubscribeEvent(txId: txId) {
                     AF.log(
-                        .subscribe,
+                        plan.appsFlyerPurchaseEvent,
                         AF.subscribeValues(
                             productId: p.productIdentifier,
                             revenue: price,
@@ -227,7 +253,7 @@ final class NewPaywallViewModel: ObservableObject {
                 }
 
                 let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
-                if !UserDefaults.standard.bool(forKey: cpaFlag) {
+                if plan.j2dType == .subscription, !UserDefaults.standard.bool(forKey: cpaFlag) {
                     AF.log(
                         .subscribe_cpa,
                         AF.subscribeCPAValues(
