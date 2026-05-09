@@ -29,6 +29,7 @@ enum OnboardingVariant: String, Identifiable, CaseIterable {
     case O = "new_onb_4"
     case P = "new_onb_5"
     case Q = "new_onb_6"
+    case R = "new_onb_7"
 
     var id: String { rawValue }
 }
@@ -56,7 +57,7 @@ extension OnboardingVariant {
         case .H: return .v9
         case .J: return .v31
         case .K: return .v10
-        case .L, .M, .N, .O, .P, .Q: return .new21
+        case .L, .M, .N, .O, .P, .Q, .R: return .new21
         }
     }
 
@@ -66,7 +67,7 @@ extension OnboardingVariant {
             return "classic"
         case .D, .E, .F, .G, .H, .K:
             return "new"
-        case .L, .M, .N, .O, .P, .Q:
+        case .L, .M, .N, .O, .P, .Q, .R:
             return "new_custom"
         }
     }
@@ -93,7 +94,8 @@ final class OnboardingAB {
         "Onb_new_third_black": { "isOn": false, "trafficPercent": 0 },
         "Onb_new_fourth_white": { "isOn": false, "trafficPercent": 0 },
         "Onb_new_fifth_white": { "isOn": false, "trafficPercent": 0 },
-        "Onb_new_sixth_black": { "isOn": false, "trafficPercent": 0 }
+        "Onb_new_sixth_black": { "isOn": false, "trafficPercent": 0 },
+        "Onb_new_seventh_black": { "isOn": false, "trafficPercent": 0 }
       }
     }
     """
@@ -128,7 +130,8 @@ final class OnboardingAB {
                 "Onb_new_third_black_enabled": false as NSObject,
                 "Onb_new_fourth_white_enabled": false as NSObject,
                 "Onb_new_fifth_white_enabled": false as NSObject,
-                "Onb_new_sixth_black_enabled": false as NSObject
+                "Onb_new_sixth_black_enabled": false as NSObject,
+                "Onb_new_seventh_black_enabled": false as NSObject
             ])
         }
 
@@ -291,6 +294,7 @@ final class OnboardingAB {
         case "new_onb_4": return .O
         case "new_onb_5": return .P
         case "new_onb_6": return .Q
+        case "new_onb_7": return .R
         case "onb_10_1": return .K
         case "onb_8_1": return .G
         default: return .G
@@ -351,6 +355,8 @@ final class OnboardingAB {
             return AnyView(NewFifthWhiteOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
         case "new_onb_6":
             return AnyView(NewSixthBlackOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
+        case "new_onb_7":
+            return AnyView(NewSeventhBlackOnboardingFlowView(flowKey: assignment.flowId, assignment: assignment))
         case "onb_8_1":
             return AnyView(OnboardAnimationView(controlFlowId: assignment.flowId, assignment: assignment))
         case "onb_10_1":
@@ -401,6 +407,8 @@ final class OnboardingAB {
             return AnyView(NewFifthWhiteOnboardingFlowView(flowKey: OnboardingVariant.P.rawValue))
         case .Q:
             return AnyView(NewSixthBlackOnboardingFlowView(flowKey: OnboardingVariant.Q.rawValue))
+        case .R:
+            return AnyView(NewSeventhBlackOnboardingFlowView(flowKey: OnboardingVariant.R.rawValue))
         }
     }
 }

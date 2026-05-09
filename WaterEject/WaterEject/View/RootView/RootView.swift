@@ -98,11 +98,6 @@ struct BootRCView: View {
         group.enter()
         PaywallAB.shared.fetchRemoteConfig { group.leave() }
 
-        group.enter()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            group.leave()
-        }
-
         group.notify(queue: .main) { proceed() }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {

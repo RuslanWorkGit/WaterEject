@@ -27,6 +27,18 @@ struct NewBlackPaywallFourth: View {
     private let telemetryVariant = PaywallVariant.fourth.rawValue
     private let telemetryPaywallId: String
 
+    private var annualPrice: String {
+        if let price = viewModel.pricePerPeriod[.annual], !price.isEmpty {
+            return price
+        }
+
+        if let onlyPrice = viewModel.onlyPrice[.annual], !onlyPrice.isEmpty {
+            return onlyPrice.replacingOccurrences(of: "for ", with: "")
+        }
+
+        return "$29.99"
+    }
+
     init(
         index: Int,
         action: @escaping () -> Void,
@@ -146,8 +158,14 @@ struct NewBlackPaywallFourth: View {
 
                 }
 
+                Text("Start Cleaning and Playing")
+                    .font(.custom("Montserrat-SemiBold", size: 24))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
 
-                Text("98% Success Rate. Remove water now before internal corrosion starts.")
+
+                Text("\(annualPrice) (Pay once - use forever)")
                     .font(.custom("Montserrat-SemiBold", size: 18))
                     .foregroundStyle(.white.opacity(1))
                     .multilineTextAlignment(.center)

@@ -142,6 +142,28 @@ struct NewSixthBlackOnboardingFlowView: View {
     }
 }
 
+struct NewSeventhBlackOnboardingFlowView: View {
+    let flowKey: String
+    let assignment: OnboardingAssignment?
+    let onFinish: (() -> Void)?
+
+    init(flowKey: String = "new_onb_7", assignment: OnboardingAssignment? = nil, onFinish: (() -> Void)? = nil) {
+        self.flowKey = flowKey
+        self.assignment = assignment
+        self.onFinish = onFinish
+    }
+
+    var body: some View {
+        NewCustomOnboardingFlowView(
+            kind: .seventhBlack,
+            flowId: "new_onb_7",
+            flowKey: flowKey,
+            assignment: assignment,
+            onFinish: onFinish
+        )
+    }
+}
+
 private struct NewCustomOnboardingFlowView: View {
     @EnvironmentObject private var coordinator: AppCoordinator
 
@@ -201,6 +223,8 @@ private struct NewCustomOnboardingFlowView: View {
                     OnboardingNewFifthViewOne(index: index, action: continueFromCurrentStep)
                 case .sixthBlack:
                     OnboardingNewSixthViewOne(index: index, action: continueFromCurrentStep)
+                case .seventhBlack:
+                    OnboardingNewSeventhViewOne(index: index, action: continueFromCurrentStep)
                 }
 
             case .stepTwo:
@@ -217,6 +241,8 @@ private struct NewCustomOnboardingFlowView: View {
                     OnboardingNewFifthViewTwo(index: index, action: continueFromCurrentStep)
                 case .sixthBlack:
                     OnboardingNewSixthViewTwo(index: index, action: continueFromCurrentStep)
+                case .seventhBlack:
+                    OnboardingNewSeventhViewTwo(index: index, action: continueFromCurrentStep)
                 }
 
             case .stepThree:
@@ -227,7 +253,7 @@ private struct NewCustomOnboardingFlowView: View {
                     OnboardingNewFourthViewThree(index: index, action: continueFromCurrentStep)
                 case .fifthWhite:
                     OnboardingNewFifthViewThree(index: index, action: continueFromCurrentStep)
-                case .firstBlackAnnual, .thirdBlack, .sixthBlack:
+                case .firstBlackAnnual, .thirdBlack, .sixthBlack, .seventhBlack:
                     EmptyView()
                 }
 
@@ -284,6 +310,16 @@ private struct NewCustomOnboardingFlowView: View {
 
         case .sixthBlack:
             NewBlackPaywallFourth(
+                index: index,
+                action: finishFromPaywall,
+                onboardId: onboardId,
+                summaryTag: onboardTag,
+                stepsVisited: stepsForPaywallSummary(),
+                paywallId: kind.paywallId
+            )
+
+        case .seventhBlack:
+            NewBlackPaywallFifth(
                 index: index,
                 action: finishFromPaywall,
                 onboardId: onboardId,
@@ -494,10 +530,11 @@ private enum NewCustomOnboardingFlowKind {
     case fourthWhite
     case fifthWhite
     case sixthBlack
+    case seventhBlack
 
     var defaultSteps: [NewCustomOnboardingStep] {
         switch self {
-        case .firstBlackAnnual, .thirdBlack, .sixthBlack:
+        case .firstBlackAnnual, .thirdBlack, .sixthBlack, .seventhBlack:
             return [.stepOne, .stepTwo, .paywall]
         case .secondBlack, .fourthWhite, .fifthWhite:
             return [.stepOne, .stepTwo, .stepThree, .paywall]
@@ -516,6 +553,8 @@ private enum NewCustomOnboardingFlowKind {
             return "paywall_new_white_1"
         case .sixthBlack:
             return "paywall_new_black_4"
+        case .seventhBlack:
+            return "paywall_new_black_5"
         }
     }
 }

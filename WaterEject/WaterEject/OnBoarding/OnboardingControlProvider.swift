@@ -63,6 +63,7 @@ final class OnboardingControlProvider {
         "new_onb_4": ["step1", "step2", "step3", "paywall"],
         "new_onb_5": ["step1", "step2", "step3", "paywall"],
         "new_onb_6": ["step1", "step2", "paywall"],
+        "new_onb_7": ["step1", "step2", "paywall"],
         "onb_8_1": ["step1", "step2", "step3", "paywall"],
         "onb_10_1": ["step1", "step2", "step3", "paywall"]
     ]
@@ -88,7 +89,8 @@ final class OnboardingControlProvider {
             "new_onb_3": OnboardingFlowConfig(isOn: false, trafficPercent: 0, enabledScreens: nil, disabledScreens: nil),
             "new_onb_4": OnboardingFlowConfig(isOn: false, trafficPercent: 0, enabledScreens: nil, disabledScreens: nil),
             "new_onb_5": OnboardingFlowConfig(isOn: false, trafficPercent: 0, enabledScreens: nil, disabledScreens: nil),
-            "new_onb_6": OnboardingFlowConfig(isOn: false, trafficPercent: 0, enabledScreens: nil, disabledScreens: nil)
+            "new_onb_6": OnboardingFlowConfig(isOn: false, trafficPercent: 0, enabledScreens: nil, disabledScreens: nil),
+            "new_onb_7": OnboardingFlowConfig(isOn: false, trafficPercent: 0, enabledScreens: nil, disabledScreens: nil)
         ]),
         tiers: nil
     )

@@ -27,13 +27,25 @@ struct NewBlackPaywallFifth: View {
     private let telemetryVariant = PaywallVariant.fourth.rawValue
     private let telemetryPaywallId: String
 
+    private var annualPrice: String {
+        if let price = viewModel.pricePerPeriod[.annual], !price.isEmpty {
+            return price
+        }
+
+        if let onlyPrice = viewModel.onlyPrice[.annual], !onlyPrice.isEmpty {
+            return onlyPrice.replacingOccurrences(of: "for ", with: "")
+        }
+
+        return "$29.99"
+    }
+
     init(
         index: Int,
         action: @escaping () -> Void,
         onboardId: String? = nil,
         summaryTag: OnboardTag? = nil,
         stepsVisited: [String]? = nil,
-        paywallId: String = "paywall_new_black_4"
+        paywallId: String = "paywall_new_black_5"
     ) {
         self.index = index
         self.action = action
@@ -127,14 +139,14 @@ struct NewBlackPaywallFifth: View {
 
 //        OnboardNewFirstForm(ctaTitle:String(localized: "Continue"), ctaAction: handleCTA, pages: 2, pageIndex: index, fixedWidth: 260) {
         OnboardThirdForm(ctaTitle:String(localized: "Get Lifetime Access"), ctaAction: handleCTA, pages: 3, pageIndex: index, fixedWidth: 260) {
-            Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255)
-                .ignoresSafeArea()
+//            Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255)
+//                .ignoresSafeArea()
 
-            Image("paywallPhotoNewWhiteMan")
-                .resizable()
-                .scaledToFit()
-                //.scaleEffect(0.9)
-                .ignoresSafeArea()
+//            Image("paywallPhotoNewWhiteMan")
+//                .resizable()
+//                .scaledToFit()
+//                //.scaleEffect(0.9)
+//                .ignoresSafeArea()
 
             VStack(spacing: 10) {
                 Spacer()
@@ -146,10 +158,16 @@ struct NewBlackPaywallFifth: View {
 
                 }
 
+                Text("Start Cleaning and Playing")
+                    .font(.custom("Montserrat-SemiBold", size: 24))
+                    .foregroundStyle(.black)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
 
-                Text("98% Success Rate. Remove water now before internal corrosion starts.")
+
+                Text("\(annualPrice) (Pay once - use forever)")
                     .font(.custom("Montserrat-SemiBold", size: 18))
-                    .foregroundStyle(.white.opacity(1))
+                    .foregroundStyle(.black.opacity(1))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
 
@@ -158,19 +176,22 @@ struct NewBlackPaywallFifth: View {
 
         }
 
-//        .background(
-//            ZStack(alignment: .top) {
-//                Color(red: 29 / 255, green: 29 / 255, blue: 29 / 255)
-//                    .ignoresSafeArea()
-//
-//                Image("FirstOnboardBGOne")
-//                    .resizable()
-//                    .scaledToFit()
-//
-//                    //.scaleEffect(1.05)
-//            }
-//                .ignoresSafeArea()
-//        )
+        .background(
+            ZStack(alignment: .top) {
+
+                Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255)
+                    .ignoresSafeArea()
+
+                Image("paywallPhotoNewWhiteMan")
+                    .resizable()
+                    .scaledToFit()
+                    //.scaleEffect(0.9)
+                    .ignoresSafeArea()
+
+                    //.scaleEffect(1.05)
+            }
+                .ignoresSafeArea()
+        )
         .onAppear {
             viewModel.selectedPlan = .annual
             logOpenIfNeeded()
