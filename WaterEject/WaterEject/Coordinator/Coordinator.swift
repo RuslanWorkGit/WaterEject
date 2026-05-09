@@ -48,25 +48,7 @@ final class AppCoordinator: ObservableObject {
 //            }
 //        }
 //    }
-    init() {
-           Task { [weak self] in
-               guard let self else { return }
-
-               // якщо вже прийшов пуш і ми переключились на specialOffer – нічого не робимо
-               guard !self.launchedFromPush, self.currentScreen == .boot else { return }
-
-               if await PaywallGate.shared.isPro() {
-                   // ще раз перевіримо перед записом
-                   guard !self.launchedFromPush, self.currentScreen == .boot else { return }
-                   self.currentScreen = .mainTabbar
-                   return
-               }
-
-               guard !self.launchedFromPush, self.currentScreen == .boot else { return }
-               
-               self.currentScreen = .onboarding
-           }
-       }
+    init() {}
     
     
        
@@ -87,6 +69,7 @@ final class AppCoordinator: ObservableObject {
     func routeAfterBoot() {
         Task { [weak self] in
             guard let self else { return }
+            guard self.currentScreen == .boot else { return }
 
             if await PaywallGate.shared.isPro() {
                 self.currentScreen = .mainTabbar

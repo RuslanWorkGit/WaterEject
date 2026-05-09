@@ -98,9 +98,14 @@ struct BootRCView: View {
         group.enter()
         PaywallAB.shared.fetchRemoteConfig { group.leave() }
 
+        group.enter()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            group.leave()
+        }
+
         group.notify(queue: .main) { proceed() }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
             proceed() // fallback якщо немає мережі
         }
     }
@@ -131,7 +136,7 @@ struct OnboardingEntryView: View {
         Group {
             if isReady {
                 // тут вже можна безпечно вибирати онборд —
-                // Remote Config активувався
+                // Remote Config активувався на boot screen
                 OnboardingAB.shared.assignedOnboardingView()
             } else {
                 // простий лоадер / чорний екран / сплеш
@@ -139,19 +144,10 @@ struct OnboardingEntryView: View {
             }
         }
         .onAppear {
-            // 1) тягнемо Remote Config
-            OnboardingAB.shared.fetchRemoteConfig {
-                print("🔥 RC fetched, onboarding =", OnboardingAB.shared.selectedControlFlowId())
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                print("🔥 onboarding =", OnboardingAB.shared.selectedControlFlowId())
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isReady = true
-                }
-            }
-            
-            // 2) фолбек на випадок, якщо мережі нема або RC не відповів
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                if !isReady {
-                    print("⚠️ RC timeout, showing default onboarding")
-                    isReady = true     // використає значення з setDefaults
                 }
             }
         }

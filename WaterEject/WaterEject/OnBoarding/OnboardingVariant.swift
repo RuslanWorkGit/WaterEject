@@ -100,7 +100,11 @@ final class OnboardingAB {
 
     private init() {
             let settings = RemoteConfigSettings()
+            #if DEBUG
+            settings.minimumFetchInterval = 0
+            #else
             settings.minimumFetchInterval = 1800 // на проді зроби 3600+
+            #endif
             rc.configSettings = settings
 
             rc.setDefaults([
