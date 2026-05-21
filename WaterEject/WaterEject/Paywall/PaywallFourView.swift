@@ -90,6 +90,7 @@ struct PaywallFourView: View {
         
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
+        let secondaryPlan = viewModel.yearlyCardPlan
         
         ZStack(alignment: .topTrailing) {
             
@@ -170,7 +171,7 @@ struct PaywallFourView: View {
 //                        )
                         
                         PaywallFourPlanCard(
-                            title: PaywallPlan.weekly.title,
+                            title: NewPaywallPlan.weekly.title,
                             price: viewModel.pricePerPeriod[.weekly] ?? "...",
                             sublabel: nil,
                             saveText: viewModel.onlyPrice[.weekly] ?? "",
@@ -179,7 +180,7 @@ struct PaywallFourView: View {
                                 let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
                                 Telemetry.shared.funnelPlanChosen(
                                     onboardId: resolvedOnboardId,
-                                    plan: PaywallPlan.weekly.analyticsValue,
+                                    plan: NewPaywallPlan.weekly.analyticsValue,
                                     selectionMethod: "tap"
                                 )
                                 didLogChoosePlan = true
@@ -187,17 +188,17 @@ struct PaywallFourView: View {
                         )
                         
                         PaywallFourPlanCard(
-                            title: PaywallPlan.yearly.title,
-                            price: viewModel.pricePerPeriod[.yearly] ?? "…",
+                            title: secondaryPlan.title,
+                            price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
                             sublabel: String(localized: "Best Value"),
-                            saveText: viewModel.onlyPrice[.yearly] ?? "",
-                            isSelected: viewModel.selectedPlan == .yearly,
+                            saveText: viewModel.onlyPrice[secondaryPlan] ?? "",
+                            isSelected: viewModel.selectedPlan == secondaryPlan,
                             onTap: {
-                                viewModel.selectedPlan = .yearly
+                                viewModel.selectedPlan = secondaryPlan
                                 let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
                                 Telemetry.shared.funnelPlanChosen(
                                     onboardId: resolvedOnboardId,
-                                    plan: PaywallPlan.yearly.analyticsValue,
+                                    plan: secondaryPlan.analyticsValue,
                                     selectionMethod: "tap"
                                 )
                                 didLogChoosePlan = true

@@ -117,6 +117,7 @@ struct PaywallFiveView: View {
 
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
+        let secondaryPlan = viewModel.yearlyCardPlan
         let shouldShowFreeTrial = isFreeTrialAllowed && isFreeTrialEnabled
 
         ZStack(alignment: .topTrailing) {
@@ -245,7 +246,7 @@ struct PaywallFiveView: View {
                                     if isEnabled {
                                         choosePlan(.weekly, selectionMethod: "free_trial_toggle")
                                     } else if viewModel.selectedPlan == .weekly {
-                                        choosePlan(.yearly, selectionMethod: "free_trial_toggle")
+                                        choosePlan(secondaryPlan, selectionMethod: "free_trial_toggle")
                                     }
                                 }
                         }
@@ -266,16 +267,16 @@ struct PaywallFiveView: View {
                         )
 
                         PaywallFivePlanCard(
-                            title: NewPaywallPlan.yearly.title,
-                            price: viewModel.pricePerPeriod[.yearly] ?? "…",
+                            title: secondaryPlan.title,
+                            price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
                             sublabel: String(localized: "Best Value"),
-                            saveText: viewModel.onlyPrice[.yearly] ?? "",
-                            isSelected: viewModel.selectedPlan == .yearly,
+                            saveText: viewModel.onlyPrice[secondaryPlan] ?? "",
+                            isSelected: viewModel.selectedPlan == secondaryPlan,
                             onTap: {
                                 if shouldShowFreeTrial {
                                     isFreeTrialEnabled = false
                                 } else {
-                                    choosePlan(.yearly, selectionMethod: "tap")
+                                    choosePlan(secondaryPlan, selectionMethod: "tap")
                                 }
                             }
                         )

@@ -65,6 +65,7 @@ final class NewPaywallViewModel: ObservableObject {
     // Мапа план → Package/StoreProduct
     @Published private(set) var packageByPlan: [NewPaywallPlan: Package] = [:]
     @Published private(set) var freeTestEnabled = false
+    @Published private(set) var yearlyCardPlan: NewPaywallPlan = .yearly
 
     // Готові рядки для UI
     @Published private(set) var pricePerPeriod: [NewPaywallPlan: String] = [:]
@@ -87,6 +88,10 @@ final class NewPaywallViewModel: ObservableObject {
                 .annual: settings.annualProductID
             ]
             freeTestEnabled = settings.freeTest
+            yearlyCardPlan = settings.yearlyCardPlan == .annual ? .annual : .yearly
+            if selectedPlan == .yearly {
+                selectedPlan = yearlyCardPlan
+            }
 
             let offerings = try await Purchases.shared.offerings()
             guard let current = offerings.current else { return }

@@ -29,6 +29,7 @@ struct PaywallSecondView: View {
         
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
+        let secondaryPlan = viewModel.yearlyCardPlan
         
         ZStack(alignment: .topTrailing) {
             
@@ -73,12 +74,12 @@ struct PaywallSecondView: View {
                             onTap: { viewModel.selectedPlan = .weekly }
                         )
                         PaywallSecondPlanCard(
-                            title: PaywallPlan.yearly.title,
-                            price: viewModel.pricePerPeriod[.yearly] ?? "…",
+                            title: secondaryPlan.title,
+                            price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
                             sublabel: String(localized: "Best Value"),
-                            saveText: viewModel.onlyPrice[.yearly] ?? "",
-                            isSelected: viewModel.selectedPlan == .yearly,
-                            onTap: { viewModel.selectedPlan = .yearly }
+                            saveText: viewModel.onlyPrice[secondaryPlan] ?? "",
+                            isSelected: viewModel.selectedPlan == secondaryPlan,
+                            onTap: { viewModel.selectedPlan = secondaryPlan }
                         )
                     }
                     .padding(.top, isSmall ? 12 : isLarge ? 60 : 40)

@@ -25,7 +25,13 @@ struct PaywallProductSettings {
     let weeklyProductID: String
     let yearlyProductID: String
     let annualProductID: String
+    let yearlyCardPlan: PaywallCardPlan
     let freeTest: Bool
+}
+
+enum PaywallCardPlan: String {
+    case yearly
+    case annual
 }
 
 private struct PaywallProductsRemoteConfig: Decodable {
@@ -37,7 +43,24 @@ private struct PaywallProductRemoteConfig: Decodable {
     let weeklyProductId: String?
     let yearlyProductId: String?
     let annualProductId: String?
+    let yearlyCardPlan: String?
     let freeTest: Bool?
+    let variants: [PaywallProductVariantRemoteConfig]?
+}
+
+private struct PaywallProductVariantRemoteConfig: Decodable {
+    let id: String?
+    let traffic: Int?
+    let trafic: Int?
+    let weeklyProductId: String?
+    let yearlyProductId: String?
+    let annualProductId: String?
+    let yearlyCardPlan: String?
+    let freeTest: Bool?
+
+    var effectiveTraffic: Int {
+        max(traffic ?? trafic ?? 0, 0)
+    }
 }
 
 final class PaywallAB {
@@ -50,26 +73,31 @@ final class PaywallAB {
         "first": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "yearlyCardPlan": "yearly",
           "freeTest": false
         },
         "second": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "yearlyCardPlan": "yearly",
           "freeTest": false
         },
         "third": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "yearlyCardPlan": "yearly",
           "freeTest": false
         },
         "fourth": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "yearlyCardPlan": "yearly",
           "freeTest": false
         },
         "fifth": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "yearlyCardPlan": "yearly",
           "freeTest": true
         },
         "special": {
@@ -151,12 +179,45 @@ final class PaywallAB {
             return fallback
         }
 
+        let variant = selectedProductVariant(in: remote, forKey: key)
         return PaywallProductSettings(
-            weeklyProductID: cleanProductID(remote.weeklyProductId) ?? fallback.weeklyProductID,
-            yearlyProductID: cleanProductID(remote.yearlyProductId) ?? fallback.yearlyProductID,
-            annualProductID: cleanProductID(remote.annualProductId) ?? fallback.annualProductID,
-            freeTest: remote.freeTest ?? fallback.freeTest
+            weeklyProductID: cleanProductID(variant?.weeklyProductId) ?? cleanProductID(remote.weeklyProductId) ?? fallback.weeklyProductID,
+            yearlyProductID: cleanProductID(variant?.yearlyProductId) ?? cleanProductID(remote.yearlyProductId) ?? fallback.yearlyProductID,
+            annualProductID: cleanProductID(variant?.annualProductId) ?? cleanProductID(remote.annualProductId) ?? fallback.annualProductID,
+            yearlyCardPlan: Self.cleanCardPlan(variant?.yearlyCardPlan) ?? Self.cleanCardPlan(remote.yearlyCardPlan) ?? fallback.yearlyCardPlan,
+            freeTest: variant?.freeTest ?? remote.freeTest ?? fallback.freeTest
         )
+    }
+
+    private func selectedProductVariant(
+        in config: PaywallProductRemoteConfig,
+        forKey key: String
+    ) -> PaywallProductVariantRemoteConfig? {
+        guard let variants = config.variants, !variants.isEmpty else { return nil }
+        let totalTraffic = variants.reduce(0) { $0 + $1.effectiveTraffic }
+        guard totalTraffic > 0 else { return nil }
+
+        let bucket = stableBucket(seed: "\(stableUserID())|\(key)|\(productsJSONKey)", upperBound: totalTraffic)
+        var cursor = 0
+        for variant in variants {
+            let traffic = variant.effectiveTraffic
+            guard traffic > 0 else { continue }
+            cursor += traffic
+            if bucket < cursor {
+                return variant
+            }
+        }
+        return nil
+    }
+
+    private func stableBucket(seed: String, upperBound: Int) -> Int {
+        guard upperBound > 0 else { return 0 }
+        var hash: UInt64 = 14_695_981_039_346_656_037
+        for byte in seed.utf8 {
+            hash ^= UInt64(byte)
+            hash &*= 1_099_511_628_211
+        }
+        return Int(hash % UInt64(upperBound))
     }
 
     private func cleanProductID(_ value: String?) -> String? {
@@ -164,15 +225,21 @@ final class PaywallAB {
         return trimmed.isEmpty ? nil : trimmed
     }
 
+    private static func cleanCardPlan(_ value: String?) -> PaywallCardPlan? {
+        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+        return PaywallCardPlan(rawValue: trimmed)
+    }
+
     private static func defaultProductSettings(forKey key: String) -> PaywallProductSettings {
         let weeklyProductID = key == "special"
             ? "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer"
             : "kyryloVoinov.WaterEject.subscription.weekly"
 
-        PaywallProductSettings(
+        return PaywallProductSettings(
             weeklyProductID: weeklyProductID,
             yearlyProductID: "kyryloVoinov.WaterEject.subscription.yearly",
             annualProductID: "KyryloVoinov.WaterEject.lifetime.access",
+            yearlyCardPlan: .yearly,
             freeTest: key == PaywallVariant.fifth.rawValue
         )
     }

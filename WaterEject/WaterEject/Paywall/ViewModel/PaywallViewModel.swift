@@ -11,20 +11,42 @@ import StoreKit
 
 
 enum PaywallPlan: String, CaseIterable, Hashable {
-    case weekly, yearly
+    case weekly, yearly, annual
 
     var productID: String {
         switch self {
         case .weekly: return "kyryloVoinov.WaterEject.subscription.weekly"
         case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
+        case .annual: return "KyryloVoinov.WaterEject.lifetime.access"
         }
     }
 
     var title: String {
-        switch self { case .weekly: String(localized: "7 days"); case .yearly: String(localized: "12 months") }
+        switch self { case .weekly: String(localized: "7 days"); case .yearly: String(localized: "12 months"); case .annual: String(localized: "Annual") }
     }
 
     var analyticsValue: String { rawValue }
+
+    var j2dEvent: J2DEvent {
+        switch self {
+        case .weekly, .yearly: return .subscribed
+        case .annual: return .purchased
+        }
+    }
+
+    var j2dType: J2DSubscriptionType {
+        switch self {
+        case .weekly, .yearly: return .subscription
+        case .annual: return .nonConsumable
+        }
+    }
+
+    var appsFlyerPurchaseEvent: AFEvent {
+        switch self {
+        case .weekly, .yearly: return .subscribe
+        case .annual: return .non_subscription_purchase
+        }
+    }
 }
 
 import Foundation
@@ -41,6 +63,7 @@ final class PaywallViewModel: ObservableObject {
     // Мапа план → Package/StoreProduct
     @Published private(set) var packageByPlan: [PaywallPlan: Package] = [:]
     @Published private(set) var freeTestEnabled = false
+    @Published private(set) var yearlyCardPlan: PaywallPlan = .yearly
 
     // Готові рядки для UI
     @Published private(set) var pricePerPeriod: [PaywallPlan: String] = [:] // "$3.99/week", "$12.99/year"
@@ -75,9 +98,14 @@ final class PaywallViewModel: ObservableObject {
             let settings = PaywallAB.shared.productSettings(forKey: paywallKey)
             productIDByPlan = [
                 .weekly: settings.weeklyProductID,
-                .yearly: settings.yearlyProductID
+                .yearly: settings.yearlyProductID,
+                .annual: settings.annualProductID
             ]
             freeTestEnabled = settings.freeTest
+            yearlyCardPlan = settings.yearlyCardPlan == .annual ? .annual : .yearly
+            if selectedPlan == .yearly {
+                selectedPlan = yearlyCardPlan
+            }
 
             let offerings = try await Purchases.shared.offerings()
             guard let current = offerings.current else { return }
@@ -89,6 +117,7 @@ final class PaywallViewModel: ObservableObject {
                 if wantedIDs.contains(id) {
                     if id == productID(for: .weekly) { map[.weekly] = pkg }
                     if id == productID(for: .yearly)  { map[.yearly]  = pkg }
+                    if id == productID(for: .annual)  { map[.annual]  = pkg }
                 }
             }
             self.packageByPlan = map
@@ -104,6 +133,7 @@ final class PaywallViewModel: ObservableObject {
                 switch plan {
                 case .weekly: period[plan] = "\(localized)\(String(localized: "/week"))"
                 case .yearly: period[plan] = "\(localized)\(String(localized: "/year"))"
+                case .annual: period[plan] = localized
                 }
                 only[plan] = "\(String(localized: "for")) \(localized)"
             }
@@ -186,7 +216,7 @@ final class PaywallViewModel: ObservableObject {
                 let txId = result.transaction?.transactionIdentifier
                 if shouldSendSubscribeEvent(txId: txId) {
                     AF.log(
-                        .subscribe,
+                        plan.appsFlyerPurchaseEvent,
                         AF.subscribeValues(
                             productId: p.productIdentifier,
                             revenue: price,
@@ -198,7 +228,7 @@ final class PaywallViewModel: ObservableObject {
                     )
                 }
 
-                if shouldSendJ2DEvent(txId: txId, suffix: "subscribed") {
+                if shouldSendJ2DEvent(txId: txId, suffix: plan.j2dEvent.rawValue) {
                     let resolvedOnboardId = Telemetry.shared.resolveOnboardId(onboardId)
                     let purchaseSource = Telemetry.shared.resolvedPurchaseSource(for: nil)
                     Task {
@@ -206,8 +236,8 @@ final class PaywallViewModel: ObservableObject {
                             try await J2DSubscriptionReporter.shared.sendSubscriptionEvent(
                                 platform: .watereject,
                                 userId: Purchases.shared.appUserID,
-                                event: .subscribed,
-                                type: .subscription,
+                                event: plan.j2dEvent,
+                                type: plan.j2dType,
                                 plan: plan.rawValue,
                                 purchaseSource: purchaseSource.rawValue,
                                 onboardId: resolvedOnboardId,
@@ -217,8 +247,8 @@ final class PaywallViewModel: ObservableObject {
                                 deliveryStatus: "success",
                                 txId: txId,
                                 plan: plan.rawValue,
-                                event: J2DEvent.subscribed.rawValue,
-                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                event: plan.j2dEvent.rawValue,
+                                subscriptionType: plan.j2dType.rawValue,
                                 purchaseSource: purchaseSource,
                                 onboardId: resolvedOnboardId,
                                 paywallId: paywallId
@@ -228,8 +258,8 @@ final class PaywallViewModel: ObservableObject {
                                 deliveryStatus: "error",
                                 txId: txId,
                                 plan: plan.rawValue,
-                                event: J2DEvent.subscribed.rawValue,
-                                subscriptionType: J2DSubscriptionType.subscription.rawValue,
+                                event: plan.j2dEvent.rawValue,
+                                subscriptionType: plan.j2dType.rawValue,
                                 purchaseSource: purchaseSource,
                                 onboardId: resolvedOnboardId,
                                 errorMessage: error.localizedDescription,
@@ -240,7 +270,7 @@ final class PaywallViewModel: ObservableObject {
                 }
 
                 let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
-                if !UserDefaults.standard.bool(forKey: cpaFlag) {
+                if plan.j2dType == .subscription, !UserDefaults.standard.bool(forKey: cpaFlag) {
                     AF.log(
                         .subscribe_cpa,
                         AF.subscribeCPAValues(
