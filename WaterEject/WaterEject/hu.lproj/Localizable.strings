@@ -345,3 +345,9 @@
 "Home" = "Otthon";
 "Test" = "Teszt";
 "Setting" = "Beállítás";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Ingyenes próba bekapcsolva";
+"3 Days Free" = "3 nap ingyen";
+"then" = "utána";
+"Free trial" = "Ingyenes próba";

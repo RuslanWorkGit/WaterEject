@@ -345,3 +345,9 @@
 "Home" = "Kotiin";
 "Test" = "Testata";
 "Setting" = "Asetus";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Maksuton kokeilu käytössä";
+"3 Days Free" = "3 päivää ilmaiseksi";
+"then" = "sen jälkeen";
+"Free trial" = "Maksuton kokeilu";

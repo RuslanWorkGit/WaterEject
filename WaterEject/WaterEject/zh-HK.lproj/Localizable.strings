@@ -345,3 +345,9 @@
 "Home" = "家";
 "Test" = "測試";
 "Setting" = "環境";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "免費試用已開啟";
+"3 Days Free" = "免費試用 3 日";
+"then" = "之後";
+"Free trial" = "免費試用";

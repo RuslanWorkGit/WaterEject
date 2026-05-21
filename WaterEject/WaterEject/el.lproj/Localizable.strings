@@ -345,3 +345,9 @@
 "Home" = "Σπίτι";
 "Test" = "Δοκιμή";
 "Setting" = "Σύνθεση";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Η δωρεάν δοκιμή είναι ενεργή";
+"3 Days Free" = "3 ημέρες δωρεάν";
+"then" = "μετά";
+"Free trial" = "Δωρεάν δοκιμή";

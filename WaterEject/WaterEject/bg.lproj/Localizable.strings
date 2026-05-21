@@ -345,3 +345,9 @@
 "Home" = "Начало";
 "Test" = "Тест";
 "Setting" = "Настройка";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Безплатният пробен период е включен";
+"3 Days Free" = "3 дни безплатно";
+"then" = "след това";
+"Free trial" = "Безплатен пробен период";

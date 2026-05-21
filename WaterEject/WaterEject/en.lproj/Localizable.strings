@@ -345,3 +345,9 @@
 "Home" = "Home";
 "Test" = "Test";
 "Setting" = "Setting";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Free Trial Enabled";
+"3 Days Free" = "3 Days Free";
+"then" = "then";
+"Free trial" = "Free trial";

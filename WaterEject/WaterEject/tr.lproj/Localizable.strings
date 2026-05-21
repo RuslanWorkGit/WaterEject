@@ -345,3 +345,9 @@
 "Home" = "Ev";
 "Test" = "Test";
 "Setting" = "Ayar";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Ücretsiz deneme açık";
+"3 Days Free" = "3 gün ücretsiz";
+"then" = "sonra";
+"Free trial" = "Ücretsiz deneme";

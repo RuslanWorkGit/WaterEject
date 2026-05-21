@@ -345,3 +345,9 @@
 "Home" = "Thuis";
 "Test" = "Test";
 "Setting" = "Instelling";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Gratis proefperiode actief";
+"3 Days Free" = "3 dagen gratis";
+"then" = "daarna";
+"Free trial" = "Gratis proefperiode";

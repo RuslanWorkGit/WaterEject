@@ -345,3 +345,9 @@
 "Home" = "Start";
 "Test" = "Test";
 "Setting" = "Ustawienia";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Bezpłatny okres próbny włączony";
+"3 Days Free" = "3 dni za darmo";
+"then" = "potem";
+"Free trial" = "Okres próbny";

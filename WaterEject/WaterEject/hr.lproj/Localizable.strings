@@ -345,3 +345,9 @@
 "Home" = "Dom";
 "Test" = "Test";
 "Setting" = "Postavka";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Besplatno probno razdoblje uključeno";
+"3 Days Free" = "3 dana besplatno";
+"then" = "zatim";
+"Free trial" = "Besplatno probno razdoblje";

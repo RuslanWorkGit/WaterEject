@@ -11,7 +11,7 @@ import RevenueCat
 import AVFoundation
 
 struct PaywallFiveView: View {
-    
+
     @StateObject private var viewModel = NewPaywallViewModel()
     @State private var webViewURL: URL?
     @State private var didLogOpen = false
@@ -20,43 +20,43 @@ struct PaywallFiveView: View {
     @State private var player = AVQueuePlayer()
     @State private var playerLooper: AVPlayerLooper?
     @State private var isExiting = false
-    
+
     @State private var appearVideo = false
     @State private var appearTitle = false
     @State private var appearList  = false
     @State private var appearCards = false
     @State private var startDelay: Double = 0.35
     @State private var featuresWidth: CGFloat = 0
-    
+
     @State private var showInfoCardContent = false
-    //@State private var isFreeTrialEnabled = true
-    
+    @State private var isFreeTrialEnabled = true
+
     @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var didShowFirstCard = false
     @State private var appearReviews = false
-    
-    
+
+
     enum InfoCard: Int, CaseIterable {
         case reviews, features, stats
     }
-    
+
     @State private var currentInfoCard: InfoCard = .reviews
-    
+
     // 🔹 нове: напрямок анімації + “ручний” таймер
     @State private var isForward: Bool = true
     @State private var autoAdvanceWorkItem: DispatchWorkItem?
     @State private var didLogChoosePlan = false
     private let infoCardInterval: TimeInterval = 2.5
-    
-    
-    
+
+
+
         let reviews: [Review] = [
             .init(text: String(localized: "It saved my iPhone!"),               name: "Maria",  rating: 5),
             .init(text: String(localized: "Saved me from going to repair!"),    name: "Kevin",  rating: 5),
             .init(text: String(localized: "Worked better than rice!"),          name: "Sophie", rating: 5)
         ]
-    
+
     let onFinish: () -> Void
     let onboardId: String?
     let summaryTag: OnboardTag?     // ⬅️ нове: для "Onbord_v_3.x"
@@ -65,11 +65,11 @@ struct PaywallFiveView: View {
     let startAnimations: Bool
     private let telemetryVariant = PaywallVariant.fifth.rawValue
     private let telemetryPaywallId = "paywall_v_5.0"
-    
-    
+
+
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-    
+
     init(onFinish: @escaping () -> Void, onboardId: String? = nil, startDelay: Double = 0.35, summaryTag: OnboardTag? = nil, stepsVisited: [String]? = nil, startAnimations: Bool = true ) {
         self.onFinish = onFinish
         self.onboardId = onboardId
@@ -78,8 +78,8 @@ struct PaywallFiveView: View {
         self.stepsVisited = stepsVisited
         self.startAnimations = startAnimations
     }
-    
-    
+
+
     private func logOnboardSummary(_ status: PaywallStatus) {
         let plan    = viewModel.selectedPlan
         if let tag = summaryTag {
@@ -97,9 +97,9 @@ struct PaywallFiveView: View {
         } else {
             // ⬇️ НЕ онбординг: якщо пейвол відкрито з Modes — логнемо modes_paywall
             if paywallGate.currentContext == .modesTap {
-                
+
                 let onboardTag = OnboardTag.lastFromUserDefaults() ?? .modes
-                
+
                     Telemetry.shared.modesPaywall(
                         status: status,
                         plan: status == .success ? plan.analyticsValue : nil,
@@ -107,46 +107,46 @@ struct PaywallFiveView: View {
                         onboard: onboardTag,
                         entryPoint: "modes"
                 )
-                
+
             }
         }
     }
-    
+
     var body: some View {
-        
+
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
-        
+
         ZStack(alignment: .topTrailing) {
-            
-            
+
+
             ZStack(alignment: .top) {
-                
+
                 Color(red: 253 / 255, green: 251 / 255, blue: 249 / 255).ignoresSafeArea()
-                
+
                 VStack(alignment: .center) {
-                    
+
                     Spacer()
-                    
+
                     VStack(spacing: 8) {
-                        
-                        
-                        
+
+
+
                         (
                             Text("Remove Water Fast")
                                 .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-                            
+
                         )
                         .font(.system(size: 38 * padScale, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
                         .padding(.bottom, 0)
                         //.padding(.top, 180)
-                        
-                        
+
+
 //                        ReviewsCardView(reviews: reviews)
 
-                        
+
                         ZStack(alignment: .top) {
                             Group {
                                 switch currentInfoCard {
@@ -178,18 +178,18 @@ struct PaywallFiveView: View {
                         .frame(height: 180)
                         //.padding()
                         //.opacity(appearReviews ? 1 : 0)
-                        
+
                         .onAppear {
                             if startAnimations {
                                 didShowFirstCard = true
                                 appearReviews = false
-                                
+
                                 DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
                                     withAnimation(.easeOut(duration: 0.28)) {
                                         appearReviews = true
                                     }
                                 }
-                                
+
                                 restartAutoAdvance()
                             }
                         }
@@ -197,13 +197,13 @@ struct PaywallFiveView: View {
                             if startAnimations {
                                 didShowFirstCard = true
                                 appearReviews = false
-                                
+
                                 DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.5) {
                                     withAnimation(.easeOut(duration: 0.28)) {
                                         appearReviews = true
                                     }
                                 }
-                                
+
                                 restartAutoAdvance()
                             } else {
                                 appearReviews = false
@@ -216,7 +216,7 @@ struct PaywallFiveView: View {
                                     let translation = value.translation.width
                                     let threshold: CGFloat = 40
                                     guard abs(translation) > threshold else { return }
-                                    
+
                                     if translation < 0 {
                                         // свайп ліворуч → наступна
                                         goNextCard(animated: true)
@@ -224,82 +224,77 @@ struct PaywallFiveView: View {
                                         // свайп праворуч → попередня
                                         goPreviousCard(animated: true)
                                     }
-                                    
+
                                     restartAutoAdvance()
                                 }
                         )
                     }
-                    
-                    
+
+
                     //Spacer(minLength: 0)
-                    
+
                     //Spacer()
-                    
+
                     VStack(spacing: 12) {
-                        
-                        PaywallFourPlanCard(
-                            title: PaywallPlan.weekly.title,
-                            price: viewModel.pricePerPeriod[.weekly] ?? "...",
+
+                        PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
+                            .onChange(of: isFreeTrialEnabled) { _, isEnabled in
+                                if isEnabled {
+                                    choosePlan(.weekly, selectionMethod: "free_trial_toggle")
+                                } else if viewModel.selectedPlan == .weekly {
+                                    choosePlan(.yearly, selectionMethod: "free_trial_toggle")
+                                }
+                            }
+
+                        PaywallFivePlanCard(
+                            title: isFreeTrialEnabled ? String(localized: "3 Days Free") : NewPaywallPlan.weekly.title,
+                            price: isFreeTrialEnabled ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
                             sublabel: nil,
-                            saveText: viewModel.onlyPrice[.weekly] ?? "",
+                            saveText: isFreeTrialEnabled ? String(localized: "Free trial") : viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
-                            onTap: { viewModel.selectedPlan = .weekly
-                                
-                                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
-                                Telemetry.shared.funnelPlanChosen(
-                                    onboardId: resolvedOnboardId,
-                                    plan: PaywallPlan.weekly.analyticsValue,
-                                    selectionMethod: "tap"
-                                )
-                                
-//                                if let onboardId = onboardId {
-//                                    Telemetry.shared.funnelPlanChosen(
-//                                        onboardId: onboardId,
-//                                        plan: PaywallPlan.weekly.analyticsValue
-//                                    )
-//                                }
-                                didLogChoosePlan = true
+                            onTap: {
+                                if isFreeTrialEnabled {
+                                    choosePlan(.weekly, selectionMethod: "tap")
+                                } else {
+                                    isFreeTrialEnabled = true
+                                }
                             }
                         )
-                        
-                        PaywallFourPlanCard(
-                            title: PaywallPlan.yearly.title,
+
+                        PaywallFivePlanCard(
+                            title: NewPaywallPlan.yearly.title,
                             price: viewModel.pricePerPeriod[.yearly] ?? "…",
                             sublabel: String(localized: "Best Value"),
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
-                            onTap: { viewModel.selectedPlan = .yearly
-                                
-                                let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
-                                Telemetry.shared.funnelPlanChosen(
-                                    onboardId: resolvedOnboardId,
-                                    plan: PaywallPlan.yearly.analyticsValue,
-                                    selectionMethod: "tap"
-                                )
-                                
-                                didLogChoosePlan = true
+                            onTap: {
+                                if isFreeTrialEnabled {
+                                    isFreeTrialEnabled = false
+                                } else {
+                                    choosePlan(.yearly, selectionMethod: "tap")
+                                }
                             }
                         )
                     }
                     .padding(.top, isSmall ? 12 : isLarge ? 30 : 20)
                     .padding(.bottom, 12)
-                    
+
                     HStack {
                         Image(systemName: "checkmark.shield")
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
-                        Text("Cancel Anytime. Secure with App Store.")
+                        Text(isFreeTrialEnabled ? String(localized: "Cancel Anytime. No payment required today.") : String(localized: "Cancel Anytime. Secure with App Store."))
                             .font(.system(size: 10))
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                             .multilineTextAlignment(.center)
                     }
                     .padding(0)
-                    
-                    
+
+
                     Button {
                         let entry   = paywallGate.currentContext?.rawValue ?? "unknown"
                         let plan    = viewModel.selectedPlan
                         let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
-                        
+
                         if !didLogChoosePlan {
                             Telemetry.shared.funnelPlanChosen(
                                 onboardId: resolvedOnboardId,
@@ -308,23 +303,23 @@ struct PaywallFiveView: View {
                             )
                             didLogChoosePlan = true
                         }
-                        
+
                         Telemetry.shared.paywallCTATap(variant: telemetryVariant, entryPoint: entry,
                                                        plan: plan.analyticsValue, onboardId: onboardId)
-                        
-          
+
+
                         Telemetry.shared.funnelGoToPurchase(
                             onboardId: resolvedOnboardId,
                             plan: plan.analyticsValue
                         )
-                        
+
 //                        if let onboardId = onboardId {
 //                            Telemetry.shared.funnelGoToPurchase(
 //                                onboardId: onboardId,
 //                                plan: plan.analyticsValue
 //                            )
 //                        }
-                        
+
                         Task {
                             let result = await viewModel.buyWithRevenueCat(
                                 plan: plan, variant: telemetryVariant, entryPoint: entry, sessionId: sessionId, onboardId: onboardId, paywallId: telemetryPaywallId
@@ -338,17 +333,17 @@ struct PaywallFiveView: View {
                         }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
-                        
+
                         HStack {
                             if viewModel.isPurchasing {
                                 ProgressView().tint(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                
+
                                 //                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
                                     .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
                                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                                
+
                                     .scaleEffect(pulse ? 1.03 : 1.0)
                                     .shadow(
                                         color: Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)
@@ -361,74 +356,77 @@ struct PaywallFiveView: View {
                                         value: pulse
                                     )
                             } else {
-                                Text(forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)")
-                                    .font(.system(size: 16 * padScale, weight: .semibold))
-                                    .foregroundStyle(.white)
-                                
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                
-                                //                            .background(Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255))
-                                    .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                                
-                                    .scaleEffect(pulse ? 1.03 : 1.0)
-                                    .shadow(
-                                        color: Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)
-                                            .opacity(pulse ? 0.45 : 0.0),
-                                        radius: pulse ? 18 : 6, x: 0, y: 0
-                                    )
-                                    .animation(
-                                        reduceMotion ? nil :
-                                                .easeInOut(duration: 0.95).repeatForever(autoreverses: true),
-                                        value: pulse
-                                    )
+                                HStack(spacing: 10) {
+                                    Spacer()
+                                    Text(isFreeTrialEnabled ? String(localized: "Continue") : (forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)"))
+                                        .font(.system(size: 16 * padScale, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                    Image(systemName: "arrow.right")
+                                        .font(.system(size: 18 * padScale, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                    Spacer()
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .scaleEffect(pulse ? 1.03 : 1.0)
+                                .shadow(
+                                    color: Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255)
+                                        .opacity(pulse ? 0.45 : 0.0),
+                                    radius: pulse ? 18 : 6, x: 0, y: 0
+                                )
+                                .animation(
+                                    reduceMotion ? nil :
+                                            .easeInOut(duration: 0.95).repeatForever(autoreverses: true),
+                                    value: pulse
+                                )
                             }
                         }
 
-                        
+
                     }
                     .disabled(viewModel.isPurchasing || !appearVideo)
                     .allowsHitTesting(appearVideo && !viewModel.isPurchasing)
                     .opacity(appearVideo ? 1 : 0)
-                    
+
                     .padding(.horizontal, 24)
                     .padding(.bottom, 4)
-                    
-                    
-                    
-                    
+
+
+
+
                     HStack(spacing: 36) {
-                        
-                        
-                        
+
+
+
                         Button("Restore") {
                             Task { await viewModel.restorePurchases() }
                         }
                         .font(.system(size: 10 * padScale))
                         .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
-                        
-                        
+
+
                         Button("Terms of Service") {
-                            
+
                             webViewURL = URL(string: "https://docs.google.com/document/d/1L2xhXP9qKJPSP7rymbXx17-xWh5_17V_nJPBbXm1boE/edit?tab=t.0")
-                            
+
                         }
                         .font(.system(size: 10 * padScale))
                         .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
-                        
+
                         Button("Privacy Policy") {
-                            
+
                             webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
-                            
+
                         }
-                        
+
                         .font(.system(size: 10 * padScale))
                         .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                     }
-                    
-                    
-                    
+
+
+
                 }
                 //                .frame(maxHeight: .infinity, alignment: .top)
                 .frame(maxHeight: .infinity)
@@ -440,17 +438,17 @@ struct PaywallFiveView: View {
                         Image("paywallPhoto")
                             .resizable()
                             .scaledToFit()
-                        
+
                         Spacer()
                     }
                         .ignoresSafeArea()
-                    
+
                 )
-                
-                
-                
+
+
+
             }
-            
+
             Button(action: {
                 let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
                 logOnboardSummary(.close)
@@ -471,14 +469,14 @@ struct PaywallFiveView: View {
             .padding(.top, 20)
             .padding(.trailing, 18)
         }
-        
-        
+
+
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
         .onAppear {
             if !reduceMotion { pulse = true }
-            
+
             if !didLogOpen {
                 let entry = paywallGate.currentContext?.rawValue ?? "unknown"
                 Telemetry.shared.configurePaywallPresentation(
@@ -489,19 +487,19 @@ struct PaywallFiveView: View {
                     onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue
                 )
                 didLogOpen = true
-                
-                
+
+
             }
             Task { await viewModel.loadPricing() }
-            
-            
-            
+
+
+
             //            withAnimation(.easeInOut(duration: 0.2)) {
             //                appearReviews = true
             //            }
             //
             //            restartAutoAdvance()
-            
+
         }
         .task {
             DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
@@ -516,55 +514,68 @@ struct PaywallFiveView: View {
             autoAdvanceWorkItem?.cancel()
             autoAdvanceWorkItem = nil
         }
-        
+
     }
-    
+
     private func goNextCard(animated: Bool) {
         let all = InfoCard.allCases
         guard let idx = all.firstIndex(of: currentInfoCard) else { return }
         let next = all[(idx + 1) % all.count]
-        
+
         isForward = true
-        
+
         if animated && !reduceMotion {
             withAnimation { currentInfoCard = next }
         } else {
             currentInfoCard = next
         }
     }
-    
+
+    private func choosePlan(_ plan: NewPaywallPlan, selectionMethod: String) {
+        viewModel.selectedPlan = plan
+
+        let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+        Telemetry.shared.funnelPlanChosen(
+            onboardId: resolvedOnboardId,
+            plan: plan.analyticsValue,
+            selectionMethod: selectionMethod
+        )
+
+        didLogChoosePlan = true
+    }
+
     private func goPreviousCard(animated: Bool) {
         let all = InfoCard.allCases
         guard let idx = all.firstIndex(of: currentInfoCard) else { return }
         let prev = all[(idx - 1 + all.count) % all.count]
-        
+
         isForward = false
-        
+
         if animated && !reduceMotion {
             withAnimation { currentInfoCard = prev }
         } else {
             currentInfoCard = prev
         }
     }
-    
+
     // MARK: - Авто-перелистування + перезапуск
-    
+
     private func restartAutoAdvance() {
         autoAdvanceWorkItem?.cancel()
-        
+
         guard !reduceMotion else { return }
-        
+
         let work = DispatchWorkItem {
             goNextCard(animated: true)
             restartAutoAdvance()
         }
-        
+
         autoAdvanceWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + infoCardInterval, execute: work)
     }
-    
-    
-    
+
+
+
 }
 
 
@@ -598,10 +609,10 @@ struct Review: Identifiable {
 
 struct StarsView: View {
     let rating: Int
-    
+
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-    
+
     var body: some View {
         HStack(spacing: 4) {
             ForEach(0..<rating, id: \.self) { _ in
@@ -620,31 +631,31 @@ struct PaywallFivePlanCard: View {
     let saveText: String
     let isSelected: Bool
     let onTap: () -> Void
-    
-    
-    
+
+
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 16) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color.gray.opacity(0.3))
                     .font(.system(size: 28, weight: .light))
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(LocalizedStringKey(title))
+                        Text(title)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(.black)
                         Spacer()
-                        
+
                     }
                     Text(price)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Color(red: 170/255, green: 178/255, blue: 191/255))
                 }
-                
-                
-                
+
+
+
                 VStack {
                     if let sublabel = sublabel {
                         Text(sublabel)
@@ -655,13 +666,15 @@ struct PaywallFivePlanCard: View {
                             .foregroundStyle(Color(red: 81/255, green: 132/255, blue: 234/255))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                    
-                    
+
+
                     Text(saveText)
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(red: 196/255, green: 196/255, blue: 197/255))
-                    
+                        .font(.system(size: sublabel == nil ? 16 : 10, weight: sublabel == nil ? .semibold : .regular))
+                        .foregroundStyle(sublabel == nil ? .black : Color(red: 196/255, green: 196/255, blue: 197/255))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
+                .frame(minWidth: 92, alignment: .trailing)
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
@@ -679,7 +692,7 @@ struct PaywallFivePlanCard: View {
                         isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5),
                         lineWidth: 1
                     )
-                
+
             )
             .shadow(
                 color: isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.08) : .clear,
@@ -691,20 +704,52 @@ struct PaywallFivePlanCard: View {
     }
 }
 
+struct PaywallFiveFreeTrialToggle: View {
+    @Binding var isOn: Bool
+
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+
+    var body: some View {
+        HStack {
+            Text("Free Trial Enabled")
+                .font(.system(size: 16 * padScale, weight: .medium))
+                .foregroundStyle(.black)
+
+            Spacer()
+
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .tint(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5), lineWidth: 1)
+                }
+        )
+        .padding(.horizontal, 4)
+    }
+}
+
 
 struct ReviewsCardView: View {
-    
+
     let reviews: [Review]
 //    let reviews: [Review] = [
 //        .init(text: "It saved my iPhone!",               name: "Maria",  rating: 5),
 //        .init(text: "Saved me from going to repair!",    name: "Kevin",  rating: 5),
 //        .init(text: "Worked better than rice!",          name: "Sophie", rating: 5)
 //    ]
-    
+
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-    
-    
+
+
     var body: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 8) {
@@ -712,83 +757,83 @@ struct ReviewsCardView: View {
 //                    HStack(alignment: .top) {
 //                        VStack(alignment: .leading, spacing: 4) {
 //                            StarsView(rating: review.rating)
-//                            
+//
 //                            Text(review.text)
 //                                .font(.custom("Montserrat-Bold", size: 14))
 //                                .foregroundColor(.black)
 //                        }
-//                        
+//
 //                        Spacer()
-//                        
+//
 //                        Text(review.name)
 //                            .font(.custom("Montserrat-Medium", size: 14))
 //                            .foregroundColor(.black)
 //                            .padding(.top, 2) // трохи вирівняти по вертикалі
-//                        
+//
 //                    }
 //                }
-                
+
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         StarsView(rating: reviews[0].rating)
-                        
+
                         Text(reviews[0].text)
                             .font(.custom("Montserrat-Bold", size: 14 * padScale))
                             .foregroundColor(.black)
                     }
-                    
+
                     Spacer()
-                    
+
                     Text(reviews[0].name)
                         .font(.custom("Montserrat-Medium", size: 14 * padScale))
                         .foregroundColor(.black)
                         .padding(.top, 2) // трохи вирівняти по вертикалі
-                    
+
                 }
 
-                
+
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         StarsView(rating: reviews[1].rating)
-                        
+
                         Text(reviews[1].text)
                             .font(.custom("Montserrat-Bold", size: 14 * padScale))
                             .foregroundColor(.black)
                     }
-                    
+
                     Spacer()
-                    
+
                     Text(reviews[1].name)
                         .font(.custom("Montserrat-Medium", size: 14 * padScale))
                         .foregroundColor(.black)
                         .padding(.top, 2) // трохи вирівняти по вертикалі
-                    
+
                 }
 
-                
+
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         StarsView(rating: reviews[2].rating)
-                        
+
                         Text(reviews[2].text)
                             .font(.custom("Montserrat-Bold", size: 14 * padScale))
                             .foregroundColor(.black)
                     }
-                    
+
                     Spacer()
-                    
+
                     Text(reviews[2].name)
                         .font(.custom("Montserrat-Medium", size: 14 * padScale))
                         .foregroundColor(.black)
                         .padding(.top, 2) // трохи вирівняти по вертикалі
-                    
+
                 }
 
-                
-                
 
-                
-                
+
+
+
+
             }
             .padding(16)
         }
@@ -808,23 +853,23 @@ struct FeatureItem: Identifiable {
 }
 
 struct FeaturesCardView: View {
-    
+
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-    
+
     private let items: [FeatureItem] = [
         .init(emoji: "🎛️", text: String(localized: "All sound & dB tools unlocked")),
         .init(emoji: "🔊", text: String(localized: "Unlimited cleaning cycles")),
         .init(emoji: "🚫", text: String(localized: "No ads, premium experience"))
     ]
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ForEach(items) { item in
                 HStack(alignment: .center, spacing: 12) {
                     Text(item.emoji)
                         .font(.system(size: 28 * padScale))
-                    
+
                     Text(item.text)
                         .font(.custom("Montserrat-SemiBold", size: 18 * padScale))
                         .foregroundColor(.black)
@@ -842,46 +887,46 @@ struct FeaturesCardView: View {
 }
 
 struct StatisticCardView: View {
-    
+
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            
+
             HStack(alignment: .center, spacing: 20) {
-                
+
                 Image("Left")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 80 * padScale)
-                
+
                 VStack(spacing: 6) {
                     Text("MORE THAN")
                         .font(.custom("Montserrat-SemiBold", size: 20 * padScale))
                         .foregroundColor(.black)
                         //.fixedSize(horizontal: false, vertical: true)
-                    
+
                     Text("1,000,000")
                         .font(.custom("Montserrat-Bold", size: 20 * padScale))
                         .foregroundColor(.black)
                         //.fixedSize(horizontal: false, vertical: true)
-                    
+
                     Text("SATISFIED USERS")
                         .font(.custom("Montserrat-SemiBold", size: 20 * padScale))
                         .foregroundColor(.black)
                         //.fixedSize(horizontal: false, vertical: true)
                 }
-                
-                
+
+
                 Image("Right")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 80 * padScale)
-                
-                
+
+
             }
-            
+
         }
         .padding(20)
         .background(
@@ -893,14 +938,14 @@ struct StatisticCardView: View {
 }
 
 
-#Preview {
-    ZStack {
-        Color(red: 239/255, green: 244/255, blue: 248/255).ignoresSafeArea()
-        StatisticCardView()
-            .padding()
-    }
-}
+//#Preview {
+//    ZStack {
+//        Color(red: 239/255, green: 244/255, blue: 248/255).ignoresSafeArea()
+//        StatisticCardView()
+//            .padding()
+//    }
+//}
 
-//#Preview(body: {
-//    PaywallFourView(onFinish: {print("hello")})
-//})
+#Preview(body: {
+    PaywallFiveView(onFinish: {print("hello")})
+})

@@ -345,3 +345,9 @@
 "Home" = "בית";
 "Test" = "בדיקה";
 "Setting" = "הגדרות";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "ניסיון חינם מופעל";
+"3 Days Free" = "3 ימים חינם";
+"then" = "לאחר מכן";
+"Free trial" = "ניסיון חינם";

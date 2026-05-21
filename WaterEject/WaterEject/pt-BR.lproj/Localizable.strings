@@ -345,3 +345,9 @@
 "Home" = "Lar";
 "Test" = "Teste";
 "Setting" = "Contexto";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Teste grátis ativado";
+"3 Days Free" = "3 dias grátis";
+"then" = "depois";
+"Free trial" = "Teste grátis";

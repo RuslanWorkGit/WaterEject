@@ -345,3 +345,9 @@
 "Home" = "Hem";
 "Test" = "Testa";
 "Setting" = "Miljö";
+
+/* Added free trial paywall strings */
+"Free Trial Enabled" = "Gratis provperiod aktiverad";
+"3 Days Free" = "3 dagar gratis";
+"then" = "sedan";
+"Free trial" = "Gratis provperiod";
