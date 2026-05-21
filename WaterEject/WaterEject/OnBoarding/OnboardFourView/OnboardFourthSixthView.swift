@@ -84,7 +84,7 @@ struct PillButtonSix: View {
     
     var body: some View {
         Button(action: action) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
                 .frame(minHeight: 52)
@@ -126,7 +126,7 @@ struct PillButtonSix: View {
 //    
 //    var body: some View {
 //        Button(action: action) {
-//            Text(title)
+//            Text(LocalizedStringKey(title))
 //                .font(.system(size: 18, weight: .semibold))
 //                .foregroundStyle(.white)
 //                .frame(minHeight: 52)

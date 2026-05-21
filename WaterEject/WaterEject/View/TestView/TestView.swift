@@ -37,7 +37,7 @@ struct TestView: View {
                     
                     Spacer()
                     
-                    Text("\(viewModel.completedModesTest.count) / 4 passed")
+                    Text(String.localizedStringWithFormat(String(localized: "%d / 4 passed"), viewModel.completedModesTest.count))
                         .foregroundStyle(Color(red: 196 / 255, green: 196 / 255, blue: 197 / 255))
                         .font(.system(size: 12 * padScale))
                         .padding(5)
@@ -127,7 +127,7 @@ struct TestView: View {
                     viewModel.goToNextStep()
                 }
             } label: {
-                Text(isLast ? "Finish" : "Continue")
+                Text(isLast ? String(localized: "Finish") : String(localized: "Continue"))
                     .font(.system(size: 16 * padScale, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -163,7 +163,7 @@ struct FeatureCard: View {
             VStack(spacing: 8) {
                 Image(testMode.imageName)
                 
-                Text(testMode.testName)
+                Text(LocalizedStringKey(testMode.testName))
                     .font(.system(size: 15 * padScale))
                     .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
             }

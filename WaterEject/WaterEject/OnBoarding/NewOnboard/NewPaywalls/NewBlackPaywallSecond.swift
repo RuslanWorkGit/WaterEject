@@ -85,10 +85,10 @@ struct NewBlackPaywallSecond: View {
 
                             HStack(spacing: 14) {
                                 NewBlackPaywallPlanCard(
-                                    title: "Annual",
+                                    title: String(localized: "Annual"),
                                     price: price(for: .annual, fallback: "$29.99"),
                                     subtitle: "\(price(for: .annual, fallback: "$29.99")) one-time purchase",
-                                    badge: "Best Value",
+                                    badge: String(localized: "Best Value"),
                                     isSelected: viewModel.selectedPlan == .annual
                                 ) {
                                     selectPlan(.annual, method: "tap")
@@ -358,7 +358,7 @@ private struct NewBlackPaywallPlanCard: View {
         Button(action: onTap) {
             ZStack(alignment: .top) {
                 VStack(spacing: 10) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 21, weight: .bold))
                         .foregroundStyle(.white)
                         .padding(.top, badge == nil ? 22 : 22)
@@ -367,7 +367,7 @@ private struct NewBlackPaywallPlanCard: View {
                         .font(.system(size: 26, weight: .black))
                         .foregroundStyle(.white)
 
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(.system(size: 13, weight: .regular))
                         .foregroundStyle(Color(red: 165 / 255, green: 172 / 255, blue: 184 / 255))
 

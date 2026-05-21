@@ -100,7 +100,7 @@ struct PillButtonNew: View {
             
             action()
         }) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(minHeight: 52)
@@ -152,7 +152,7 @@ struct SelectableChipOne: View {
                 //                    .font(.system(size: 18, weight: .semibold))
                 //                    .foregroundStyle(isSelected ? Color(red: 81 / 255, green: 132 / 255, blue: 234 / 255) : Color(red: 195 / 255, green: 198 / 255, blue: 205 / 255))
                 
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
                 

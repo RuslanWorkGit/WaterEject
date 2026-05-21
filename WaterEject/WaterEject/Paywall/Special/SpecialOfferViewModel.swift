@@ -21,7 +21,7 @@ enum SpecialPlan: String, CaseIterable, Hashable {
     }
     
     var title: String {
-        switch self { case .weekly: "7 days" }
+        switch self { case .weekly: String(localized: "7 days") }
     }
     
     var analyticsValue: String { rawValue }
@@ -94,7 +94,7 @@ final class SpecialOfferViewModel: ObservableObject {
             
             var fullPrice = p.localizedPriceString
 
-            weeklyPricePerPeriod = "\(displayPrice)/week"
+            weeklyPricePerPeriod = "\(displayPrice)\(String(localized: "/week"))"
             weeklyOnlyPrice      = "\(displayPrice)"
             weeklyFullPrice      = "\(fullPrice)"
 

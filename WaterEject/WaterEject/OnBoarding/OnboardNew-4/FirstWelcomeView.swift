@@ -73,7 +73,7 @@ struct NewOboardStyleButton: View {
             action()
         }
         ) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(minHeight: 52)
@@ -271,7 +271,7 @@ private struct OnboardingReviewBlock: View {
                         .foregroundColor(.black)
                 }
 
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.custom("Montserrat-ExtraBold", size: 20))
                     .foregroundColor(.black)
 

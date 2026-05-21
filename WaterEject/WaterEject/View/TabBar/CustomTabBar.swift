@@ -104,7 +104,7 @@ struct TabBarButton: View {
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .medium))
                     .foregroundColor(isSelected ? Color(red: 161/255, green: 192/255, blue: 255/255) : .gray)
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(.system(size: 13, weight: .semibold))
                     .lineLimit(1)                   // ← не даємо розриватися
                     .minimumScaleFactor(0.9)

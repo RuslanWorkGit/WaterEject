@@ -157,11 +157,11 @@ struct ModeInfoCard: View {
             // Текст показуємо тільки коли розгорнута
             if isExpanded {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.black)
                     
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(Color(red: 90/255, green: 96/255, blue: 104/255))
                 }

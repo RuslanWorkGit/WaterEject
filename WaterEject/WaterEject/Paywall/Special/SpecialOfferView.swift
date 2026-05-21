@@ -289,7 +289,7 @@ struct HorizontalSpecialText: View {
             ////                    Circle()
             ////                        .fill(color.opacity(0.15))
             //                )
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: (isLarge ? 20 : 17) * padScale, weight: .semibold))
                 .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 246 / 255))
         }
@@ -310,7 +310,7 @@ struct SpecialButton: View {
     var body: some View {
         ZStack {
             Button(action: action) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.custom("Manrope_SemiBold", size: 16 * padScale))
                     .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
                     .frame(minHeight: 52)

@@ -72,19 +72,19 @@ struct NewHomeView: View {
                     BigCardStartCleaningView(
                         icon: "NewWaterDrop",
                         mode: .waterRemoval,
-                        day: "Day 1",
-                        mainText: "Water \nRemoval",
+                        day: String(localized: "Day 1"),
+                        mainText: String(localized: "Water Removal"),
                         deviceIcon: "SmallWave",
-                        firstHesh: "#Clean",
+                        firstHesh: String(localized: "#Clean"),
                         deviceColor: Color(red: 161/255, green: 225/255, blue: 255/255),
-                        secondHesh: "#LowFrequence",
-                        time: "60 seconds",
+                        secondHesh: String(localized: "#LowFrequency"),
+                        time: String.localizedStringWithFormat(String(localized: "%d seconds"), 60),
                         isSmall: isSmall,
                         onModeAction: { mode in startIfAllowed(mode) }
                     )
                     .padding(.horizontal, 24)
                     
-                    TurboCleaningCardView(icon: "Lightning", mode: .waterRemoval, mainText: "Turbo Cleaning", secondText: "Advaced", isSmall: isSmall) { mode in
+                    TurboCleaningCardView(icon: "Lightning", mode: .waterRemoval, mainText: String(localized: "Turbo Cleaning"), secondText: String(localized: "Advanced"), isSmall: isSmall) { mode in
                         startIfAllowed(mode)
                     }
                     .padding(.horizontal, 24)
@@ -206,5 +206,4 @@ private func shouldShowSpecialOfferOnSecondLaunch() async -> Bool {
     
     return true
 }
-
 

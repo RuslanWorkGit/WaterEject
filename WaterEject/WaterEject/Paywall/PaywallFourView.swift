@@ -189,7 +189,7 @@ struct PaywallFourView: View {
                         PaywallFourPlanCard(
                             title: PaywallPlan.yearly.title,
                             price: viewModel.pricePerPeriod[.yearly] ?? "…",
-                            sublabel: "Best Value",
+                            sublabel: String(localized: "Best Value"),
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: {
@@ -254,7 +254,7 @@ struct PaywallFourView: View {
                         }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
-                        Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
+                        Text(forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
                         
@@ -447,7 +447,7 @@ struct HorizontalFourText: View {
 //                    Circle()
 //                        .fill(color.opacity(0.15))
                 )
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: isLarge ? 20 : 17, weight: .semibold))
                 .foregroundStyle(Color(red: 65 / 255, green: 67 / 255, blue: 72 / 255))
         }
@@ -478,7 +478,7 @@ struct PaywallFourPlanCard: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(title)
+                        Text(LocalizedStringKey(title))
                             .font(.system(size: 20 * padScale, weight: .bold))
                             .foregroundStyle(.black)
                         Spacer()

@@ -62,12 +62,12 @@ struct CleaningModeCard: View {
                     
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
-                            Text(mode.modeName)
+                            Text(LocalizedStringKey(mode.modeName))
                                 .font(.system(size: isSmall ? 14 : 18, weight: .semibold))
                                 .foregroundStyle(Color(red: 247 / 255, green: 247 / 255, blue: 247 / 255))
                             
                         }
-                        Text(mode.explainText)
+                        Text(LocalizedStringKey(mode.explainText))
                             .font(.system(size: isSmall ? 12 : 14))
                             .foregroundColor(Color.white.opacity(0.55))
                     }

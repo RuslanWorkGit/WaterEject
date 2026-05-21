@@ -290,7 +290,7 @@ struct SelectedModeCard: View {
                 Text("Selected mode:")
                     .font(.system(size: 13 * padScale, weight: .regular))
                     .foregroundStyle(.white.opacity(0.6))
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 18 * padScale, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)

@@ -52,7 +52,7 @@ struct VibroView: View {
                 //.padding(.horizontal, 16)
                 .offset(y: -20)
             
-            Text("Patern")
+            Text("Pattern")
                 .font(.system(size: 14 * padScale))
                 .foregroundStyle(.white.opacity(0.9))
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -205,7 +205,7 @@ struct VibroCard: View {
                 Image(systemName: testMode.imageName)
                     .scaleEffect(padScale)
                     .foregroundStyle(isCompleted ? Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255) : isSelected ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255) : Color(red: 179/255, green: 179/255, blue: 179/255))
-                Text(testMode.testName)
+                Text(LocalizedStringKey(testMode.testName))
                     .font(.system(size: 15 * padScale))
                     .foregroundStyle(isCompleted ? Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255) : isSelected ? Color(red: 161 / 255, green: 192 / 255, blue: 255 / 255) : Color(red: 179/255, green: 179/255, blue: 179/255))
             }
@@ -287,7 +287,7 @@ struct IntensityPill: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Text(level.title)
+                Text(LocalizedStringKey(level.title))
                     .font(.system(size: 15 * padScale, weight: .semibold))
                 
                 

@@ -52,9 +52,9 @@ struct PaywallFiveView: View {
     
     
         let reviews: [Review] = [
-            .init(text: "It saved my iPhone!",               name: "Maria",  rating: 5),
-            .init(text: "Saved me from going to repair!",    name: "Kevin",  rating: 5),
-            .init(text: "Worked better than rice!",          name: "Sophie", rating: 5)
+            .init(text: String(localized: "It saved my iPhone!"),               name: "Maria",  rating: 5),
+            .init(text: String(localized: "Saved me from going to repair!"),    name: "Kevin",  rating: 5),
+            .init(text: String(localized: "Worked better than rice!"),          name: "Sophie", rating: 5)
         ]
     
     let onFinish: () -> Void
@@ -265,7 +265,7 @@ struct PaywallFiveView: View {
                         PaywallFourPlanCard(
                             title: PaywallPlan.yearly.title,
                             price: viewModel.pricePerPeriod[.yearly] ?? "…",
-                            sublabel: "Best Value",
+                            sublabel: String(localized: "Best Value"),
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: { viewModel.selectedPlan = .yearly
@@ -361,7 +361,7 @@ struct PaywallFiveView: View {
                                         value: pulse
                                     )
                             } else {
-                                Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
+                                Text(forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)")
                                     .font(.system(size: 16 * padScale, weight: .semibold))
                                     .foregroundStyle(.white)
                                 
@@ -632,7 +632,7 @@ struct PaywallFivePlanCard: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(title)
+                        Text(LocalizedStringKey(title))
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(.black)
                         Spacer()
@@ -813,9 +813,9 @@ struct FeaturesCardView: View {
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
     
     private let items: [FeatureItem] = [
-        .init(emoji: "🎛️", text: "All sound & dB tools unlocked"),
-        .init(emoji: "🔊", text: "Unlimited cleaning cycles"),
-        .init(emoji: "🚫", text: "No ads, premium experience")
+        .init(emoji: "🎛️", text: String(localized: "All sound & dB tools unlocked")),
+        .init(emoji: "🔊", text: String(localized: "Unlimited cleaning cycles")),
+        .init(emoji: "🚫", text: String(localized: "No ads, premium experience"))
     ]
     
     var body: some View {

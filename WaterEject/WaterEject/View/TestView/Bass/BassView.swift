@@ -280,7 +280,7 @@ struct TestClipCard: View {
                             : Color(red: 81/255, green: 132/255, blue: 234/255)
                         )
                     
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 15 * padScale, weight: .semibold))
                         .foregroundStyle(
                             isFinished ? Color(red: 247/255, green: 247/255, blue: 247/255)

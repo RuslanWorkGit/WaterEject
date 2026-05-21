@@ -24,7 +24,7 @@ enum NewPaywallPlan: String, CaseIterable, Hashable {
     }
     
     var title: String {
-        switch self { case .weekly: "7 days"; case .yearly: "12 months"; case .annual: "Annual" }
+        switch self { case .weekly: String(localized: "7 days"); case .yearly: String(localized: "12 months"); case .annual: String(localized: "Annual") }
     }
     
     var analyticsValue: String { rawValue }
@@ -98,11 +98,11 @@ final class NewPaywallViewModel: ObservableObject {
                 let p = pkg.storeProduct
                 let localized = p.localizedPriceString
                 switch plan {
-                case .weekly: period[plan] = "\(localized)/week"
-                case .yearly: period[plan] = "\(localized)/year"
+                case .weekly: period[plan] = "\(localized)\(String(localized: "/week"))"
+                case .yearly: period[plan] = "\(localized)\(String(localized: "/year"))"
                 case .annual: period[plan] = localized
                 }
-                only[plan]   = "for \(localized)"
+                only[plan] = "\(String(localized: "for")) \(localized)"
             }
             
             // 👇 тепер ОДНИМ махом присвоюємо у @Published

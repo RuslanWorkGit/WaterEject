@@ -99,12 +99,12 @@ struct SelectableChipTwo: View {
                 
                 VStack(alignment: .leading) {
                     
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
                     
                     
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
                     

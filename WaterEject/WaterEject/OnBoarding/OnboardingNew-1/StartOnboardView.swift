@@ -155,7 +155,7 @@ struct PrimaryPillButton: View {
 
     var body: some View {
         Button(action: action) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(height: 52) // тільки висота, ширину задає scaffold

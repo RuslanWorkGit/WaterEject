@@ -70,7 +70,7 @@ struct StereoView: View {
 
                    
                 } label: {
-                    Text(viewModel.isPlaying ? "Pause" : "Start Stereo")
+                    Text(viewModel.isPlaying ? String(localized: "Pause") : String(localized: "Start Stereo"))
                         .font(.system(size: 16 * padScale, weight: .semibold))
                         .foregroundStyle(.white)
                     
@@ -160,7 +160,7 @@ struct SpeakerSwitchCard: View {
             isOn.toggle()
         }) {
             VStack(spacing: sizeVertical) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 20 * padScale, weight: .medium))
                     .foregroundColor(Color.white.opacity(0.7))
                 Image(imageName)

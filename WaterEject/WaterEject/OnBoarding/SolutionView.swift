@@ -100,7 +100,7 @@ struct HorizontalTextSolution: View {
                 .resizable()
                 .frame(width: isLarge ? 18 : 16, height: isLarge ? 18 : 16)
                 .foregroundStyle(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: isLarge ? 18 : 16))
                 .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 246 / 255))
         }

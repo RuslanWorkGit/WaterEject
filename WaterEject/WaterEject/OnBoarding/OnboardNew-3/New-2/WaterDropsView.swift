@@ -120,7 +120,7 @@ struct NewTwoOboardButton: View {
             action()
             
         }) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(minHeight: 64)

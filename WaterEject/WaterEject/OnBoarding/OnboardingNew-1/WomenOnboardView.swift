@@ -152,7 +152,7 @@ struct ReviewCard: View {
                     .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
             }
             
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 16, weight: .heavy))
                 .foregroundStyle(Color(red: 17 / 255, green: 17 / 255, blue: 17 / 255))
 

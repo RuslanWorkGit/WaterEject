@@ -53,8 +53,8 @@ struct SevenDaysModesView: View {
                 VStack(spacing: 12) {
                     SevenDaysHeaderView(
                         headerHeight: headerHeight,
-                        title: "7-day cleaning Plan",
-                        subtitle: "Perform a complete cleaning by daily cleaning",
+                        title: String(localized: "7-day cleaning Plan"),
+                        subtitle: String(localized: "Perform a complete cleaning by daily cleaning"),
                         onBack: { dismiss() }
                     )
                 }

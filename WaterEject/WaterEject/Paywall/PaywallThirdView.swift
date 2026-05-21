@@ -174,7 +174,7 @@ struct PaywallThirdView: View {
                         PaywallThirdPlanCard(
                             title: PaywallPlan.yearly.title,
                             price: viewModel.pricePerPeriod[.yearly] ?? "…",
-                            sublabel: "Best Value",
+                            sublabel: String(localized: "Best Value"),
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: { viewModel.selectedPlan = .yearly
@@ -228,7 +228,7 @@ struct PaywallThirdView: View {
                         }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
-                        Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
+                        Text(forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
                         
@@ -441,7 +441,7 @@ struct HorizontalThirdText: View {
                     Circle()
                         .fill(color.opacity(0.15))
                 )
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: isLarge ? 20 : 17))
                 .foregroundStyle(Color(red: 240 / 255, green: 240 / 255, blue: 240 / 255))
         }
@@ -468,7 +468,7 @@ struct PaywallThirdPlanCard: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(title)
+                        Text(LocalizedStringKey(title))
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(Color(red: 238/255, green: 255/255, blue: 246/255))
                         Spacer()

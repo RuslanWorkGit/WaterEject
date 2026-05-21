@@ -107,44 +107,44 @@ enum NewCleaningMode: String, CaseIterable, Identifiable {
     
     var modeName: String {
         switch self {
-        case .waterRemoval: return "Water Removal"
-        case .deepWaterClean:        return "Deep Water Clean"
-                case .speakerCheck:          return "Speaker Check"
-                case .intermediateCleaning:  return "Intermediate Cleaning"
-                case .dustResidueClean:      return "Dust & Residue Clean"
-                case .soundBalanceRestore:   return "Sound Balance Restore"
-                case .finalDeepClean:        return "Final Deep Clean"
+        case .waterRemoval: return String(localized: "Water Removal")
+        case .deepWaterClean:        return String(localized: "Deep Water Clean")
+                case .speakerCheck:          return String(localized: "Speaker Check")
+                case .intermediateCleaning:  return String(localized: "Intermediate Cleaning")
+                case .dustResidueClean:      return String(localized: "Dust & Residue Clean")
+                case .soundBalanceRestore:   return String(localized: "Sound Balance Restore")
+                case .finalDeepClean:        return String(localized: "Final Deep Clean")
         }
     }
 
     var explainText: String {
         switch self {
-        case .waterRemoval: return "Use basic sound frequencies to quickly remove visible water and dust from the speakers"
+        case .waterRemoval: return String(localized: "Use basic sound frequencies to quickly remove visible water and dust from the speakers")
         case .deepWaterClean:
-                   return "Targets water trapped deeper inside the speaker mesh. Helps prevent sound distortion caused by remaining moisture"
+                   return String(localized: "Targets water trapped deeper inside the speaker mesh. Helps prevent sound distortion caused by remaining moisture")
                case .speakerCheck:
-                   return "Plays test tones to check clarity, balance, and volume. Detect issues early before they affect sound quality"
+                   return String(localized: "Plays test tones to check clarity, balance, and volume. Detect issues early before they affect sound quality")
                case .intermediateCleaning:
-                   return "Uses mid-range frequencies for gentle maintenance cleaning. Keeps speakers clear after initial water removal"
+                   return String(localized: "Uses mid-range frequencies for gentle maintenance cleaning. Keeps speakers clear after initial water removal")
                case .dustResidueClean:
-                   return "Helps loosen dust and small particles left after moisture dries. Improves airflow and overall sound clarity"
+                   return String(localized: "Helps loosen dust and small particles left after moisture dries. Improves airflow and overall sound clarity")
                case .soundBalanceRestore:
-                   return "Stabilizes speaker output after multiple cleaning sessions. Designed to normalize sound performance"
+                   return String(localized: "Stabilizes speaker output after multiple cleaning sessions. Designed to normalize sound performance")
                case .finalDeepClean:
-                   return "Completes the cleaning cycle with a full multi-frequency pass. Leaves your speakers clean, dry, and ready for everyday use"
+                   return String(localized: "Completes the cleaning cycle with a full multi-frequency pass. Leaves your speakers clean, dry, and ready for everyday use")
 
         }
     }
     
     var tags: [String] {
             switch self {
-            case .waterRemoval:         return ["#Clean", "#LowFrequency"]
-            case .deepWaterClean:       return ["#MultiFrequency", "#Expel"]
-            case .speakerCheck:         return ["#HighFrequency", "#Test"]
-            case .intermediateCleaning: return ["#Maintain"]
-            case .dustResidueClean:     return ["#Clear", "#BalancedFrequency"]
-            case .soundBalanceRestore:  return ["#Optimize", "#Balance"]
-            case .finalDeepClean:       return ["#FullClean", "#Finish"]
+            case .waterRemoval:         return [String(localized: "#Clean"), String(localized: "#LowFrequency")]
+            case .deepWaterClean:       return [String(localized: "#MultiFrequency"), String(localized: "#Expel")]
+            case .speakerCheck:         return [String(localized: "#HighFrequency"), String(localized: "#Test")]
+            case .intermediateCleaning: return [String(localized: "#Maintain")]
+            case .dustResidueClean:     return [String(localized: "#Clear"), String(localized: "#BalancedFrequency")]
+            case .soundBalanceRestore:  return [String(localized: "#Optimize"), String(localized: "#Balance")]
+            case .finalDeepClean:       return [String(localized: "#FullClean"), String(localized: "#Finish")]
             }
         }
     
@@ -160,7 +160,7 @@ enum NewCleaningMode: String, CaseIterable, Identifiable {
             }
         }
     
-    var durationText: String { "\(durationSeconds) seconds" }
+    var durationText: String { String.localizedStringWithFormat(String(localized: "%d seconds"), durationSeconds) }
     
     var iconAssetName: String {
             switch self {
@@ -177,4 +177,3 @@ enum NewCleaningMode: String, CaseIterable, Identifiable {
 
 
 }
-

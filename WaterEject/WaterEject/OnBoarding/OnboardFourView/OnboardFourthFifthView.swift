@@ -160,7 +160,7 @@ struct InfoActionCard: View {
     var body: some View {
         HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 15, weight: .regular))
                     .foregroundStyle(Color(red: 59 / 255, green: 65 / 255, blue: 72 / 255))
 

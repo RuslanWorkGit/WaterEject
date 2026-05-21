@@ -39,23 +39,23 @@ final class SpecialOfferNotificationManager {
            id: String
        ) {
            let content = UNMutableNotificationContent()
-           content.title = "WaterEject"
+           content.title = String(localized: "WaterEject")
            
            // 🔹 Варіанти текстів для 5 хв після закриття
            let afterCloseBodies = [
-               "💧 Your speakers may still need cleaning — 40% OFF.",
-               "💧 Water may be trapped. Finish cleaning: 40% OFF.",
-               "💧 Protect your speakers. Cleaning now 40% OFF.",
-               "💧 Restore speaker clarity — 40% OFF cleaning."
+               String(localized: "💧 Your speakers may still need cleaning — 40% OFF."),
+               String(localized: "💧 Water may be trapped. Finish cleaning: 40% OFF."),
+               String(localized: "💧 Protect your speakers. Cleaning now 40% OFF."),
+               String(localized: "💧 Restore speaker clarity — 40% OFF cleaning.")
            ]
            
            // 🔹 Варіанти текстів для 7 днів неактивності
            let after7DaysBodies = [
-               "💧 Moisture risk in speakers. 40% OFF to clean.",
-               "💧 Your speakers may still need cleaning — 40% OFF.",
-               "💧 Water may be trapped. Finish cleaning: 40% OFF.",
-               "💧 Protect your speakers. Cleaning now 40% OFF.",
-               "💧 Restore speaker clarity — 40% OFF cleaning."
+               String(localized: "💧 Moisture risk in speakers. 40% OFF to clean."),
+               String(localized: "💧 Your speakers may still need cleaning — 40% OFF."),
+               String(localized: "💧 Water may be trapped. Finish cleaning: 40% OFF."),
+               String(localized: "💧 Protect your speakers. Cleaning now 40% OFF."),
+               String(localized: "💧 Restore speaker clarity — 40% OFF cleaning.")
            ]
            
            // 🔹 Вибір рандомного тексту залежно від типу нотифікації
@@ -68,7 +68,7 @@ final class SpecialOfferNotificationManager {
                body = afterCloseBodies.randomElement() ?? afterCloseBodies[0]
                
            default:
-               body = "💧 Your speakers may still need cleaning — 40% OFF."
+               body = String(localized: "💧 Your speakers may still need cleaning — 40% OFF.")
            }
            
            content.body  = body

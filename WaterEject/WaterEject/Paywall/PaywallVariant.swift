@@ -293,7 +293,7 @@ struct PaywallStubView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             VStack(spacing: 16) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .foregroundStyle(.white)
                     .font(.title2.bold())
                 Button("Close") { onClose() }

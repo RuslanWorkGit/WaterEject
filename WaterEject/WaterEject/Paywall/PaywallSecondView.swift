@@ -75,7 +75,7 @@ struct PaywallSecondView: View {
                         PaywallSecondPlanCard(
                             title: PaywallPlan.yearly.title,
                             price: viewModel.pricePerPeriod[.yearly] ?? "…",
-                            sublabel: "Best Value",
+                            sublabel: String(localized: "Best Value"),
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: { viewModel.selectedPlan = .yearly }
@@ -104,7 +104,7 @@ struct PaywallSecondView: View {
                         }
                     } label: {
                         let forPeriod = viewModel.onlyPrice[viewModel.selectedPlan] ?? ""
-                        Text("Continue \(forPeriod.isEmpty ? "" : " \(forPeriod)")")
+                        Text(forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(Color(red: 13 / 255, green: 64 / 255, blue: 46 / 266))
                         
@@ -216,7 +216,7 @@ struct HorizontalText: View {
                 .resizable()
                 .frame(width: 16, height: 16)
                 .foregroundStyle(Color(red: 43 / 255, green: 217 / 255, blue: 156 / 255))
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 15))
                 .foregroundStyle(Color(red: 238 / 255, green: 255 / 255, blue: 246 / 255))
         }
@@ -241,7 +241,7 @@ struct PaywallSecondPlanCard: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(title)
+                        Text(LocalizedStringKey(title))
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(Color(red: 238/255, green: 255/255, blue: 246/255))
                         Spacer()
