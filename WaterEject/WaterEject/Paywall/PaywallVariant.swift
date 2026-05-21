@@ -17,13 +17,96 @@ enum PaywallVariant: String, Identifiable {
     case fifth     = "fifth"
 //    case A        = "A"
 //    case B        = "B"
-    
+
     var id: String { rawValue }
+}
+
+struct PaywallProductSettings {
+    let weeklyProductID: String
+    let yearlyProductID: String
+    let annualProductID: String
+    let freeTest: Bool
+}
+
+private struct PaywallProductsRemoteConfig: Decodable {
+    let version: Int?
+    let paywalls: [String: PaywallProductRemoteConfig]
+}
+
+private struct PaywallProductRemoteConfig: Decodable {
+    let weeklyProductId: String?
+    let yearlyProductId: String?
+    let annualProductId: String?
+    let freeTest: Bool?
 }
 
 final class PaywallAB {
     static let shared = PaywallAB()
-    
+
+    static let defaultPaywallProductsJSON = """
+    {
+      "version": 1,
+      "paywalls": {
+        "first": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "freeTest": false
+        },
+        "second": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "freeTest": false
+        },
+        "third": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "freeTest": false
+        },
+        "fourth": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "freeTest": false
+        },
+        "fifth": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "freeTest": true
+        },
+        "special": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer",
+          "freeTest": false
+        },
+        "paywall_new_black_1": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "freeTest": false
+        },
+        "paywall_new_black_2": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "freeTest": false
+        },
+        "paywall_new_black_3": {
+          "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "freeTest": false
+        },
+        "paywall_new_black_4": {
+          "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "freeTest": false
+        },
+        "paywall_new_black_5": {
+          "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "freeTest": false
+        },
+        "paywall_new_white_1": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "freeTest": false
+        }
+      }
+    }
+    """
+
     private init() {
         let settings = RemoteConfigSettings()
         settings.minimumFetchInterval = 1800 // на проді зроби 3600+
@@ -31,34 +114,76 @@ final class PaywallAB {
         rc.setDefaults([
             "paywall_share_A": 50 as NSObject,   // якщо колись повернешся до спліта
             "paywall_force":   "" as NSObject, // <- ВСІ бачать PaywallThirdView
-            
+
             // ⬇️ нові ключі
             "paywall3_enabled": true as NSObject,
             "paywall4_enabled": true as NSObject,
-            "paywall5_enabled": true as NSObject
+            "paywall5_enabled": true as NSObject,
+            "paywall_products_json": Self.defaultPaywallProductsJSON as NSObject
         ])
     }
-    
+
     private let rc = RemoteConfig.remoteConfig()
     private let storageKey = "paywall_variant_v1"
-    
+    private let productsJSONKey = "paywall_products_json"
+
     private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
 
     private func enabledPaywalls() -> [PaywallVariant] {
         allPaywalls.filter { isEnabled($0) }
     }
-    
+
     func fetchRemoteConfig(completion: (() -> Void)? = nil) {
         rc.fetchAndActivate { _, _ in completion?() }
     }
-    
+
+    func productSettings(for variant: PaywallVariant) -> PaywallProductSettings {
+        productSettings(forKey: variant.rawValue)
+    }
+
+    func productSettings(forKey key: String) -> PaywallProductSettings {
+        let fallback = Self.defaultProductSettings(forKey: key)
+        let json = rc[productsJSONKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !json.isEmpty,
+              let data = json.data(using: .utf8),
+              let config = try? JSONDecoder().decode(PaywallProductsRemoteConfig.self, from: data),
+              let remote = config.paywalls[key] else {
+            return fallback
+        }
+
+        return PaywallProductSettings(
+            weeklyProductID: cleanProductID(remote.weeklyProductId) ?? fallback.weeklyProductID,
+            yearlyProductID: cleanProductID(remote.yearlyProductId) ?? fallback.yearlyProductID,
+            annualProductID: cleanProductID(remote.annualProductId) ?? fallback.annualProductID,
+            freeTest: remote.freeTest ?? fallback.freeTest
+        )
+    }
+
+    private func cleanProductID(_ value: String?) -> String? {
+        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private static func defaultProductSettings(forKey key: String) -> PaywallProductSettings {
+        let weeklyProductID = key == "special"
+            ? "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer"
+            : "kyryloVoinov.WaterEject.subscription.weekly"
+
+        PaywallProductSettings(
+            weeklyProductID: weeklyProductID,
+            yearlyProductID: "kyryloVoinov.WaterEject.subscription.yearly",
+            annualProductID: "KyryloVoinov.WaterEject.lifetime.access",
+            freeTest: key == PaywallVariant.fifth.rawValue
+        )
+    }
+
     private func stableUserID() -> String {
         let id = Purchases.shared.appUserID
         return id.isEmpty
         ? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
         : id
     }
-    
+
     private func isEnabled(_ v: PaywallVariant) -> Bool {
         switch v {
         case .third:
@@ -71,7 +196,7 @@ final class PaywallAB {
 //            return true
         }
     }
-    
+
     private func primaryOnboardingVariant(for tag: OnboardTag) -> PaywallVariant {
         switch tag {
         case .v31, .v32, .v33, .v41:        // OnboardingFlowViewTwo / Three
@@ -84,7 +209,7 @@ final class PaywallAB {
             return .fourth
         }
     }
-    
+
 //    func onboardingPaywallVariant(for tag: OnboardTag) -> PaywallVariant {
 //        // 0) форс з RC — як і було, має абсолютний пріоритет
 //        let forceKey = rc["paywall_force"].stringValue
@@ -119,7 +244,7 @@ final class PaywallAB {
 //            return (bucket == 0) ? primary : fallback
 //        }
 //    }
-    
+
     func onboardingPaywallVariant(for tag: OnboardTag) -> PaywallVariant {
         // 0) RC force
         let forceKey = rc["paywall_force"].stringValue
@@ -157,7 +282,7 @@ final class PaywallAB {
         }
     }
 
-    
+
     func onboardingPaywallView(
         for tag: OnboardTag,
         onFinish: @escaping () -> Void,
@@ -190,7 +315,7 @@ final class PaywallAB {
                     stepsVisited: stepsVisited
                 )
             )
-            
+
         case .fifth:
             return AnyView(
                 PaywallFiveView(
@@ -214,7 +339,7 @@ final class PaywallAB {
     private func applyTracking(_ v: PaywallVariant) {
         Analytics.setUserProperty(v.rawValue, forName: "paywall_variant")
         Purchases.shared.attribution.setAttributes(["paywall_variant": v.rawValue])
-        
+
         let key = "variant_assigned_logged_v1"
         if !UserDefaults.standard.bool(forKey: key) {
             Analytics.logEvent("variant_assigned", parameters: ["variant": v.rawValue])
@@ -234,7 +359,7 @@ final class PaywallAB {
         default:       return nil
         }
     }
-    
+
     func variant() -> PaywallVariant {
         // 1) Якщо у RC заданий форс — він має ПРІОРИТЕТ над кешем
         if let forced = parseForcedVariant(rc["paywall_force"].stringValue) {
@@ -242,26 +367,26 @@ final class PaywallAB {
             applyTracking(forced)
             return forced
         }
-        
+
         // 2) Інакше беремо з кешу
         if let raw = UserDefaults.standard.string(forKey: storageKey),
            let v = PaywallVariant(rawValue: raw) {
             applyTracking(v)
             return v
         }
-        
+
         // 3) Якщо форсу немає і кешу немає — зробимо спліт (на майбутнє)
         let rawShare = rc["paywall_share_A"].numberValue.intValue
         let shareA = min(max(rawShare, 0), 100)
         let bucket = abs(stableUserID().hashValue) % 100
         //let v: PaywallVariant = (bucket < shareA) ? .A : .B
-        
+
 //        UserDefaults.standard.set(v.rawValue, forKey: storageKey)
 //        applyTracking(v)
         return .fourth
     }
-    
-    
+
+
     func assignedPaywallView(onFinish: @escaping () -> Void) -> AnyView {
         switch variant() {
         case .third:
@@ -288,7 +413,7 @@ final class PaywallAB {
 struct PaywallStubView: View {
     let title: String
     let onClose: () -> Void
-    
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -320,7 +445,7 @@ extension View {
             .compactMap({ $0 as? UIWindowScene })
             .flatMap({ $0.windows })
             .first(where: { $0.isKeyWindow })?.rootViewController else { return }
-        
+
         PaywallRouter.presentAssigned(from: root, onFinish: onFinish)
     }
 }

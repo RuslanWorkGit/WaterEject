@@ -205,7 +205,7 @@ struct PaywallFirstView: View {
                 didLogOpen = true
             }
             Purchases.logLevel = .debug
-            Task { await viewModel.loadPricing()  }
+            Task { await viewModel.loadPricing(paywallKey: "first") }
         }
     }
     

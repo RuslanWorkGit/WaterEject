@@ -12,18 +12,18 @@ import StoreKit
 
 enum PaywallPlan: String, CaseIterable, Hashable {
     case weekly, yearly
-    
+
     var productID: String {
         switch self {
         case .weekly: return "kyryloVoinov.WaterEject.subscription.weekly"
         case .yearly: return "kyryloVoinov.WaterEject.subscription.yearly"
         }
     }
-    
+
     var title: String {
         switch self { case .weekly: String(localized: "7 days"); case .yearly: String(localized: "12 months") }
     }
-    
+
     var analyticsValue: String { rawValue }
 }
 
@@ -37,15 +37,17 @@ final class PaywallViewModel: ObservableObject {
     @Published var purchaseSucceeded = false
     @Published var errorMessage: String?
     @Published var selectedPlan: PaywallPlan = .yearly
-    
+
     // Мапа план → Package/StoreProduct
     @Published private(set) var packageByPlan: [PaywallPlan: Package] = [:]
-    
+    @Published private(set) var freeTestEnabled = false
+
     // Готові рядки для UI
     @Published private(set) var pricePerPeriod: [PaywallPlan: String] = [:] // "$3.99/week", "$12.99/year"
     @Published private(set) var onlyPrice: [PaywallPlan: String] = [:]      // "for $3.99", "for $12.99"
-    
+
     private let entitlementID = "pro_user"
+    private var productIDByPlan: [PaywallPlan: String] = [:]
 
     private func shouldSendSubscribeEvent(txId: String?) -> Bool {
         guard let txId, !txId.isEmpty else { return true }
@@ -62,29 +64,40 @@ final class PaywallViewModel: ObservableObject {
         UserDefaults.standard.set(true, forKey: key)
         return true
     }
-    
+
     // Виклич на .onAppear пейвола
-    func loadPricing() async {
+    func loadPricing(paywallVariant: PaywallVariant) async {
+        await loadPricing(paywallKey: paywallVariant.rawValue)
+    }
+
+    func loadPricing(paywallKey: String) async {
         do {
+            let settings = PaywallAB.shared.productSettings(forKey: paywallKey)
+            productIDByPlan = [
+                .weekly: settings.weeklyProductID,
+                .yearly: settings.yearlyProductID
+            ]
+            freeTestEnabled = settings.freeTest
+
             let offerings = try await Purchases.shared.offerings()
             guard let current = offerings.current else { return }
-            
+
             var map: [PaywallPlan: Package] = [:]
-            let wantedIDs = Set(PaywallPlan.allCases.map { $0.productID })
+            let wantedIDs = Set(PaywallPlan.allCases.map { productID(for: $0) })
             for pkg in current.availablePackages {
                 let id = pkg.storeProduct.productIdentifier
                 if wantedIDs.contains(id) {
-                    if id == PaywallPlan.weekly.productID { map[.weekly] = pkg }
-                    if id == PaywallPlan.yearly.productID  { map[.yearly]  = pkg }
+                    if id == productID(for: .weekly) { map[.weekly] = pkg }
+                    if id == productID(for: .yearly)  { map[.yearly]  = pkg }
                 }
             }
             self.packageByPlan = map
-            
+
             // заповнюємо локальні словники
             var period: [PaywallPlan: String] = [:]
             var only:   [PaywallPlan: String] = [:]
-            
-            
+
+
             for (plan, pkg) in map {
                 let p = pkg.storeProduct
                 let localized = p.localizedPriceString
@@ -94,7 +107,7 @@ final class PaywallViewModel: ObservableObject {
                 }
                 only[plan] = "\(String(localized: "for")) \(localized)"
             }
-            
+
             // 👇 тепер ОДНИМ махом присвоюємо у @Published
             self.pricePerPeriod = period
             self.onlyPrice      = only
@@ -102,8 +115,12 @@ final class PaywallViewModel: ObservableObject {
             self.errorMessage = (error as NSError).localizedDescription
         }
     }
-    
-    
+
+    func productID(for plan: PaywallPlan) -> String {
+        productIDByPlan[plan] ?? plan.productID
+    }
+
+
     // Купівля: краще купувати по package (RC сам розрулить SK1/SK2)
     func buyWithRevenueCat(
         plan: PaywallPlan,
@@ -120,7 +137,7 @@ final class PaywallViewModel: ObservableObject {
                 variant: variant,
                 entryPoint: entryPoint,
                 plan: plan.analyticsValue,
-                packageId: plan.productID,
+                packageId: productID(for: plan),
                 rcCode: -2,
                 message: "Product not found",
                 fallbackReason: .productNotFound,
@@ -129,27 +146,27 @@ final class PaywallViewModel: ObservableObject {
             )
             return TelemetryPurchaseAttemptResult(
                 status: .failed,
-                packageId: plan.productID,
+                packageId: productID(for: plan),
                 transactionId: nil,
                 rcCode: -2,
                 message: "Product not found",
                 reasonWhy: .productNotFound
             )
         }
-        
+
         isPurchasing = true
         errorMessage = nil
         purchaseSucceeded = false
 
         defer { isPurchasing = false }
-        
+
         let p = pkg.storeProduct
         let price = (p.price as? NSNumber)?.doubleValue
         ?? (p.price as? NSDecimalNumber)?.doubleValue
         ?? 0
         let currency = p.currencyCode
         let afCurrency = p.afCurrencyCode
-        
+
         Telemetry.shared.purchaseStart(
             variant: variant,
             packageId: p.productIdentifier,
@@ -160,7 +177,7 @@ final class PaywallViewModel: ObservableObject {
             paywallId: paywallId,
             onboardId: onboardId
         )
-        
+
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
             let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
@@ -221,7 +238,7 @@ final class PaywallViewModel: ObservableObject {
                         }
                     }
                 }
-                
+
                 let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
                 if !UserDefaults.standard.bool(forKey: cpaFlag) {
                     AF.log(
@@ -235,9 +252,9 @@ final class PaywallViewModel: ObservableObject {
                     )
                     UserDefaults.standard.set(true, forKey: cpaFlag)
                 }
-                
+
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)
-                
+
                 RCPriceCache.save(entitlementID: "pro_user", price: price, currency: afCurrency)
 
                 Telemetry.shared.handleSuccessfulPurchase(
@@ -312,13 +329,13 @@ final class PaywallViewModel: ObservableObject {
             )
         }
     }
-    
-    
+
+
     func restorePurchases() async {
         isPurchasing = true
         Telemetry.shared.restoreStart()
         defer { isPurchasing = false }
-        
+
         do {
             let info = try await Purchases.shared.restorePurchases()
             let active = info.entitlements[entitlementID]?.isActive == true

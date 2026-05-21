@@ -195,7 +195,7 @@ struct NewBlackPaywallFifth: View {
         .onAppear {
             viewModel.selectedPlan = .annual
             logOpenIfNeeded()
-            Task { await viewModel.loadPricing() }
+            Task { await viewModel.loadPricing(paywallKey: telemetryPaywallId) }
         }
 
     }

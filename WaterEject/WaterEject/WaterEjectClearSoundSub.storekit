@@ -9,7 +9,7 @@
       }
     ]
   },
-  "identifier" : "5F0B44CD",
+  "identifier" : "74031864",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -38,47 +38,12 @@
     "_developerTeamID" : "LBA86YKHYN",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 799876879.79054296,
+    "_lastSynchronizedDate" : 801067239.47822297,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
     "_storeKitErrors" : [
-      {
-        "enabled" : false,
-        "name" : "Load Products"
-      },
-      {
-        "enabled" : false,
-        "name" : "Purchase"
-      },
-      {
-        "enabled" : false,
-        "name" : "Verification"
-      },
-      {
-        "enabled" : false,
-        "name" : "App Store Sync"
-      },
-      {
-        "enabled" : false,
-        "name" : "Subscription Status"
-      },
-      {
-        "enabled" : false,
-        "name" : "App Transaction"
-      },
-      {
-        "enabled" : false,
-        "name" : "Manage Subscriptions Sheet"
-      },
-      {
-        "enabled" : false,
-        "name" : "Refund Request Sheet"
-      },
-      {
-        "enabled" : false,
-        "name" : "Offer Code Redeem Sheet"
-      }
+
     ],
     "_timeRate" : 0
   },
@@ -97,11 +62,16 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "3.99",
+          "displayPrice" : "4.99",
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "6749955956",
-          "introductoryOffer" : null,
+          "introductoryOffer" : {
+            "internalID" : "E8CB76D4",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
           "localizations" : [
             {
               "description" : "Grants Pro access to user",
@@ -131,7 +101,7 @@
           "internalID" : "6756081159",
           "introductoryOffer" : {
             "displayPrice" : "2.99",
-            "internalID" : "77243F16",
+            "internalID" : "1AFA80FE",
             "numberOfPeriods" : 1,
             "paymentMode" : "payAsYouGo",
             "subscriptionPeriod" : "P1W"
@@ -146,6 +116,72 @@
           "productID" : "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer",
           "recurringSubscriptionPeriod" : "P1W",
           "referenceName" : "Weekly Premium Offer",
+          "subscriptionGroupID" : "21754724",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 5,
+          "internalID" : "6771787134",
+          "introductoryOffer" : {
+            "internalID" : "03126BB3",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "Grants Pro access to user",
+              "displayName" : "Pro Sub",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "kyryloVoinov.WaterEject.subscription.weeklyThree",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly Premium Three",
+          "subscriptionGroupID" : "21754724",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 4,
+          "internalID" : "6771777041",
+          "introductoryOffer" : {
+            "internalID" : "0B7E6DE1",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "Grants Pro access to user",
+              "displayName" : "Pro Sub",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "kyryloVoinov.WaterEject.subscription.weeklyTwo",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly Premium Two",
           "subscriptionGroupID" : "21754724",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

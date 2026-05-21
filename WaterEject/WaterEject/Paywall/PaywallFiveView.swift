@@ -30,6 +30,7 @@ struct PaywallFiveView: View {
 
     @State private var showInfoCardContent = false
     @State private var isFreeTrialEnabled = true
+    @State private var isFreeTrialAllowed = true
 
     @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -116,6 +117,7 @@ struct PaywallFiveView: View {
 
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
+        let shouldShowFreeTrial = isFreeTrialAllowed && isFreeTrialEnabled
 
         ZStack(alignment: .topTrailing) {
 
@@ -237,23 +239,25 @@ struct PaywallFiveView: View {
 
                     VStack(spacing: 12) {
 
-                        PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
-                            .onChange(of: isFreeTrialEnabled) { _, isEnabled in
-                                if isEnabled {
-                                    choosePlan(.weekly, selectionMethod: "free_trial_toggle")
-                                } else if viewModel.selectedPlan == .weekly {
-                                    choosePlan(.yearly, selectionMethod: "free_trial_toggle")
+                        if isFreeTrialAllowed {
+                            PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
+                                .onChange(of: isFreeTrialEnabled) { _, isEnabled in
+                                    if isEnabled {
+                                        choosePlan(.weekly, selectionMethod: "free_trial_toggle")
+                                    } else if viewModel.selectedPlan == .weekly {
+                                        choosePlan(.yearly, selectionMethod: "free_trial_toggle")
+                                    }
                                 }
-                            }
+                        }
 
                         PaywallFivePlanCard(
-                            title: isFreeTrialEnabled ? String(localized: "3 Days Free") : NewPaywallPlan.weekly.title,
-                            price: isFreeTrialEnabled ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
+                            title: shouldShowFreeTrial ? String(localized: "3 Days Free") : NewPaywallPlan.weekly.title,
+                            price: shouldShowFreeTrial ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
                             sublabel: nil,
-                            saveText: isFreeTrialEnabled ? String(localized: "Free trial") : viewModel.onlyPrice[.weekly] ?? "",
+                            saveText: shouldShowFreeTrial ? String(localized: "Free trial") : viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: {
-                                if isFreeTrialEnabled {
+                                if shouldShowFreeTrial || !isFreeTrialAllowed {
                                     choosePlan(.weekly, selectionMethod: "tap")
                                 } else {
                                     isFreeTrialEnabled = true
@@ -268,7 +272,7 @@ struct PaywallFiveView: View {
                             saveText: viewModel.onlyPrice[.yearly] ?? "",
                             isSelected: viewModel.selectedPlan == .yearly,
                             onTap: {
-                                if isFreeTrialEnabled {
+                                if shouldShowFreeTrial {
                                     isFreeTrialEnabled = false
                                 } else {
                                     choosePlan(.yearly, selectionMethod: "tap")
@@ -282,7 +286,7 @@ struct PaywallFiveView: View {
                     HStack {
                         Image(systemName: "checkmark.shield")
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
-                        Text(isFreeTrialEnabled ? String(localized: "Cancel Anytime. No payment required today.") : String(localized: "Cancel Anytime. Secure with App Store."))
+                        Text(shouldShowFreeTrial ? String(localized: "Cancel Anytime. No payment required today.") : String(localized: "Cancel Anytime. Secure with App Store."))
                             .font(.system(size: 10))
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                             .multilineTextAlignment(.center)
@@ -358,7 +362,7 @@ struct PaywallFiveView: View {
                             } else {
                                 HStack(spacing: 10) {
                                     Spacer()
-                                    Text(isFreeTrialEnabled ? String(localized: "Continue") : (forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)"))
+                                    Text(shouldShowFreeTrial ? String(localized: "Continue") : (forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)"))
                                         .font(.system(size: 16 * padScale, weight: .semibold))
                                         .foregroundStyle(.white)
                                     Image(systemName: "arrow.right")
@@ -490,7 +494,11 @@ struct PaywallFiveView: View {
 
 
             }
-            Task { await viewModel.loadPricing() }
+            Task {
+                await viewModel.loadPricing(paywallVariant: .fifth)
+                isFreeTrialAllowed = viewModel.freeTestEnabled
+                isFreeTrialEnabled = viewModel.freeTestEnabled
+            }
 
 
 

@@ -191,7 +191,7 @@ struct NewWhitePaywall: View {
         .onAppear {
             if !reduceMotion { pulse = true }
             logOpenIfNeeded()
-            Task { await viewModel.loadPricing() }
+            Task { await viewModel.loadPricing(paywallKey: telemetryPaywallId) }
         }
         .onDisappear {
             pulse = false

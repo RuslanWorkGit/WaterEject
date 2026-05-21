@@ -399,7 +399,7 @@ struct PaywallFourView: View {
                 )
                 didLogOpen = true
             }
-            Task { await viewModel.loadPricing() }
+            Task { await viewModel.loadPricing(paywallVariant: .fourth) }
             
             //            DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
             //                player.play()

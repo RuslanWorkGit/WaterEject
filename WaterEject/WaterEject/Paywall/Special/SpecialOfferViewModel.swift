@@ -54,6 +54,7 @@ final class SpecialOfferViewModel: ObservableObject {
     
     private let entitlementID = "pro_user"
     private var timer: Timer?
+    private var productID: String = SpecialPlan.weekly.productID
     
     init() {
         updateCountdown()
@@ -68,10 +69,11 @@ final class SpecialOfferViewModel: ObservableObject {
     
     func loadPricing() async {
         do {
+            productID = PaywallAB.shared.productSettings(forKey: "special").weeklyProductID
             let offerings = try await Purchases.shared.offerings()
             guard let current = offerings.current else { return }
 
-            let wantedID = plan.productID
+            let wantedID = productID
             guard let pkg = current.availablePackages.first(
                 where: { $0.storeProduct.productIdentifier == wantedID }
             ) else { return }
@@ -161,7 +163,7 @@ final class SpecialOfferViewModel: ObservableObject {
         guard !isPurchasing else {
             return TelemetryPurchaseAttemptResult(
                 status: .failed,
-                packageId: plan.productID,
+                packageId: productID,
                 transactionId: nil,
                 rcCode: nil,
                 message: "Purchase already in progress",
@@ -175,7 +177,7 @@ final class SpecialOfferViewModel: ObservableObject {
                 variant: variant,
                 entryPoint: entryPoint,
                 plan: plan.analyticsValue,
-                packageId: plan.productID,
+                packageId: productID,
                 rcCode: -2,
                 message: "Product not found",
                 fallbackReason: .productNotFound,
@@ -185,7 +187,7 @@ final class SpecialOfferViewModel: ObservableObject {
             )
             return TelemetryPurchaseAttemptResult(
                 status: .failed,
-                packageId: plan.productID,
+                packageId: productID,
                 transactionId: nil,
                 rcCode: -2,
                 message: "Product not found",

@@ -198,7 +198,7 @@ struct PaywallSecondView: View {
                 didLogOpen = true
             }
             Purchases.logLevel = .debug
-            Task { await viewModel.loadPricing()  }
+            Task { await viewModel.loadPricing(paywallKey: "second") }
             let v = PaywallAB.shared.variant()
             //            Analytics.logEvent("paywall_exposure", parameters: ["variant": v.rawValue])
         }
