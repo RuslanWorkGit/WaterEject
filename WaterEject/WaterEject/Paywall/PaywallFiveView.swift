@@ -242,13 +242,6 @@ struct PaywallFiveView: View {
 
                         if isFreeTrialAllowed {
                             PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
-                                .onChange(of: isFreeTrialEnabled) { _, isEnabled in
-                                    if isEnabled {
-                                        choosePlan(.weekly, selectionMethod: "free_trial_toggle")
-                                    } else if viewModel.selectedPlan == .weekly {
-                                        choosePlan(secondaryPlan, selectionMethod: "free_trial_toggle")
-                                    }
-                                }
                         }
 
                         PaywallFivePlanCard(
@@ -258,11 +251,10 @@ struct PaywallFiveView: View {
                             saveText: shouldShowFreeTrial ? String(localized: "Free trial") : viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: {
-                                if shouldShowFreeTrial || !isFreeTrialAllowed {
-                                    choosePlan(.weekly, selectionMethod: "tap")
-                                } else {
+                                if isFreeTrialAllowed {
                                     isFreeTrialEnabled = true
                                 }
+                                choosePlan(.weekly, selectionMethod: "tap")
                             }
                         )
 
@@ -273,11 +265,10 @@ struct PaywallFiveView: View {
                             saveText: viewModel.onlyPrice[secondaryPlan] ?? "",
                             isSelected: viewModel.selectedPlan == secondaryPlan,
                             onTap: {
-                                if shouldShowFreeTrial {
+                                if isFreeTrialAllowed {
                                     isFreeTrialEnabled = false
-                                } else {
-                                    choosePlan(secondaryPlan, selectionMethod: "tap")
                                 }
+                                choosePlan(secondaryPlan, selectionMethod: "tap")
                             }
                         )
                     }
@@ -730,6 +721,7 @@ struct PaywallFiveFreeTrialToggle: View {
             Toggle("", isOn: $isOn)
                 .labelsHidden()
                 .tint(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                .allowsHitTesting(false)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
