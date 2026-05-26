@@ -214,18 +214,32 @@ final class PaywallViewModel: ObservableObject {
             purchaseSucceeded = active
             if active {
                 let txId = result.transaction?.transactionIdentifier
+                let entitlement = result.customerInfo.entitlements[entitlementID]
                 if shouldSendSubscribeEvent(txId: txId) {
-                    AF.log(
-                        plan.appsFlyerPurchaseEvent,
-                        AF.subscribeValues(
-                            productId: p.productIdentifier,
-                            revenue: price,
-                            currency: afCurrency,
-                            transactionId: txId,
-                            paywallId: paywallId,
-                            plan: plan.analyticsValue
+                    if plan.j2dType == .subscription,
+                       entitlement?.afSubscriptionPeriodKind == .trial {
+                        AF.log(
+                            .trial_subscribe,
+                            AF.trialSubscribeValues(
+                                productId: p.productIdentifier,
+                                transactionId: txId,
+                                paywallId: paywallId,
+                                plan: plan.analyticsValue
+                            )
                         )
-                    )
+                    } else {
+                        AF.log(
+                            plan.appsFlyerPurchaseEvent,
+                            AF.subscribeValues(
+                                productId: p.productIdentifier,
+                                revenue: price,
+                                currency: afCurrency,
+                                transactionId: txId,
+                                paywallId: paywallId,
+                                plan: plan.analyticsValue
+                            )
+                        )
+                    }
                 }
 
                 if shouldSendJ2DEvent(txId: txId, suffix: plan.j2dEvent.rawValue) {
@@ -267,20 +281,6 @@ final class PaywallViewModel: ObservableObject {
                             )
                         }
                     }
-                }
-
-                let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
-                if plan.j2dType == .subscription, !UserDefaults.standard.bool(forKey: cpaFlag) {
-                    AF.log(
-                        .subscribe_cpa,
-                        AF.subscribeCPAValues(
-                            productId: p.productIdentifier,
-                            revenue: p.afPriceDouble,
-                            currency: afCurrency,
-                            transactionId: txId
-                        )
-                    )
-                    UserDefaults.standard.set(true, forKey: cpaFlag)
                 }
 
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)

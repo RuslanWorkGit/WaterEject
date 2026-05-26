@@ -22,6 +22,7 @@ enum PaywallVariant: String, Identifiable {
 }
 
 struct PaywallProductSettings {
+    let variantID: String?
     let weeklyProductID: String
     let yearlyProductID: String
     let annualProductID: String
@@ -181,6 +182,7 @@ final class PaywallAB {
 
         let variant = selectedProductVariant(in: remote, forKey: key)
         return PaywallProductSettings(
+            variantID: cleanVariantID(variant?.id),
             weeklyProductID: cleanProductID(variant?.weeklyProductId) ?? cleanProductID(remote.weeklyProductId) ?? fallback.weeklyProductID,
             yearlyProductID: cleanProductID(variant?.yearlyProductId) ?? cleanProductID(remote.yearlyProductId) ?? fallback.yearlyProductID,
             annualProductID: cleanProductID(variant?.annualProductId) ?? cleanProductID(remote.annualProductId) ?? fallback.annualProductID,
@@ -225,6 +227,11 @@ final class PaywallAB {
         return trimmed.isEmpty ? nil : trimmed
     }
 
+    private func cleanVariantID(_ value: String?) -> String? {
+        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     private static func cleanCardPlan(_ value: String?) -> PaywallCardPlan? {
         let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
         return PaywallCardPlan(rawValue: trimmed)
@@ -236,6 +243,7 @@ final class PaywallAB {
             : "kyryloVoinov.WaterEject.subscription.weekly"
 
         return PaywallProductSettings(
+            variantID: nil,
             weeklyProductID: weeklyProductID,
             yearlyProductID: "kyryloVoinov.WaterEject.subscription.yearly",
             annualProductID: "KyryloVoinov.WaterEject.lifetime.access",

@@ -296,6 +296,15 @@ struct NewBlackPaywallSecond: View {
             purchaseSource: Telemetry.shared.resolvedPurchaseSource(for: paywallGate.currentContext),
             onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue
         )
+        Telemetry.shared.onboardPaywallOpen(
+            variant: telemetryVariant,
+            entryPoint: entry,
+            onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue,
+            paywallId: telemetryPaywallId,
+            paywallKey: telemetryPaywallId,
+            displayedPlans: ["annual", "weekly"],
+            defaultPlan: "annual"
+        )
         didLogOpen = true
     }
 

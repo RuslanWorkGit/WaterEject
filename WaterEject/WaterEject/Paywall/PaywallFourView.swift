@@ -391,12 +391,22 @@ struct PaywallFourView: View {
             
             if !didLogOpen {
                 let entry = paywallGate.currentContext?.rawValue ?? "unknown"
+                let settings = PaywallAB.shared.productSettings(for: .fourth)
                 Telemetry.shared.configurePaywallPresentation(
                     paywallId: telemetryPaywallId,
                     variant: telemetryVariant,
                     entryPoint: entry,
                     purchaseSource: Telemetry.shared.resolvedPurchaseSource(for: paywallGate.currentContext),
                     onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue
+                )
+                Telemetry.shared.onboardPaywallOpen(
+                    variant: telemetryVariant,
+                    entryPoint: entry,
+                    onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue,
+                    paywallId: telemetryPaywallId,
+                    paywallKey: telemetryVariant,
+                    displayedPlans: ["weekly", settings.yearlyCardPlan.rawValue],
+                    defaultPlan: "weekly"
                 )
                 didLogOpen = true
             }

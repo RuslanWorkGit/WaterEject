@@ -958,12 +958,20 @@ extension Telemetry {
         )
     }
 
-    func funnelPurchaseSuccess(onboardId: String, plan: String, purchaseSource: PurchaseSource? = nil) {
+    func funnelPurchaseSuccess(
+        onboardId: String,
+        plan: String,
+        productId: String? = nil,
+        purchaseSource: PurchaseSource? = nil
+    ) {
         let resolvedOnboardId = resolveOnboardId(onboardId)
         var extra: [String: Any] = [
             "event_version": "1",
             "plan": plan
         ]
+        if let productId, !productId.isEmpty {
+            extra["product_id"] = productId
+        }
         if let purchaseSource {
             extra["purchase_source"] = purchaseSource.rawValue
         }
@@ -1321,6 +1329,104 @@ extension Telemetry {
         )
     }
 
+    func onboardPaywallOpen(
+        variant: String,
+        entryPoint: String,
+        onboardId: String?,
+        paywallId explicitPaywallId: String? = nil,
+        weeklyProductId: String? = nil,
+        yearlyProductId: String? = nil,
+        annualProductId: String? = nil,
+        defaultProductId: String,
+        displayedPlans: String,
+        defaultPlan: String,
+        secondaryPlan: String? = nil,
+        productVariantId: String? = nil,
+        freeTrialEnabled: Bool
+    ) {
+        let purchaseSource = purchaseSource(for: currentPaywallContext())
+        let resolvedOnboardId = resolveOnboardId(onboardId)
+
+        var params: [String: Any] = [
+            "paywall_id": explicitPaywallId ?? paywallId(for: variant),
+            "entry_point": entryPoint,
+            "purchase_source": purchaseSource.rawValue,
+            "default_product_id": defaultProductId,
+            "displayed_plans": displayedPlans,
+            "default_plan": defaultPlan,
+            "free_trial_enabled": freeTrialEnabled
+        ]
+
+        if let weeklyProductId {
+            params["weekly_product_id"] = weeklyProductId
+        }
+        if let yearlyProductId {
+            params["yearly_product_id"] = yearlyProductId
+        }
+        if let annualProductId {
+            params["annual_product_id"] = annualProductId
+        }
+        if let secondaryPlan {
+            params["secondary_plan"] = secondaryPlan
+        }
+        if let productVariantId {
+            params["product_variant_id"] = productVariantId
+        }
+
+        logEvent(
+            "onboard_paywall_open",
+            explicitOnboardId: resolvedOnboardId,
+            variant: variant,
+            extra: params
+        )
+    }
+
+    func onboardPaywallOpen(
+        variant: String,
+        entryPoint: String,
+        onboardId: String?,
+        paywallId explicitPaywallId: String? = nil,
+        paywallKey: String,
+        displayedPlans: [String],
+        defaultPlan: String
+    ) {
+        let settings = PaywallAB.shared.productSettings(forKey: paywallKey)
+        let normalizedDisplayedPlans = displayedPlans.map { $0.lowercased() }
+
+        func productId(for plan: String) -> String? {
+            switch plan.lowercased() {
+            case "weekly":
+                return settings.weeklyProductID
+            case "yearly":
+                return settings.yearlyProductID
+            case "annual":
+                return settings.annualProductID
+            default:
+                return nil
+            }
+        }
+
+        let normalizedDefaultPlan = defaultPlan.lowercased()
+        let defaultProductId = productId(for: normalizedDefaultPlan) ?? settings.annualProductID
+        let secondaryPlan = normalizedDisplayedPlans.first { $0 != normalizedDefaultPlan }
+
+        onboardPaywallOpen(
+            variant: variant,
+            entryPoint: entryPoint,
+            onboardId: onboardId,
+            paywallId: explicitPaywallId,
+            weeklyProductId: normalizedDisplayedPlans.contains("weekly") ? settings.weeklyProductID : nil,
+            yearlyProductId: normalizedDisplayedPlans.contains("yearly") ? settings.yearlyProductID : nil,
+            annualProductId: normalizedDisplayedPlans.contains("annual") ? settings.annualProductID : nil,
+            defaultProductId: defaultProductId,
+            displayedPlans: normalizedDisplayedPlans.joined(separator: ","),
+            defaultPlan: normalizedDefaultPlan,
+            secondaryPlan: secondaryPlan,
+            productVariantId: settings.variantID,
+            freeTrialEnabled: settings.freeTest
+        )
+    }
+
     func paywallCTATap(
         variant: String,
         entryPoint: String,
@@ -1508,6 +1614,7 @@ extension Telemetry {
         funnelPurchaseSuccess(
             onboardId: resolvedOnboardId ?? "unknown",
             plan: plan,
+            productId: packageId,
             purchaseSource: purchaseSource
         )
 

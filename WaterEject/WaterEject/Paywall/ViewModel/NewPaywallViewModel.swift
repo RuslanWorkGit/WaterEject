@@ -221,6 +221,7 @@ final class NewPaywallViewModel: ObservableObject {
                 let txId = result.transaction?.transactionIdentifier
                 let resolvedOnboardId = Telemetry.shared.resolveOnboardId(onboardId)
                 let purchaseSource = Telemetry.shared.resolvedPurchaseSource(for: nil)
+                let entitlement = result.customerInfo.entitlements[entitlementID]
 
                 if shouldSendJ2DEvent(txId: txId, suffix: plan.j2dEvent.rawValue) {
                     Task {
@@ -262,31 +263,30 @@ final class NewPaywallViewModel: ObservableObject {
                 }
 
                 if shouldSendSubscribeEvent(txId: txId) {
-                    AF.log(
-                        plan.appsFlyerPurchaseEvent,
-                        AF.subscribeValues(
-                            productId: p.productIdentifier,
-                            revenue: price,
-                            currency: afCurrency,
-                            transactionId: txId,
-                            paywallId: paywallId,
-                            plan: plan.analyticsValue
+                    if plan.j2dType == .subscription,
+                       entitlement?.afSubscriptionPeriodKind == .trial {
+                        AF.log(
+                            .trial_subscribe,
+                            AF.trialSubscribeValues(
+                                productId: p.productIdentifier,
+                                transactionId: txId,
+                                paywallId: paywallId,
+                                plan: plan.analyticsValue
+                            )
                         )
-                    )
-                }
-
-                let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
-                if plan.j2dType == .subscription, !UserDefaults.standard.bool(forKey: cpaFlag) {
-                    AF.log(
-                        .subscribe_cpa,
-                        AF.subscribeCPAValues(
-                            productId: p.productIdentifier,
-                            revenue: p.afPriceDouble,
-                            currency: afCurrency,
-                            transactionId: txId
+                    } else {
+                        AF.log(
+                            plan.appsFlyerPurchaseEvent,
+                            AF.subscribeValues(
+                                productId: p.productIdentifier,
+                                revenue: price,
+                                currency: afCurrency,
+                                transactionId: txId,
+                                paywallId: paywallId,
+                                plan: plan.analyticsValue
+                            )
                         )
-                    )
-                    UserDefaults.standard.set(true, forKey: cpaFlag)
+                    }
                 }
 
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)

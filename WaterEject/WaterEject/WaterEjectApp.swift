@@ -32,7 +32,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     
     
     private var didHandleATT = false
-    private(set) var didStartAppsFlyer = false
     
     private var attRequestAttempts = 0
     private var isRequestingATT = false
@@ -100,28 +99,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     private func startTrackingStack() {
         // ✅ стартуємо AppsFlyer тільки після ATT
         startAppsFlyer()
-        didStartAppsFlyer = true
-
-        // ✅ івенти AppsFlyer теж після ATT
-        sendInstallIfNeeded()
-        
-        DispatchQueue.main.async { [weak self] in
-               self?.logStartAppIfNeeded()
-           }
     }
 
     private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
     private let appleAppID      = "6749094272" // без префікса "id"
     
-    private var lastAFStartTs: TimeInterval = 0
-    
     private let asaKeywordKey = "asaKeywordId"
     private let asaKeywordTextKey = "asaKeywordText"
     private var didLogKeywordOnStart = false
-
-    // 👇 додано: прапорці для контролю start_app
-    var sentStartAppThisForeground = false
-    var isColdLaunch = true
     var isProUser: Bool = false
     weak var coordinator: AppCoordinator?
 
@@ -165,12 +150,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         af.isDebug = true
         #endif
 
-        //startAppsFlyer()
-
-        // 3) Одноразовий кастомний івент "install" — ПІСЛЯ configure()
-        //sendInstallIfNeeded()
-        //self.logStoredKeywordOnStartIfNeeded()
-        
         let center = UNUserNotificationCenter.current()
         center.delegate = self
 
@@ -236,21 +215,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         }
     }
 
-    /// Лог "install" лише один раз на девайс
-    private func sendInstallIfNeeded() {
-        let key = "af_install_sent"
-        guard !UserDefaults.standard.bool(forKey: key) else { return }
-
-        let values: [String: Any] = [
-            "device_model_id": hardwareIdentifier()
-        ]
-        AppsFlyerLib.shared().logEvent("first_open", withValues: values)
-        UserDefaults.standard.set(true, forKey: key)
-        
-
-
-    }
-    
     private func logStoredKeywordOnStartIfNeeded() {
         guard !didLogKeywordOnStart else { return }
         didLogKeywordOnStart = true
@@ -358,11 +322,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         }
     }
 
-    // 👇 додано: скидаємо прапорець, щоб при наступному поверненні у фокус знову надіслати start_app
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        sentStartAppThisForeground = false
-    }
-
     // Якщо будуть диплінки через URL-схеми:
     func application(_ app: UIApplication,
                      open url: URL,
@@ -371,35 +330,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         return false
     }
     
-    func hardwareIdentifier() -> String {
-        var s = utsname(); uname(&s)
-        return withUnsafePointer(to: &s.machine) {
-            $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(cString: $0) }
-        }
-    }
-    
-    private func logStartAppIfNeeded() {
-        guard didStartAppsFlyer else { return }
-        guard !sentStartAppThisForeground else { return }
-
-        let payload: [String: Any] = [
-            "session_kind": isColdLaunch ? "cold" : "warm",
-            "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
-            "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "",
-            "os": UIDevice.current.systemVersion
-        ]
-
-        AppsFlyerLib.shared().logEvent("start_app", withValues: payload)
-        sentStartAppThisForeground = true
-        isColdLaunch = false
-    }
-    
     func sceneBecameActive() {
         print("sceneBecameActive fired ✅")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.requestATTThenStartTrackingIfNeeded()
             }
-        //logStartAppIfNeeded()
     }
 
 }
@@ -411,13 +346,6 @@ struct WaterEjectApp: App {
     @StateObject var coordinator = AppCoordinator()
     @Environment(\.scenePhase) private var scenePhase
     
-//    private func hardwareIdentifier() -> String {
-//        var s = utsname(); uname(&s)
-//        return withUnsafePointer(to: &s.machine) {
-//            $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(cString: $0) }
-//        }
-//    }
-
     init() {
         OneTimeDefaultsReset.run(full: true)
         
@@ -463,8 +391,6 @@ struct WaterEjectApp: App {
                 appDelegate.sceneBecameActive()
 
             case .background:
-                
-                appDelegate.sentStartAppThisForeground = false
                 Telemetry.shared.appMovedToBackground()
                 
                 if appDelegate.isProUser {

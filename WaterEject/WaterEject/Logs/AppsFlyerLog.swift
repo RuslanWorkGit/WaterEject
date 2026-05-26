@@ -11,11 +11,19 @@ import AppsFlyerLib
 
 enum AFEvent: String {
   case install, start_app, subscribe, subscription_started,
-       subscribe_cpa,
+       trial_subscribe, trial_success,
        subscription_renewed, subscription_cancelled,
        subscription_refunded, subscription_expired,
        billing_issue_detected, product_change,
        purch, non_subscription_purchase
+}
+
+enum AFSubscriptionPeriodKind {
+    case trial
+    case intro
+    case normal
+    case promotional
+    case unknown
 }
 
 struct AF {
@@ -52,19 +60,21 @@ struct AF {
         ]
     }
 
-    static func subscribeCPAValues(
+    static func trialSubscribeValues(
         productId: String,
-        revenue: Double,
-        currency: String,
-        transactionId: String?
+        transactionId: String?,
+        paywallId: String,
+        plan: String
     ) -> [String: Any] {
         [
-            "cpa_value": revenue,
-            "af_revenue": revenue,
-            "af_currency": currency,
             "af_content_id": productId,
             "product_id": productId,
-            "transaction_id": transactionId ?? ""
+            "af_order_id": transactionId ?? "",
+            "transaction_id": transactionId ?? "",
+            "paywall_id": paywallId,
+            "plan": plan,
+            "subscription_type": plan,
+            "rc_app_user_id": Purchases.shared.appUserID
         ]
     }
 
@@ -91,5 +101,26 @@ extension StoreProduct {
 
     var afPriceDouble: Double {
         (price as NSDecimalNumber).doubleValue
+    }
+}
+
+extension EntitlementInfo {
+    var afSubscriptionPeriodKind: AFSubscriptionPeriodKind {
+        let rawValue = String(describing: periodType).lowercased()
+
+        if rawValue.contains("trial") {
+            return .trial
+        }
+        if rawValue.contains("intro") {
+            return .intro
+        }
+        if rawValue.contains("promo") {
+            return .promotional
+        }
+        if rawValue.contains("normal") {
+            return .normal
+        }
+
+        return .unknown
     }
 }

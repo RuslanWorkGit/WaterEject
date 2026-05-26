@@ -218,6 +218,7 @@ final class SpecialOfferViewModel: ObservableObject {
                 let txId = result.transaction?.transactionIdentifier
                 let purchaseSource = Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy)
                 let resolvedOnboardId = Telemetry.shared.resolveOnboardId(OnboardTag.lastFromUserDefaults()?.rawValue)
+                let entitlement = result.customerInfo.entitlements[entitlementID]
 
                 if shouldSendJ2DEvent(txId: txId, suffix: "special_offer_subscribed") {
                     Task {
@@ -265,31 +266,29 @@ final class SpecialOfferViewModel: ObservableObject {
                 }
                 
                 if shouldSendSubscribeEvent(txId: txId) {
-                    AF.log(
-                        .subscribe,
-                        AF.subscribeValues(
-                            productId: p.productIdentifier,
-                            revenue: price,
-                            currency: afCurrency,
-                            transactionId: txId,
-                            paywallId: paywallId,
-                            plan: plan.analyticsValue
+                    if entitlement?.afSubscriptionPeriodKind == .trial {
+                        AF.log(
+                            .trial_subscribe,
+                            AF.trialSubscribeValues(
+                                productId: p.productIdentifier,
+                                transactionId: txId,
+                                paywallId: paywallId,
+                                plan: plan.analyticsValue
+                            )
                         )
-                    )
-                }
-                
-                let cpaFlag = "af_subscribe_cpa_sent\(Purchases.shared.appUserID)"
-                if !UserDefaults.standard.bool(forKey: cpaFlag) {
-                    AF.log(
-                        .subscribe_cpa,
-                        AF.subscribeCPAValues(
-                            productId: p.productIdentifier,
-                            revenue: p.afPriceDouble,
-                            currency: afCurrency,
-                            transactionId: txId
+                    } else {
+                        AF.log(
+                            .subscribe,
+                            AF.subscribeValues(
+                                productId: p.productIdentifier,
+                                revenue: price,
+                                currency: afCurrency,
+                                transactionId: txId,
+                                paywallId: paywallId,
+                                plan: plan.analyticsValue
+                            )
                         )
-                    )
-                    UserDefaults.standard.set(true, forKey: cpaFlag)
+                    }
                 }
                 
                 SubscriptionMonitor.shared.process(customerInfo: result.customerInfo)

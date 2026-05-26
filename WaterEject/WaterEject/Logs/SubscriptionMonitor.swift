@@ -22,11 +22,17 @@ enum RCPriceCache {
 }
 
 private extension SubscriptionMonitor {
-    func afPayload(revenue: Double?, currency: String?) -> [String: Any] {
+    func afPayload(revenue: Double?, currency: String?, productId: String? = nil) -> [String: Any] {
         var d: [String: Any] = [
             "af_content_id": entitlementID,
             "af_currency": currency ?? "USD"
         ]
+        if let productId, !productId.isEmpty {
+            let plan = resolvePlan(from: productId)
+            d["product_id"] = productId
+            d["plan"] = plan
+            d["subscription_type"] = plan
+        }
         d["af_revenue"] = revenue ?? 0.0
         return d
     }
@@ -41,6 +47,7 @@ private struct SavedState: Codable, Equatable {
     var billingIssue: Bool
     var unsubscribed: Bool
     var productId: String?
+    var periodType: String
 }
 
 final class SubscriptionMonitor {
@@ -96,35 +103,46 @@ final class SubscriptionMonitor {
             latestPurchaseTs: ent.latestPurchaseDate?.timeIntervalSince1970,
             billingIssue: ent.billingIssueDetectedAt != nil,
             unsubscribed: ent.unsubscribeDetectedAt != nil,
-            productId: ent.productIdentifier
+            productId: ent.productIdentifier,
+            periodType: String(describing: ent.afSubscriptionPeriodKind)
         )
         let old = load()
-        
-        let oldWasNonConsumable = (old?.isActive == true && old?.expirationTs == nil)
-        let newIsNonConsumableActive = (new.isActive && new.expirationTs == nil)
 
         // ---- Виявлення подій ----
 
         // 1) Скасування авто-пролонгації (user turned off renewal)
         if isSubscriptionProduct, new.unsubscribed, old?.unsubscribed == false || (old == nil && new.unsubscribed) {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
-            AF.log(.subscription_cancelled, afPayload(revenue: 0.0, currency: cached?.currency))
+            AF.log(.subscription_cancelled, afPayload(revenue: 0.0, currency: cached?.currency, productId: new.productId ?? old?.productId))
             sendJ2D(.unsubscribed, type: .subscription, plan: new.productId ?? old?.productId, date: ent.unsubscribeDetectedAt)
         }
 
 
         // 2) Ренювал (новий період почався): коли зросла expiration або з’явилась нова latestPurchase
-        if  isSubscriptionProduct, let newExp = new.expirationTs,
-           let oldExp = old?.expirationTs,
-           new.isActive, newExp > oldExp + 1 {
+        let hasRenewalByExpiration =
+            old != nil &&
+            isSubscriptionProduct &&
+            new.isActive &&
+            (new.expirationTs ?? 0) > ((old?.expirationTs ?? 0) + 1)
+
+        let hasRenewalByPurchaseDate =
+            old != nil &&
+            isSubscriptionProduct &&
+            new.isActive &&
+            (new.latestPurchaseTs ?? 0) > ((old?.latestPurchaseTs ?? 0) + 1)
+
+        if hasRenewalByExpiration || hasRenewalByPurchaseDate {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
-            AF.log(.subscription_renewed, afPayload(revenue: cached?.price, currency: cached?.currency))
-            sendJ2D(.renewed, type: .subscription, plan: new.productId ?? old?.productId, date: ent.latestPurchaseDate ?? Date())
-        } else if  isSubscriptionProduct, let newLP = new.latestPurchaseTs,
-                  let oldLP = old?.latestPurchaseTs,
-                  new.isActive, newLP > oldLP + 1 {
-            let cached = RCPriceCache.read(entitlementID: entitlementID)
-            AF.log(.subscription_renewed, afPayload(revenue: cached?.price, currency: cached?.currency))
+            let oldWasTrial = old?.periodType == String(describing: AFSubscriptionPeriodKind.trial)
+
+            AF.log(
+                oldWasTrial ? .trial_success : .subscription_renewed,
+                afPayload(
+                    revenue: cached?.price,
+                    currency: cached?.currency,
+                    productId: new.productId ?? old?.productId
+                )
+            )
             sendJ2D(.renewed, type: .subscription, plan: new.productId ?? old?.productId, date: ent.latestPurchaseDate ?? Date())
         }
 
@@ -134,13 +152,13 @@ final class SubscriptionMonitor {
            new.isActive == false,
            (new.expirationTs ?? 0) < Date().timeIntervalSince1970 {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
-            AF.log(.subscription_expired, afPayload(revenue: 0.0, currency: cached?.currency))
+            AF.log(.subscription_expired, afPayload(revenue: 0.0, currency: cached?.currency, productId: new.productId ?? old?.productId))
         }
 
         // 4) Billing issue (помилка білінгу)
         if new.billingIssue, old?.billingIssue == false || (old == nil && new.billingIssue) {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
-            AF.log(.billing_issue_detected, afPayload(revenue: 0.0, currency: cached?.currency))
+            AF.log(.billing_issue_detected, afPayload(revenue: 0.0, currency: cached?.currency, productId: new.productId ?? old?.productId))
         }
 
         // Зберегти новий стан
