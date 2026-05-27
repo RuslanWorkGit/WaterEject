@@ -376,6 +376,7 @@ final class NewPaywallViewModel: ObservableObject {
             let info = try await Purchases.shared.restorePurchases()
             let active = info.entitlements[entitlementID]?.isActive == true
             purchaseSucceeded = active
+            AppNotificationPolicy.updateForSubscription(isActive: active)
             if !active { errorMessage = "No previous purchases found." }
             Telemetry.shared.restoreSuccess(entitlementActive: active)
         } catch {

@@ -16,6 +16,11 @@ enum SevenDayPlanNotificationScheduler {
     /// Викликати ПІСЛЯ успішної чистки (після markCompletedToday()).
     /// Запланує нотифікації на наступний день о 10:00 і 20:00.
     static func scheduleForNextDayIfNeeded() {
+        guard AppNotificationPolicy.canScheduleNotifications else {
+            cancelPending()
+            return
+        }
+
         // Якщо план завершено — нічого не плануємо
         let completed = SevenDayPlanProgress.completedDays
         guard completed < 7 else {
@@ -40,7 +45,7 @@ enum SevenDayPlanNotificationScheduler {
 
         Task {
             let allowed = await requestAuthorizationIfNeeded()
-            guard allowed else { return }
+            guard allowed, AppNotificationPolicy.canScheduleNotifications else { return }
 
             // 10:00
             if let tenAM = cal.date(bySettingHour: 10, minute: 0, second: 0, of: nextDay) {
@@ -68,6 +73,8 @@ enum SevenDayPlanNotificationScheduler {
     // MARK: - Private
 
     private static func schedule(at date: Date, id: String, title: String, body: String) {
+        guard AppNotificationPolicy.canScheduleNotifications else { return }
+
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
@@ -82,6 +89,8 @@ enum SevenDayPlanNotificationScheduler {
     }
 
     private static func requestAuthorizationIfNeeded() async -> Bool {
+        guard AppNotificationPolicy.canScheduleNotifications else { return false }
+
         let center = UNUserNotificationCenter.current()
 
         let settings = await withCheckedContinuation { cont in

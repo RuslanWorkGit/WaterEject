@@ -92,6 +92,10 @@ final class SubscriptionMonitor {
     
     /// Викликай на лаунчі, при поверненні у фокус, після покупки і коли RC оновлює CustomerInfo
     func process(customerInfo: CustomerInfo) {
+        AppNotificationPolicy.updateForSubscription(
+            isActive: customerInfo.entitlements[entitlementID]?.isActive == true
+        )
+
         guard let ent = customerInfo.entitlements[entitlementID] else { return }
         
         let isSubscriptionProduct = (ent.expirationDate != nil)

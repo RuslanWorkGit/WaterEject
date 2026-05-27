@@ -180,6 +180,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             isSpecialByUserInfo
 
         if isSpecial {
+            guard !AppNotificationPolicy.blocksNotifications else {
+                completionHandler()
+                return
+            }
+
             // 1) для холодного запуску — флаг + source в UserDefaults
             UserDefaults.standard.set(true, forKey: "launch_special_offer_from_push")
             UserDefaults.standard.set(placeWhereBuy, forKey: "special_offer_place_where_buy")
@@ -393,9 +398,8 @@ struct WaterEjectApp: App {
             case .background:
                 Telemetry.shared.appMovedToBackground()
                 
-                if appDelegate.isProUser {
-                            // якщо Pro — ніяких офферів
-                    SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
+                if AppNotificationPolicy.blocksNotifications {
+                    AppNotificationPolicy.disableAllNotifications()
                         } else {
                             // юзер без підписки — плануємо оффер
                             SpecialOfferNotificationManager.shared.scheduleAfterClose()

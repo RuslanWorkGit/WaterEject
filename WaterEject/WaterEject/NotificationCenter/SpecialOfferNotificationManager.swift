@@ -17,6 +17,33 @@ extension Notification.Name {
     static let specialOfferPushTapped = Notification.Name("specialOfferPushTapped")
 }
 
+enum AppNotificationPolicy {
+    private static let subscriptionBlocksNotificationsKey = "subscription_blocks_app_notifications"
+    private static let subscriptionStatusResolvedKey = "subscription_notification_status_resolved"
+
+    static var blocksNotifications: Bool {
+        UserDefaults.standard.bool(forKey: subscriptionBlocksNotificationsKey)
+    }
+
+    static var canScheduleNotifications: Bool {
+        UserDefaults.standard.bool(forKey: subscriptionStatusResolvedKey) && !blocksNotifications
+    }
+
+    static func updateForSubscription(isActive: Bool) {
+        UserDefaults.standard.set(true, forKey: subscriptionStatusResolvedKey)
+        UserDefaults.standard.set(isActive, forKey: subscriptionBlocksNotificationsKey)
+
+        if isActive {
+            disableAllNotifications()
+        }
+    }
+
+    static func disableAllNotifications() {
+        let center = UNUserNotificationCenter.current()
+        center.removeAllPendingNotificationRequests()
+        center.removeAllDeliveredNotifications()
+    }
+}
 
 final class SpecialOfferNotificationManager {
     static let shared = SpecialOfferNotificationManager()
@@ -24,6 +51,8 @@ final class SpecialOfferNotificationManager {
     
     // 1) Запит дозволів (краще викликати 1 раз, наприклад після онбордингу)
     func requestAuthorization() {
+        guard !AppNotificationPolicy.blocksNotifications else { return }
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error {
                 print("Notification permission error: \(error)")
@@ -38,6 +67,8 @@ final class SpecialOfferNotificationManager {
            after seconds: TimeInterval,
            id: String
        ) {
+           guard AppNotificationPolicy.canScheduleNotifications else { return }
+
            let content = UNMutableNotificationContent()
            content.title = String(localized: "WaterEject")
            

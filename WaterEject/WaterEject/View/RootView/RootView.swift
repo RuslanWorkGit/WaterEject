@@ -49,12 +49,13 @@ struct RootView: View {
         }
         .onAppear {
             // якщо апку запустили тапом по пушу в killed-стані
-            if UserDefaults.standard.bool(forKey: "launch_special_offer_from_push") {
+            if UserDefaults.standard.bool(forKey: "launch_special_offer_from_push"),
+               !AppNotificationPolicy.blocksNotifications {
                 let placeWhereBuy = UserDefaults.standard.string(forKey: "special_offer_place_where_buy")
                     ?? "Push notification"
                 coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
-                UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
             }
+            UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
             
             lastScreen = coordinator.currentScreen
         }
@@ -69,6 +70,8 @@ struct RootView: View {
             SpecialOfferNotificationManager.shared.requestAuthorization()
         }
         .onReceive(NotificationCenter.default.publisher(for: .specialOfferPushTapped)) { notif in
+            guard !AppNotificationPolicy.blocksNotifications else { return }
+
             let placeWhereBuy = notif.object as? String ?? "Push notification"
             coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
             UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
