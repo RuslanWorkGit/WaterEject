@@ -90,7 +90,9 @@ final class PaywallGate: ObservableObject {
         
         do {
             let info = try await Purchases.shared.customerInfo()
-            return info.entitlements[entitlementID]?.isActive == true
+            let active = info.entitlements[entitlementID]?.isActive == true
+            AppNotificationPolicy.updateForSubscription(isActive: active)
+            return active
         } catch {
             return false
         }

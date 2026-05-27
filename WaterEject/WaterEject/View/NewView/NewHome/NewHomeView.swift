@@ -192,6 +192,7 @@ private func shouldShowSpecialOfferOnSecondLaunch() async -> Bool {
     do {
         let info = try await Purchases.shared.customerInfo()
         let isPro = info.entitlements["pro_user"]?.isActive == true
+        AppNotificationPolicy.updateForSubscription(isActive: isPro)
         if isPro { return false }
     } catch {
         // якщо не змогли отримати info — краще нічого не показувати
@@ -206,4 +207,3 @@ private func shouldShowSpecialOfferOnSecondLaunch() async -> Bool {
     
     return true
 }
-

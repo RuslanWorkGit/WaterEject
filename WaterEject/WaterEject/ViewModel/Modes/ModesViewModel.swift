@@ -15,7 +15,9 @@ final class ModesViewModel: ObservableObject {
         do {
             let info = try await Purchases.shared.customerInfo()
             // 👉 заміни "pro" на свій entitlement id з RevenueCat
-            return info.entitlements.active["pro_user"] == nil
+            let isPro = info.entitlements.active["pro_user"] != nil
+            AppNotificationPolicy.updateForSubscription(isActive: isPro)
+            return !isPro
         } catch {
             return true // якщо не змогли дістати — краще показати пейвол
         }

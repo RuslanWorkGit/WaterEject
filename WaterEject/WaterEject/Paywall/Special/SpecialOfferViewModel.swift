@@ -213,6 +213,7 @@ final class SpecialOfferViewModel: ObservableObject {
             let result = try await Purchases.shared.purchase(package: pkg)
             let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
             purchaseSucceeded = active
+            AppNotificationPolicy.updateForSubscription(isActive: active)
             
             if active {
                 let txId = result.transaction?.transactionIdentifier
