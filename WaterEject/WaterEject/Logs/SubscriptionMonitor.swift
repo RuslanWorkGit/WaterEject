@@ -7,6 +7,7 @@
 
 import Foundation
 import RevenueCat
+import FirebaseAnalytics
 
 enum RCPriceCache {
     static func save(entitlementID: String, price: Double, currency: String) {
@@ -56,6 +57,7 @@ final class SubscriptionMonitor {
 
     private let entitlementID: String
     private let storageKey = "rc_saved_state_v1"
+    private let trialConversionPrefix = "firebase_success_buy_after_trial_"
 
     private init(entitlementID: String) {
         self.entitlementID = entitlementID
@@ -71,6 +73,41 @@ final class SubscriptionMonitor {
         if let data = try? JSONEncoder().encode(s) {
             UserDefaults.standard.set(data, forKey: storageKey)
         }
+    }
+
+    private func logFirebaseTrialConversion(
+        old: SavedState?,
+        new: SavedState,
+        price: Double?,
+        currency: String?,
+        latestPurchaseDate: Date?
+    ) {
+        let dedupeKey = [
+            trialConversionPrefix,
+            new.productId ?? "unknown",
+            String(Int(new.latestPurchaseTs ?? latestPurchaseDate?.timeIntervalSince1970 ?? Date().timeIntervalSince1970))
+        ].joined(separator: "_")
+
+        guard !UserDefaults.standard.bool(forKey: dedupeKey) else { return }
+        UserDefaults.standard.set(true, forKey: dedupeKey)
+
+        Analytics.logEvent(
+            "success_buy_after_trial",
+            parameters: [
+                "entitlement_id": entitlementID,
+                "product_id": new.productId ?? old?.productId ?? "unknown",
+                "plan": resolvePlan(from: new.productId ?? old?.productId),
+                "price_paid": price ?? 0,
+                "currency": currency ?? "NA",
+                "rc_app_user_id": Purchases.shared.appUserID,
+                "previous_period_type": old?.periodType ?? "unknown",
+                "current_period_type": new.periodType,
+                "latest_purchase_ts": new.latestPurchaseTs ?? 0,
+                "expiration_ts": new.expirationTs ?? 0,
+                "will_renew": new.willRenew ? 1 : 0,
+                "onboard_id": OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
+            ]
+        )
     }
 
     private func sendJ2D(_ event: J2DEvent, type: J2DSubscriptionType, plan: String?, date: Date? = nil) {
@@ -138,6 +175,15 @@ final class SubscriptionMonitor {
         if hasRenewalByExpiration || hasRenewalByPurchaseDate {
             let cached = RCPriceCache.read(entitlementID: entitlementID)
             let oldWasTrial = old?.periodType == String(describing: AFSubscriptionPeriodKind.trial)
+            if oldWasTrial {
+                logFirebaseTrialConversion(
+                    old: old,
+                    new: new,
+                    price: cached?.price,
+                    currency: cached?.currency,
+                    latestPurchaseDate: ent.latestPurchaseDate
+                )
+            }
 
             AF.log(
                 oldWasTrial ? .trial_success : .subscription_renewed,

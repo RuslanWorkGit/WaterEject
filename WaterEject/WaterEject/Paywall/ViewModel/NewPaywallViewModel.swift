@@ -215,6 +215,30 @@ final class NewPaywallViewModel: ObservableObject {
 
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
+            if result.userCancelled {
+                purchaseSucceeded = false
+                Telemetry.shared.handlePurchaseError(
+                    paywallId: paywallId,
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    plan: plan.analyticsValue,
+                    packageId: p.productIdentifier,
+                    rcCode: 1,
+                    message: "User cancelled",
+                    fallbackReason: .userCancelled,
+                    explicitPurchaseSource: nil,
+                    explicitOnboardId: onboardId
+                )
+                return TelemetryPurchaseAttemptResult(
+                    status: .cancelled,
+                    packageId: p.productIdentifier,
+                    transactionId: result.transaction?.transactionIdentifier,
+                    rcCode: 1,
+                    message: "User cancelled",
+                    reasonWhy: .userCancelled
+                )
+            }
+
             let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
             purchaseSucceeded = active
             AppNotificationPolicy.updateForSubscription(isActive: active)

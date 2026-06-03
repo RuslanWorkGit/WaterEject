@@ -31,6 +31,7 @@ struct PaywallThirdView: View {
     
     @State private var pulse = false
     @State private var didLogChoosePlan = false
+    @State private var showTransactionAbandonSpecialOffer = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     
@@ -223,6 +224,9 @@ struct PaywallThirdView: View {
                             if result.isSuccess {
                                 logOnboardSummary(.success)
                                 onFinish()
+                            } else if result.isCancelled {
+                                logOnboardSummary(.abandon)
+                                showTransactionAbandonSpecialOffer = true
                             } else {
                                 logOnboardSummary(.error)
                             }
@@ -363,6 +367,11 @@ struct PaywallThirdView: View {
         }
         
         
+        .transactionAbandonSpecialOffer(
+            isPresented: $showTransactionAbandonSpecialOffer,
+            paywallGate: paywallGate,
+            onFinish: onFinish
+        )
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }

@@ -15,6 +15,7 @@ struct NewBlackPaywallFourth: View {
     @State private var sessionId = UUID().uuidString
     @State private var didLogOpen = false
     @State private var didLogChoosePlan = false
+    @State private var showTransactionAbandonSpecialOffer = false
 
     @EnvironmentObject private var paywallGate: PaywallGate
 
@@ -95,6 +96,9 @@ struct NewBlackPaywallFourth: View {
             if result.isSuccess {
                 logOnboardSummary(.success)
                 action()
+            } else if result.isCancelled {
+                logOnboardSummary(.abandon)
+                showTransactionAbandonSpecialOffer = true
             } else {
                 logOnboardSummary(.error)
             }
@@ -203,6 +207,11 @@ struct NewBlackPaywallFourth: View {
             logOpenIfNeeded()
             Task { await viewModel.loadPricing(paywallKey: telemetryPaywallId) }
         }
+        .transactionAbandonSpecialOffer(
+            isPresented: $showTransactionAbandonSpecialOffer,
+            paywallGate: paywallGate,
+            onFinish: action
+        )
 
     }
 }

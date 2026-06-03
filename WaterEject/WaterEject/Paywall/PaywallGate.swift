@@ -128,3 +128,22 @@ final class PaywallGate: ObservableObject {
         return false
     }
 }
+
+extension View {
+    func transactionAbandonSpecialOffer(
+        isPresented: Binding<Bool>,
+        paywallGate: PaywallGate,
+        onFinish: @escaping () -> Void
+    ) -> some View {
+        fullScreenCover(isPresented: isPresented) {
+            SpecialOfferView(
+                onFinish: {
+                    isPresented.wrappedValue = false
+                    onFinish()
+                },
+                placeWhereBuy: PurchaseSource.specialOfferAfterTransactionAbandon.rawValue
+            )
+            .environmentObject(paywallGate)
+        }
+    }
+}

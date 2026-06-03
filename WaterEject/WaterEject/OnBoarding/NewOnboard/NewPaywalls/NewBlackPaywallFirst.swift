@@ -17,6 +17,7 @@ struct NewBlackPaywall: View {
     @State private var didLogOpen = false
     @State private var didLogChoosePlan = false
     @State private var pulse = false
+    @State private var showTransactionAbandonSpecialOffer = false
 
     @EnvironmentObject private var paywallGate: PaywallGate
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -190,6 +191,11 @@ struct NewBlackPaywall: View {
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
+        .transactionAbandonSpecialOffer(
+            isPresented: $showTransactionAbandonSpecialOffer,
+            paywallGate: paywallGate,
+            onFinish: onFinish
+        )
         .onAppear {
             if !reduceMotion { pulse = true }
             logOpenIfNeeded()
@@ -263,6 +269,9 @@ struct NewBlackPaywall: View {
             if result.isSuccess {
                 logOnboardSummary(.success)
                 onFinish()
+            } else if result.isCancelled {
+                logOnboardSummary(.abandon)
+                showTransactionAbandonSpecialOffer = true
             } else {
                 logOnboardSummary(.error)
             }

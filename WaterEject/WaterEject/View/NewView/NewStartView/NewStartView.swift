@@ -326,4 +326,3 @@ struct NewStartView: View {
 
 
 
-

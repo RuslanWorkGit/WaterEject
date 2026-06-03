@@ -103,6 +103,7 @@ struct TelemetryPurchaseAttemptResult {
     let reasonWhy: TelemetryPurchaseFailureReason?
 
     var isSuccess: Bool { status == .success }
+    var isCancelled: Bool { status == .cancelled }
 }
 
 struct TelemetryOnboardingContext: Codable, Equatable {

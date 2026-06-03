@@ -36,6 +36,7 @@ struct PaywallFiveView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var didShowFirstCard = false
     @State private var appearReviews = false
+    @State private var showTransactionAbandonSpecialOffer = false
 
 
     enum InfoCard: Int, CaseIterable {
@@ -323,6 +324,9 @@ struct PaywallFiveView: View {
                             if result.isSuccess {
                                 logOnboardSummary(.success)
                                 onFinish()
+                            } else if result.isCancelled {
+                                logOnboardSummary(.abandon)
+                                showTransactionAbandonSpecialOffer = true
                             } else {
                                 logOnboardSummary(.error)
                             }
@@ -467,6 +471,11 @@ struct PaywallFiveView: View {
         }
 
 
+        .transactionAbandonSpecialOffer(
+            isPresented: $showTransactionAbandonSpecialOffer,
+            paywallGate: paywallGate,
+            onFinish: onFinish
+        )
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
