@@ -18,6 +18,7 @@ import AppsFlyerLib
 import UserNotifications
 import FirebaseAnalytics
 import AppTrackingTransparency
+import AdSupport
 
 
 final class RCDelegateProxy: NSObject, PurchasesDelegate {
@@ -86,6 +87,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                     }
 
                     self.didHandleATT = true
+                    if newStatus == .authorized {
+                        self.syncRevenueCatAppsFlyerAttribution()
+                    }
                     self.startTrackingStack()
                 }
             }
@@ -99,6 +103,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     private func startTrackingStack() {
         // ✅ стартуємо AppsFlyer тільки після ATT
         startAppsFlyer()
+    }
+
+    private func collectRevenueCatDeviceIdentifiers() {
+        Purchases.shared.attribution.collectDeviceIdentifiers()
+    }
+
+    private func syncRevenueCatAppsFlyerAttribution() {
+        collectRevenueCatDeviceIdentifiers()
+        Purchases.shared.attribution.setAppsflyerID(AppsFlyerLib.shared().getAppsFlyerUID())
     }
 
     private let appsFlyerDevKey = "mxUTQbads3dmAtKCADioKm"
@@ -122,6 +135,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
         // 0) Спершу конфігурація RevenueCat, щоб був appUserID
         Purchases.configure(withAPIKey: "appl_lVJsBEhDCcyoBVhDgoyaBHruByh")
+        collectRevenueCatDeviceIdentifiers()
         
         Purchases.shared.delegate = RCDelegateProxy.shared
         
@@ -143,6 +157,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         af.appsFlyerDevKey = appsFlyerDevKey
         af.appleAppID = appleAppID
         af.customerUserID = Purchases.shared.appUserID
+        syncRevenueCatAppsFlyerAttribution()
         
         af.delegate = self
         
@@ -215,6 +230,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             }
             let status = (result?["status"] as? Int) ?? -1
             let type   = (result?["type"] as? String) ?? "unknown"
+            self.syncRevenueCatAppsFlyerAttribution()
             print("AF start status:", status, "type:", type,
                   "customerUserID:", AppsFlyerLib.shared().customerUserID ?? "nil")
         }
@@ -357,6 +373,7 @@ struct WaterEjectApp: App {
 
         // Firebase
         FirebaseApp.configure()
+        AF.configureRemoteConfigDefaults()
         
         //Analytics.setAnalyticsCollectionEnabled(false)
         

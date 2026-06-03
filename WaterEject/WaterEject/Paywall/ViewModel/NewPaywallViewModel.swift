@@ -211,6 +211,7 @@ final class NewPaywallViewModel: ObservableObject {
             paywallId: paywallId,
             onboardId: onboardId
         )
+        let introEligibilityStatus = await AF.trialEligibilityStatus(for: p)
 
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
@@ -265,7 +266,11 @@ final class NewPaywallViewModel: ObservableObject {
 
                 if shouldSendSubscribeEvent(txId: txId) {
                     if plan.j2dType == .subscription,
-                       entitlement?.afSubscriptionPeriodKind == .trial {
+                       AF.isTrialSubscribe(
+                            product: p,
+                            entitlement: entitlement,
+                            introEligibilityStatus: introEligibilityStatus
+                       ) {
                         AF.log(
                             .trial_subscribe,
                             AF.trialSubscribeValues(

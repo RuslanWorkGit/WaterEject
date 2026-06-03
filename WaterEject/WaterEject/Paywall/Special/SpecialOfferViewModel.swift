@@ -207,6 +207,7 @@ final class SpecialOfferViewModel: ObservableObject {
         ?? 0
         let currency = p.currencyCode
         let afCurrency = p.afCurrencyCode
+        let introEligibilityStatus = await AF.trialEligibilityStatus(for: p)
         
         
         do {
@@ -267,7 +268,11 @@ final class SpecialOfferViewModel: ObservableObject {
                 }
                 
                 if shouldSendSubscribeEvent(txId: txId) {
-                    if entitlement?.afSubscriptionPeriodKind == .trial {
+                    if AF.isTrialSubscribe(
+                        product: p,
+                        entitlement: entitlement,
+                        introEligibilityStatus: introEligibilityStatus
+                    ) {
                         AF.log(
                             .trial_subscribe,
                             AF.trialSubscribeValues(

@@ -8,6 +8,7 @@
 import Foundation
 import RevenueCat
 import AppsFlyerLib
+import FirebaseRemoteConfig
 
 enum AFEvent: String {
   case install, start_app, subscribe, subscription_started,
@@ -26,8 +27,35 @@ enum AFSubscriptionPeriodKind {
     case unknown
 }
 
+enum AFLogMode: String {
+    case manual
+    case revenuecat
+}
+
 struct AF {
+    private static let remoteConfigKey = "appsflyer_log"
+    private static let defaultLogMode: AFLogMode = .manual
+
+    static func configureRemoteConfigDefaults() {
+        RemoteConfig.remoteConfig().setDefaults([
+            remoteConfigKey: defaultLogMode.rawValue as NSObject
+        ])
+    }
+
+    static var logMode: AFLogMode {
+        let value = RemoteConfig.remoteConfig()[remoteConfigKey].stringValue
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+
+        return AFLogMode(rawValue: value) ?? defaultLogMode
+    }
+
     static func log(_ e: AFEvent, _ vals: [String: Any] = [:]) {
+        guard logMode == .manual else {
+            debugSkippedLog(eventName: e.rawValue)
+            return
+        }
+
         logRaw(e.rawValue, vals)
     }
 
@@ -78,6 +106,23 @@ struct AF {
         ]
     }
 
+    static func trialEligibilityStatus(for product: StoreProduct) async -> IntroEligibilityStatus? {
+        guard product.afHasFreeTrialIntroductoryOffer else { return nil }
+        return await Purchases.shared.checkTrialOrIntroDiscountEligibility(product: product)
+    }
+
+    static func isTrialSubscribe(
+        product: StoreProduct,
+        entitlement: EntitlementInfo?,
+        introEligibilityStatus: IntroEligibilityStatus?
+    ) -> Bool {
+        if entitlement?.afSubscriptionPeriodKind == .trial {
+            return true
+        }
+
+        return product.afHasFreeTrialIntroductoryOffer && introEligibilityStatus?.isEligible == true
+    }
+
     private static func debugLog(eventName: String, payload: [String: Any]) {
         #if DEBUG
         let sortedPayload = payload.keys.sorted().reduce(into: [String: Any]()) { result, key in
@@ -86,6 +131,12 @@ struct AF {
         print("📈 AF event:", eventName)
         print("   payload:", sortedPayload)
         print("   customerUserID:", AppsFlyerLib.shared().customerUserID ?? "nil")
+        #endif
+    }
+
+    private static func debugSkippedLog(eventName: String) {
+        #if DEBUG
+        print("📈 AF event skipped:", eventName, "mode:", logMode.rawValue)
         #endif
     }
 }
@@ -101,6 +152,10 @@ extension StoreProduct {
 
     var afPriceDouble: Double {
         (price as NSDecimalNumber).doubleValue
+    }
+
+    var afHasFreeTrialIntroductoryOffer: Bool {
+        introductoryDiscount?.paymentMode == .freeTrial
     }
 }
 

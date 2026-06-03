@@ -1,4 +1,4 @@
-/* WaterEject localization: nb */
+/* WaterEject localization: nb-NO */
 " and " = " og ";
 "$0.49/day" = "$0.49/dag";
 "%@ (Pay once - use forever)" = "%@ (Betal én gang - bruk for alltid)";
@@ -57,7 +57,7 @@
 "Clearly" = "Helt klart";
 "Close" = "Lukk";
 "completely silent" = "helt stille";
-"Completes the cleaning cycle with a full multi-frequency pass. Leaves your speakers clean, dry, and ready for everyday use" = "Fullfører rensesyklusen med en full multifrekvensgjennomgang. Etterlater høyttalerne rene, tørre og klare for hverdagsbruk.";
+"Completes the cleaning cycle with a full multi-frequency pass. Leaves your speakers clean, dry, and ready for everyday use" = "Fullfører renseprosessen med en full multifrekvensgjennomgang. Etterlater høyttalerne rene, tørre og klare for hverdagsbruk.";
 "Continue" = "Fortsett";
 "Continue %@" = "Fortsett %@";
 "Continue \\(forPeriod.isEmpty ? " = "Continue \\(forPeriod.isEmpty ? ";
