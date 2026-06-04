@@ -212,6 +212,31 @@ final class SpecialOfferViewModel: ObservableObject {
         
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
+            if result.userCancelled {
+                purchaseSucceeded = false
+                Telemetry.shared.handlePurchaseError(
+                    paywallId: paywallId,
+                    variant: variant,
+                    entryPoint: entryPoint,
+                    plan: plan.analyticsValue,
+                    packageId: pkg.storeProduct.productIdentifier,
+                    rcCode: 1,
+                    message: "User cancelled",
+                    fallbackReason: .userCancelled,
+                    explicitPurchaseSource: Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy),
+                    explicitOnboardId: OnboardTag.lastFromUserDefaults()?.rawValue,
+                    placeWhereBuy: placeWhereBuy
+                )
+                return TelemetryPurchaseAttemptResult(
+                    status: .cancelled,
+                    packageId: pkg.storeProduct.productIdentifier,
+                    transactionId: result.transaction?.transactionIdentifier,
+                    rcCode: 1,
+                    message: "User cancelled",
+                    reasonWhy: .userCancelled
+                )
+            }
+
             let active = result.customerInfo.entitlements[entitlementID]?.isActive == true
             purchaseSucceeded = active
             AppNotificationPolicy.updateForSubscription(isActive: active)
