@@ -491,6 +491,9 @@ struct PaywallThirdPlanCard: View {
                         Text(LocalizedStringKey(title))
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(Color(red: 238/255, green: 255/255, blue: 246/255))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.65)
+                            .layoutPriority(1)
                         Spacer()
                         
                     }

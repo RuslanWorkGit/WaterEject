@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Ilmainen kokeilu käytössä";
 "3 Days Free" = "3 päivää ilmaiseksi";
+"%@ due today" = "%@ maksettavaa tänään";
 "then" = "jonka jälkeen";
 "Free trial" = "Ilmainen kokeilu";

@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Perioadă gratuită activată";
 "3 Days Free" = "3 zile gratis";
+"%@ due today" = "De plată astăzi: %@";
 "then" = "apoi";
 "Free trial" = "Perioadă gratuită";

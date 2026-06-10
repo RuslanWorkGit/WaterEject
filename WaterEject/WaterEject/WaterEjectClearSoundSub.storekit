@@ -28,6 +28,51 @@
       "productID" : "KyryloVoinov.WaterEject.lifetime.access",
       "referenceName" : "Lifetime Access",
       "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "6778037813",
+      "localizations" : [
+        {
+          "description" : "Grants Pro Access to User",
+          "displayName" : "Pro Sub",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "KyryloVoinov.WaterEject.lifetime.accessOne",
+      "referenceName" : "Lifetime Access One",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "3.99",
+      "familyShareable" : false,
+      "internalID" : "6778039077",
+      "localizations" : [
+        {
+          "description" : "Grants Pro Access to User",
+          "displayName" : "Pro Sub",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "KyryloVoinov.WaterEject.lifetime.accessThree",
+      "referenceName" : "Lifetime Access Three",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "6778038780",
+      "localizations" : [
+        {
+          "description" : "Grants Pro Access to User",
+          "displayName" : "Pro sub",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "KyryloVoinov.WaterEject.lifetime.accessTwo",
+      "referenceName" : "Lifetime Access Two",
+      "type" : "NonConsumable"
     }
   ],
   "settings" : {
@@ -38,7 +83,7 @@
     "_developerTeamID" : "LBA86YKHYN",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 801067239.47822297,
+    "_lastSynchronizedDate" : 802622685.65614104,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
@@ -67,7 +112,7 @@
           "groupNumber" : 2,
           "internalID" : "6749955956",
           "introductoryOffer" : {
-            "internalID" : "E8CB76D4",
+            "internalID" : "9806374E",
             "numberOfPeriods" : 1,
             "paymentMode" : "free",
             "subscriptionPeriod" : "P3D"
@@ -101,7 +146,7 @@
           "internalID" : "6756081159",
           "introductoryOffer" : {
             "displayPrice" : "2.99",
-            "internalID" : "1AFA80FE",
+            "internalID" : "1C3CEDB7",
             "numberOfPeriods" : 1,
             "paymentMode" : "payAsYouGo",
             "subscriptionPeriod" : "P1W"
@@ -134,7 +179,7 @@
           "groupNumber" : 5,
           "internalID" : "6771787134",
           "introductoryOffer" : {
-            "internalID" : "03126BB3",
+            "internalID" : "54CBAC9B",
             "numberOfPeriods" : 1,
             "paymentMode" : "free",
             "subscriptionPeriod" : "P3D"
@@ -167,7 +212,7 @@
           "groupNumber" : 4,
           "internalID" : "6771777041",
           "introductoryOffer" : {
-            "internalID" : "0B7E6DE1",
+            "internalID" : "21AA8D7F",
             "numberOfPeriods" : 1,
             "paymentMode" : "free",
             "subscriptionPeriod" : "P3D"

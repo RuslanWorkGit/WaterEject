@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Aktyvuotas nemokamas bandymas";
 "3 Days Free" = "3 dienos nemokamai";
+"%@ due today" = "%@ mokėtina šiandien";
 "then" = "tada";
 "Free trial" = "Nemokamas bandymas";

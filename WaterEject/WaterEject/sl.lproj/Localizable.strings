@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Brezplačen preizkus je omogočen";
 "3 Days Free" = "3 dni brezplačno";
+"%@ due today" = "%@ za plačilo danes";
 "then" = "nato";
 "Free trial" = "Brezplačen preizkus";

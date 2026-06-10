@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Безплатният пробен период е включен";
 "3 Days Free" = "3 дни безплатно";
+"%@ due today" = "%@ дължими днес";
 "then" = "след това";
 "Free trial" = "Безплатен пробен период";

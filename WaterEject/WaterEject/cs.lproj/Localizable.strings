@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Zkušební verze aktivována";
 "3 Days Free" = "3 dny zdarma";
+"%@ due today" = "%@ splatné dnes";
 "then" = "poté";
 "Free trial" = "Zkušební verze zdarma";

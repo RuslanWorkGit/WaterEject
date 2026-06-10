@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Kostenlose Testversion aktiviert";
 "3 Days Free" = "3 Tage kostenlos";
+"%@ due today" = "%@ heute fällig";
 "then" = "danach";
 "Free trial" = "Kostenlose Testversion";

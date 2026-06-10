@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "免费试用已开启";
 "3 Days Free" = "免费试用 3 天";
+"%@ due today" = "今日应付：%@";
 "then" = "之后";
 "Free trial" = "免费试用";

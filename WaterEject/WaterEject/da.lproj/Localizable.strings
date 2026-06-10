@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Gratis prøveperiode aktiveret";
 "3 Days Free" = "3 dage gratis";
+"%@ due today" = "%@ forfalder i dag";
 "then" = "derefter";
 "Free trial" = "Gratis prøveperiode";

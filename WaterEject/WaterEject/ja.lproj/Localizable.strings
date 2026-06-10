@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "無料トライアル有効";
 "3 Days Free" = "3日間無料";
+"%@ due today" = "本日のお支払い: %@";
 "then" = "その後";
 "Free trial" = "無料トライアル";

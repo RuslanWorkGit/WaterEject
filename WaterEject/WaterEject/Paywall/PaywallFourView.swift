@@ -501,6 +501,9 @@ struct PaywallFourPlanCard: View {
                         Text(LocalizedStringKey(title))
                             .font(.system(size: 20 * padScale, weight: .bold))
                             .foregroundStyle(.black)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.65)
+                            .layoutPriority(1)
                         Spacer()
                         
                     }

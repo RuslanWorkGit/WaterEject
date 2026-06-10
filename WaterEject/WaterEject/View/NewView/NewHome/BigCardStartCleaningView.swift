@@ -56,7 +56,9 @@ struct BigCardStartCleaningView: View {
                     Text(mainText)
                         .font(.system(size: (isSmall ? 38 : 42) * padScale, weight: .bold))
                         .foregroundStyle(.white)
+                        .padding(.top, 32)
                         .fixedSize(horizontal: false, vertical: true)
+                    
                     
                 }
             }

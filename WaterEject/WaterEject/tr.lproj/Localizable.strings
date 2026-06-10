@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Ücretsiz deneme açık";
 "3 Days Free" = "3 gün ücretsiz";
+"%@ due today" = "Bugün ödenecek: %@";
 "then" = "sonra";
 "Free trial" = "Ücretsiz deneme";

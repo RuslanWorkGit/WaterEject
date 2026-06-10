@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "무료 체험 활성화";
 "3 Days Free" = "3일 무료";
+"%@ due today" = "오늘 결제 금액: %@";
 "then" = "이후";
 "Free trial" = "무료 체험";

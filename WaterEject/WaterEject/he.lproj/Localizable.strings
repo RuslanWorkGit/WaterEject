@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "ניסיון חינם מופעל";
 "3 Days Free" = "3 ימים חינם";
+"%@ due today" = "%@ לתשלום היום";
 "then" = "לאחר מכן";
 "Free trial" = "ניסיון חינם";

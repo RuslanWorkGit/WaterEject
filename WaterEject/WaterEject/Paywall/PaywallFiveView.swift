@@ -68,6 +68,20 @@ struct PaywallFiveView: View {
     private let telemetryVariant = PaywallVariant.fifth.rawValue
     private let telemetryPaywallId = "paywall_v_5.0"
 
+    private var weeklyDueTodayTitle: String {
+        String(format: String(localized: "%@ due today"), zeroPriceString(for: .weekly))
+    }
+
+    private func zeroPriceString(for plan: NewPaywallPlan) -> String {
+        guard
+            let formatter = viewModel.packageByPlan[plan]?.storeProduct.priceFormatter,
+            let formattedPrice = formatter.string(from: NSNumber(value: 0))
+        else {
+            return "$0.00"
+        }
+
+        return formattedPrice
+    }
 
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
@@ -120,6 +134,7 @@ struct PaywallFiveView: View {
         let isLarge = UIScreen.main.bounds.height > 900
         let secondaryPlan = viewModel.yearlyCardPlan
         let shouldShowFreeTrial = isFreeTrialAllowed && isFreeTrialEnabled
+        let shouldShowWeeklyTrialText = isFreeTrialAllowed
 
         ZStack(alignment: .topTrailing) {
 
@@ -246,10 +261,10 @@ struct PaywallFiveView: View {
                         }
 
                         PaywallFivePlanCard(
-                            title: shouldShowFreeTrial ? String(localized: "3 Days Free") : NewPaywallPlan.weekly.title,
-                            price: shouldShowFreeTrial ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
+                            title: shouldShowWeeklyTrialText ? weeklyDueTodayTitle : NewPaywallPlan.weekly.title,
+                            price: shouldShowWeeklyTrialText ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
                             sublabel: nil,
-                            saveText: shouldShowFreeTrial ? String(localized: "Free trial") : viewModel.onlyPrice[.weekly] ?? "",
+                            saveText: shouldShowWeeklyTrialText ? String(localized: "3 Days Free") : viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: {
                                 if isFreeTrialAllowed {
@@ -466,7 +481,7 @@ struct PaywallFiveView: View {
                     .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
                     .padding(14)
             }
-            .padding(.top, 20)
+            .padding(.top, 8)
             .padding(.trailing, 18)
         }
 
@@ -655,7 +670,7 @@ struct PaywallFivePlanCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 16) {
+            HStack(spacing: 8) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color.gray.opacity(0.3))
                     .font(.system(size: 28, weight: .light))
@@ -665,6 +680,9 @@ struct PaywallFivePlanCard: View {
                         Text(title)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(.black)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.65)
+                            .layoutPriority(1)
                         Spacer()
 
                     }
@@ -690,12 +708,12 @@ struct PaywallFivePlanCard: View {
                     Text(saveText)
                         .font(.system(size: sublabel == nil ? 16 : 10, weight: sublabel == nil ? .semibold : .regular))
                         .foregroundStyle(sublabel == nil ? .black : Color(red: 196/255, green: 196/255, blue: 197/255))
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.8)
                 }
                 .frame(minWidth: 92, alignment: .trailing)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
             .background(
                 ZStack {

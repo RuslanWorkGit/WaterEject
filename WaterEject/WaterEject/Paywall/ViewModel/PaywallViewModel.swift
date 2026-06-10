@@ -22,7 +22,7 @@ enum PaywallPlan: String, CaseIterable, Hashable {
     }
 
     var title: String {
-        switch self { case .weekly: String(localized: "7 days"); case .yearly: String(localized: "12 months"); case .annual: String(localized: "Annual") }
+        switch self { case .weekly: String(localized: "7 days"); case .yearly: String(localized: "12 months"); case .annual: String(localized: "Get Lifetime Access") }
     }
 
     var analyticsValue: String { rawValue }
@@ -133,7 +133,7 @@ final class PaywallViewModel: ObservableObject {
                 switch plan {
                 case .weekly: period[plan] = "\(localized)\(String(localized: "/week"))"
                 case .yearly: period[plan] = "\(localized)\(String(localized: "/year"))"
-                case .annual: period[plan] = localized
+                case .annual: period[plan] = String(format: String(localized: "%@ / lifetime"), localized)
                 }
                 only[plan] = "\(String(localized: "for")) \(localized)"
             }

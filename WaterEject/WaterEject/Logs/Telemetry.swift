@@ -368,6 +368,69 @@ final class Telemetry {
         }
     }
 
+    private func assignedPaywallKey(for onboardId: String?) -> String? {
+        let resolvedOnboardId = resolveOnboardId(onboardId)
+        let candidates = [
+            resolvedOnboardId,
+            onboardId,
+            presentedOnboardingContext()?.flowKey,
+            presentedOnboardingContext()?.flowId
+        ].compactMap { $0 }
+
+        for candidate in candidates {
+            if let tag = OnboardTag(rawValue: candidate) {
+                return PaywallAB.shared.onboardingPaywallVariant(for: tag).rawValue
+            }
+
+            if let variant = OnboardingVariant(rawValue: candidate) {
+                return PaywallAB.shared.onboardingPaywallVariant(for: variant.onboardTag).rawValue
+            }
+
+            switch candidate {
+            case "onb_10_1":
+                return PaywallAB.shared.onboardingPaywallVariant(for: .v10).rawValue
+            case "new_onb_1":
+                return "paywall_new_black_3"
+            case "new_onb_2":
+                return "paywall_new_black_2"
+            case "new_onb_3":
+                return "paywall_new_black_1"
+            case "new_onb_4", "new_onb_5":
+                return "paywall_new_white_1"
+            case "new_onb_6":
+                return "paywall_new_black_4"
+            case "new_onb_7":
+                return "paywall_new_black_5"
+            default:
+                continue
+            }
+        }
+
+        return nil
+    }
+
+    private func firstTimeOpenPaywallProductParams(onboardId: String?) -> [String: Any] {
+        guard let paywallKey = assignedPaywallKey(for: onboardId) else {
+            return [:]
+        }
+
+        let settings = PaywallAB.shared.productSettings(forKey: paywallKey)
+        var params: [String: Any] = [
+            "assigned_paywall_key": paywallKey,
+            "assigned_weekly_product_id": settings.weeklyProductID,
+            "assigned_yearly_product_id": settings.yearlyProductID,
+            "assigned_annual_product_id": settings.annualProductID,
+            "assigned_yearly_card_plan": settings.yearlyCardPlan.rawValue,
+            "assigned_free_trial_enabled": settings.freeTest
+        ]
+
+        if let variantID = settings.variantID {
+            params["assigned_product_variant_id"] = variantID
+        }
+
+        return params
+    }
+
     private func purchaseSource(for context: PaywallContext?) -> PurchaseSource {
         switch context {
         case .onboarding:
@@ -914,10 +977,13 @@ extension Telemetry {
         )
 
         if !defaults.bool(forKey: firstTimeOpenLoggedKey) {
+            var params = firstTimeOpenPaywallProductParams(onboardId: resolvedOnboardId)
+            params["event_version"] = "1"
+
             logTieredEvent(
                 "first_time_open",
                 explicitOnboardId: resolvedOnboardId,
-                extra: ["event_version": "1"]
+                extra: params
             )
             defaults.set(true, forKey: firstTimeOpenLoggedKey)
         }

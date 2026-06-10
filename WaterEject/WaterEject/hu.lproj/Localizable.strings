@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Ingyenes próba bekapcsolva";
 "3 Days Free" = "3 nap ingyen";
+"%@ due today" = "%@ ma esedékes";
 "then" = "utána";
 "Free trial" = "Ingyenes próba";

@@ -349,5 +349,6 @@
 /* Added free trial paywall strings */
 "Free Trial Enabled" = "Η δωρεάν δοκιμή είναι ενεργή";
 "3 Days Free" = "3 ημέρες δωρεάν";
+"%@ due today" = "%@ οφείλεται σήμερα";
 "then" = "μετά";
 "Free trial" = "Δωρεάν δοκιμή";
