@@ -431,6 +431,57 @@ final class Telemetry {
         return params
     }
 
+    private func assignedPaywallProductParams(onboardId: String?) -> [String: Any] {
+        firstTimeOpenPaywallProductParams(onboardId: onboardId)
+    }
+
+    private func productSettingsKey(paywallId: String?, variant: String?, onboardId: String?) -> String? {
+        let trimmedPaywallId = paywallId?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let rcPaywallKeys: Set<String> = ["first", "second", "third", "fourth", "fifth", "special"]
+        if rcPaywallKeys.contains(trimmedPaywallId) || trimmedPaywallId.hasPrefix("paywall_new_") {
+            return trimmedPaywallId
+        }
+
+        let trimmedVariant = variant?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !trimmedVariant.isEmpty {
+            return trimmedVariant
+        }
+
+        return assignedPaywallKey(for: onboardId)
+    }
+
+    private func selectedProductParams(paywallKey: String?, onboardId: String?, plan: String) -> [String: Any] {
+        let resolvedPaywallKey = paywallKey ?? assignedPaywallKey(for: onboardId)
+        guard let resolvedPaywallKey else { return [:] }
+
+        let settings = PaywallAB.shared.productSettings(forKey: resolvedPaywallKey)
+        let normalizedPlan = plan.lowercased()
+        var params: [String: Any] = [
+            "selected_paywall_key": resolvedPaywallKey,
+            "selected_product_plan": normalizedPlan
+        ]
+
+        switch normalizedPlan {
+        case "weekly":
+            params["selected_product_id"] = settings.weeklyProductID
+            params["weekly_product_id"] = settings.weeklyProductID
+        case "yearly":
+            params["selected_product_id"] = settings.yearlyProductID
+            params["yearly_product_id"] = settings.yearlyProductID
+        case "annual":
+            params["selected_product_id"] = settings.annualProductID
+            params["annual_product_id"] = settings.annualProductID
+        default:
+            break
+        }
+
+        if let variantID = settings.variantID {
+            params["product_variant_id"] = variantID
+        }
+
+        return params
+    }
+
     private func purchaseSource(for context: PaywallContext?) -> PurchaseSource {
         switch context {
         case .onboarding:
@@ -991,37 +1042,42 @@ extension Telemetry {
 
     func funnelOnboardStart(onboardId: String) {
         let resolvedOnboardId = resolveOnboardId(onboardId)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        params["event_version"] = "1"
+
         logTieredEvent(
             "start_onboard",
             explicitOnboardId: resolvedOnboardId,
-            extra: [
-                "event_version": "1"
-            ]
+            extra: params
         )
     }
 
     func funnelPlanChosen(onboardId: String, plan: String, selectionMethod: String = "tap") {
         let resolvedOnboardId = resolveOnboardId(onboardId)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        params.merge(selectedProductParams(paywallKey: nil, onboardId: resolvedOnboardId, plan: plan)) { _, new in new }
+        params["event_version"] = "1"
+        params["plan"] = plan
+        params["selection_method"] = selectionMethod
+
         logTieredEvent(
             "choose_plan",
             explicitOnboardId: resolvedOnboardId,
-            extra: [
-                "event_version": "1",
-                "plan": plan,
-                "selection_method": selectionMethod
-            ]
+            extra: params
         )
     }
 
     func funnelGoToPurchase(onboardId: String, plan: String) {
         let resolvedOnboardId = resolveOnboardId(onboardId)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        params.merge(selectedProductParams(paywallKey: nil, onboardId: resolvedOnboardId, plan: plan)) { _, new in new }
+        params["event_version"] = "1"
+        params["plan"] = plan
+
         logTieredEvent(
             "go_to_purchase",
             explicitOnboardId: resolvedOnboardId,
-            extra: [
-                "event_version": "1",
-                "plan": plan
-            ]
+            extra: params
         )
     }
 
@@ -1036,8 +1092,11 @@ extension Telemetry {
             "event_version": "1",
             "plan": plan
         ]
+        extra.merge(assignedPaywallProductParams(onboardId: resolvedOnboardId)) { _, new in new }
+        extra.merge(selectedProductParams(paywallKey: nil, onboardId: resolvedOnboardId, plan: plan)) { _, new in new }
         if let productId, !productId.isEmpty {
             extra["product_id"] = productId
+            extra["selected_product_id"] = productId
         }
         if let purchaseSource {
             extra["purchase_source"] = purchaseSource.rawValue
@@ -1144,6 +1203,7 @@ extension Telemetry {
             "entry_point": entryPoint,
             "purchase_source": purchaseSource.rawValue
         ]
+        params.merge(assignedPaywallProductParams(onboardId: context.onboardId)) { _, new in new }
 
         if let selectedDevice {
             params["selected_device"] = selectedDevice
@@ -1178,28 +1238,30 @@ extension Telemetry {
         let paywallId = explicitPaywallId ?? paywallId(for: variant)
         let onboardId = resolveOnboardId(explicitOnboardId)
         let source = purchaseSource(for: currentPaywallContext())
+        let assignedParams = assignedPaywallProductParams(onboardId: onboardId)
+
         logEvent(
             "paywall_close",
             explicitOnboardId: onboardId,
             variant: variant,
-            extra: [
+            extra: assignedParams.merging([
                 "paywall_id": paywallId,
                 "entry_point": entryPoint,
                 "reason": reason,
                 "paywall_session_id": sessionId,
                 "purchase_source": source.rawValue
-            ]
+            ]) { _, new in new }
         )
         logEvent(
             "paywall_summary",
             explicitOnboardId: onboardId,
             variant: variant,
-            extra: [
+            extra: assignedParams.merging([
                 "paywall_id": paywallId,
                 "status": PaywallStatus.close.rawValue,
                 "reason": reason,
                 "purchase_source": source.rawValue
-            ]
+            ]) { _, new in new }
         )
     }
 
@@ -1213,19 +1275,25 @@ extension Telemetry {
         paywallId explicitPaywallId: String? = nil,
         onboardId explicitOnboardId: String? = nil
     ) {
+        let resolvedOnboardId = resolveOnboardId(explicitOnboardId)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        params.merge([
+            "paywall_id": explicitPaywallId ?? paywallId(for: variant),
+            "product_id": packageId,
+            "selected_product_id": packageId,
+            "package_id": packageId,
+            "offering_id": offeringId ?? "na",
+            "price_shown": price ?? 0,
+            "paywall_currency": currency ?? "NA",
+            "paywall_session_id": sessionId,
+            "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
+        ]) { _, new in new }
+
         logEvent(
             "Purchase_Start",
-            explicitOnboardId: resolveOnboardId(explicitOnboardId),
+            explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
-                "paywall_id": explicitPaywallId ?? paywallId(for: variant),
-                "package_id": packageId,
-                "offering_id": offeringId ?? "na",
-                "price_shown": price ?? 0,
-                "paywall_currency": currency ?? "NA",
-                "paywall_session_id": sessionId,
-                "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
-            ]
+            extra: params
         )
     }
 
@@ -1311,47 +1379,65 @@ extension Telemetry {
     }
 
     func paywallExposure(flowId: String?, variant: String, entryPoint: String) {
+        let resolvedOnboardId = resolveOnboardId(nil)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        params.merge([
+            "flow_id": flowId ?? "unknown",
+            "paywall_id": paywallId(for: variant),
+            "entry_point": entryPoint,
+            "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
+        ]) { _, new in new }
+
         logEvent(
             "paywall_exposure",
-            explicitOnboardId: resolveOnboardId(nil),
+            explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
-                "flow_id": flowId ?? "unknown",
-                "paywall_id": paywallId(for: variant),
-                "entry_point": entryPoint,
-                "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
-            ]
+            extra: params
         )
     }
 
     func paywallCTATap(flowId: String?, variant: String, entryPoint: String, plan: String, paywallId explicitPaywallId: String? = nil) {
+        let resolvedOnboardId = resolveOnboardId(nil)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        let paywallKey = productSettingsKey(paywallId: explicitPaywallId, variant: variant, onboardId: resolvedOnboardId)
+        params.merge(selectedProductParams(paywallKey: paywallKey, onboardId: resolvedOnboardId, plan: plan)) { _, new in new }
+        params.merge([
+            "flow_id": flowId ?? "unknown",
+            "paywall_id": explicitPaywallId ?? paywallId(for: variant),
+            "entry_point": entryPoint,
+            "plan": plan,
+            "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
+        ]) { _, new in new }
+
         logEvent(
             "paywall_cta_tap",
-            explicitOnboardId: resolveOnboardId(nil),
+            explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
-                "flow_id": flowId ?? "unknown",
-                "paywall_id": explicitPaywallId ?? paywallId(for: variant),
-                "entry_point": entryPoint,
-                "plan": plan,
-                "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
-            ]
+            extra: params
         )
     }
 
     func purchaseSuccess(flowId: String?, variant: String, plan: String, packageId: String, sessionId: String) {
+        let resolvedOnboardId = resolveOnboardId(nil)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        let paywallKey = productSettingsKey(paywallId: nil, variant: variant, onboardId: resolvedOnboardId)
+        params.merge(selectedProductParams(paywallKey: paywallKey, onboardId: resolvedOnboardId, plan: plan)) { _, new in new }
+        params.merge([
+            "flow_id": flowId ?? "unknown",
+            "plan": plan,
+            "product_id": packageId,
+            "selected_product_id": packageId,
+            "package_id": packageId,
+            "paywall_session_id": sessionId,
+            "paywall_id": paywallId(for: variant),
+            "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
+        ]) { _, new in new }
+
         logEvent(
             "purchase_success",
-            explicitOnboardId: resolveOnboardId(nil),
+            explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
-                "flow_id": flowId ?? "unknown",
-                "plan": plan,
-                "package_id": packageId,
-                "paywall_session_id": sessionId,
-                "paywall_id": paywallId(for: variant),
-                "purchase_source": purchaseSource(for: currentPaywallContext()).rawValue
-            ]
+            extra: params
         )
     }
 
@@ -1503,32 +1589,42 @@ extension Telemetry {
     ) {
         let purchaseSource = purchaseSource(for: currentPaywallContext())
         let resolvedOnboardId = resolveOnboardId(onboardId)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        let paywallKey = productSettingsKey(paywallId: explicitPaywallId, variant: variant, onboardId: resolvedOnboardId)
+        params.merge(selectedProductParams(paywallKey: paywallKey, onboardId: resolvedOnboardId, plan: plan)) { _, new in new }
+        params.merge([
+            "paywall_id": explicitPaywallId ?? paywallId(for: variant),
+            "entry_point": entryPoint,
+            "plan": plan,
+            "purchase_source": purchaseSource.rawValue
+        ]) { _, new in new }
+
         logEvent(
             "paywall_cta_tap",
             explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
-                "paywall_id": explicitPaywallId ?? paywallId(for: variant),
-                "entry_point": entryPoint,
-                "plan": plan,
-                "purchase_source": purchaseSource.rawValue
-            ]
+            extra: params
         )
     }
 
     func purchaseSuccess(variant: String, packageId: String, sessionId: String, onboardId: String?) {
         let purchaseSource = purchaseSource(for: currentPaywallContext())
         let resolvedOnboardId = resolveOnboardId(onboardId)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        params.merge([
+            "product_id": packageId,
+            "selected_product_id": packageId,
+            "package_id": packageId,
+            "paywall_session_id": sessionId,
+            "paywall_id": paywallId(for: variant),
+            "purchase_source": purchaseSource.rawValue
+        ]) { _, new in new }
+
         logEvent(
             "purchase_success",
             explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
-                "package_id": packageId,
-                "paywall_session_id": sessionId,
-                "paywall_id": paywallId(for: variant),
-                "purchase_source": purchaseSource.rawValue
-            ]
+            extra: params
         )
     }
 
@@ -1543,19 +1639,26 @@ extension Telemetry {
     ) {
         let purchaseSource = purchaseSource(for: currentPaywallContext())
         let resolvedOnboardId = resolveOnboardId(onboardId)
+        var params = assignedPaywallProductParams(onboardId: resolvedOnboardId)
+        let paywallKey = productSettingsKey(paywallId: nil, variant: variant, onboardId: resolvedOnboardId)
+        params.merge(selectedProductParams(paywallKey: paywallKey, onboardId: resolvedOnboardId, plan: plan)) { _, new in new }
+        params.merge([
+            "plan": plan,
+            "product_id": packageId,
+            "selected_product_id": packageId,
+            "package_id": packageId,
+            "rc_code": rcCode ?? -1,
+            "message": message ?? "",
+            "paywall_session_id": sessionId,
+            "paywall_id": paywallId(for: variant),
+            "purchase_source": purchaseSource.rawValue
+        ]) { _, new in new }
+
         logEvent(
             "purchase_error",
             explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
-                "plan": plan,
-                "package_id": packageId,
-                "rc_code": rcCode ?? -1,
-                "message": message ?? "",
-                "paywall_session_id": sessionId,
-                "paywall_id": paywallId(for: variant),
-                "purchase_source": purchaseSource.rawValue
-            ]
+            extra: params
         )
     }
 
@@ -1685,12 +1788,17 @@ extension Telemetry {
             purchaseSource: purchaseSource
         )
 
+        let paywallKey = productSettingsKey(paywallId: paywallId, variant: variant, onboardId: resolvedOnboardId)
+        let selectedParams = selectedProductParams(paywallKey: paywallKey, onboardId: resolvedOnboardId, plan: plan)
+
         logEvent(
             "success_Buy",
             explicitOnboardId: resolvedOnboardId,
             explicitBrand: brand,
             variant: variant,
-            extra: [
+            extra: assignedPaywallProductParams(onboardId: resolvedOnboardId).merging(selectedParams) { _, new in new }.merging([
+                "product_id": packageId,
+                "selected_product_id": packageId,
                 "package_id": packageId,
                 "paywall_id": paywallId,
                 "plan": plan,
@@ -1700,7 +1808,7 @@ extension Telemetry {
                 "transaction_id": transactionId ?? "",
                 "price_paid": price ?? 0,
                 "currency": currency ?? "NA"
-            ]
+            ]) { _, new in new }
         )
 
         logEvent(
@@ -1708,12 +1816,14 @@ extension Telemetry {
             explicitOnboardId: resolvedOnboardId,
             explicitBrand: brand,
             variant: variant,
-            extra: [
+            extra: assignedPaywallProductParams(onboardId: resolvedOnboardId).merging(selectedParams) { _, new in new }.merging([
                 "paywall_id": paywallId,
                 "status": PaywallStatus.success.rawValue,
                 "plan": plan,
+                "product_id": packageId,
+                "selected_product_id": packageId,
                 "purchase_source": purchaseSource.rawValue
-            ]
+            ]) { _, new in new }
         )
 
         syncRevenueCatAttributes(onboardId: resolvedOnboardId)
@@ -1735,33 +1845,39 @@ extension Telemetry {
         let purchaseSource = explicitPurchaseSource ?? purchaseSource(for: currentPaywallContext())
         let resolvedOnboardId = resolveOnboardId(explicitOnboardId)
         let reasonWhy = normalizeReason(rcCode: rcCode, message: message, fallback: fallbackReason)
+        let paywallKey = productSettingsKey(paywallId: paywallId, variant: variant, onboardId: resolvedOnboardId)
+        let selectedParams = selectedProductParams(paywallKey: paywallKey, onboardId: resolvedOnboardId, plan: plan)
 
         logEvent(
             "Paywall_Purchase_Error",
             explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
+            extra: assignedPaywallProductParams(onboardId: resolvedOnboardId).merging(selectedParams) { _, new in new }.merging([
                 "paywall_id": paywallId,
+                "product_id": packageId,
+                "selected_product_id": packageId,
                 "package_id": packageId,
                 "plan": plan,
                 "rc_code": rcCode ?? -1,
                 "message": message ?? "",
                 "reasonWhy": reasonWhy.rawValue
-            ]
+            ]) { _, new in new }
         )
 
         logEvent(
             "paywall_summary",
             explicitOnboardId: resolvedOnboardId,
             variant: variant,
-            extra: [
+            extra: assignedPaywallProductParams(onboardId: resolvedOnboardId).merging(selectedParams) { _, new in new }.merging([
                 "paywall_id": paywallId,
                 "status": PaywallStatus.error.rawValue,
                 "plan": plan,
+                "product_id": packageId,
+                "selected_product_id": packageId,
                 "purchase_source": purchaseSource.rawValue,
                 "reason": reasonWhy.rawValue,
                 "place_where_buy": placeWhereBuy ?? entryPoint
-            ]
+            ]) { _, new in new }
         )
     }
 

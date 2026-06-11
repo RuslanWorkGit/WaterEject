@@ -434,13 +434,20 @@ private struct OnboardingControlResolution {
 }
 
 private struct OnboardingCountryTierMapping {
-    var tier1Countries: Set<String> = ["US", "CA"]
+    var tier1Countries: Set<String> = [
+        "US", "CA", "AU"
+    ]
     var tier2Countries: Set<String> = [
         "AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ",
         "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IS", "IE", "IT",
         "XK", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL",
         "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI",
         "ES", "SE", "CH", "TR", "UA", "GB", "VA"
+    ]
+    var tier3Countries: Set<String> = [
+        "AE", "AR", "BR", "CL", "CN", "CO", "EC", "HK", "ID", "IL",
+        "IN", "JP", "KR", "MX", "MY", "NZ", "PE", "PH", "SA", "SG",
+        "TH", "UY", "VE", "VN", "ZA"
     ]
 
     func tier(for countryCode: String) -> String {
@@ -450,6 +457,9 @@ private struct OnboardingCountryTierMapping {
         }
         if tier2Countries.contains(code) {
             return "tier_2"
+        }
+        if tier3Countries.contains(code) {
+            return "tier_3"
         }
         return "tier_3"
     }

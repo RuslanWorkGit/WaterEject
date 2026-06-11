@@ -46,7 +46,67 @@ private struct PaywallProductRemoteConfig: Decodable {
     let annualProductId: String?
     let yearlyCardPlan: String?
     let freeTest: Bool?
-    let variants: [PaywallProductVariantRemoteConfig]?
+    let variants: PaywallProductVariantsRemoteConfig?
+}
+
+private enum PaywallProductVariantsRemoteConfig: Decodable {
+    case list([PaywallProductVariantRemoteConfig])
+    case tiers([String: PaywallProductTierVariantsRemoteConfig])
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let list = try? container.decode([PaywallProductVariantRemoteConfig].self) {
+            self = .list(list)
+            return
+        }
+        self = .tiers(try container.decode([String: PaywallProductTierVariantsRemoteConfig].self))
+    }
+}
+
+private struct PaywallProductTierVariantsRemoteConfig: Decodable {
+    let defaultVariants: [PaywallProductVariantRemoteConfig]
+    let countries: [String: PaywallProductCountryVariantsRemoteConfig]?
+
+    private enum CodingKeys: String, CodingKey {
+        case defaultVariants = "default"
+        case countries
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let list = try? container.decode([PaywallProductVariantRemoteConfig].self) {
+            self.defaultVariants = list
+            self.countries = nil
+            return
+        }
+
+        let keyed = try decoder.container(keyedBy: CodingKeys.self)
+        self.defaultVariants = try keyed.decodeIfPresent([PaywallProductVariantRemoteConfig].self, forKey: .defaultVariants) ?? []
+        self.countries = try keyed.decodeIfPresent([String: PaywallProductCountryVariantsRemoteConfig].self, forKey: .countries)
+    }
+}
+
+private struct PaywallProductCountryVariantsRemoteConfig: Decodable {
+    let name: String?
+    let variants: [PaywallProductVariantRemoteConfig]
+
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case variants
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let list = try? container.decode([PaywallProductVariantRemoteConfig].self) {
+            self.name = nil
+            self.variants = list
+            return
+        }
+
+        let keyed = try decoder.container(keyedBy: CodingKeys.self)
+        self.name = try keyed.decodeIfPresent(String.self, forKey: .name)
+        self.variants = try keyed.decodeIfPresent([PaywallProductVariantRemoteConfig].self, forKey: .variants) ?? []
+    }
 }
 
 private struct PaywallProductVariantRemoteConfig: Decodable {
@@ -61,6 +121,76 @@ private struct PaywallProductVariantRemoteConfig: Decodable {
 
     var effectiveTraffic: Int {
         max(traffic ?? trafic ?? 0, 0)
+    }
+}
+
+private struct PaywallCountryTierMapping {
+    private let tier1Countries: Set<String> = [
+        "US", "CA", "AU"
+    ]
+    private let tier2Countries: Set<String> = [
+        "AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ",
+        "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IS", "IE", "IT",
+        "XK", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL",
+        "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI",
+        "ES", "SE", "CH", "TR", "UA", "GB", "VA"
+    ]
+    private let tier3Countries: Set<String> = [
+        "AE", "AR", "BR", "CL", "CN", "CO", "EC", "HK", "ID", "IL",
+        "IN", "JP", "KR", "MX", "MY", "NZ", "PE", "PH", "SA", "SG",
+        "TH", "UY", "VE", "VN", "ZA"
+    ]
+
+    func tier(for countryCode: String) -> String {
+        let code = Self.normalizedCountryCode(countryCode)
+        if tier1Countries.contains(code) {
+            return "tier_1"
+        }
+        if tier2Countries.contains(code) {
+            return "tier_2"
+        }
+        if tier3Countries.contains(code) {
+            return "tier_3"
+        }
+        return "tier_3"
+    }
+
+    static func normalizedCountryCode(_ value: String) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        let uppercased = trimmed.uppercased()
+        if uppercased.count == 2 {
+            return uppercased
+        }
+
+        let aliases = [
+            "BRAZIL": "BR",
+            "KOSOVO": "XK",
+            "UNITED STATES": "US",
+            "UNITED STATES OF AMERICA": "US",
+            "UNITED KINGDOM": "GB",
+            "GREAT BRITAIN": "GB"
+        ]
+        if let alias = aliases[uppercased] {
+            return alias
+        }
+
+        let englishLocale = Locale(identifier: "en_US_POSIX")
+        for code in isoRegionCodes() {
+            let englishName = englishLocale.localizedString(forRegionCode: code)?.uppercased()
+            let currentName = Locale.current.localizedString(forRegionCode: code)?.uppercased()
+            if englishName == uppercased || currentName == uppercased {
+                return code.uppercased()
+            }
+        }
+
+        return uppercased
+    }
+
+    private static func isoRegionCodes() -> [String] {
+        if #available(iOS 16.0, *) {
+            return Locale.Region.isoRegions.map { $0.identifier }
+        }
+        return NSLocale.isoCountryCodes
     }
 }
 
@@ -155,6 +285,7 @@ final class PaywallAB {
     private let rc = RemoteConfig.remoteConfig()
     private let storageKey = "paywall_variant_v1"
     private let productsJSONKey = "paywall_products_json"
+    private let countryTierMapping = PaywallCountryTierMapping()
 
     private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
 
@@ -195,11 +326,62 @@ final class PaywallAB {
         in config: PaywallProductRemoteConfig,
         forKey key: String
     ) -> PaywallProductVariantRemoteConfig? {
-        guard let variants = config.variants, !variants.isEmpty else { return nil }
-        let totalTraffic = variants.reduce(0) { $0 + $1.effectiveTraffic }
-        guard totalTraffic > 0 else { return nil }
+        guard let variants = config.variants else { return nil }
 
-        let bucket = stableBucket(seed: "\(stableUserID())|\(key)|\(productsJSONKey)", upperBound: totalTraffic)
+        switch variants {
+        case .list(let list):
+            return selectedProductVariant(from: list, forKey: key)
+        case .tiers(let tiers):
+            let countryCode = currentCountryCode()
+            let tierKey = countryTierMapping.tier(for: countryCode)
+            guard let tierConfig = tiers[tierKey] else { return nil }
+
+            if let countryConfig = countryVariantConfig(in: tierConfig, for: countryCode),
+               !countryConfig.variants.isEmpty {
+                return selectedProductVariant(
+                    from: countryConfig.variants,
+                    forKey: key,
+                    seedScope: "\(tierKey)|\(countryCode)"
+                )
+            }
+
+            return selectedProductVariant(
+                from: tierConfig.defaultVariants,
+                forKey: key,
+                seedScope: "\(tierKey)|default"
+            )
+        }
+    }
+
+    private func countryVariantConfig(
+        in tierConfig: PaywallProductTierVariantsRemoteConfig,
+        for countryCode: String
+    ) -> PaywallProductCountryVariantsRemoteConfig? {
+        guard let countries = tierConfig.countries else { return nil }
+        let normalizedCode = PaywallCountryTierMapping.normalizedCountryCode(countryCode)
+
+        if let exact = countries[normalizedCode] {
+            return exact
+        }
+
+        return countries.first { element in
+            PaywallCountryTierMapping.normalizedCountryCode(element.key) == normalizedCode
+        }?.value
+    }
+
+    private func selectedProductVariant(
+        from variants: [PaywallProductVariantRemoteConfig],
+        forKey key: String,
+        seedScope: String? = nil
+    ) -> PaywallProductVariantRemoteConfig? {
+        guard !variants.isEmpty else { return nil }
+        let totalTraffic = variants.reduce(0) { $0 + $1.effectiveTraffic }
+        guard (1...100).contains(totalTraffic) else { return nil }
+
+        let seed = [stableUserID(), key, productsJSONKey, seedScope]
+            .compactMap { $0 }
+            .joined(separator: "|")
+        let bucket = stableBucket(seed: seed, upperBound: 100)
         var cursor = 0
         for variant in variants {
             let traffic = variant.effectiveTraffic
@@ -210,6 +392,16 @@ final class PaywallAB {
             }
         }
         return nil
+    }
+
+    private func currentCountryCode() -> String {
+        let countryCode: String?
+        if #available(iOS 16.0, *) {
+            countryCode = Locale.current.region?.identifier ?? Locale.current.regionCode
+        } else {
+            countryCode = Locale.current.regionCode
+        }
+        return PaywallCountryTierMapping.normalizedCountryCode(countryCode ?? "unknown")
     }
 
     private func stableBucket(seed: String, upperBound: Int) -> Int {
