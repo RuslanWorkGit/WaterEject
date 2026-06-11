@@ -103,9 +103,7 @@ final class PaywallViewModel: ObservableObject {
             ]
             freeTestEnabled = settings.freeTest
             yearlyCardPlan = settings.yearlyCardPlan == .annual ? .annual : .yearly
-            if selectedPlan == .yearly {
-                selectedPlan = yearlyCardPlan
-            }
+            selectedPlan = settings.chooseCard == .second ? yearlyCardPlan : .weekly
 
             let offerings = try await Purchases.shared.offerings()
             guard let current = offerings.current else { return }

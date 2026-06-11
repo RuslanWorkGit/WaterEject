@@ -27,6 +27,7 @@ struct PaywallProductSettings {
     let yearlyProductID: String
     let annualProductID: String
     let yearlyCardPlan: PaywallCardPlan
+    let chooseCard: PaywallChooseCard
     let freeTest: Bool
 }
 
@@ -35,9 +36,51 @@ enum PaywallCardPlan: String {
     case annual
 }
 
+enum PaywallChooseCard: String {
+    case first
+    case second
+}
+
+struct PaywallPlanTextSettings {
+    let title: String?
+    let trialTitleFormat: String?
+    let sublabel: String?
+    let saveText: String?
+}
+
+struct PaywallTextSettings {
+    let mainText: String?
+    let footerTrialText: String?
+    let footerSecureText: String?
+    let plans: [String: PaywallPlanTextSettings]
+
+    func plan(_ key: String) -> PaywallPlanTextSettings {
+        plans[key] ?? PaywallPlanTextSettings(title: nil, trialTitleFormat: nil, sublabel: nil, saveText: nil)
+    }
+}
+
 private struct PaywallProductsRemoteConfig: Decodable {
     let version: Int?
     let paywalls: [String: PaywallProductRemoteConfig]
+}
+
+private struct PaywallTextRemoteConfig: Decodable {
+    let version: Int?
+    let paywalls: [String: PaywallTextRemotePaywall]
+}
+
+private struct PaywallTextRemotePaywall: Decodable {
+    let mainText: [String: String]?
+    let footerTrialText: [String: String]?
+    let footerSecureText: [String: String]?
+    let plans: [String: PaywallPlanTextRemoteConfig]?
+}
+
+private struct PaywallPlanTextRemoteConfig: Decodable {
+    let title: [String: String]?
+    let trialTitleFormat: [String: String]?
+    let sublabel: [String: String]?
+    let saveText: [String: String]?
 }
 
 private struct PaywallProductRemoteConfig: Decodable {
@@ -45,6 +88,7 @@ private struct PaywallProductRemoteConfig: Decodable {
     let yearlyProductId: String?
     let annualProductId: String?
     let yearlyCardPlan: String?
+    let chooseCard: String?
     let freeTest: Bool?
     let variants: PaywallProductVariantsRemoteConfig?
 }
@@ -117,6 +161,7 @@ private struct PaywallProductVariantRemoteConfig: Decodable {
     let yearlyProductId: String?
     let annualProductId: String?
     let yearlyCardPlan: String?
+    let chooseCard: String?
     let freeTest: Bool?
 
     var effectiveTraffic: Int {
@@ -205,61 +250,73 @@ final class PaywallAB {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
           "yearlyCardPlan": "yearly",
+          "chooseCard": "second",
           "freeTest": false
         },
         "second": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
           "yearlyCardPlan": "yearly",
+          "chooseCard": "second",
           "freeTest": false
         },
         "third": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
           "yearlyCardPlan": "yearly",
+          "chooseCard": "second",
           "freeTest": false
         },
         "fourth": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
           "yearlyCardPlan": "yearly",
+          "chooseCard": "first",
           "freeTest": false
         },
         "fifth": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
           "yearlyCardPlan": "yearly",
+          "chooseCard": "first",
           "freeTest": true
         },
         "special": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer",
+          "chooseCard": "first",
           "freeTest": false
         },
         "paywall_new_black_1": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "chooseCard": "first",
           "freeTest": false
         },
         "paywall_new_black_2": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "chooseCard": "first",
           "freeTest": false
         },
         "paywall_new_black_3": {
           "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "chooseCard": "first",
           "freeTest": false
         },
         "paywall_new_black_4": {
           "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "chooseCard": "first",
           "freeTest": false
         },
         "paywall_new_black_5": {
           "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "chooseCard": "first",
           "freeTest": false
         },
         "paywall_new_white_1": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
           "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "chooseCard": "first",
           "freeTest": false
         }
       }
@@ -278,13 +335,15 @@ final class PaywallAB {
             "paywall3_enabled": true as NSObject,
             "paywall4_enabled": true as NSObject,
             "paywall5_enabled": true as NSObject,
-            "paywall_products_json": Self.defaultPaywallProductsJSON as NSObject
+            "paywall_products_json": Self.defaultPaywallProductsJSON as NSObject,
+            "paywall_text_controll": "" as NSObject
         ])
     }
 
     private let rc = RemoteConfig.remoteConfig()
     private let storageKey = "paywall_variant_v1"
     private let productsJSONKey = "paywall_products_json"
+    private let textJSONKey = "paywall_text_controll"
     private let countryTierMapping = PaywallCountryTierMapping()
 
     private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
@@ -299,6 +358,38 @@ final class PaywallAB {
 
     func productSettings(for variant: PaywallVariant) -> PaywallProductSettings {
         productSettings(forKey: variant.rawValue)
+    }
+
+    func textSettings(for variant: PaywallVariant) -> PaywallTextSettings {
+        textSettings(forKey: variant.rawValue)
+    }
+
+    func textSettings(forKey key: String) -> PaywallTextSettings {
+        let empty = PaywallTextSettings(mainText: nil, footerTrialText: nil, footerSecureText: nil, plans: [:])
+        let json = rc[textJSONKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !json.isEmpty,
+              let data = json.data(using: .utf8),
+              let config = try? JSONDecoder().decode(PaywallTextRemoteConfig.self, from: data),
+              let remote = config.paywalls[key] else {
+            return empty
+        }
+
+        var plans: [String: PaywallPlanTextSettings] = [:]
+        for (planKey, planConfig) in remote.plans ?? [:] {
+            plans[planKey] = PaywallPlanTextSettings(
+                title: localizedValue(in: planConfig.title),
+                trialTitleFormat: localizedValue(in: planConfig.trialTitleFormat),
+                sublabel: localizedValue(in: planConfig.sublabel),
+                saveText: localizedValue(in: planConfig.saveText)
+            )
+        }
+
+        return PaywallTextSettings(
+            mainText: localizedValue(in: remote.mainText),
+            footerTrialText: localizedValue(in: remote.footerTrialText),
+            footerSecureText: localizedValue(in: remote.footerSecureText),
+            plans: plans
+        )
     }
 
     func productSettings(forKey key: String) -> PaywallProductSettings {
@@ -318,8 +409,37 @@ final class PaywallAB {
             yearlyProductID: cleanProductID(variant?.yearlyProductId) ?? cleanProductID(remote.yearlyProductId) ?? fallback.yearlyProductID,
             annualProductID: cleanProductID(variant?.annualProductId) ?? cleanProductID(remote.annualProductId) ?? fallback.annualProductID,
             yearlyCardPlan: Self.cleanCardPlan(variant?.yearlyCardPlan) ?? Self.cleanCardPlan(remote.yearlyCardPlan) ?? fallback.yearlyCardPlan,
+            chooseCard: Self.cleanChooseCard(variant?.chooseCard) ?? Self.cleanChooseCard(remote.chooseCard) ?? fallback.chooseCard,
             freeTest: variant?.freeTest ?? remote.freeTest ?? fallback.freeTest
         )
+    }
+
+    private func localizedValue(in values: [String: String]?) -> String? {
+        guard let values else { return nil }
+
+        for localeIdentifier in Locale.preferredLanguages + [Locale.current.identifier, "en"] {
+            let normalized = localeIdentifier.replacingOccurrences(of: "_", with: "-")
+            let candidates = [
+                normalized,
+                normalized.lowercased(),
+                Locale(identifier: normalized).languageCode,
+                normalized.split(separator: "-").first.map(String.init)
+            ].compactMap { $0 }
+
+            for candidate in candidates {
+                if let value = cleanText(values[candidate]) {
+                    return value
+                }
+            }
+        }
+
+        return cleanText(values["en"]) ?? values.values.compactMap { cleanText($0) }.first
+    }
+
+    private func cleanText(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : value
     }
 
     private func selectedProductVariant(
@@ -429,10 +549,18 @@ final class PaywallAB {
         return PaywallCardPlan(rawValue: trimmed)
     }
 
+    private static func cleanChooseCard(_ value: String?) -> PaywallChooseCard? {
+        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+        return PaywallChooseCard(rawValue: trimmed)
+    }
+
     private static func defaultProductSettings(forKey key: String) -> PaywallProductSettings {
         let weeklyProductID = key == "special"
             ? "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer"
             : "kyryloVoinov.WaterEject.subscription.weekly"
+        let defaultChooseCard: PaywallChooseCard = ["first", "second", PaywallVariant.third.rawValue].contains(key)
+            ? .second
+            : .first
 
         return PaywallProductSettings(
             variantID: nil,
@@ -440,6 +568,7 @@ final class PaywallAB {
             yearlyProductID: "kyryloVoinov.WaterEject.subscription.yearly",
             annualProductID: "KyryloVoinov.WaterEject.lifetime.access",
             yearlyCardPlan: .yearly,
+            chooseCard: defaultChooseCard,
             freeTest: key == PaywallVariant.fifth.rawValue
         )
     }

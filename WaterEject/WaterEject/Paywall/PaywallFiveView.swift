@@ -135,11 +135,14 @@ struct PaywallFiveView: View {
         let secondaryPlan = viewModel.yearlyCardPlan
         let shouldShowFreeTrial = isFreeTrialAllowed && isFreeTrialEnabled
         let shouldShowWeeklyTrialText = isFreeTrialAllowed
+        let paywallText = PaywallAB.shared.textSettings(for: .fifth)
+        let weeklyPlanText = paywallText.plan(NewPaywallPlan.weekly.rawValue)
+        let secondaryPlanText = paywallText.plan(secondaryPlan.rawValue)
 
         ZStack(alignment: .topTrailing) {
 
 
-            ZStack(alignment: .top) {
+            ZStack(alignment: .bottom) {
 
                 Color(red: 253 / 255, green: 251 / 255, blue: 249 / 255).ignoresSafeArea()
 
@@ -152,15 +155,17 @@ struct PaywallFiveView: View {
 
 
                         (
-                            Text("Remove Water Fast")
+                            Text(paywallText.mainText ?? String(localized: "Remove Water Fast"))
                                 .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
 
                         )
                         .font(.system(size: 38 * padScale, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
                         .padding(.bottom, 0)
-                        //.padding(.top, 180)
+                        .padding(.top, 12)
 
 
 //                        ReviewsCardView(reviews: reviews)
@@ -194,7 +199,7 @@ struct PaywallFiveView: View {
                                    maxHeight: .infinity,
                                    alignment: .top)
                         }
-                        .frame(height: 180)
+                        .frame(height: 168)
                         //.padding()
                         //.opacity(appearReviews ? 1 : 0)
 
@@ -261,10 +266,12 @@ struct PaywallFiveView: View {
                         }
 
                         PaywallFivePlanCard(
-                            title: shouldShowWeeklyTrialText ? weeklyDueTodayTitle : NewPaywallPlan.weekly.title,
+                            title: shouldShowWeeklyTrialText
+                                ? String(format: weeklyPlanText.trialTitleFormat ?? String(localized: "%@ due today"), zeroPriceString(for: .weekly))
+                                : weeklyPlanText.title ?? NewPaywallPlan.weekly.title,
                             price: shouldShowWeeklyTrialText ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
-                            sublabel: nil,
-                            saveText: shouldShowWeeklyTrialText ? String(localized: "3 Days Free") : viewModel.onlyPrice[.weekly] ?? "",
+                            sublabel: weeklyPlanText.sublabel,
+                            saveText: shouldShowWeeklyTrialText ? weeklyPlanText.saveText ?? String(localized: "3 Days Free") : viewModel.onlyPrice[.weekly] ?? "",
                             isSelected: viewModel.selectedPlan == .weekly,
                             onTap: {
                                 if isFreeTrialAllowed {
@@ -275,10 +282,10 @@ struct PaywallFiveView: View {
                         )
 
                         PaywallFivePlanCard(
-                            title: secondaryPlan.title,
+                            title: secondaryPlanText.title ?? secondaryPlan.title,
                             price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
-                            sublabel: String(localized: "Best Value"),
-                            saveText: viewModel.onlyPrice[secondaryPlan] ?? "",
+                            sublabel: secondaryPlanText.sublabel ?? String(localized: "Best Value"),
+                            saveText: secondaryPlanText.saveText ?? viewModel.onlyPrice[secondaryPlan] ?? "",
                             isSelected: viewModel.selectedPlan == secondaryPlan,
                             onTap: {
                                 if isFreeTrialAllowed {
@@ -288,13 +295,15 @@ struct PaywallFiveView: View {
                             }
                         )
                     }
-                    .padding(.top, isSmall ? 12 : isLarge ? 30 : 20)
-                    .padding(.bottom, 12)
+                    .padding(.top, isSmall ? 8 : isLarge ? 24 : 12)
+                    .padding(.bottom, 8)
 
                     HStack {
                         Image(systemName: "checkmark.shield")
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
-                        Text(shouldShowFreeTrial ? String(localized: "Cancel Anytime. No payment required today.") : String(localized: "Cancel Anytime. Secure with App Store."))
+                        Text(shouldShowFreeTrial
+                             ? paywallText.footerTrialText ?? String(localized: "Cancel Anytime. No payment required today.")
+                             : paywallText.footerSecureText ?? String(localized: "Cancel Anytime. Secure with App Store."))
                             .font(.system(size: 10))
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                             .multilineTextAlignment(.center)
@@ -382,7 +391,7 @@ struct PaywallFiveView: View {
                                     Spacer()
                                 }
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
+                                .padding(.vertical, 16)
                                 .background(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .scaleEffect(pulse ? 1.03 : 1.0)
@@ -447,7 +456,7 @@ struct PaywallFiveView: View {
                 .frame(maxHeight: .infinity)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
-                .padding(.bottom, 8)
+                .padding(.bottom, 4)
                 .background(
                     VStack {
                         Image("paywallPhoto")
@@ -514,7 +523,7 @@ struct PaywallFiveView: View {
                     paywallId: telemetryPaywallId,
                     paywallKey: telemetryVariant,
                     displayedPlans: ["weekly", settings.yearlyCardPlan.rawValue],
-                    defaultPlan: "weekly"
+                    defaultPlan: settings.chooseCard == .second ? settings.yearlyCardPlan.rawValue : "weekly"
                 )
                 didLogOpen = true
 

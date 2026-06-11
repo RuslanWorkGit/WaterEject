@@ -395,7 +395,7 @@ struct PaywallThirdView: View {
                     paywallId: telemetryPaywallId,
                     paywallKey: telemetryVariant,
                     displayedPlans: ["weekly", settings.yearlyCardPlan.rawValue],
-                    defaultPlan: "weekly"
+                    defaultPlan: settings.chooseCard == .second ? settings.yearlyCardPlan.rawValue : "weekly"
                 )
                 didLogOpen = true
             }
