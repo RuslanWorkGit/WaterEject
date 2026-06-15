@@ -133,7 +133,9 @@ struct PaywallFiveView: View {
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
         let secondaryPlan = viewModel.yearlyCardPlan
-        let shouldShowWeeklyPlan = PaywallAB.shared.isWeeklyPriceEnabled
+        let priceMode = PaywallAB.shared.priceMode
+        let shouldShowWeeklyPlan = priceMode == .first || priceMode == .both
+        let shouldShowSecondaryPlan = priceMode == .second || priceMode == .both
         let shouldAllowFreeTrial = shouldShowWeeklyPlan && isFreeTrialAllowed
         let shouldShowFreeTrial = shouldAllowFreeTrial && isFreeTrialEnabled
         let shouldShowWeeklyTrialText = shouldAllowFreeTrial
@@ -285,19 +287,21 @@ struct PaywallFiveView: View {
                             )
                         }
 
-                        PaywallFivePlanCard(
-                            title: secondaryPlanText.title ?? secondaryPlan.title,
-                            price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
-                            sublabel: secondaryPlanText.sublabel ?? String(localized: "Best Value"),
-                            saveText: secondaryPlanText.saveText ?? viewModel.onlyPrice[secondaryPlan] ?? "",
-                            isSelected: viewModel.selectedPlan == secondaryPlan,
-                            onTap: {
-                                if shouldAllowFreeTrial {
-                                    isFreeTrialEnabled = false
+                        if shouldShowSecondaryPlan {
+                            PaywallFivePlanCard(
+                                title: secondaryPlanText.title ?? secondaryPlan.title,
+                                price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
+                                sublabel: secondaryPlanText.sublabel ?? String(localized: "Best Value"),
+                                saveText: secondaryPlanText.saveText ?? viewModel.onlyPrice[secondaryPlan] ?? "",
+                                isSelected: viewModel.selectedPlan == secondaryPlan,
+                                onTap: {
+                                    if shouldAllowFreeTrial {
+                                        isFreeTrialEnabled = false
+                                    }
+                                    choosePlan(secondaryPlan, selectionMethod: "tap")
                                 }
-                                choosePlan(secondaryPlan, selectionMethod: "tap")
-                            }
-                        )
+                            )
+                        }
                     }
                     .padding(.top, isSmall ? 8 : isLarge ? 24 : 12)
                     .padding(.bottom, 8)
@@ -526,8 +530,8 @@ struct PaywallFiveView: View {
                     onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue,
                     paywallId: telemetryPaywallId,
                     paywallKey: telemetryVariant,
-                    displayedPlans: PaywallAB.shared.isWeeklyPriceEnabled ? ["weekly", settings.yearlyCardPlan.rawValue] : [settings.yearlyCardPlan.rawValue],
-                    defaultPlan: PaywallAB.shared.isWeeklyPriceEnabled && settings.chooseCard != .second ? "weekly" : settings.yearlyCardPlan.rawValue
+                    displayedPlans: displayedPlans(for: PaywallAB.shared.priceMode, secondaryPlan: settings.yearlyCardPlan),
+                    defaultPlan: defaultPlan(for: PaywallAB.shared.priceMode, settings: settings)
                 )
                 didLogOpen = true
 
@@ -535,13 +539,18 @@ struct PaywallFiveView: View {
             }
             Task {
                 await viewModel.loadPricing(paywallVariant: .fifth)
-                if PaywallAB.shared.isWeeklyPriceEnabled {
+                switch PaywallAB.shared.priceMode {
+                case .first:
                     isFreeTrialAllowed = viewModel.freeTestEnabled
                     isFreeTrialEnabled = viewModel.freeTestEnabled
-                } else {
+                    viewModel.selectedPlan = .weekly
+                case .second:
                     isFreeTrialAllowed = false
                     isFreeTrialEnabled = false
                     viewModel.selectedPlan = viewModel.yearlyCardPlan
+                case .both:
+                    isFreeTrialAllowed = viewModel.freeTestEnabled
+                    isFreeTrialEnabled = viewModel.freeTestEnabled
                 }
             }
 
@@ -595,6 +604,28 @@ struct PaywallFiveView: View {
         )
 
         didLogChoosePlan = true
+    }
+
+    private func displayedPlans(for mode: PaywallPriceMode, secondaryPlan: PaywallCardPlan) -> [String] {
+        switch mode {
+        case .first:
+            return ["weekly"]
+        case .second:
+            return [secondaryPlan.rawValue]
+        case .both:
+            return ["weekly", secondaryPlan.rawValue]
+        }
+    }
+
+    private func defaultPlan(for mode: PaywallPriceMode, settings: PaywallProductSettings) -> String {
+        switch mode {
+        case .first:
+            return "weekly"
+        case .second:
+            return settings.yearlyCardPlan.rawValue
+        case .both:
+            return settings.chooseCard == .second ? settings.yearlyCardPlan.rawValue : "weekly"
+        }
     }
 
     private func goPreviousCard(animated: Bool) {

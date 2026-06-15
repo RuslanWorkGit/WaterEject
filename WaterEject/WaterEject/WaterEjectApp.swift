@@ -252,13 +252,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
         if let keywordId, !keywordId.isEmpty {
             attributes["asa_keyword_id"] = keywordId
-            attributes["keyword_id"] = keywordId
         }
 
         if let keywordText, !keywordText.isEmpty {
             attributes["asa_keyword_text"] = keywordText
             attributes["keyword_text"] = keywordText
-            attributes["keyword"] = keywordText
         }
 
         guard !attributes.isEmpty else { return }
