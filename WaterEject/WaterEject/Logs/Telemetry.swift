@@ -1576,7 +1576,7 @@ extension Telemetry {
             defaultPlan: normalizedDefaultPlan,
             secondaryPlan: secondaryPlan,
             productVariantId: settings.variantID,
-            freeTrialEnabled: settings.freeTest
+            freeTrialEnabled: settings.freeTest && normalizedDisplayedPlans.contains("weekly")
         )
     }
 

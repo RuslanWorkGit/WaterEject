@@ -335,6 +335,7 @@ final class PaywallAB {
             "paywall3_enabled": true as NSObject,
             "paywall4_enabled": true as NSObject,
             "paywall5_enabled": true as NSObject,
+            "price_weekly_control": true as NSObject,
             "paywall_products_json": Self.defaultPaywallProductsJSON as NSObject,
             "paywall_text_controll": "" as NSObject
         ])
@@ -344,6 +345,7 @@ final class PaywallAB {
     private let storageKey = "paywall_variant_v1"
     private let productsJSONKey = "paywall_products_json"
     private let textJSONKey = "paywall_text_controll"
+    private let weeklyPriceControlKey = "price_weekly_control"
     private let countryTierMapping = PaywallCountryTierMapping()
 
     private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
@@ -362,6 +364,10 @@ final class PaywallAB {
 
     func textSettings(for variant: PaywallVariant) -> PaywallTextSettings {
         textSettings(forKey: variant.rawValue)
+    }
+
+    var isWeeklyPriceEnabled: Bool {
+        rc[weeklyPriceControlKey].boolValue
     }
 
     func textSettings(forKey key: String) -> PaywallTextSettings {

@@ -133,8 +133,10 @@ struct PaywallFiveView: View {
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
         let secondaryPlan = viewModel.yearlyCardPlan
-        let shouldShowFreeTrial = isFreeTrialAllowed && isFreeTrialEnabled
-        let shouldShowWeeklyTrialText = isFreeTrialAllowed
+        let shouldShowWeeklyPlan = PaywallAB.shared.isWeeklyPriceEnabled
+        let shouldAllowFreeTrial = shouldShowWeeklyPlan && isFreeTrialAllowed
+        let shouldShowFreeTrial = shouldAllowFreeTrial && isFreeTrialEnabled
+        let shouldShowWeeklyTrialText = shouldAllowFreeTrial
         let paywallText = PaywallAB.shared.textSettings(for: .fifth)
         let weeklyPlanText = paywallText.plan(NewPaywallPlan.weekly.rawValue)
         let secondaryPlanText = paywallText.plan(secondaryPlan.rawValue)
@@ -261,25 +263,27 @@ struct PaywallFiveView: View {
 
                     VStack(spacing: 12) {
 
-                        if isFreeTrialAllowed {
+                        if shouldAllowFreeTrial {
                             PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
                         }
 
-                        PaywallFivePlanCard(
-                            title: shouldShowWeeklyTrialText
-                                ? String(format: weeklyPlanText.trialTitleFormat ?? String(localized: "%@ due today"), zeroPriceString(for: .weekly))
-                                : weeklyPlanText.title ?? NewPaywallPlan.weekly.title,
-                            price: shouldShowWeeklyTrialText ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
-                            sublabel: weeklyPlanText.sublabel,
-                            saveText: shouldShowWeeklyTrialText ? weeklyPlanText.saveText ?? String(localized: "3 Days Free") : viewModel.onlyPrice[.weekly] ?? "",
-                            isSelected: viewModel.selectedPlan == .weekly,
-                            onTap: {
-                                if isFreeTrialAllowed {
-                                    isFreeTrialEnabled = true
+                        if shouldShowWeeklyPlan {
+                            PaywallFivePlanCard(
+                                title: shouldShowWeeklyTrialText
+                                    ? String(format: weeklyPlanText.trialTitleFormat ?? String(localized: "%@ due today"), zeroPriceString(for: .weekly))
+                                    : weeklyPlanText.title ?? NewPaywallPlan.weekly.title,
+                                price: shouldShowWeeklyTrialText ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
+                                sublabel: weeklyPlanText.sublabel,
+                                saveText: shouldShowWeeklyTrialText ? weeklyPlanText.saveText ?? String(localized: "3 Days Free") : viewModel.onlyPrice[.weekly] ?? "",
+                                isSelected: viewModel.selectedPlan == .weekly,
+                                onTap: {
+                                    if shouldAllowFreeTrial {
+                                        isFreeTrialEnabled = true
+                                    }
+                                    choosePlan(.weekly, selectionMethod: "tap")
                                 }
-                                choosePlan(.weekly, selectionMethod: "tap")
-                            }
-                        )
+                            )
+                        }
 
                         PaywallFivePlanCard(
                             title: secondaryPlanText.title ?? secondaryPlan.title,
@@ -288,7 +292,7 @@ struct PaywallFiveView: View {
                             saveText: secondaryPlanText.saveText ?? viewModel.onlyPrice[secondaryPlan] ?? "",
                             isSelected: viewModel.selectedPlan == secondaryPlan,
                             onTap: {
-                                if isFreeTrialAllowed {
+                                if shouldAllowFreeTrial {
                                     isFreeTrialEnabled = false
                                 }
                                 choosePlan(secondaryPlan, selectionMethod: "tap")
@@ -522,8 +526,8 @@ struct PaywallFiveView: View {
                     onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue,
                     paywallId: telemetryPaywallId,
                     paywallKey: telemetryVariant,
-                    displayedPlans: ["weekly", settings.yearlyCardPlan.rawValue],
-                    defaultPlan: settings.chooseCard == .second ? settings.yearlyCardPlan.rawValue : "weekly"
+                    displayedPlans: PaywallAB.shared.isWeeklyPriceEnabled ? ["weekly", settings.yearlyCardPlan.rawValue] : [settings.yearlyCardPlan.rawValue],
+                    defaultPlan: PaywallAB.shared.isWeeklyPriceEnabled && settings.chooseCard != .second ? "weekly" : settings.yearlyCardPlan.rawValue
                 )
                 didLogOpen = true
 
@@ -531,8 +535,14 @@ struct PaywallFiveView: View {
             }
             Task {
                 await viewModel.loadPricing(paywallVariant: .fifth)
-                isFreeTrialAllowed = viewModel.freeTestEnabled
-                isFreeTrialEnabled = viewModel.freeTestEnabled
+                if PaywallAB.shared.isWeeklyPriceEnabled {
+                    isFreeTrialAllowed = viewModel.freeTestEnabled
+                    isFreeTrialEnabled = viewModel.freeTestEnabled
+                } else {
+                    isFreeTrialAllowed = false
+                    isFreeTrialEnabled = false
+                    viewModel.selectedPlan = viewModel.yearlyCardPlan
+                }
             }
 
 

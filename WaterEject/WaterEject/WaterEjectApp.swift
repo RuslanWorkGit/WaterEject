@@ -243,7 +243,26 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let storedId = UserDefaults.standard.string(forKey: asaKeywordKey)
         let storedText = UserDefaults.standard.string(forKey: asaKeywordTextKey)
 
+        syncRevenueCatKeywordAttributes(keywordId: storedId, keywordText: storedText)
         Telemetry.shared.keywordsLogOnStart(keywordId: storedId, keywordText: storedText)
+    }
+
+    private func syncRevenueCatKeywordAttributes(keywordId: String?, keywordText: String?) {
+        var attributes: [String: String] = [:]
+
+        if let keywordId, !keywordId.isEmpty {
+            attributes["asa_keyword_id"] = keywordId
+            attributes["keyword_id"] = keywordId
+        }
+
+        if let keywordText, !keywordText.isEmpty {
+            attributes["asa_keyword_text"] = keywordText
+            attributes["keyword_text"] = keywordText
+            attributes["keyword"] = keywordText
+        }
+
+        guard !attributes.isEmpty else { return }
+        Purchases.shared.attribution.setAttributes(attributes)
     }
     
     func onConversionDataSuccess(_ installData: [AnyHashable : Any]) {
@@ -267,6 +286,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         } else {
             UserDefaults.standard.removeObject(forKey: asaKeywordTextKey)
         }
+
+        syncRevenueCatKeywordAttributes(keywordId: keywordId, keywordText: keywordText)
 
         Telemetry.shared.keywordsLog(
             keywordId: keywordId,
