@@ -47,6 +47,29 @@ enum PaywallPriceMode: String {
     case both
 }
 
+enum AssignedOnboardingPaywall: String, CaseIterable {
+    case paywallThird = "third"
+    case paywallFourth = "fourth"
+    case paywallFive = "fifth"
+    case newSecondBlack = "paywall_v_5.0"
+    case newFirstWhite = "paywall_first_white_1"
+
+    var productSettingsKey: String {
+        switch self {
+        case .paywallThird:
+            return PaywallVariant.third.rawValue
+        case .paywallFourth:
+            return PaywallVariant.fourth.rawValue
+        case .paywallFive:
+            return PaywallVariant.fifth.rawValue
+        case .newSecondBlack:
+            return rawValue
+        case .newFirstWhite:
+            return rawValue
+        }
+    }
+}
+
 struct PaywallPlanTextSettings {
     let title: String?
     let trialTitleFormat: String?
@@ -56,6 +79,12 @@ struct PaywallPlanTextSettings {
 
 struct PaywallTextSettings {
     let mainText: String?
+    let subtitleText: String?
+    let trustText: String?
+    let ctaTitle: String?
+    let ctaPriceFormat: String?
+    let thenText: String?
+    let priceCaptionFormat: String?
     let footerTrialText: String?
     let footerSecureText: String?
     let plans: [String: PaywallPlanTextSettings]
@@ -75,8 +104,52 @@ private struct PaywallTextRemoteConfig: Decodable {
     let paywalls: [String: PaywallTextRemotePaywall]
 }
 
+private struct PaywallPriceModeRemoteConfig: Decodable {
+    let version: Int?
+    let defaultMode: String?
+    let paywalls: [String: String]?
+
+    private enum CodingKeys: String, CodingKey {
+        case version
+        case defaultMode = "default"
+        case paywalls
+    }
+}
+
+private struct OnboardingPaywallRemoteConfig: Decodable {
+    let version: Int?
+    let defaultPaywalls: OnboardingPaywallRemoteEntry?
+    let onboards: [String: OnboardingPaywallRemoteEntry]?
+
+    private enum CodingKeys: String, CodingKey {
+        case version
+        case defaultPaywalls = "default"
+        case onboards
+    }
+}
+
+private struct OnboardingPaywallRemoteEntry: Decodable {
+    let paywalls: [String: Bool]?
+    let fifth: Bool?
+    let paywallV50: Bool?
+    let paywallFirstWhite1: Bool?
+
+    private enum CodingKeys: String, CodingKey {
+        case paywalls
+        case fifth
+        case paywallV50 = "paywall_v_5.0"
+        case paywallFirstWhite1 = "paywall_first_white_1"
+    }
+}
+
 private struct PaywallTextRemotePaywall: Decodable {
     let mainText: [String: String]?
+    let subtitleText: [String: String]?
+    let trustText: [String: String]?
+    let ctaTitle: [String: String]?
+    let ctaPriceFormat: [String: String]?
+    let thenText: [String: String]?
+    let priceCaptionFormat: [String: String]?
     let footerTrialText: [String: String]?
     let footerSecureText: [String: String]?
     let plans: [String: PaywallPlanTextRemoteConfig]?
@@ -287,6 +360,13 @@ final class PaywallAB {
           "chooseCard": "first",
           "freeTest": true
         },
+        "paywall_v_5.0": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "yearlyCardPlan": "yearly",
+          "chooseCard": "first",
+          "freeTest": true
+        },
         "special": {
           "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer",
           "chooseCard": "first",
@@ -324,6 +404,14 @@ final class PaywallAB {
           "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
           "chooseCard": "first",
           "freeTest": false
+        },
+        "paywall_first_white_1": {
+          "weeklyProductId": "kyryloVoinov.WaterEject.subscription.weekly",
+          "yearlyProductId": "kyryloVoinov.WaterEject.subscription.yearly",
+          "annualProductId": "KyryloVoinov.WaterEject.lifetime.access",
+          "yearlyCardPlan": "annual",
+          "chooseCard": "first",
+          "freeTest": false
         }
       }
     }
@@ -341,9 +429,32 @@ final class PaywallAB {
             "paywall3_enabled": true as NSObject,
             "paywall4_enabled": true as NSObject,
             "paywall5_enabled": true as NSObject,
-            "price_mode_control": "both" as NSObject,
+            "price_mode_control": """
+            {
+              "version": 1,
+              "default": "both",
+              "paywalls": {
+                "fifth": "both",
+                "paywall_v_5.0": "both"
+              }
+            }
+            """ as NSObject,
             "paywall_products_json": Self.defaultPaywallProductsJSON as NSObject,
-            "paywall_text_controll": "" as NSObject
+            "paywall_text_controll": "" as NSObject,
+            "onboarding_paywall_control": """
+            {
+              "version": 1,
+              "onboards": {
+                "Onboard_8_1": {
+                  "paywalls": {
+                    "fifth": true,
+                    "paywall_v_5.0": false,
+                    "paywall_first_white_1": false
+                  }
+                }
+              }
+            }
+            """ as NSObject
         ])
     }
 
@@ -352,6 +463,7 @@ final class PaywallAB {
     private let productsJSONKey = "paywall_products_json"
     private let textJSONKey = "paywall_text_controll"
     private let priceModeControlKey = "price_mode_control"
+    private let onboardingPaywallControlKey = "onboarding_paywall_control"
     private let countryTierMapping = PaywallCountryTierMapping()
 
     private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
@@ -372,14 +484,52 @@ final class PaywallAB {
         textSettings(forKey: variant.rawValue)
     }
 
+    func priceMode(for variant: PaywallVariant) -> PaywallPriceMode {
+        priceMode(forKey: variant.rawValue)
+    }
+
     var priceMode: PaywallPriceMode {
-        PaywallPriceMode(rawValue: rc[priceModeControlKey].stringValue
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()) ?? .both
+        priceMode(forKey: "default")
+    }
+
+    func priceMode(forKey key: String) -> PaywallPriceMode {
+        let value = rc[priceModeControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return .both }
+
+        if let legacyMode = Self.cleanPriceMode(value) {
+            return legacyMode
+        }
+
+        guard let data = value.data(using: .utf8) else { return .both }
+
+        if let config = try? JSONDecoder().decode(PaywallPriceModeRemoteConfig.self, from: data) {
+            return Self.cleanPriceMode(config.paywalls?[key])
+                ?? Self.cleanPriceMode(config.defaultMode)
+                ?? .both
+        }
+
+        if let flatConfig = try? JSONDecoder().decode([String: String].self, from: data) {
+            return Self.cleanPriceMode(flatConfig[key])
+                ?? Self.cleanPriceMode(flatConfig["default"])
+                ?? .both
+        }
+
+        return .both
     }
 
     func textSettings(forKey key: String) -> PaywallTextSettings {
-        let empty = PaywallTextSettings(mainText: nil, footerTrialText: nil, footerSecureText: nil, plans: [:])
+        let empty = PaywallTextSettings(
+            mainText: nil,
+            subtitleText: nil,
+            trustText: nil,
+            ctaTitle: nil,
+            ctaPriceFormat: nil,
+            thenText: nil,
+            priceCaptionFormat: nil,
+            footerTrialText: nil,
+            footerSecureText: nil,
+            plans: [:]
+        )
         let json = rc[textJSONKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !json.isEmpty,
               let data = json.data(using: .utf8),
@@ -400,6 +550,12 @@ final class PaywallAB {
 
         return PaywallTextSettings(
             mainText: localizedValue(in: remote.mainText),
+            subtitleText: localizedValue(in: remote.subtitleText),
+            trustText: localizedValue(in: remote.trustText),
+            ctaTitle: localizedValue(in: remote.ctaTitle),
+            ctaPriceFormat: localizedValue(in: remote.ctaPriceFormat),
+            thenText: localizedValue(in: remote.thenText),
+            priceCaptionFormat: localizedValue(in: remote.priceCaptionFormat),
             footerTrialText: localizedValue(in: remote.footerTrialText),
             footerSecureText: localizedValue(in: remote.footerSecureText),
             plans: plans
@@ -568,6 +724,32 @@ final class PaywallAB {
         return PaywallChooseCard(rawValue: trimmed)
     }
 
+    private static func cleanPriceMode(_ value: String?) -> PaywallPriceMode? {
+        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+        return PaywallPriceMode(rawValue: trimmed)
+    }
+
+    private static func cleanAssignedPaywall(_ value: String?) -> AssignedOnboardingPaywall? {
+        let trimmed = value?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased() ?? ""
+
+        switch trimmed {
+        case "third", "paywallthirdview", "paywall_v_3.0":
+            return .paywallThird
+        case "fourth", "paywallfourview", "paywall_v_4.0":
+            return .paywallFourth
+        case "fifth", "paywallfiveview":
+            return .paywallFive
+        case "paywall_v_5.0", "newsecondblackpaywall", "new_second_black":
+            return .newSecondBlack
+        case "paywall_first_white_1", "newfirstwhitepaywall", "new_first_white":
+            return .newFirstWhite
+        default:
+            return AssignedOnboardingPaywall(rawValue: trimmed)
+        }
+    }
+
     private static func defaultProductSettings(forKey key: String) -> PaywallProductSettings {
         let weeklyProductID = key == "special"
             ? "kyryloVoinov.WaterEject.subscription.weeklyPecialOffer"
@@ -583,7 +765,7 @@ final class PaywallAB {
             annualProductID: "KyryloVoinov.WaterEject.lifetime.access",
             yearlyCardPlan: .yearly,
             chooseCard: defaultChooseCard,
-            freeTest: key == PaywallVariant.fifth.rawValue
+            freeTest: key == PaywallVariant.fifth.rawValue || key == AssignedOnboardingPaywall.newSecondBlack.rawValue
         )
     }
 
@@ -618,6 +800,77 @@ final class PaywallAB {
         default:
             return .fourth
         }
+    }
+
+    private func remoteAssignedPaywalls(for tag: OnboardTag) -> [AssignedOnboardingPaywall]? {
+        let json = rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !json.isEmpty,
+              let data = json.data(using: .utf8),
+              let config = try? JSONDecoder().decode(OnboardingPaywallRemoteConfig.self, from: data) else {
+            return nil
+        }
+
+        let onboardKeyAliases = [
+            tag.rawValue,
+            tag.summaryEventName,
+            tag.rawValue.lowercased(),
+            tag.summaryEventName.lowercased(),
+            tag == .v8 ? "onboard_8_1" : nil,
+            tag == .v8 ? "onb_8_1" : nil,
+            tag == .v8 ? "onboard_8_1_steps" : nil
+        ].compactMap { $0 }
+        let entry = onboardKeyAliases.compactMap { config.onboards?[$0] }.first ?? config.defaultPaywalls
+        guard let entry else { return nil }
+
+        var enabled: [AssignedOnboardingPaywall] = []
+        var seen = Set<String>()
+
+        func append(_ paywall: AssignedOnboardingPaywall?) {
+            guard let paywall, !seen.contains(paywall.rawValue) else { return }
+            enabled.append(paywall)
+            seen.insert(paywall.rawValue)
+        }
+
+        for (key, isEnabled) in entry.paywalls ?? [:] where isEnabled {
+            append(Self.cleanAssignedPaywall(key))
+        }
+
+        if entry.fifth == true {
+            append(.paywallFive)
+        }
+        if entry.paywallV50 == true {
+            append(.newSecondBlack)
+        }
+        if entry.paywallFirstWhite1 == true {
+            append(.newFirstWhite)
+        }
+
+        return enabled
+    }
+
+    func assignedOnboardingPaywall(for tag: OnboardTag) -> AssignedOnboardingPaywall {
+        if let enabled = remoteAssignedPaywalls(for: tag), !enabled.isEmpty {
+            if enabled.count == 1 {
+                return enabled[0]
+            }
+
+            let seed = "\(stableUserID())|\(tag.rawValue)|\(onboardingPaywallControlKey)"
+            let bucket = stableBucket(seed: seed, upperBound: enabled.count)
+            return enabled[bucket]
+        }
+
+        switch onboardingPaywallVariant(for: tag) {
+        case .third:
+            return .paywallThird
+        case .fourth:
+            return .paywallFourth
+        case .fifth:
+            return .paywallFive
+        }
+    }
+
+    func assignedOnboardingPaywallKey(for tag: OnboardTag) -> String {
+        assignedOnboardingPaywall(for: tag).rawValue
     }
 
 //    func onboardingPaywallVariant(for tag: OnboardTag) -> PaywallVariant {
@@ -700,11 +953,11 @@ final class PaywallAB {
         stepsVisited: [String]?,
         onboardIdOverride: String? = nil
     ) -> AnyView {
-        let variant = onboardingPaywallVariant(for: tag)
+        let assignedPaywall = assignedOnboardingPaywall(for: tag)
         let onboardId = onboardIdOverride ?? tag.rawValue
 
-        switch variant {
-        case .third:
+        switch assignedPaywall {
+        case .paywallThird:
             return AnyView(
                 PaywallThirdView(
                     onFinish: onFinish,
@@ -715,7 +968,7 @@ final class PaywallAB {
                 )
             )
 
-        case .fourth:
+        case .paywallFourth:
             return AnyView(
                 PaywallFourView(
                     onFinish: onFinish,
@@ -726,7 +979,7 @@ final class PaywallAB {
                 )
             )
 
-        case .fifth:
+        case .paywallFive:
             return AnyView(
                 PaywallFiveView(
                     onFinish: onFinish,
@@ -736,6 +989,29 @@ final class PaywallAB {
                     stepsVisited: stepsVisited
             )
                 )
+
+        case .newSecondBlack:
+            return AnyView(
+                NewSecondBlackPaywall(
+                    onFinish: onFinish,
+                    onboardId: onboardId,
+                    startDelay: startDelay,
+                    summaryTag: tag,
+                    stepsVisited: stepsVisited
+                )
+            )
+
+        case .newFirstWhite:
+            return AnyView(
+                NewFirstWhitePaywall(
+                    index: 0,
+                    action: onFinish,
+                    onboardId: onboardId,
+                    summaryTag: tag,
+                    stepsVisited: stepsVisited,
+                    paywallId: AssignedOnboardingPaywall.newFirstWhite.rawValue
+                )
+            )
 
 //        case .A, .B:
 //            // якщо колись захочеш ще варіанти – тут можна розширити

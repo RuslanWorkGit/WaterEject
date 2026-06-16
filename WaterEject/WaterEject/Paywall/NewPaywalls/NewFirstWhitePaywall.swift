@@ -33,7 +33,7 @@ struct NewFirstWhitePaywall: View {
         onboardId: String? = nil,
         summaryTag: OnboardTag? = nil,
         stepsVisited: [String]? = nil,
-        paywallId: String = "paywall_new_black_3"
+        paywallId: String = "paywall_first_white_1"
     ) {
         self.index = index
         self.action = action
@@ -147,11 +147,17 @@ struct NewFirstWhitePaywall: View {
     
     
     var body: some View {
-        
+        let paywallText = PaywallAB.shared.textSettings(forKey: telemetryPaywallId)
+        let annualPlanText = paywallText.plan(NewPaywallPlan.annual.rawValue)
+        let ctaTitle = paywallText.ctaTitle ?? annualPlanText.title ?? String(localized: "Get Lifetime Access")
+        let priceCaption = String(
+            format: paywallText.priceCaptionFormat ?? String(localized: "%@ (Pay once - use forever)"),
+            annualPrice
+        )
         
 
 //        OnboardNewFirstForm(ctaTitle:String(localized: "Continue"), ctaAction: handleCTA, pages: 2, pageIndex: index, fixedWidth: 260) {
-        OnboardWhiteForm(ctaTitle:String(localized: "Get Lifetime Access"), ctaAction: handleCTA, pages: 3, pageIndex: index, fixedWidth: 260) {
+        OnboardWhiteForm(ctaTitle: ctaTitle, ctaAction: handleCTA, pages: 3, pageIndex: index, fixedWidth: 260) {
 //            Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255)
 //                .ignoresSafeArea()
 //
@@ -170,21 +176,21 @@ struct NewFirstWhitePaywall: View {
                     
                 }
                 
-                Text("Apple Watch Sonic Technology")
+                Text(paywallText.subtitleText ?? String(localized: "Apple Watch Sonic Technology"))
                     .font(.custom("Montserrat-SemiBold", size: 12))
                     .foregroundStyle(Color(red: 25 / 255, green: 26 / 255, blue: 28 / 255))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 30)
                 
                 
-                Text("Unlock Full Cleaning Power")
+                Text(paywallText.mainText ?? String(localized: "Unlock Full Cleaning Power"))
                     .font(.custom("Montserrat-Bold", size: 26))
                     .foregroundStyle(.black)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 4)
                 
-                Text("\(annualPrice) (Pay once - use forever)")
+                Text(priceCaption)
                     .font(.custom("Montserrat-SemiBold", size: 16))
                     .foregroundStyle(Color(red: 25 / 255, green: 26 / 255, blue: 28 / 255))
                     .multilineTextAlignment(.center)
@@ -287,7 +293,7 @@ struct OboardWhiteNewButton: View {
             action()
             
         }) {
-            Text(LocalizedStringKey(title))
+            Text(title)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(minHeight: 52)

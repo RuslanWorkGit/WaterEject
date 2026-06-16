@@ -270,6 +270,7 @@ final class Telemetry {
 
         if let resolvedOnboardId, !resolvedOnboardId.isEmpty {
             params["onboard_id"] = resolvedOnboardId
+            params.merge(assignedPaywallProductParams(onboardId: resolvedOnboardId)) { current, _ in current }
         }
 
         if let resolvedBrand,
@@ -379,16 +380,18 @@ final class Telemetry {
 
         for candidate in candidates {
             if let tag = OnboardTag(rawValue: candidate) {
-                return PaywallAB.shared.onboardingPaywallVariant(for: tag).rawValue
+                return PaywallAB.shared.assignedOnboardingPaywallKey(for: tag)
             }
 
             if let variant = OnboardingVariant(rawValue: candidate) {
-                return PaywallAB.shared.onboardingPaywallVariant(for: variant.onboardTag).rawValue
+                return PaywallAB.shared.assignedOnboardingPaywallKey(for: variant.onboardTag)
             }
 
             switch candidate {
             case "onb_10_1":
-                return PaywallAB.shared.onboardingPaywallVariant(for: .v10).rawValue
+                return PaywallAB.shared.assignedOnboardingPaywallKey(for: .v10)
+            case "onb_8_1", "onboard_8_1_steps":
+                return PaywallAB.shared.assignedOnboardingPaywallKey(for: .v8)
             case "new_onb_1":
                 return "paywall_new_black_3"
             case "new_onb_2":
@@ -414,9 +417,11 @@ final class Telemetry {
             return [:]
         }
 
-        let settings = PaywallAB.shared.productSettings(forKey: paywallKey)
+        let productSettingsKey = assignedPaywallProductSettingsKey(paywallKey)
+        let settings = PaywallAB.shared.productSettings(forKey: productSettingsKey)
         var params: [String: Any] = [
             "assigned_paywall_key": paywallKey,
+            "assigned_paywall_product_key": productSettingsKey,
             "assigned_weekly_product_id": settings.weeklyProductID,
             "assigned_yearly_product_id": settings.yearlyProductID,
             "assigned_annual_product_id": settings.annualProductID,
@@ -435,10 +440,30 @@ final class Telemetry {
         firstTimeOpenPaywallProductParams(onboardId: onboardId)
     }
 
+    private func assignedPaywallProductSettingsKey(_ assignedPaywallKey: String) -> String {
+        switch assignedPaywallKey {
+        case AssignedOnboardingPaywall.newSecondBlack.rawValue:
+            return AssignedOnboardingPaywall.newSecondBlack.productSettingsKey
+        case AssignedOnboardingPaywall.newFirstWhite.rawValue:
+            return AssignedOnboardingPaywall.newFirstWhite.productSettingsKey
+        case AssignedOnboardingPaywall.paywallFive.rawValue:
+            return AssignedOnboardingPaywall.paywallFive.productSettingsKey
+        case AssignedOnboardingPaywall.paywallFourth.rawValue:
+            return AssignedOnboardingPaywall.paywallFourth.productSettingsKey
+        case AssignedOnboardingPaywall.paywallThird.rawValue:
+            return AssignedOnboardingPaywall.paywallThird.productSettingsKey
+        default:
+            return assignedPaywallKey
+        }
+    }
+
     private func productSettingsKey(paywallId: String?, variant: String?, onboardId: String?) -> String? {
         let trimmedPaywallId = paywallId?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let rcPaywallKeys: Set<String> = ["first", "second", "third", "fourth", "fifth", "special"]
-        if rcPaywallKeys.contains(trimmedPaywallId) || trimmedPaywallId.hasPrefix("paywall_new_") {
+        if rcPaywallKeys.contains(trimmedPaywallId) ||
+            trimmedPaywallId == AssignedOnboardingPaywall.newSecondBlack.rawValue ||
+            trimmedPaywallId == AssignedOnboardingPaywall.newFirstWhite.rawValue ||
+            trimmedPaywallId.hasPrefix("paywall_new_") {
             return trimmedPaywallId
         }
 
@@ -454,10 +479,12 @@ final class Telemetry {
         let resolvedPaywallKey = paywallKey ?? assignedPaywallKey(for: onboardId)
         guard let resolvedPaywallKey else { return [:] }
 
-        let settings = PaywallAB.shared.productSettings(forKey: resolvedPaywallKey)
+        let productSettingsKey = assignedPaywallProductSettingsKey(resolvedPaywallKey)
+        let settings = PaywallAB.shared.productSettings(forKey: productSettingsKey)
         let normalizedPlan = plan.lowercased()
         var params: [String: Any] = [
             "selected_paywall_key": resolvedPaywallKey,
+            "selected_paywall_product_key": productSettingsKey,
             "selected_product_plan": normalizedPlan
         ]
 

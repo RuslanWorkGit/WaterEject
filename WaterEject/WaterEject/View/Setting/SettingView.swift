@@ -24,6 +24,8 @@ struct SettingView: View {
     @State private var showEightOnboarding = false
     @State private var showNineOnboarding = false
     @State private var showTenOnboarding = false
+    @State private var showNewFirstWhitePaywall = false
+    @State private var showNewSecondBlackPaywall = false
     
     var body: some View {
         NavigationStack {
@@ -56,6 +58,24 @@ struct SettingView: View {
                             Button("Privacy") {
                                 webViewURL = URL(string: "https://docs.google.com/document/d/1lQQMYnybap2JyKGf7Sd8gyPD1o9FWnAqgnGKx1BnSJI/edit?tab=t.0")
                                 
+                            }
+                            .buttonStyle(PillButtonStyle())
+                        }
+
+                        Text("Paywalls")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(Color.gray)
+
+                        VStack(spacing: 12) {
+                            Button("New First White Paywall") {
+                                tabBarState.isHidden = true
+                                showNewFirstWhitePaywall = true
+                            }
+                            .buttonStyle(PillButtonStyle())
+
+                            Button("New Second Black Paywall") {
+                                tabBarState.isHidden = true
+                                showNewSecondBlackPaywall = true
                             }
                             .buttonStyle(PillButtonStyle())
                         }
@@ -161,6 +181,24 @@ struct SettingView: View {
         .sheet(item: $webViewURL, content: { url in
             SafariView(url: url)
         })
+        .fullScreenCover(isPresented: $showNewFirstWhitePaywall, onDismiss: {
+            tabBarState.isHidden = false
+        }) {
+            NewFirstWhitePaywall(index: 0) {
+                showNewFirstWhitePaywall = false
+                tabBarState.isHidden = false
+            }
+            .environmentObject(PaywallGate.shared)
+        }
+        .fullScreenCover(isPresented: $showNewSecondBlackPaywall, onDismiss: {
+            tabBarState.isHidden = false
+        }) {
+            NewSecondBlackPaywall {
+                showNewSecondBlackPaywall = false
+                tabBarState.isHidden = false
+            }
+            .environmentObject(PaywallGate.shared)
+        }
         
         .fullScreenCover(isPresented: $showFourthOnboarding, onDismiss: {
             tabBarState.isHidden = false           // повернемо таббар (якщо треба)

@@ -1,8 +1,9 @@
+
 //
-//  PaywallFiveView.swift
+//  Untitled.swift
 //  WaterEject
 //
-//  Created by Ruslan Liulka on 08.12.2025.
+//  Created by Ruslan Liulka on 16.06.2026.
 //
 
 import SwiftUI
@@ -10,7 +11,7 @@ import FirebaseAnalytics
 import RevenueCat
 import AVFoundation
 
-struct PaywallFiveView: View {
+struct NewSecondBlackPaywall: View {
 
     @StateObject private var viewModel = NewPaywallViewModel()
     @State private var webViewURL: URL?
@@ -53,7 +54,7 @@ struct PaywallFiveView: View {
 
 
 
-        let reviews: [Review] = [
+        let reviews: [ReviewNew] = [
             .init(text: String(localized: "It saved my iPhone!"),               name: "Maria",  rating: 5),
             .init(text: String(localized: "Saved me from going to repair!"),    name: "Kevin",  rating: 5),
             .init(text: String(localized: "Worked better than rice!"),          name: "Sophie", rating: 5)
@@ -66,7 +67,8 @@ struct PaywallFiveView: View {
     private let exitDuration: Double = 0.6
     let startAnimations: Bool
     private let telemetryVariant = PaywallVariant.fifth.rawValue
-    private let telemetryPaywallId = PaywallVariant.fifth.rawValue
+    private let telemetryPaywallId = "paywall_v_5.0"
+    private let textRemoteConfigKey = "paywall_v_5.0"
 
     private var weeklyDueTodayTitle: String {
         String(format: String(localized: "%@ due today"), zeroPriceString(for: .weekly))
@@ -133,130 +135,119 @@ struct PaywallFiveView: View {
         let isSmall = UIScreen.main.bounds.height < 700
         let isLarge = UIScreen.main.bounds.height > 900
         let secondaryPlan = viewModel.yearlyCardPlan
-        let priceMode = PaywallAB.shared.priceMode(for: .fifth)
+        let priceMode = PaywallAB.shared.priceMode(forKey: textRemoteConfigKey)
         let shouldShowWeeklyPlan = priceMode == .first || priceMode == .both
         let shouldShowSecondaryPlan = priceMode == .second || priceMode == .both
         let canOfferFreeTrial = shouldShowWeeklyPlan && isFreeTrialAllowed
         let shouldAllowFreeTrial = canOfferFreeTrial && viewModel.selectedPlan == .weekly
         let shouldShowFreeTrial = shouldAllowFreeTrial && isFreeTrialEnabled
         let shouldShowWeeklyTrialText = canOfferFreeTrial
-        let paywallText = PaywallAB.shared.textSettings(for: .fifth)
+        let paywallText = PaywallAB.shared.textSettings(forKey: textRemoteConfigKey)
+        let fallbackPaywallText = PaywallAB.shared.textSettings(for: .fifth)
         let weeklyPlanText = paywallText.plan(NewPaywallPlan.weekly.rawValue)
+        let weeklyFallbackPlanText = fallbackPaywallText.plan(NewPaywallPlan.weekly.rawValue)
         let secondaryPlanText = paywallText.plan(secondaryPlan.rawValue)
+        let secondaryFallbackPlanText = fallbackPaywallText.plan(secondaryPlan.rawValue)
+        let thenText = paywallText.thenText ?? fallbackPaywallText.thenText ?? String(localized: "then")
+        let trialCTATitle = paywallText.ctaTitle ?? fallbackPaywallText.ctaTitle ?? String(localized: "TRY FREE & FIX NOW")
+        let paidCTAFormat = paywallText.ctaPriceFormat ?? fallbackPaywallText.ctaPriceFormat ?? String(localized: "Continue %@")
 
         ZStack(alignment: .topTrailing) {
 
 
-            ZStack(alignment: .bottom) {
+            ZStack(alignment: .top) {
 
-                Color(red: 253 / 255, green: 251 / 255, blue: 249 / 255).ignoresSafeArea()
+                Color(red: 0 / 255, green: 0 / 255, blue: 0 / 255).ignoresSafeArea()
 
                 VStack(alignment: .center) {
-
-                    Spacer()
 
                     VStack(spacing: 8) {
 
 
 
                         (
-                            Text(paywallText.mainText ?? String(localized: "Remove Water Fast"))
-                                .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-                                .lineLimit(1)
+                            Text(paywallText.mainText ?? String(localized: "Unlock Full Cleaning Power"))
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
                                 .minimumScaleFactor(0.6)
 
                         )
-                        .font(.system(size: 38 * padScale, weight: .semibold))
+                        .font(.custom("Montserrat-ExtraBold", size: 30))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
                         .padding(.bottom, 0)
-                        .padding(.top, 12)
+                        //.padding(.top, 12)
+                        
+                        Spacer()
 
+                        (
+                            Text(paywallText.subtitleText ?? String(localized: "Apple Watch Sonic Technology"))
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.6)
 
-//                        ReviewsCardView(reviews: reviews)
-
-
-                        ZStack(alignment: .top) {
-                            Group {
-                                switch currentInfoCard {
-                                case .reviews:
-                                    ReviewsCardView(reviews: reviews)
-//                                        .drawingGroup()
-
-                                case .features:
-                                    FeaturesCardView()
-                                case .stats:
-                                    StatisticCardView()
+                        )
+                        .font(.custom("Montserrat-Medium", size: 14))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 16)
+                        
+                        HStack(spacing: 4) {
+                            HStack(spacing: 1) {
+                                ForEach(0..<5, id: \.self) { _ in
+                                    Image(systemName: "star.fill")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
                                 }
                             }
-                            .id(currentInfoCard)
-                            .transition(
-                                didShowFirstCard
-                                ? .asymmetric(
-                                    insertion: .move(edge: isForward ? .trailing : .leading)
-                                        .combined(with: .opacity),
-                                    removal: .move(edge: isForward ? .leading : .trailing)
-                                        .combined(with: .opacity)
-                                )
-                                : .identity
-                            )
-                            .frame(maxWidth: .infinity,
-                                   maxHeight: .infinity,
-                                   alignment: .top)
+
+                            Text(paywallText.trustText ?? String(localized: "Trusted by 1M+ users"))
+                                .font(.custom("Montserrat-SemiBold", size: 14))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
-                        .frame(height: 168)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 16)
+
+                        ReviewsCardNewView(reviews: reviews)
+                            //.frame(height: 168)
+
+
+//                        ZStack(alignment: .top) {
+//                            Group {
+//                                switch currentInfoCard {
+//                                case .reviews:
+//                                    
+////                                        .drawingGroup()
+//
+//                                case .features:
+//                                    FeaturesCardView()
+//                                case .stats:
+//                                    StatisticCardView()
+//                                }
+//                            }
+//                            .id(currentInfoCard)
+//                            .transition(
+//                                didShowFirstCard
+//                                ? .asymmetric(
+//                                    insertion: .move(edge: isForward ? .trailing : .leading)
+//                                        .combined(with: .opacity),
+//                                    removal: .move(edge: isForward ? .leading : .trailing)
+//                                        .combined(with: .opacity)
+//                                )
+//                                : .identity
+//                            )
+//                            .frame(maxWidth: .infinity,
+//                                   maxHeight: .infinity,
+//                                   alignment: .top)
+//                        }
+
                         //.padding()
                         //.opacity(appearReviews ? 1 : 0)
 
-                        .onAppear {
-                            if startAnimations {
-                                didShowFirstCard = true
-                                appearReviews = false
 
-                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
-                                    withAnimation(.easeOut(duration: 0.28)) {
-                                        appearReviews = true
-                                    }
-                                }
 
-                                restartAutoAdvance()
-                            }
-                        }
-                        .onChange(of: startAnimations) {
-                            if startAnimations {
-                                didShowFirstCard = true
-                                appearReviews = false
 
-                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.5) {
-                                    withAnimation(.easeOut(duration: 0.28)) {
-                                        appearReviews = true
-                                    }
-                                }
-
-                                restartAutoAdvance()
-                            } else {
-                                appearReviews = false
-                                autoAdvanceWorkItem?.cancel()
-                            }
-                        }
-                        .gesture(
-                            DragGesture(minimumDistance: 20)
-                                .onEnded { value in
-                                    let translation = value.translation.width
-                                    let threshold: CGFloat = 40
-                                    guard abs(translation) > threshold else { return }
-
-                                    if translation < 0 {
-                                        // свайп ліворуч → наступна
-                                        goNextCard(animated: true)
-                                    } else {
-                                        // свайп праворуч → попередня
-                                        goPreviousCard(animated: true)
-                                    }
-
-                                    restartAutoAdvance()
-                                }
-                        )
                     }
 
 
@@ -266,18 +257,16 @@ struct PaywallFiveView: View {
 
                     VStack(spacing: 12) {
 
-                        if canOfferFreeTrial {
-                            PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
-                        }
+                      
 
                         if shouldShowWeeklyPlan {
-                            PaywallFivePlanCard(
+                            PaywallNewPlanCard(
                                 title: shouldShowWeeklyTrialText
-                                    ? String(format: weeklyPlanText.trialTitleFormat ?? String(localized: "%@ due today"), zeroPriceString(for: .weekly))
-                                    : weeklyPlanText.title ?? NewPaywallPlan.weekly.title,
-                                price: shouldShowWeeklyTrialText ? "\(String(localized: "then")) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
-                                sublabel: weeklyPlanText.sublabel,
-                                saveText: shouldShowWeeklyTrialText ? weeklyPlanText.saveText ?? String(localized: "3 Days Free") : viewModel.onlyPrice[.weekly] ?? "",
+                                    ? String(format: weeklyPlanText.trialTitleFormat ?? weeklyFallbackPlanText.trialTitleFormat ?? String(localized: "%@ due today"), zeroPriceString(for: .weekly))
+                                    : weeklyPlanText.title ?? weeklyFallbackPlanText.title ?? NewPaywallPlan.weekly.title,
+                                price: shouldShowWeeklyTrialText ? "\(thenText) \(viewModel.pricePerPeriod[.weekly] ?? "...")" : viewModel.pricePerPeriod[.weekly] ?? "...",
+                                sublabel: weeklyPlanText.sublabel ?? weeklyFallbackPlanText.sublabel,
+                                saveText: shouldShowWeeklyTrialText ? weeklyPlanText.saveText ?? weeklyFallbackPlanText.saveText ?? String(localized: "3 Days Free") : viewModel.onlyPrice[.weekly] ?? "",
                                 isSelected: viewModel.selectedPlan == .weekly,
                                 onTap: {
                                     if shouldAllowFreeTrial {
@@ -289,11 +278,11 @@ struct PaywallFiveView: View {
                         }
 
                         if shouldShowSecondaryPlan {
-                            PaywallFivePlanCard(
-                                title: secondaryPlanText.title ?? secondaryPlan.title,
+                            PaywallNewPlanCard(
+                                title: secondaryPlanText.title ?? secondaryFallbackPlanText.title ?? secondaryPlan.title,
                                 price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
-                                sublabel: secondaryPlanText.sublabel ?? String(localized: "Best Value"),
-                                saveText: secondaryPlanText.saveText ?? viewModel.onlyPrice[secondaryPlan] ?? "",
+                                sublabel: secondaryPlanText.sublabel ?? secondaryFallbackPlanText.sublabel ?? String(localized: "Best Value"),
+                                saveText: secondaryPlanText.saveText ?? secondaryFallbackPlanText.saveText ?? viewModel.onlyPrice[secondaryPlan] ?? "",
                                 isSelected: viewModel.selectedPlan == secondaryPlan,
                                 onTap: {
                                     if shouldAllowFreeTrial {
@@ -311,8 +300,8 @@ struct PaywallFiveView: View {
                         Image(systemName: "checkmark.shield")
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                         Text(shouldShowFreeTrial
-                             ? paywallText.footerTrialText ?? String(localized: "Cancel Anytime. No payment required today.")
-                             : paywallText.footerSecureText ?? String(localized: "Cancel Anytime. Secure with App Store."))
+                             ? paywallText.footerTrialText ?? fallbackPaywallText.footerTrialText ?? String(localized: "Cancel Anytime. No payment required today.")
+                             : paywallText.footerSecureText ?? fallbackPaywallText.footerSecureText ?? String(localized: "Cancel Anytime. Secure with App Store."))
                             .font(.system(size: 10))
                             .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
                             .multilineTextAlignment(.center)
@@ -335,7 +324,7 @@ struct PaywallFiveView: View {
                         }
 
                         Telemetry.shared.paywallCTATap(variant: telemetryVariant, entryPoint: entry,
-                                                       plan: plan.analyticsValue, onboardId: onboardId)
+                                                       plan: plan.analyticsValue, onboardId: onboardId, paywallId: telemetryPaywallId)
 
 
                         Telemetry.shared.funnelGoToPurchase(
@@ -391,7 +380,7 @@ struct PaywallFiveView: View {
                             } else {
                                 HStack(spacing: 10) {
                                     Spacer()
-                                    Text(shouldShowFreeTrial ? String(localized: "Continue") : (forPeriod.isEmpty ? String(localized: "Continue") : "\(String(localized: "Continue")) \(forPeriod)"))
+                                    Text(shouldShowFreeTrial ? trialCTATitle : (forPeriod.isEmpty ? trialCTATitle : String(format: paidCTAFormat, forPeriod)))
                                         .font(.system(size: 16 * padScale, weight: .semibold))
                                         .foregroundStyle(.white)
                                     Image(systemName: "arrow.right")
@@ -468,7 +457,7 @@ struct PaywallFiveView: View {
                 .padding(.bottom, 4)
                 .background(
                     VStack {
-                        Image("paywallPhoto")
+                        Image("NewSecondBlackPaywallImg")
                             .resizable()
                             .scaledToFit()
 
@@ -499,7 +488,7 @@ struct PaywallFiveView: View {
                     .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
                     .padding(14)
             }
-            .padding(.top, 8)
+            //.padding(.top, 8)
             .padding(.trailing, 18)
         }
 
@@ -517,7 +506,7 @@ struct PaywallFiveView: View {
 
             if !didLogOpen {
                 let entry = paywallGate.currentContext?.rawValue ?? "unknown"
-                let settings = PaywallAB.shared.productSettings(for: .fifth)
+                let settings = PaywallAB.shared.productSettings(forKey: telemetryPaywallId)
                 Telemetry.shared.configurePaywallPresentation(
                     paywallId: telemetryPaywallId,
                     variant: telemetryVariant,
@@ -530,17 +519,17 @@ struct PaywallFiveView: View {
                     entryPoint: entry,
                     onboardId: onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue,
                     paywallId: telemetryPaywallId,
-                    paywallKey: telemetryVariant,
-                    displayedPlans: displayedPlans(for: PaywallAB.shared.priceMode(for: .fifth), secondaryPlan: settings.yearlyCardPlan),
-                    defaultPlan: defaultPlan(for: PaywallAB.shared.priceMode(for: .fifth), settings: settings)
+                    paywallKey: telemetryPaywallId,
+                    displayedPlans: displayedPlans(for: PaywallAB.shared.priceMode(forKey: textRemoteConfigKey), secondaryPlan: settings.yearlyCardPlan),
+                    defaultPlan: defaultPlan(for: PaywallAB.shared.priceMode(forKey: textRemoteConfigKey), settings: settings)
                 )
                 didLogOpen = true
 
 
             }
             Task {
-                await viewModel.loadPricing(paywallVariant: .fifth)
-                switch PaywallAB.shared.priceMode(for: .fifth) {
+                await viewModel.loadPricing(paywallKey: telemetryPaywallId)
+                switch PaywallAB.shared.priceMode(forKey: textRemoteConfigKey) {
                 case .first:
                     isFreeTrialAllowed = viewModel.freeTestEnabled
                     viewModel.selectedPlan = .weekly
@@ -686,31 +675,14 @@ private extension View {
     }
 }
 
-struct Review: Identifiable {
+struct ReviewNew: Identifiable {
     let id = UUID()
     let text: String
     let name: String
     let rating: Int
 }
 
-struct StarsView: View {
-    let rating: Int
-
-    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
-    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-
-    var body: some View {
-        HStack(spacing: 4) {
-            ForEach(0..<rating, id: \.self) { _ in
-                Image(systemName: "star.fill")
-                    .font(.system(size: 16 * padScale))
-                    .foregroundColor(Color(red: 250/255, green: 204/255, blue: 21/255)) // жовтий
-            }
-        }
-    }
-}
-
-struct PaywallFivePlanCard: View {
+struct PaywallNewPlanCard: View {
     let title: String
     let price: String
     let sublabel: String?
@@ -731,7 +703,7 @@ struct PaywallFivePlanCard: View {
                     HStack {
                         Text(title)
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.white)
                             .lineLimit(1)
                             .minimumScaleFactor(0.65)
                             .layoutPriority(1)
@@ -748,29 +720,29 @@ struct PaywallFivePlanCard: View {
                 VStack {
                     if let sublabel = sublabel {
                         Text(sublabel)
-                            .font(.system(size: 12))
+                            .font(.custom("Montserrat-Bold", size: 10))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
-                            .background(Color(red: 81/255, green: 132/255, blue: 234/255).opacity(0.14))
-                            .foregroundStyle(Color(red: 81/255, green: 132/255, blue: 234/255))
+                            .background(Color(red: 34/255, green: 117/255, blue: 174/255).opacity(1))
+                            .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
 
 
                     Text(saveText)
                         .font(.system(size: sublabel == nil ? 16 : 10, weight: sublabel == nil ? .semibold : .regular))
-                        .foregroundStyle(sublabel == nil ? .black : Color(red: 196/255, green: 196/255, blue: 197/255))
+                        .foregroundStyle(sublabel == nil ? .white : Color(red: 196/255, green: 196/255, blue: 197/255))
                         .lineLimit(2)
                         .minimumScaleFactor(0.8)
                 }
                 .frame(minWidth: 92, alignment: .trailing)
             }
             .padding(.horizontal, 12)
-            .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
+            .frame(maxWidth: .infinity, minHeight: 62, maxHeight: 62)
             .background(
                 ZStack {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Color.white)
+                        .fill(Color.white.opacity(0.1))
                     //                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                     //                        .fill(Color.white.opacity(0.15))
                 }
@@ -793,43 +765,11 @@ struct PaywallFivePlanCard: View {
     }
 }
 
-struct PaywallFiveFreeTrialToggle: View {
-    @Binding var isOn: Bool
-
-    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
-    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-
-    var body: some View {
-        HStack {
-            Text("Free Trial Enabled")
-                .font(.system(size: 16 * padScale, weight: .medium))
-                .foregroundStyle(.black)
-
-            Spacer()
-
-            Toggle("", isOn: $isOn)
-                .labelsHidden()
-                .tint(Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255))
-                .allowsHitTesting(false)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.white)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5), lineWidth: 1)
-                }
-        )
-        .padding(.horizontal, 4)
-    }
-}
 
 
-struct ReviewsCardView: View {
+struct ReviewsCardNewView: View {
 
-    let reviews: [Review]
+    let reviews: [ReviewNew]
 //    let reviews: [Review] = [
 //        .init(text: "It saved my iPhone!",               name: "Maria",  rating: 5),
 //        .init(text: "Saved me from going to repair!",    name: "Kevin",  rating: 5),
@@ -865,7 +805,7 @@ struct ReviewsCardView: View {
 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        StarsView(rating: reviews[0].rating)
+        
 
                         Text(reviews[0].text)
                             .font(.custom("Montserrat-Bold", size: 14 * padScale))
@@ -880,11 +820,16 @@ struct ReviewsCardView: View {
                         .padding(.top, 2) // трохи вирівняти по вертикалі
 
                 }
+                .padding(.vertical, 4)
+
+                Rectangle()
+                    .fill(Color(red: 229 / 255, green: 229 / 255, blue: 229 / 255))
+                    .frame(height: 1)
 
 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        StarsView(rating: reviews[1].rating)
+                       
 
                         Text(reviews[1].text)
                             .font(.custom("Montserrat-Bold", size: 14 * padScale))
@@ -899,11 +844,16 @@ struct ReviewsCardView: View {
                         .padding(.top, 2) // трохи вирівняти по вертикалі
 
                 }
+                .padding(.vertical, 4)
+
+                Rectangle()
+                    .fill(Color(red: 229 / 255, green: 229 / 255, blue: 229 / 255))
+                    .frame(height: 1)
 
 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        StarsView(rating: reviews[2].rating)
+                       
 
                         Text(reviews[2].text)
                             .font(.custom("Montserrat-Bold", size: 14 * padScale))
@@ -918,6 +868,7 @@ struct ReviewsCardView: View {
                         .padding(.top, 2) // трохи вирівняти по вертикалі
 
                 }
+                .padding(.vertical, 4)
 
 
 
@@ -936,97 +887,6 @@ struct ReviewsCardView: View {
     }
 }
 
-struct FeatureItem: Identifiable {
-    let id = UUID()
-    let emoji: String
-    let text: String
-}
-
-struct FeaturesCardView: View {
-
-    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
-    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-
-    private let items: [FeatureItem] = [
-        .init(emoji: "🎛️", text: String(localized: "All sound & dB tools unlocked")),
-        .init(emoji: "🔊", text: String(localized: "Unlimited cleaning cycles")),
-        .init(emoji: "🚫", text: String(localized: "No ads, premium experience"))
-    ]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach(items) { item in
-                HStack(alignment: .center, spacing: 12) {
-                    Text(item.emoji)
-                        .font(.system(size: 28 * padScale))
-
-                    Text(item.text)
-                        .font(.custom("Montserrat-SemiBold", size: 18 * padScale))
-                        .foregroundColor(.black)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.06), radius: 20, x: 0, y: 8)
-        )
-    }
-}
-
-struct StatisticCardView: View {
-
-    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
-    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-
-            HStack(alignment: .center, spacing: 20) {
-
-                Image("Left")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 80 * padScale)
-
-                VStack(spacing: 6) {
-                    Text("MORE THAN")
-                        .font(.custom("Montserrat-SemiBold", size: 20 * padScale))
-                        .foregroundColor(.black)
-                        //.fixedSize(horizontal: false, vertical: true)
-
-                    Text("1,000,000")
-                        .font(.custom("Montserrat-Bold", size: 20 * padScale))
-                        .foregroundColor(.black)
-                        //.fixedSize(horizontal: false, vertical: true)
-
-                    Text("SATISFIED USERS")
-                        .font(.custom("Montserrat-SemiBold", size: 20 * padScale))
-                        .foregroundColor(.black)
-                        //.fixedSize(horizontal: false, vertical: true)
-                }
-
-
-                Image("Right")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 80 * padScale)
-
-
-            }
-
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.06), radius: 20, x: 0, y: 8)
-        )
-    }
-}
-
 
 //#Preview {
 //    ZStack {
@@ -1037,5 +897,6 @@ struct StatisticCardView: View {
 //}
 
 #Preview(body: {
-    PaywallFiveView(onFinish: {print("hello")})
+    NewSecondBlackPaywall(onFinish: {print("hello")})
+        .environmentObject(PaywallGate.shared)
 })

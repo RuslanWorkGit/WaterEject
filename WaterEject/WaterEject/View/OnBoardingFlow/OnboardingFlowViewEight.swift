@@ -229,6 +229,7 @@ struct OnboardingFlowViewEight: View {
 
     private func controlParams(_ params: [String: Any]) -> [String: Any] {
         var enriched = params
+        enriched["assigned_paywall_key"] = PaywallAB.shared.assignedOnboardingPaywallKey(for: .v8)
         if let assignment {
             enriched["experiment_id"] = assignment.experimentId
             enriched["bucket"] = assignment.bucket
