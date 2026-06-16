@@ -136,9 +136,10 @@ struct PaywallFiveView: View {
         let priceMode = PaywallAB.shared.priceMode
         let shouldShowWeeklyPlan = priceMode == .first || priceMode == .both
         let shouldShowSecondaryPlan = priceMode == .second || priceMode == .both
-        let shouldAllowFreeTrial = shouldShowWeeklyPlan && isFreeTrialAllowed
+        let canOfferFreeTrial = shouldShowWeeklyPlan && isFreeTrialAllowed
+        let shouldAllowFreeTrial = canOfferFreeTrial && viewModel.selectedPlan == .weekly
         let shouldShowFreeTrial = shouldAllowFreeTrial && isFreeTrialEnabled
-        let shouldShowWeeklyTrialText = shouldAllowFreeTrial
+        let shouldShowWeeklyTrialText = canOfferFreeTrial
         let paywallText = PaywallAB.shared.textSettings(for: .fifth)
         let weeklyPlanText = paywallText.plan(NewPaywallPlan.weekly.rawValue)
         let secondaryPlanText = paywallText.plan(secondaryPlan.rawValue)
@@ -265,7 +266,7 @@ struct PaywallFiveView: View {
 
                     VStack(spacing: 12) {
 
-                        if shouldAllowFreeTrial {
+                        if canOfferFreeTrial {
                             PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
                         }
 
@@ -542,15 +543,15 @@ struct PaywallFiveView: View {
                 switch PaywallAB.shared.priceMode {
                 case .first:
                     isFreeTrialAllowed = viewModel.freeTestEnabled
-                    isFreeTrialEnabled = viewModel.freeTestEnabled
                     viewModel.selectedPlan = .weekly
+                    isFreeTrialEnabled = viewModel.freeTestEnabled
                 case .second:
                     isFreeTrialAllowed = false
                     isFreeTrialEnabled = false
                     viewModel.selectedPlan = viewModel.yearlyCardPlan
                 case .both:
                     isFreeTrialAllowed = viewModel.freeTestEnabled
-                    isFreeTrialEnabled = viewModel.freeTestEnabled
+                    isFreeTrialEnabled = viewModel.freeTestEnabled && viewModel.selectedPlan == .weekly
                 }
             }
 
@@ -595,6 +596,7 @@ struct PaywallFiveView: View {
 
     private func choosePlan(_ plan: NewPaywallPlan, selectionMethod: String) {
         viewModel.selectedPlan = plan
+        isFreeTrialEnabled = isFreeTrialAllowed && plan == .weekly
 
         let resolvedOnboardId = onboardId ?? OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
         Telemetry.shared.funnelPlanChosen(
