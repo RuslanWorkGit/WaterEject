@@ -181,7 +181,8 @@ struct OnboardingFlowViewTwo: View {
                        for: .v32,                       // тег онборду (Onbord_v_3.3)
                        onFinish: finishOnboarding,
                        startDelay: slideDuration + 0.0,
-                       stepsVisited: stepsVisited
+                       stepsVisited: stepsVisited,
+                       startAnimations: startAnimations
                    )
                    .onAppear {
                        paywallShown = true

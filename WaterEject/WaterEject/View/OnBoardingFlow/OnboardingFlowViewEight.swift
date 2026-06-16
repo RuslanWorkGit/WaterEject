@@ -18,11 +18,7 @@ struct OnboardingFlowViewEight: View {
     //@AppStorage("onb_last_shown_ts") private var onbLastShownTS: Double = 0
 
     @State private var currentStep: OnboardingStepEight = .stepOne
-    @State private var prevStep: OnboardingStepEight? = nil          // ← старий екран (фон)
-    @State private var incomingStep: OnboardingStepEight? = nil      // ← новий екран (оверлей)
-    @State private var overlayX: CGFloat = 0                       // ← офсет оверлея
-    @State private var isAnimating = false
-    @State private var isForward = true
+    @State private var path: [OnboardingStepEight] = []
     @StateObject private var reviewsCarouselModel = ReviewsCarouselModel()
     
     @State private var topCardIndex: Int = 0
@@ -36,8 +32,6 @@ struct OnboardingFlowViewEight: View {
     
     
     
-    @State private var childAnimate = false
-    private let slideDuration: Double = 0.5
     @State private var modesExpandedIndex: Int = 0
 
     init(
@@ -64,46 +58,13 @@ struct OnboardingFlowViewEight: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack {
-
-                // 2) Старий екран — залишається на місці під час анімації
-                if let p = prevStep {
-                    screen(for: p, startAnimations: false, staticDisplay: true)
-                        .id(p)
-                        .frame(width: geo.size.width, height: geo.size.height)  // ✅ фіксуємо розмір
-                        .zIndex(0)
-                } else {
-                    // якщо немає prevStep, показуємо поточний як базовий
-                    screen(for: currentStep, startAnimations: true, staticDisplay: false)
-                        .id(currentStep)
-                        .frame(width: geo.size.width, height: geo.size.height)  // ✅
-                        .zIndex(0)
+        NavigationStack(path: $path) {
+            screen(for: .stepOne)
+                .navigationBarBackButtonHidden(true)
+                .navigationDestination(for: OnboardingStepEight.self) { step in
+                    screen(for: step)
+                        .navigationBarBackButtonHidden(true)
                 }
-
-                // 3) Новий екран — в’їжджає зверху поверх старого
-                if let inc = incomingStep {
-                    screen(for: inc, startAnimations: childAnimate, staticDisplay: false)
-                        .id(inc)
-                        .frame(width: geo.size.width, height: geo.size.height)  // ✅
-//                                        .ignoresSafeArea()
-                        .offset(x: overlayX)         // ← тільки він рухається
-                        .zIndex(1)
-                        .onAppear {
-                            // стартуємо за межами екрана справа/зліва
-                            overlayX = (isForward ? 1 : -1) * geo.size.width
-                            withAnimation(.easeInOut(duration: slideDuration)) {
-                                            overlayX = 0
-                                        }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
-                                            childAnimate = true
-                                        }
-//                            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.9)) {
-//                                overlayX = 0
-//                            }
-                        }
-                }
-            }
             .task {
                 
                 Telemetry.shared.funnelOnboardStart(onboardId: analyticsOnboardId)
@@ -117,6 +78,9 @@ struct OnboardingFlowViewEight: View {
                 
                 appendStep(currentStep)
             }
+            .onChange(of: path) { newPath in
+                currentStep = newPath.last ?? .stepOne
+            }
         }
         .onAppear {
             Telemetry.shared.sceneDidBecomeActive(onboardId: analyticsOnboardId)
@@ -125,57 +89,20 @@ struct OnboardingFlowViewEight: View {
 
     // MARK: - Навігація
     private func goTo(_ step: OnboardingStepEight, forward: Bool) {
-        guard !isAnimating, step != currentStep else { return }
+        guard step != currentStep else { return }
         logControlStepAction(currentStep, action: "continue")
-        isAnimating = true
-        isForward = forward
-        childAnimate = false
-        
-        if step == .paywall {
-            isAnimating = true
 
-            // НЕ чіпаємо prevStep → MeetView залишається тим самим інстансом
-            incomingStep = step
+        currentStep = step
+        path.append(step)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
-                currentStep = step
-                incomingStep = nil
-                isAnimating = false
+        Telemetry.shared.onbScreenView(flowId: analyticsFlowId, screenId: screenId(for: step))
+        logControlStepView(step)
 
-                Telemetry.shared.onbScreenView(flowId: analyticsFlowId,
-                                               screenId: screenId(for: step))
-                logControlStepView(step)
-                PaywallGate.shared.currentContext = .onboarding
-            }
-
-            return
-        }
-
-        // фіксуємо старий і запускаємо оверлей
-        prevStep = currentStep
-        incomingStep = step
-
-        // після короткої затримки (кінець пружини) — фіксуємо новий current і чистимо тимчасові
-        //let delay = 0.7
-        DispatchQueue.main.asyncAfter(deadline: .now() + slideDuration) {
-            currentStep = step
-            prevStep = nil
-            incomingStep = nil
-            isAnimating = false
-            
-            Telemetry.shared.onbScreenView(flowId: analyticsFlowId, screenId: screenId(for: step))
-            logControlStepView(step)
-            
-            if step != .paywall {
-//                       incomingStep = nil
-                // Telemetry.shared.onbScreenView(flowId: flowId, screenId: screenId(for: step))
-                
-                appendStep(step)
-                persist(tag: .v8)
-            } else {
-                PaywallGate.shared.currentContext = .onboarding
-            }
-
+        if step != .paywall {
+            appendStep(step)
+            persist(tag: .v8)
+        } else {
+            PaywallGate.shared.currentContext = .onboarding
         }
     }
 
@@ -302,8 +229,9 @@ struct OnboardingFlowViewEight: View {
                    .onboardingPaywallView(
                        for: .v8,                       
                        onFinish: finishOnboarding,
-                       startDelay: slideDuration + 0.0,
+                       startDelay: 0.0,
                        stepsVisited: stepsVisited,
+                       startAnimations: true,
                        onboardIdOverride: controlFlowId
                    )
                    .onAppear {

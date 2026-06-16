@@ -143,6 +143,7 @@ struct PaywallFiveView: View {
         let paywallText = PaywallAB.shared.textSettings(for: .fifth)
         let weeklyPlanText = paywallText.plan(NewPaywallPlan.weekly.rawValue)
         let secondaryPlanText = paywallText.plan(secondaryPlan.rawValue)
+        let shouldShowInfoCards = PaywallAB.shared.fifthPaywallCardControl
 
         ZStack(alignment: .topTrailing) {
 
@@ -176,87 +177,103 @@ struct PaywallFiveView: View {
 //                        ReviewsCardView(reviews: reviews)
 
 
-                        ZStack(alignment: .top) {
-                            Group {
-                                switch currentInfoCard {
-                                case .reviews:
-                                    ReviewsCardView(reviews: reviews)
-//                                        .drawingGroup()
-
-                                case .features:
-                                    FeaturesCardView()
-                                case .stats:
-                                    StatisticCardView()
+                        if shouldShowInfoCards {
+                            ZStack(alignment: .top) {
+                                Group {
+                                    switch currentInfoCard {
+                                    case .reviews:
+                                        ReviewsCardView(reviews: reviews)
+                                    case .features:
+                                        FeaturesCardView()
+                                    case .stats:
+                                        StatisticCardView()
+                                    }
                                 }
-                            }
-                            .id(currentInfoCard)
-                            .transition(
-                                didShowFirstCard
-                                ? .asymmetric(
-                                    insertion: .move(edge: isForward ? .trailing : .leading)
-                                        .combined(with: .opacity),
-                                    removal: .move(edge: isForward ? .leading : .trailing)
-                                        .combined(with: .opacity)
+                                .id(currentInfoCard)
+                                .transition(
+                                    didShowFirstCard
+                                    ? .asymmetric(
+                                        insertion: .move(edge: isForward ? .trailing : .leading)
+                                            .combined(with: .opacity),
+                                        removal: .move(edge: isForward ? .leading : .trailing)
+                                            .combined(with: .opacity)
+                                    )
+                                    : .identity
                                 )
-                                : .identity
-                            )
-                            .frame(maxWidth: .infinity,
-                                   maxHeight: .infinity,
-                                   alignment: .top)
-                        }
-                        .frame(height: 168)
-                        //.padding()
-                        //.opacity(appearReviews ? 1 : 0)
-
-                        .onAppear {
-                            if startAnimations {
-                                didShowFirstCard = true
-                                appearReviews = false
-
-                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
-                                    withAnimation(.easeOut(duration: 0.28)) {
-                                        appearReviews = true
-                                    }
-                                }
-
-                                restartAutoAdvance()
+                                .frame(maxWidth: .infinity,
+                                       maxHeight: .infinity,
+                                       alignment: .top)
                             }
-                        }
-                        .onChange(of: startAnimations) {
-                            if startAnimations {
-                                didShowFirstCard = true
-                                appearReviews = false
+                            .frame(height: 168)
+                            //.padding()
+                            //.opacity(appearReviews ? 1 : 0)
 
-                                DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.5) {
-                                    withAnimation(.easeOut(duration: 0.28)) {
-                                        appearReviews = true
-                                    }
-                                }
+                            .onAppear {
+                                if startAnimations {
+                                    didShowFirstCard = true
+                                    appearReviews = false
 
-                                restartAutoAdvance()
-                            } else {
-                                appearReviews = false
-                                autoAdvanceWorkItem?.cancel()
-                            }
-                        }
-                        .gesture(
-                            DragGesture(minimumDistance: 20)
-                                .onEnded { value in
-                                    let translation = value.translation.width
-                                    let threshold: CGFloat = 40
-                                    guard abs(translation) > threshold else { return }
-
-                                    if translation < 0 {
-                                        // свайп ліворуч → наступна
-                                        goNextCard(animated: true)
-                                    } else {
-                                        // свайп праворуч → попередня
-                                        goPreviousCard(animated: true)
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                                        withAnimation(.easeOut(duration: 0.28)) {
+                                            appearReviews = true
+                                        }
                                     }
 
                                     restartAutoAdvance()
                                 }
-                        )
+                            }
+                            .onChange(of: startAnimations) {
+                                if startAnimations {
+                                    didShowFirstCard = true
+                                    appearReviews = false
+
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + startDelay - 0.5) {
+                                        withAnimation(.easeOut(duration: 0.28)) {
+                                            appearReviews = true
+                                        }
+                                    }
+
+                                    restartAutoAdvance()
+                                } else {
+                                    appearReviews = false
+                                    autoAdvanceWorkItem?.cancel()
+                                }
+                            }
+                            .gesture(
+                                DragGesture(minimumDistance: 20)
+                                    .onEnded { value in
+                                        let translation = value.translation.width
+                                        let threshold: CGFloat = 40
+                                        guard abs(translation) > threshold else { return }
+
+                                        if translation < 0 {
+                                            // свайп ліворуч → наступна
+                                            goNextCard(animated: true)
+                                        } else {
+                                            // свайп праворуч → попередня
+                                            goPreviousCard(animated: true)
+                                        }
+
+                                        restartAutoAdvance()
+                                    }
+                            )
+                        } else {
+                            Group {
+                                if startAnimations {
+                                    PaywallFiveFeatureListView(
+                                        titleLineOne: paywallText.titleLineOne,
+                                        titleLineTwo: paywallText.titleLineTwo,
+                                        titleLineThree: paywallText.titleLineThree
+                                    )
+                                } else {
+                                    Color.clear
+                                }
+                            }
+                            .frame(height: 168)
+                            .onAppear {
+                                autoAdvanceWorkItem?.cancel()
+                            }
+                        }
                     }
 
 
@@ -264,7 +281,7 @@ struct PaywallFiveView: View {
 
                     //Spacer()
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: 16) {
 
                         if canOfferFreeTrial {
                             PaywallFiveFreeTrialToggle(isOn: $isFreeTrialEnabled)
@@ -294,6 +311,8 @@ struct PaywallFiveView: View {
                                 price: viewModel.pricePerPeriod[secondaryPlan] ?? "…",
                                 sublabel: secondaryPlanText.sublabel ?? String(localized: "Best Value"),
                                 saveText: secondaryPlanText.saveText ?? viewModel.onlyPrice[secondaryPlan] ?? "",
+                                discountBadgeText: paywallText.discountBadgeText ?? "Save 99% 🔥",
+                                usesRightPriceLayout: true,
                                 isSelected: viewModel.selectedPlan == secondaryPlan,
                                 onTap: {
                                     if shouldAllowFreeTrial {
@@ -335,7 +354,7 @@ struct PaywallFiveView: View {
                         }
 
                         Telemetry.shared.paywallCTATap(variant: telemetryVariant, entryPoint: entry,
-                                                       plan: plan.analyticsValue, onboardId: onboardId)
+                                                       plan: plan.analyticsValue, onboardId: onboardId, paywallId: telemetryPaywallId)
 
 
                         Telemetry.shared.funnelGoToPurchase(
@@ -715,6 +734,8 @@ struct PaywallFivePlanCard: View {
     let price: String
     let sublabel: String?
     let saveText: String
+    var discountBadgeText: String? = nil
+    var usesRightPriceLayout: Bool = false
     let isSelected: Bool
     let onTap: () -> Void
 
@@ -722,71 +743,103 @@ struct PaywallFivePlanCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 8) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color.gray.opacity(0.3))
-                    .font(.system(size: 28, weight: .light))
+            ZStack(alignment: .topTrailing) {
+                HStack(spacing: 8) {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color.gray.opacity(0.3))
+                        .font(.system(size: 28, weight: .light))
 
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(title)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(.black)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.65)
-                            .layoutPriority(1)
-                        Spacer()
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(title)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(.black)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.65)
+                                .layoutPriority(1)
+                            Spacer()
 
-                    }
-                    Text(price)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Color(red: 170/255, green: 178/255, blue: 191/255))
-                }
-
-
-
-                VStack {
-                    if let sublabel = sublabel {
-                        Text(sublabel)
-                            .font(.system(size: 12))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 4)
-                            .background(Color(red: 81/255, green: 132/255, blue: 234/255).opacity(0.14))
-                            .foregroundStyle(Color(red: 81/255, green: 132/255, blue: 234/255))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        Text(usesRightPriceLayout ? saveText : price)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color(red: 170/255, green: 178/255, blue: 191/255))
                     }
 
 
-                    Text(saveText)
-                        .font(.system(size: sublabel == nil ? 16 : 10, weight: sublabel == nil ? .semibold : .regular))
-                        .foregroundStyle(sublabel == nil ? .black : Color(red: 196/255, green: 196/255, blue: 197/255))
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
+
+                    VStack(alignment: .trailing, spacing: usesRightPriceLayout ? 2 : 4) {
+                        if usesRightPriceLayout {
+                            Text(price)
+                                .font(.system(size: 17, weight: .bold))
+                                .foregroundStyle(.black)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+
+                            if let sublabel = sublabel {
+                                Text(sublabel)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(Color(red: 131 / 255, green: 137 / 255, blue: 147 / 255))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                            }
+                        } else {
+                            if let sublabel = sublabel {
+                                Text(sublabel)
+                                    .font(.system(size: 12))
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 4)
+                                    .background(Color(red: 81/255, green: 132/255, blue: 234/255).opacity(0.14))
+                                    .foregroundStyle(Color(red: 81/255, green: 132/255, blue: 234/255))
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+
+
+                            Text(saveText)
+                                .font(.system(size: sublabel == nil ? 16 : 10, weight: sublabel == nil ? .semibold : .regular))
+                                .foregroundStyle(sublabel == nil ? .black : Color(red: 196/255, green: 196/255, blue: 197/255))
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
+                        }
+                    }
+                    .frame(minWidth: 92, alignment: .trailing)
                 }
-                .frame(minWidth: 92, alignment: .trailing)
-            }
-            .padding(.horizontal, 12)
-            .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
-            .background(
-                ZStack {
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 72)
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(Color.white)
+                        //                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        //                        .fill(Color.white.opacity(0.15))
+                    }
+                )
+                .overlay(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Color.white)
-                    //                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    //                        .fill(Color.white.opacity(0.15))
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(
-                        isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5),
-                        lineWidth: 1
-                    )
+                        .stroke(
+                            isSelected ? Color(red: 2 / 255, green: 125 / 255, blue: 244 / 255) : Color(red: 221 / 255, green: 219 / 255, blue: 225 / 255).opacity(0.5),
+                            lineWidth: 1
+                        )
 
-            )
-            .shadow(
-                color: isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.08) : .clear,
-                radius: 8, x: 0, y: 4
-            )
+                )
+                .shadow(
+                    color: isSelected ? Color(red: 43/255, green: 217/255, blue: 156/255, opacity: 0.08) : .clear,
+                    radius: 8, x: 0, y: 4
+                )
+
+                if let discountBadgeText {
+                    Text(discountBadgeText)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(Color(red: 81/255, green: 132/255, blue: 234/255))
+                        .clipShape(Capsule())
+                        .padding(.trailing, 28)
+                        .offset(y: -11)
+                }
+            }
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 4)
@@ -942,6 +995,61 @@ struct FeatureItem: Identifiable {
     let text: String
 }
 
+private struct PaywallFiveFeatureListItem: Identifiable {
+    let id = UUID()
+    let icon: String
+    let title: String
+}
+
+struct PaywallFiveFeatureListView: View {
+    let titleLineOne: String?
+    let titleLineTwo: String?
+    let titleLineThree: String?
+
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+
+    private var items: [PaywallFiveFeatureListItem] {
+        [
+            .init(icon: "drop.fill", title: titleLineOne ?? String(localized: "Powerful Water Eject")),
+            .init(icon: "speaker.wave.2.fill", title: titleLineTwo ?? String(localized: "Fast Speaker Cleaner")),
+            .init(icon: "scope", title: titleLineThree ?? String(localized: "Precise Decibel Meter"))
+        ]
+    }
+
+    var body: some View {
+        HStack {
+            Spacer(minLength: 0)
+
+            VStack(alignment: .leading, spacing: 12 * padScale) {
+                ForEach(items) { item in
+                    HStack(spacing: 8 * padScale) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10 * padScale, style: .continuous)
+                                .fill(Color(red: 2 / 255, green: 150 / 255, blue: 244 / 255))
+
+                            Image(systemName: item.icon)
+                                .font(.system(size: 16 * padScale, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(width: 38 * padScale, height: 38 * padScale)
+
+                        Text(item.title)
+                            .font(.custom("Montserrat-Bold", size: 18 * padScale))
+                            .foregroundStyle(.black)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .padding(.horizontal, 24)
+    }
+}
+
 struct FeaturesCardView: View {
 
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
@@ -1038,4 +1146,5 @@ struct StatisticCardView: View {
 
 #Preview(body: {
     PaywallFiveView(onFinish: {print("hello")})
+        .environmentObject(PaywallGate.shared)
 })

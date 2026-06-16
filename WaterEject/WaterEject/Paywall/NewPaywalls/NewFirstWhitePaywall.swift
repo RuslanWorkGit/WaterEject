@@ -144,6 +144,21 @@ struct NewFirstWhitePaywall: View {
         )
         OnboardingSessionStore.shared.clear()
     }
+
+    private func closePaywall() {
+        let entry = entryPoint()
+        logOnboardSummary(.close)
+        Telemetry.shared.paywallClose(
+            variant: telemetryVariant,
+            entryPoint: entry,
+            reason: "close_button",
+            sessionId: sessionId,
+            paywallId: telemetryPaywallId,
+            onboardId: onboardId
+        )
+        Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
+        action()
+    }
     
     
     var body: some View {
@@ -215,6 +230,16 @@ struct NewFirstWhitePaywall: View {
             }
                 .ignoresSafeArea()
         )
+        .overlay(alignment: .topTrailing) {
+            Button(action: closePaywall) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(Color(red: 170 / 255, green: 170 / 255, blue: 170 / 255))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .padding(.trailing, 22)
+        }
         .onAppear {
             viewModel.selectedPlan = .annual
             logOpenIfNeeded()
@@ -261,12 +286,12 @@ struct OnboardWhiteForm<Content: View>: View {
                         Spacer()
                     }
                     
-                    if pages > 0 {
-                        PageDotsWhite(total: pages, index: pageIndex)
-//                            .padding(.bottom, 32)
-                            .padding(.bottom, 12)
-                            //.padding(.top, 12)
-                    }
+//                    if pages > 0 {
+//                        PageDotsWhite(total: pages, index: pageIndex)
+////                            .padding(.bottom, 32)
+//                            .padding(.bottom, 12)
+//                            //.padding(.top, 12)
+//                    }
                     
                     
                 }

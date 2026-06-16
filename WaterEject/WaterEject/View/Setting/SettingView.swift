@@ -62,23 +62,23 @@ struct SettingView: View {
                             .buttonStyle(PillButtonStyle())
                         }
 
-                        Text("Paywalls")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(Color.gray)
-
-                        VStack(spacing: 12) {
-                            Button("New First White Paywall") {
-                                tabBarState.isHidden = true
-                                showNewFirstWhitePaywall = true
-                            }
-                            .buttonStyle(PillButtonStyle())
-
-                            Button("New Second Black Paywall") {
-                                tabBarState.isHidden = true
-                                showNewSecondBlackPaywall = true
-                            }
-                            .buttonStyle(PillButtonStyle())
-                        }
+//                        Text("Paywalls")
+//                            .font(.system(size: 20, weight: .bold))
+//                            .foregroundStyle(Color.gray)
+//
+//                        VStack(spacing: 12) {
+//                            Button("New First White Paywall") {
+//                                tabBarState.isHidden = true
+//                                showNewFirstWhitePaywall = true
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//
+//                            Button("New Second Black Paywall") {
+//                                tabBarState.isHidden = true
+//                                showNewSecondBlackPaywall = true
+//                            }
+//                            .buttonStyle(PillButtonStyle())
+//                        }
                         
 //                        Text("Help center")
 //                            .font(.system(size: 20, weight: .bold))

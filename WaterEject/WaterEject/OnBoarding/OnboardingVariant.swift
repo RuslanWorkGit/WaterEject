@@ -218,11 +218,14 @@ final class OnboardingAB {
     }
 
     private func stableUserID() -> String {
-        // така ж логіка як у PaywallAB: беремо RC/RevenueCat user id або IDFV
-        let id = Purchases.shared.appUserID
-        return id.isEmpty
-        ? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-        : id
+        let key = "onboarding_ab_stable_user_id"
+        if let storedId = UserDefaults.standard.string(forKey: key), !storedId.isEmpty {
+            return storedId
+        }
+
+        let newId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        UserDefaults.standard.set(newId, forKey: key)
+        return newId
     }
 
     private func applyTracking(_ v: OnboardingVariant) {

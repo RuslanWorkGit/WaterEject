@@ -47,7 +47,7 @@ enum PaywallPriceMode: String {
     case both
 }
 
-enum AssignedOnboardingPaywall: String, CaseIterable {
+enum AssignedOnboardingPaywall: String, CaseIterable, Hashable {
     case paywallThird = "third"
     case paywallFourth = "fourth"
     case paywallFive = "fifth"
@@ -87,6 +87,10 @@ struct PaywallTextSettings {
     let priceCaptionFormat: String?
     let footerTrialText: String?
     let footerSecureText: String?
+    let titleLineOne: String?
+    let titleLineTwo: String?
+    let titleLineThree: String?
+    let discountBadgeText: String?
     let plans: [String: PaywallPlanTextSettings]
 
     func plan(_ key: String) -> PaywallPlanTextSettings {
@@ -152,6 +156,10 @@ private struct PaywallTextRemotePaywall: Decodable {
     let priceCaptionFormat: [String: String]?
     let footerTrialText: [String: String]?
     let footerSecureText: [String: String]?
+    let titleLineOne: [String: String]?
+    let titleLineTwo: [String: String]?
+    let titleLineThree: [String: String]?
+    let discountBadgeText: [String: String]?
     let plans: [String: PaywallPlanTextRemoteConfig]?
 }
 
@@ -429,6 +437,7 @@ final class PaywallAB {
             "paywall3_enabled": true as NSObject,
             "paywall4_enabled": true as NSObject,
             "paywall5_enabled": true as NSObject,
+            "fifth_paywall_card_controll": true as NSObject,
             "price_mode_control": """
             {
               "version": 1,
@@ -464,6 +473,7 @@ final class PaywallAB {
     private let textJSONKey = "paywall_text_controll"
     private let priceModeControlKey = "price_mode_control"
     private let onboardingPaywallControlKey = "onboarding_paywall_control"
+    private let fifthPaywallCardControlKey = "fifth_paywall_card_controll"
     private let countryTierMapping = PaywallCountryTierMapping()
 
     private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
@@ -486,6 +496,10 @@ final class PaywallAB {
 
     func priceMode(for variant: PaywallVariant) -> PaywallPriceMode {
         priceMode(forKey: variant.rawValue)
+    }
+
+    var fifthPaywallCardControl: Bool {
+        rc[fifthPaywallCardControlKey].boolValue
     }
 
     var priceMode: PaywallPriceMode {
@@ -528,6 +542,10 @@ final class PaywallAB {
             priceCaptionFormat: nil,
             footerTrialText: nil,
             footerSecureText: nil,
+            titleLineOne: nil,
+            titleLineTwo: nil,
+            titleLineThree: nil,
+            discountBadgeText: nil,
             plans: [:]
         )
         let json = rc[textJSONKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -558,6 +576,10 @@ final class PaywallAB {
             priceCaptionFormat: localizedValue(in: remote.priceCaptionFormat),
             footerTrialText: localizedValue(in: remote.footerTrialText),
             footerSecureText: localizedValue(in: remote.footerSecureText),
+            titleLineOne: localizedValue(in: remote.titleLineOne),
+            titleLineTwo: localizedValue(in: remote.titleLineTwo),
+            titleLineThree: localizedValue(in: remote.titleLineThree),
+            discountBadgeText: localizedValue(in: remote.discountBadgeText),
             plans: plans
         )
     }
@@ -770,10 +792,14 @@ final class PaywallAB {
     }
 
     private func stableUserID() -> String {
-        let id = Purchases.shared.appUserID
-        return id.isEmpty
-        ? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-        : id
+        let key = "paywall_ab_stable_user_id"
+        if let storedId = UserDefaults.standard.string(forKey: key), !storedId.isEmpty {
+            return storedId
+        }
+
+        let newId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        UserDefaults.standard.set(newId, forKey: key)
+        return newId
     }
 
     private func isEnabled(_ v: PaywallVariant) -> Bool {
@@ -822,51 +848,69 @@ final class PaywallAB {
         let entry = onboardKeyAliases.compactMap { config.onboards?[$0] }.first ?? config.defaultPaywalls
         guard let entry else { return nil }
 
-        var enabled: [AssignedOnboardingPaywall] = []
-        var seen = Set<String>()
+        var enabled = Set<AssignedOnboardingPaywall>()
 
-        func append(_ paywall: AssignedOnboardingPaywall?) {
-            guard let paywall, !seen.contains(paywall.rawValue) else { return }
-            enabled.append(paywall)
-            seen.insert(paywall.rawValue)
+        func enable(_ paywall: AssignedOnboardingPaywall?) {
+            guard let paywall else { return }
+            enabled.insert(paywall)
         }
 
         for (key, isEnabled) in entry.paywalls ?? [:] where isEnabled {
-            append(Self.cleanAssignedPaywall(key))
+            enable(Self.cleanAssignedPaywall(key))
         }
 
         if entry.fifth == true {
-            append(.paywallFive)
+            enable(.paywallFive)
         }
         if entry.paywallV50 == true {
-            append(.newSecondBlack)
+            enable(.newSecondBlack)
         }
         if entry.paywallFirstWhite1 == true {
-            append(.newFirstWhite)
+            enable(.newFirstWhite)
         }
 
-        return enabled
+        return AssignedOnboardingPaywall.allCases.filter { enabled.contains($0) }
+    }
+
+    private func storedAssignedOnboardingPaywall(for tag: OnboardTag) -> AssignedOnboardingPaywall? {
+        Self.cleanAssignedPaywall(UserDefaults.standard.string(forKey: assignedOnboardingPaywallStorageKey(for: tag)))
+    }
+
+    private func storeAssignedOnboardingPaywall(_ paywall: AssignedOnboardingPaywall, for tag: OnboardTag) {
+        UserDefaults.standard.set(paywall.rawValue, forKey: assignedOnboardingPaywallStorageKey(for: tag))
+    }
+
+    private func assignedOnboardingPaywallStorageKey(for tag: OnboardTag) -> String {
+        "assigned_onboarding_paywall_\(tag.rawValue)"
     }
 
     func assignedOnboardingPaywall(for tag: OnboardTag) -> AssignedOnboardingPaywall {
+        if let stored = storedAssignedOnboardingPaywall(for: tag) {
+            return stored
+        }
+
+        let assignedPaywall: AssignedOnboardingPaywall
         if let enabled = remoteAssignedPaywalls(for: tag), !enabled.isEmpty {
             if enabled.count == 1 {
-                return enabled[0]
+                assignedPaywall = enabled[0]
+            } else {
+                let seed = "\(stableUserID())|\(tag.rawValue)|\(onboardingPaywallControlKey)"
+                let bucket = stableBucket(seed: seed, upperBound: enabled.count)
+                assignedPaywall = enabled[bucket]
             }
-
-            let seed = "\(stableUserID())|\(tag.rawValue)|\(onboardingPaywallControlKey)"
-            let bucket = stableBucket(seed: seed, upperBound: enabled.count)
-            return enabled[bucket]
+        } else {
+            switch onboardingPaywallVariant(for: tag) {
+            case .third:
+                assignedPaywall = .paywallThird
+            case .fourth:
+                assignedPaywall = .paywallFourth
+            case .fifth:
+                assignedPaywall = .paywallFive
+            }
         }
 
-        switch onboardingPaywallVariant(for: tag) {
-        case .third:
-            return .paywallThird
-        case .fourth:
-            return .paywallFourth
-        case .fifth:
-            return .paywallFive
-        }
+        storeAssignedOnboardingPaywall(assignedPaywall, for: tag)
+        return assignedPaywall
     }
 
     func assignedOnboardingPaywallKey(for tag: OnboardTag) -> String {
@@ -951,6 +995,7 @@ final class PaywallAB {
         onFinish: @escaping () -> Void,
         startDelay: Double,
         stepsVisited: [String]?,
+        startAnimations: Bool = true,
         onboardIdOverride: String? = nil
     ) -> AnyView {
         let assignedPaywall = assignedOnboardingPaywall(for: tag)
@@ -986,7 +1031,8 @@ final class PaywallAB {
                     onboardId: onboardId,
                     startDelay: startDelay,
                     summaryTag: tag,
-                    stepsVisited: stepsVisited
+                    stepsVisited: stepsVisited,
+                    startAnimations: startAnimations
             )
                 )
 
@@ -997,7 +1043,8 @@ final class PaywallAB {
                     onboardId: onboardId,
                     startDelay: startDelay,
                     summaryTag: tag,
-                    stepsVisited: stepsVisited
+                    stepsVisited: stepsVisited,
+                    startAnimations: startAnimations
                 )
             )
 

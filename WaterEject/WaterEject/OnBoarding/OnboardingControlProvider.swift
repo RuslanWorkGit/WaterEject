@@ -164,11 +164,14 @@ final class OnboardingControlProvider {
     }
 
     func stableUserId() -> String {
-        let rcUserId = Purchases.shared.appUserID
-        if !rcUserId.isEmpty {
-            return rcUserId
+        let key = "onboarding_control_stable_user_id"
+        if let storedId = UserDefaults.standard.string(forKey: key), !storedId.isEmpty {
+            return storedId
         }
-        return UIDevice.current.identifierForVendor?.uuidString ?? "unknown_user"
+
+        let newId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        UserDefaults.standard.set(newId, forKey: key)
+        return newId
     }
 
     func defaultControlJSON() -> String {

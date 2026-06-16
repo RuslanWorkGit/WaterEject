@@ -281,6 +281,7 @@ struct OnboardingFlowViewTen: View {
                        onFinish: finishOnboarding,
                        startDelay: slideDuration + 0.0,
                        stepsVisited: stepsVisited,
+                       startAnimations: startAnimations,
                        onboardIdOverride: controlFlowId
                    )
                    .onAppear {
