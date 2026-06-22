@@ -8,7 +8,6 @@
 import Foundation
 import FirebaseRemoteConfig
 import FirebaseAnalytics
-import RevenueCat
 import SwiftUI
 
 enum OnboardingVariant: String, Identifiable, CaseIterable {
@@ -230,7 +229,6 @@ final class OnboardingAB {
 
     private func applyTracking(_ v: OnboardingVariant) {
         Analytics.setUserProperty(v.rawValue, forName: "onboarding_variant")
-        Purchases.shared.attribution.setAttributes(["onboarding_variant": v.rawValue])
 
         let key = "onboarding_variant_assigned_logged_v1"
         if !UserDefaults.standard.bool(forKey: key) {
@@ -327,7 +325,6 @@ final class OnboardingAB {
 
     private func applyControlTelemetry(_ assignment: OnboardingAssignment) {
         Analytics.setUserProperty(assignment.flowId, forName: "onboarding_variant")
-        Purchases.shared.attribution.setAttributes(["onboarding_variant": assignment.flowId])
 
         Telemetry.shared.setPresentedOnboardingContext(
             brand: nil,

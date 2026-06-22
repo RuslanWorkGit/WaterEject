@@ -1853,7 +1853,10 @@ extension Telemetry {
             ]) { _, new in new }
         )
 
-        syncRevenueCatAttributes(onboardId: resolvedOnboardId)
+        syncRevenueCatAttributes(
+            onboardId: resolvedOnboardId,
+            paywallId: assignedPaywallKey(for: resolvedOnboardId) ?? paywallId
+        )
     }
 
     func handlePurchaseError(
@@ -1908,10 +1911,13 @@ extension Telemetry {
         )
     }
 
-    func syncRevenueCatAttributes(onboardId: String?) {
+    func syncRevenueCatAttributes(onboardId: String?, paywallId: String?) {
         var attributes: [String: String] = [:]
         if let onboardId, !onboardId.isEmpty {
             attributes["onboard_id"] = onboardId
+        }
+        if let paywallId, !paywallId.isEmpty {
+            attributes["paywall_id"] = paywallId
         }
         guard !attributes.isEmpty else { return }
         try? Purchases.shared.attribution.setAttributes(attributes)

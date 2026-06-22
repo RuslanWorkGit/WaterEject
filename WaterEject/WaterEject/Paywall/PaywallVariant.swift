@@ -124,9 +124,21 @@ private struct OnboardingPaywallRemoteConfig: Decodable {
     let version: Int?
     let defaultPaywalls: OnboardingPaywallRemoteEntry?
     let onboards: [String: OnboardingPaywallRemoteEntry]?
+    let tiers: [String: OnboardingPaywallRemoteTier]?
 
     private enum CodingKeys: String, CodingKey {
         case version
+        case defaultPaywalls = "default"
+        case onboards
+        case tiers
+    }
+}
+
+private struct OnboardingPaywallRemoteTier: Decodable {
+    let defaultPaywalls: OnboardingPaywallRemoteEntry?
+    let onboards: [String: OnboardingPaywallRemoteEntry]?
+
+    private enum CodingKeys: String, CodingKey {
         case defaultPaywalls = "default"
         case onboards
     }
@@ -845,7 +857,12 @@ final class PaywallAB {
             tag == .v8 ? "onb_8_1" : nil,
             tag == .v8 ? "onboard_8_1_steps" : nil
         ].compactMap { $0 }
-        let entry = onboardKeyAliases.compactMap { config.onboards?[$0] }.first ?? config.defaultPaywalls
+        let tierKey = countryTierMapping.tier(for: currentCountryCode())
+        let tierConfig = config.tiers?[tierKey]
+        let entry = onboardKeyAliases.compactMap { tierConfig?.onboards?[$0] }.first
+            ?? tierConfig?.defaultPaywalls
+            ?? onboardKeyAliases.compactMap { config.onboards?[$0] }.first
+            ?? config.defaultPaywalls
         guard let entry else { return nil }
 
         var enabled = Set<AssignedOnboardingPaywall>()
@@ -881,7 +898,11 @@ final class PaywallAB {
     }
 
     private func assignedOnboardingPaywallStorageKey(for tag: OnboardTag) -> String {
-        "assigned_onboarding_paywall_\(tag.rawValue)"
+        let tierKey = countryTierMapping.tier(for: currentCountryCode())
+        let configSignature = stableSignature(
+            rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+        return "assigned_onboarding_paywall_v2_\(tag.rawValue)_\(tierKey)_\(configSignature)"
     }
 
     func assignedOnboardingPaywall(for tag: OnboardTag) -> AssignedOnboardingPaywall {
@@ -894,7 +915,11 @@ final class PaywallAB {
             if enabled.count == 1 {
                 assignedPaywall = enabled[0]
             } else {
-                let seed = "\(stableUserID())|\(tag.rawValue)|\(onboardingPaywallControlKey)"
+                let tierKey = countryTierMapping.tier(for: currentCountryCode())
+                let configSignature = stableSignature(
+                    rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                let seed = "\(stableUserID())|\(tag.rawValue)|\(tierKey)|\(configSignature)|\(onboardingPaywallControlKey)"
                 let bucket = stableBucket(seed: seed, upperBound: enabled.count)
                 assignedPaywall = enabled[bucket]
             }
@@ -911,6 +936,15 @@ final class PaywallAB {
 
         storeAssignedOnboardingPaywall(assignedPaywall, for: tag)
         return assignedPaywall
+    }
+
+    private func stableSignature(_ value: String) -> String {
+        var hash: UInt64 = 14_695_981_039_346_656_037
+        for byte in value.utf8 {
+            hash ^= UInt64(byte)
+            hash &*= 1_099_511_628_211
+        }
+        return String(hash, radix: 16)
     }
 
     func assignedOnboardingPaywallKey(for tag: OnboardTag) -> String {
