@@ -8,13 +8,27 @@
 
 import Foundation
 import UserNotifications
+import RevenueCat
 
 enum LocalNotificationId {
-    static let specialOfferAfterClose  = "special_offer_after_close"
+    static let specialOfferAfterClose  = "special_offer_after_5_min"
+    static let legacySpecialOfferAfterClose = "special_offer_after_close"
+    static let specialOfferAfter5Min = "special_offer_after_5_min"
+    static let specialOfferAfter30Min = "special_offer_after_30_min"
+    static let specialOfferAfter1Day = "special_offer_after_1_day"
+    static let specialOfferAfter3Days = "special_offer_after_3_days"
     static let specialOfferAfter7Days  = "special_offer_after_7_days"
 }
 extension Notification.Name {
     static let specialOfferPushTapped = Notification.Name("specialOfferPushTapped")
+}
+
+struct SpecialOfferPushContext {
+    let notificationId: String
+    let placeWhereBuy: String
+    let shownText: String
+    let offerTextEn: String
+    let launchedFromPush: Bool
 }
 
 enum AppNotificationPolicy {
@@ -48,6 +62,36 @@ enum AppNotificationPolicy {
 final class SpecialOfferNotificationManager {
     static let shared = SpecialOfferNotificationManager()
     private init() {}
+
+    static let defaultEnglishOfferText = "Your speakers may still need cleaning - 40% OFF."
+
+    static var allSpecialOfferIds: [String] {
+        [
+            LocalNotificationId.specialOfferAfter5Min,
+            LocalNotificationId.specialOfferAfter30Min,
+            LocalNotificationId.specialOfferAfter1Day,
+            LocalNotificationId.specialOfferAfter3Days,
+            LocalNotificationId.specialOfferAfter7Days,
+            LocalNotificationId.legacySpecialOfferAfterClose
+        ]
+    }
+
+    static func placeWhereBuy(for notificationId: String) -> String {
+        switch notificationId {
+        case LocalNotificationId.specialOfferAfter5Min, LocalNotificationId.legacySpecialOfferAfterClose:
+            return "Push notification 5 min"
+        case LocalNotificationId.specialOfferAfter30Min:
+            return "Push notification 30 min"
+        case LocalNotificationId.specialOfferAfter1Day:
+            return "Push notification 1 day"
+        case LocalNotificationId.specialOfferAfter3Days:
+            return "Push notification 3 days"
+        case LocalNotificationId.specialOfferAfter7Days:
+            return "Push notification 7 days"
+        default:
+            return "Push notification"
+        }
+    }
     
     // 1) Запит дозволів (краще викликати 1 раз, наприклад після онбордингу)
     func requestAuthorization() {
@@ -64,49 +108,25 @@ final class SpecialOfferNotificationManager {
     
     // 2) Запланувати оффер через N секунд (за замовчуванням 5 хв)
     private func scheduleSpecialOffer(
-           after seconds: TimeInterval,
-           id: String
-       ) {
+        after seconds: TimeInterval,
+        id: String,
+        englishBody: String
+    ) {
            guard AppNotificationPolicy.canScheduleNotifications else { return }
 
            let content = UNMutableNotificationContent()
            content.title = String(localized: "WaterEject")
-           
-           // 🔹 Варіанти текстів для 5 хв після закриття
-           let afterCloseBodies = [
-               String(localized: "💧 Your speakers may still need cleaning — 40% OFF."),
-               String(localized: "💧 Water may be trapped. Finish cleaning: 40% OFF."),
-               String(localized: "💧 Protect your speakers. Cleaning now 40% OFF."),
-               String(localized: "💧 Restore speaker clarity — 40% OFF cleaning.")
-           ]
-           
-           // 🔹 Варіанти текстів для 7 днів неактивності
-           let after7DaysBodies = [
-               String(localized: "💧 Moisture risk in speakers. 40% OFF to clean."),
-               String(localized: "💧 Your speakers may still need cleaning — 40% OFF."),
-               String(localized: "💧 Water may be trapped. Finish cleaning: 40% OFF."),
-               String(localized: "💧 Protect your speakers. Cleaning now 40% OFF."),
-               String(localized: "💧 Restore speaker clarity — 40% OFF cleaning.")
-           ]
-           
-           // 🔹 Вибір рандомного тексту залежно від типу нотифікації
-           let body: String
-           switch id {
-           case LocalNotificationId.specialOfferAfter7Days:
-               body = after7DaysBodies.randomElement() ?? after7DaysBodies[0]
-               
-           case LocalNotificationId.specialOfferAfterClose:
-               body = afterCloseBodies.randomElement() ?? afterCloseBodies[0]
-               
-           default:
-               body = String(localized: "💧 Your speakers may still need cleaning — 40% OFF.")
-           }
+           let body = NSLocalizedString(englishBody, comment: "")
            
            content.body  = body
            content.sound = .default
            
-           // ключ, по якому розуміємо, що це наш special offer
-           content.userInfo = ["special_offer": true]
+           content.userInfo = [
+                "special_offer": true,
+                "special_offer_text": englishBody,
+                "offer_text_en": englishBody,
+                "notification_id": id
+           ]
            
            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
            
@@ -123,30 +143,59 @@ final class SpecialOfferNotificationManager {
            }
        }
     
-    // офер через 5 хв після закриття
-    func scheduleAfterClose() {
+    func scheduleAllSpecialOffers() {
+        guard AppNotificationPolicy.canScheduleNotifications else { return }
+        cancelAllSpecialOffers()
+
         scheduleSpecialOffer(
             after: 5 * 60,
-            id: LocalNotificationId.specialOfferAfterClose
+            id: LocalNotificationId.specialOfferAfter5Min,
+            englishBody: "Your speakers may still need cleaning - 40% OFF."
+        )
+        scheduleSpecialOffer(
+            after: 30 * 60,
+            id: LocalNotificationId.specialOfferAfter30Min,
+            englishBody: "Water may be trapped. Finish cleaning: 40% OFF."
+        )
+        scheduleSpecialOffer(
+            after: 24 * 60 * 60,
+            id: LocalNotificationId.specialOfferAfter1Day,
+            englishBody: "Protect your speakers. Cleaning now 40% OFF."
+        )
+        scheduleSpecialOffer(
+            after: 3 * 24 * 60 * 60,
+            id: LocalNotificationId.specialOfferAfter3Days,
+            englishBody: "Restore speaker clarity - 40% OFF cleaning."
+        )
+        scheduleSpecialOffer(
+            after: 7 * 24 * 60 * 60,
+            id: LocalNotificationId.specialOfferAfter7Days,
+            englishBody: "Moisture risk in speakers. 40% OFF to clean."
         )
     }
-    
-    // офер через 7 днів неактивності
+
+    func scheduleAllSpecialOffersIfEligible() async {
+        if let info = try? await Purchases.shared.customerInfo() {
+            let isPro = info.entitlements["pro_user"]?.isActive == true
+            AppNotificationPolicy.updateForSubscription(isActive: isPro)
+        }
+
+        guard AppNotificationPolicy.canScheduleNotifications else { return }
+        scheduleAllSpecialOffers()
+    }
+
+    func scheduleAfterClose() {
+        Task { await scheduleAllSpecialOffersIfEligible() }
+    }
+
     func scheduleAfter7Days() {
-        let sevenDays: TimeInterval = 7 * 24 * 60 * 60
-        scheduleSpecialOffer(
-            after: sevenDays,
-            id: LocalNotificationId.specialOfferAfter7Days
-        )
+        Task { await scheduleAllSpecialOffersIfEligible() }
     }
     
     func cancelAllSpecialOffers() {
         UNUserNotificationCenter.current()
             .removePendingNotificationRequests(
-                withIdentifiers: [
-                    LocalNotificationId.specialOfferAfterClose,
-                    LocalNotificationId.specialOfferAfter7Days
-                ]
+                withIdentifiers: Self.allSpecialOfferIds
             )
     }
 }

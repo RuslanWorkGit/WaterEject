@@ -23,9 +23,11 @@ final class AppCoordinator: ObservableObject {
     
     @Published var currentScreen: Screen = .boot
     @Published var specialOfferPlaceWhereBuy: String = "Push notification"
+    @Published var specialOfferShownText: String = SpecialOfferNotificationManager.defaultEnglishOfferText
+    @Published var specialOfferTextEn: String = SpecialOfferNotificationManager.defaultEnglishOfferText
+    @Published var specialOfferNotificationId: String?
+    @Published var specialOfferLaunchedFromPush = false
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
-    
-    private var launchedFromPush = false
     
 //    init() {
 //        // Якщо користувач не бачив онбординг — показати його, інакше Home
@@ -80,9 +82,22 @@ final class AppCoordinator: ObservableObject {
     }
     
     func showSpecialOfferFromPush(placeWhereBuy: String = "Push notification") {
-            self.specialOfferPlaceWhereBuy = placeWhereBuy
-            currentScreen = .specialOfferFromPush
-        }
+        self.specialOfferPlaceWhereBuy = placeWhereBuy
+        self.specialOfferShownText = SpecialOfferNotificationManager.defaultEnglishOfferText
+        self.specialOfferTextEn = SpecialOfferNotificationManager.defaultEnglishOfferText
+        self.specialOfferNotificationId = nil
+        self.specialOfferLaunchedFromPush = true
+        currentScreen = .specialOfferFromPush
+    }
+
+    func showSpecialOfferFromPush(_ context: SpecialOfferPushContext) {
+        self.specialOfferPlaceWhereBuy = context.placeWhereBuy
+        self.specialOfferShownText = context.shownText
+        self.specialOfferTextEn = context.offerTextEn
+        self.specialOfferNotificationId = context.notificationId
+        self.specialOfferLaunchedFromPush = context.launchedFromPush
+        currentScreen = .specialOfferFromPush
+    }
 
     
 

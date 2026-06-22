@@ -15,14 +15,42 @@ struct SpecialOfferView: View {
     
     let onFinish: () -> Void
     let placeWhereBuy: String
+    let shownText: String
+    let offerTextEn: String
+    let launchedFromPush: Bool
+    let notificationId: String?
     
     @State private var sessionId = UUID().uuidString
     @State private var featuresWidth: CGFloat = 0
     @State private var webViewURL: URL?
     
     private let paywallId = "special_offer_v_1.0"
+    private let offerId = "special_offer_power"
+    private let specialOfferVariant = "power"
+    private var analyticsOfferText: String {
+        shownText.isEmpty ? "-40%" : shownText
+    }
+    private var analyticsOfferTextEn: String {
+        offerTextEn.isEmpty ? analyticsOfferText : offerTextEn
+    }
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
     private var padScale: CGFloat { isPad ? 1.3 : 1.0 }
+
+    init(
+        onFinish: @escaping () -> Void,
+        placeWhereBuy: String,
+        shownText: String = "-40%",
+        offerTextEn: String = "-40%",
+        launchedFromPush: Bool = false,
+        notificationId: String? = nil
+    ) {
+        self.onFinish = onFinish
+        self.placeWhereBuy = placeWhereBuy
+        self.shownText = shownText
+        self.offerTextEn = offerTextEn
+        self.launchedFromPush = launchedFromPush
+        self.notificationId = notificationId
+    }
     
     var body: some View {
         let isSmall = UIScreen.main.bounds.height < 700
@@ -143,10 +171,10 @@ struct SpecialOfferView: View {
                             let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue ?? "unknown"
                             Telemetry.shared.specialOfferGoToPurchase(
                                 onboardId: resolvedOnboardId,
-                                variant: PaywallAB.shared.variant().rawValue,
-                                specialOfferVariant: "special_offer_v_1",
+                                variant: "special_offer",
+                                specialOfferVariant: specialOfferVariant,
                                 placeWhereGo: placeWhereBuy,
-                                offerText: "-40%",
+                                offerText: analyticsOfferText,
                                 plan: "weekly"
                             )
                             Telemetry.shared.funnelGoToPurchase(
@@ -209,8 +237,8 @@ struct SpecialOfferView: View {
                 let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue
                 Telemetry.shared.specialOfferClose(
                     onboardId: resolvedOnboardId,
-                    variant: PaywallAB.shared.variant().rawValue,
-                    specialOfferVariant: "special_offer_v_1",
+                    variant: "special_offer",
+                    specialOfferVariant: specialOfferVariant,
                     placeWhereClose: placeWhereBuy,
                     reason: "close_button"
                 )
@@ -232,10 +260,13 @@ struct SpecialOfferView: View {
         .onAppear {
             Telemetry.shared.specialOfferOpen(
                 onboardId: OnboardTag.lastFromUserDefaults()?.rawValue,
-                variant: PaywallAB.shared.variant().rawValue,
-                specialOfferVariant: "special_offer_v_1",
+                variant: "special_offer",
+                offerId: offerId,
+                specialOfferVariant: specialOfferVariant,
                 placeWhereOpen: placeWhereBuy,
-                offerText: "-40%"
+                offerText: analyticsOfferText,
+                offerTextEn: analyticsOfferTextEn,
+                notificationId: notificationId
             )
         }
         .sheet(item: $webViewURL) { url in
@@ -253,7 +284,12 @@ struct SpecialOfferView: View {
             entryPoint: entry,
             sessionId: sessionId,
             placeWhereBuy: placeWhereBuy,
-            paywallId: paywallId
+            paywallId: paywallId,
+            offerId: offerId,
+            offerText: analyticsOfferText,
+            offerTextEn: analyticsOfferTextEn,
+            specialOfferVariant: specialOfferVariant,
+            notificationId: notificationId
         )
         
         if result.isSuccess {

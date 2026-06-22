@@ -43,7 +43,11 @@ struct RootView: View {
                         onFinish: {
                             coordinator.showMainTabbar()
                         },
-                        placeWhereBuy: coordinator.specialOfferPlaceWhereBuy
+                        placeWhereBuy: coordinator.specialOfferPlaceWhereBuy,
+                        shownText: coordinator.specialOfferShownText,
+                        offerTextEn: coordinator.specialOfferTextEn,
+                        launchedFromPush: coordinator.specialOfferLaunchedFromPush,
+                        notificationId: coordinator.specialOfferNotificationId
                     )
             }
         }
@@ -53,7 +57,20 @@ struct RootView: View {
                !AppNotificationPolicy.blocksNotifications {
                 let placeWhereBuy = UserDefaults.standard.string(forKey: "special_offer_place_where_buy")
                     ?? "Push notification"
-                coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
+                let notificationId = UserDefaults.standard.string(forKey: "special_offer_notification_id")
+                let offerTextEn = UserDefaults.standard.string(forKey: "special_offer_offer_text_en")
+                    ?? SpecialOfferNotificationManager.defaultEnglishOfferText
+                let shownText = UserDefaults.standard.string(forKey: "special_offer_shown_text")
+                    ?? offerTextEn
+                coordinator.showSpecialOfferFromPush(
+                    SpecialOfferPushContext(
+                        notificationId: notificationId ?? "",
+                        placeWhereBuy: placeWhereBuy,
+                        shownText: shownText,
+                        offerTextEn: offerTextEn,
+                        launchedFromPush: true
+                    )
+                )
             }
             UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
             
@@ -72,8 +89,12 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .specialOfferPushTapped)) { notif in
             guard !AppNotificationPolicy.blocksNotifications else { return }
 
-            let placeWhereBuy = notif.object as? String ?? "Push notification"
-            coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
+            if let context = notif.object as? SpecialOfferPushContext {
+                coordinator.showSpecialOfferFromPush(context)
+            } else {
+                let placeWhereBuy = notif.object as? String ?? "Push notification"
+                coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
+            }
             UserDefaults.standard.set(false, forKey: "launch_special_offer_from_push")
         }
         .animation(nil, value: coordinator.currentScreen)

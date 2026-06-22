@@ -141,7 +141,7 @@ extension View {
                     isPresented.wrappedValue = false
                     onFinish()
                 },
-                placeWhereBuy: PurchaseSource.specialOfferAfterTransactionAbandon.rawValue
+                placeWhereBuy: "Transaction abandon"
             )
             .environmentObject(paywallGate)
         }

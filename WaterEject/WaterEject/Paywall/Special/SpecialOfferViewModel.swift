@@ -158,7 +158,12 @@ final class SpecialOfferViewModel: ObservableObject {
         entryPoint: String,
         sessionId: String,
         placeWhereBuy: String?,
-        paywallId: String      // наприклад "special_offer_v_1.0"
+        paywallId: String,
+        offerId: String,
+        offerText: String?,
+        offerTextEn: String?,
+        specialOfferVariant: String,
+        notificationId: String?
     ) async -> TelemetryPurchaseAttemptResult {
         guard !isPurchasing else {
             return TelemetryPurchaseAttemptResult(
@@ -260,7 +265,7 @@ final class SpecialOfferViewModel: ObservableObject {
                                 onboardId: resolvedOnboardId,
                                 paywallId: paywallId,
                                 placeWhereBuy: placeWhereBuy,
-                                specialOfferVariant: "special_offer_v_1"
+                                specialOfferVariant: specialOfferVariant
                             )
                             Telemetry.shared.logTechnicalDeliveryResult(
                                 deliveryStatus: "success",
@@ -272,7 +277,7 @@ final class SpecialOfferViewModel: ObservableObject {
                                 onboardId: resolvedOnboardId,
                                 paywallId: paywallId,
                                 placeWhereBuy: placeWhereBuy,
-                                specialOfferVariant: "special_offer_v_1"
+                                specialOfferVariant: specialOfferVariant
                             )
                         } catch {
                             Telemetry.shared.logTechnicalDeliveryResult(
@@ -286,7 +291,7 @@ final class SpecialOfferViewModel: ObservableObject {
                                 errorMessage: error.localizedDescription,
                                 paywallId: paywallId,
                                 placeWhereBuy: placeWhereBuy,
-                                specialOfferVariant: "special_offer_v_1"
+                                specialOfferVariant: specialOfferVariant
                             )
                         }
                     }
@@ -337,13 +342,26 @@ final class SpecialOfferViewModel: ObservableObject {
                     explicitPurchaseSource: purchaseSource,
                     explicitOnboardId: resolvedOnboardId,
                     placeWhereBuy: placeWhereBuy,
-                    specialOfferVariant: "special_offer_v_1",
-                    offerText: nil
+                    specialOfferVariant: specialOfferVariant,
+                    offerText: offerText
+                )
+                Telemetry.shared.specialOfferPurchaseSuccess(
+                    onboardId: resolvedOnboardId,
+                    variant: "special_offer",
+                    offerId: offerId,
+                    plan: plan.analyticsValue,
+                    placeWhereBuy: placeWhereBuy ?? entryPoint,
+                    offerText: offerText,
+                    offerTextEn: offerTextEn,
+                    purchaseSource: purchaseSource,
+                    transactionId: txId,
+                    specialOfferVariant: specialOfferVariant,
+                    notificationId: notificationId
                 )
                 Telemetry.shared.specialOfferSuccess(
                     onboardId: resolvedOnboardId,
-                    variant: variant,
-                    specialOfferVariant: "special_offer_v_1",
+                    variant: "special_offer",
+                    specialOfferVariant: specialOfferVariant,
                     plan: plan.analyticsValue,
                     purchaseSource: purchaseSource,
                     placeWhereBuy: placeWhereBuy ?? entryPoint

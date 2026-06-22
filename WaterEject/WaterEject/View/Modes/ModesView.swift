@@ -238,7 +238,7 @@ struct ModesView: View {
                 onFinish: {
                     showSpecialOffer = false
                 },
-                placeWhereBuy: "Modes View"
+                placeWhereBuy: "Devices screen"
                 
             )
             .environmentObject(paywallGate)
@@ -301,5 +301,4 @@ struct ModesView: View {
         }
     }
 }
-
 

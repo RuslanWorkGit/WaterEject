@@ -101,7 +101,7 @@ struct HomeView: View {
             .fullScreenCover(isPresented: $showSpecialOffer) {
                 SpecialOfferView(
                     onFinish: { showSpecialOffer = false },
-                    placeWhereBuy: "Buy on second show"
+                    placeWhereBuy: "After onboarding"
                 )
                 // PaywallGate вже передається як environmentObject з кореня,
                 // додатково нічого не треба

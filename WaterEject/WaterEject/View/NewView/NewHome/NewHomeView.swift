@@ -136,7 +136,7 @@ struct NewHomeView: View {
             .fullScreenCover(isPresented: $showSpecialOffer) {
                 SpecialOfferView(
                     onFinish: { showSpecialOffer = false },
-                    placeWhereBuy: "Buy on second show"
+                    placeWhereBuy: "After onboarding"
                 )
                 
             }

@@ -165,41 +165,58 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     ) {
         let request = response.notification.request
         let userInfo = request.content.userInfo
-        let id = request.identifier
+        let id = (userInfo["notification_id"] as? String) ?? request.identifier
         
         let isSpecialByUserInfo = (userInfo["special_offer"] as? Bool) == true
 
-        // Визначаємо source для placeWhereBuy
-        var placeWhereBuy = "Push notification 5 min"
-        if id == LocalNotificationId.specialOfferAfter7Days {
-            placeWhereBuy = "7 days notification buy"
-        }
-
         let isSpecial =
-            id == LocalNotificationId.specialOfferAfterClose ||
-            id == LocalNotificationId.specialOfferAfter7Days ||
+            SpecialOfferNotificationManager.allSpecialOfferIds.contains(id) ||
             isSpecialByUserInfo
 
         if isSpecial {
+            let placeWhereBuy = SpecialOfferNotificationManager.placeWhereBuy(for: id)
+            let offerTextEn =
+                (userInfo["offer_text_en"] as? String)
+                ?? (userInfo["special_offer_text"] as? String)
+                ?? (userInfo["text"] as? String)
+                ?? request.content.body
+            let shownText = offerTextEn.isEmpty ? request.content.body : offerTextEn
+            let context = SpecialOfferPushContext(
+                notificationId: id,
+                placeWhereBuy: placeWhereBuy,
+                shownText: shownText,
+                offerTextEn: offerTextEn,
+                launchedFromPush: true
+            )
+
+            Telemetry.shared.specialOfferNotificationOpen(
+                notificationId: id,
+                placeWhereOpen: placeWhereBuy,
+                offerText: shownText,
+                offerTextEn: offerTextEn,
+                onboardId: OnboardTag.lastFromUserDefaults()?.rawValue
+            )
+
             guard !AppNotificationPolicy.blocksNotifications else {
+                SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
                 completionHandler()
                 return
             }
 
-            // 1) для холодного запуску — флаг + source в UserDefaults
             UserDefaults.standard.set(true, forKey: "launch_special_offer_from_push")
             UserDefaults.standard.set(placeWhereBuy, forKey: "special_offer_place_where_buy")
+            UserDefaults.standard.set(id, forKey: "special_offer_notification_id")
+            UserDefaults.standard.set(shownText, forKey: "special_offer_shown_text")
+            UserDefaults.standard.set(offerTextEn, forKey: "special_offer_offer_text_en")
 
-            // 2) якщо апка вже жива — NotificationCenter
             NotificationCenter.default.post(
                 name: .specialOfferPushTapped,
-                object: placeWhereBuy
+                object: context
             )
 
-            // 3) якщо координатор вже є — показуємо одразу
             if let coordinator {
                 Task { @MainActor in
-                    coordinator.showSpecialOfferFromPush(placeWhereBuy: placeWhereBuy)
+                    coordinator.showSpecialOfferFromPush(context)
                 }
             }
         }
@@ -412,8 +429,6 @@ struct WaterEjectApp: App {
         .onChange(of: scenePhase) { oldPhase, newPhase in
             switch newPhase {
             case .active:
-                SpecialOfferNotificationManager.shared.cancelAllSpecialOffers()
-                
                 appDelegate.sceneBecameActive()
 
             case .background:
@@ -423,9 +438,9 @@ struct WaterEjectApp: App {
                     AppNotificationPolicy.disableAllNotifications()
                         } else {
                             // юзер без підписки — плануємо оффер
-                            SpecialOfferNotificationManager.shared.scheduleAfterClose()
-                                                // 7 днів неактивності
-                                                SpecialOfferNotificationManager.shared.scheduleAfter7Days()
+                            Task {
+                                await SpecialOfferNotificationManager.shared.scheduleAllSpecialOffersIfEligible()
+                            }
                         }
                 
                // SpecialOfferNotificationManager.shared.scheduleSpecialOffer(after: 1 * 60)

@@ -76,6 +76,12 @@ enum PurchaseSource: String, Codable {
     case specialOfferPushNotification1Day = "special_offer_push_notification_1_day"
     case specialOfferPushNotification3Days = "special_offer_push_notification_3_days"
     case specialOfferPushNotification7Days = "special_offer_push_notification_7_days"
+    case specialOfferAfterOnboarding = "special_offer_after_onboarding"
+    case specialOfferAfterDevicesScreen = "special_offer_after_devices_screen"
+    case specialOfferAfterPlayerScreen = "special_offer_after_player_screen"
+    case specialOfferAfterDJPultScreen = "special_offer_after_dj_pult_screen"
+    case specialOfferAfterEqualizerScreen = "special_offer_after_equalizer_screen"
+    case specialOfferAfterFreeTest = "special_offer_after_free_test"
     case specialOfferOther = "special_offer_other"
     case otherScreen = "other_screen"
 }
@@ -530,9 +536,6 @@ final class Telemetry {
         guard let placeWhereBuy else { return .specialOfferOther }
         let value = placeWhereBuy.lowercased()
 
-        if value.contains("abandon") {
-            return .specialOfferAfterTransactionAbandon
-        }
         if value.contains("30") {
             return .specialOfferPushNotification30Min
         }
@@ -550,6 +553,27 @@ final class Telemetry {
         }
         if value.contains("push") || value.contains("notification") {
             return .specialOfferPushNotification
+        }
+        if value.contains("after onboarding") {
+            return .specialOfferAfterOnboarding
+        }
+        if value.contains("devices screen") {
+            return .specialOfferAfterDevicesScreen
+        }
+        if value.contains("player screen") {
+            return .specialOfferAfterPlayerScreen
+        }
+        if value.contains("dj pult screen") {
+            return .specialOfferAfterDJPultScreen
+        }
+        if value.contains("equalizer screen") {
+            return .specialOfferAfterEqualizerScreen
+        }
+        if value.contains("free test") {
+            return .specialOfferAfterFreeTest
+        }
+        if value.contains("transaction abandon") || value.contains("abandon") {
+            return .specialOfferAfterTransactionAbandon
         }
         return .specialOfferOther
     }
@@ -1971,72 +1995,189 @@ extension Telemetry {
 
 // MARK: - Special Offer
 extension Telemetry {
+    private func specialOfferAnalyticsParams(
+        onboardId: String?,
+        offerId: String? = nil,
+        purchaseSource: PurchaseSource,
+        specialOfferVariant: String,
+        offerText: String? = nil,
+        offerTextEn: String? = nil,
+        notificationId: String? = nil,
+        extra: [String: Any] = [:]
+    ) -> [String: Any] {
+        let resolvedOnboardId = resolveOnboardId(onboardId)
+        let resolvedBrand = brand(fromOnboardId: resolvedOnboardId) ?? presentedOnboardingContext()?.brand ?? "generic"
+
+        var params: [String: Any] = [
+            "purchase_source": purchaseSource.rawValue,
+            "special_offer_variant": specialOfferVariant,
+            "variant": "special_offer",
+            "brand": resolvedBrand,
+            "tier": currentTierSuffix
+        ]
+
+        if let offerId, !offerId.isEmpty {
+            params["offer_id"] = offerId
+        }
+        if let offerText {
+            params["offer_text"] = offerText
+        }
+        if let offerTextEn {
+            params["offer_text_en"] = offerTextEn
+        }
+        if let notificationId, !notificationId.isEmpty {
+            params["notification_id"] = notificationId
+        }
+        if let onboardFlow = presentedOnboardingContext()?.flowId ?? presentedOnboardingContext()?.flowKey,
+           !onboardFlow.isEmpty {
+            params["onboard_flow"] = onboardFlow
+        }
+
+        extra.forEach { params[$0.key] = $0.value }
+        return params
+    }
+
     func specialOfferOpen(
         onboardId: String?,
         variant: String? = nil,
-        specialOfferVariant: String = "special_offer_v_1",
+        offerId: String = "special_offer_power",
+        specialOfferVariant: String = "power",
         placeWhereOpen: String,
-        offerText: String?
+        offerText: String?,
+        offerTextEn: String? = nil,
+        notificationId: String? = nil
     ) {
+        let purchaseSource = specialOfferPurchaseSource(from: placeWhereOpen)
         logEvent(
             "special_offer_open",
             explicitOnboardId: resolveOnboardId(onboardId),
-            variant: variant,
-            extra: [
-                "special_offer_variant": specialOfferVariant,
-                "place_where_open": placeWhereOpen,
-                "offer_text": offerText ?? "",
-                "purchase_source": specialOfferPurchaseSource(from: placeWhereOpen).rawValue
-            ]
+            variant: "special_offer",
+            extra: specialOfferAnalyticsParams(
+                onboardId: onboardId,
+                offerId: offerId,
+                purchaseSource: purchaseSource,
+                specialOfferVariant: specialOfferVariant,
+                offerText: offerText ?? "",
+                offerTextEn: offerTextEn,
+                notificationId: notificationId,
+                extra: ["place_where_open": placeWhereOpen]
+            )
+        )
+    }
+
+    func specialOfferNotificationOpen(
+        notificationId: String,
+        placeWhereOpen: String,
+        offerText: String?,
+        offerTextEn: String?,
+        onboardId: String?,
+        specialOfferVariant: String = "power"
+    ) {
+        let purchaseSource = specialOfferPurchaseSource(from: placeWhereOpen)
+        logEvent(
+            "special_offer_notification_open",
+            explicitOnboardId: resolveOnboardId(onboardId),
+            variant: "special_offer",
+            extra: specialOfferAnalyticsParams(
+                onboardId: onboardId,
+                purchaseSource: purchaseSource,
+                specialOfferVariant: specialOfferVariant,
+                offerText: offerText ?? "",
+                offerTextEn: offerTextEn ?? offerText ?? "",
+                notificationId: notificationId,
+                extra: ["place_where_open": placeWhereOpen]
+            )
         )
     }
 
     func specialOfferClose(
         onboardId: String?,
         variant: String? = nil,
-        specialOfferVariant: String = "special_offer_v_1",
+        specialOfferVariant: String = "power",
         placeWhereClose: String,
         reason: String
     ) {
+        let purchaseSource = specialOfferPurchaseSource(from: placeWhereClose)
         logEvent(
             "special_offer_close",
             explicitOnboardId: resolveOnboardId(onboardId),
-            variant: variant,
-            extra: [
-                "special_offer_variant": specialOfferVariant,
-                "place_where_close": placeWhereClose,
-                "reason": reason,
-                "purchase_source": specialOfferPurchaseSource(from: placeWhereClose).rawValue
-            ]
+            variant: "special_offer",
+            extra: specialOfferAnalyticsParams(
+                onboardId: onboardId,
+                purchaseSource: purchaseSource,
+                specialOfferVariant: specialOfferVariant,
+                extra: [
+                    "place_where_close": placeWhereClose,
+                    "reason": reason
+                ]
+            )
         )
     }
 
     func specialOfferGoToPurchase(
         onboardId: String?,
         variant: String? = nil,
-        specialOfferVariant: String = "special_offer_v_1",
+        specialOfferVariant: String = "power",
         placeWhereGo: String,
         offerText: String?,
         plan: String
     ) {
+        let purchaseSource = specialOfferPurchaseSource(from: placeWhereGo)
         logEvent(
             "special_offer_go_to_purchase",
             explicitOnboardId: resolveOnboardId(onboardId),
-            variant: variant,
-            extra: [
-                "special_offer_variant": specialOfferVariant,
-                "place_where_go": placeWhereGo,
-                "offer_text": offerText ?? "",
-                "plan": plan,
-                "purchase_source": specialOfferPurchaseSource(from: placeWhereGo).rawValue
-            ]
+            variant: "special_offer",
+            extra: specialOfferAnalyticsParams(
+                onboardId: onboardId,
+                purchaseSource: purchaseSource,
+                specialOfferVariant: specialOfferVariant,
+                offerText: offerText ?? "",
+                extra: [
+                    "place_where_go": placeWhereGo,
+                    "plan": plan
+                ]
+            )
+        )
+    }
+
+    func specialOfferPurchaseSuccess(
+        onboardId: String?,
+        variant: String? = nil,
+        offerId: String,
+        plan: String,
+        placeWhereBuy: String,
+        offerText: String?,
+        offerTextEn: String?,
+        purchaseSource: PurchaseSource,
+        transactionId: String?,
+        specialOfferVariant: String = "power",
+        notificationId: String? = nil
+    ) {
+        logEvent(
+            "special_offer_purchase_success",
+            explicitOnboardId: resolveOnboardId(onboardId),
+            variant: "special_offer",
+            extra: specialOfferAnalyticsParams(
+                onboardId: onboardId,
+                offerId: offerId,
+                purchaseSource: purchaseSource,
+                specialOfferVariant: specialOfferVariant,
+                offerText: offerText ?? "",
+                offerTextEn: offerTextEn ?? offerText ?? "",
+                notificationId: notificationId,
+                extra: [
+                    "plan": plan,
+                    "place_where_buy": placeWhereBuy,
+                    "transaction_id": transactionId ?? ""
+                ]
+            )
         )
     }
 
     func specialOfferSuccess(
         onboardId: String?,
         variant: String? = nil,
-        specialOfferVariant: String = "special_offer_v_1",
+        specialOfferVariant: String = "power",
         plan: String,
         purchaseSource: PurchaseSource,
         placeWhereBuy: String
@@ -2044,9 +2185,10 @@ extension Telemetry {
         logEvent(
             "special_offer_success",
             explicitOnboardId: resolveOnboardId(onboardId),
-            variant: variant,
+            variant: "special_offer",
             extra: [
                 "special_offer_variant": specialOfferVariant,
+                "tier": currentTierSuffix,
                 "plan": plan,
                 "purchase_source": purchaseSource.rawValue,
                 "place_where_buy": placeWhereBuy

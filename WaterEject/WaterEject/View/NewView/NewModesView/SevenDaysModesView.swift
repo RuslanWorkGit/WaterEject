@@ -137,7 +137,7 @@ struct SevenDaysModesView: View {
         .fullScreenCover(isPresented: $showSpecialOffer) {
             SpecialOfferView(
                 onFinish: { showSpecialOffer = false },
-                placeWhereBuy: "SevenDaysModesView"
+                placeWhereBuy: "Devices screen"
             )
             .environmentObject(paywallGate)
         }
