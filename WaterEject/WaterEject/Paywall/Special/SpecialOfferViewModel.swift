@@ -213,6 +213,12 @@ final class SpecialOfferViewModel: ObservableObject {
         let currency = p.currencyCode
         let afCurrency = p.afCurrencyCode
         let introEligibilityStatus = await AF.trialEligibilityStatus(for: p)
+        let purchaseOnboardId = Telemetry.shared.resolveOnboardId(OnboardTag.lastFromUserDefaults()?.rawValue)
+        Telemetry.shared.syncRevenueCatAttributes(
+            onboardId: purchaseOnboardId,
+            paywallId: paywallId,
+            purchasePaywallId: paywallId
+        )
         
         
         do {
@@ -249,7 +255,7 @@ final class SpecialOfferViewModel: ObservableObject {
             if active {
                 let txId = result.transaction?.transactionIdentifier
                 let purchaseSource = Telemetry.shared.resolvedSpecialOfferPurchaseSource(from: placeWhereBuy)
-                let resolvedOnboardId = Telemetry.shared.resolveOnboardId(OnboardTag.lastFromUserDefaults()?.rawValue)
+                let resolvedOnboardId = purchaseOnboardId
                 let entitlement = result.customerInfo.entitlements[entitlementID]
 
                 if shouldSendJ2DEvent(txId: txId, suffix: "special_offer_subscribed") {

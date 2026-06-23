@@ -264,8 +264,34 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         guard !attributes.isEmpty else { return }
         Purchases.shared.attribution.setAttributes(attributes)
     }
+
+    private func syncAppsFlyerConversionAttributes(from conversionInfo: [AnyHashable: Any]) {
+        let attributes: [String: String] = [
+            "campaign": normalizedAppsFlyerConversionValue(conversionInfo["campaign"]),
+            "adgroup": normalizedAppsFlyerConversionValue(conversionInfo["adgroup"]),
+            "keyword": normalizedAppsFlyerConversionValue(conversionInfo["af_keywords"])
+        ]
+
+        Purchases.shared.attribution.setAttributes(attributes)
+    }
+
+    private func normalizedAppsFlyerConversionValue(_ value: Any?) -> String {
+        guard let value, !(value is NSNull) else { return "organic" }
+
+        let stringValue: String
+        if let value = value as? String {
+            stringValue = value
+        } else {
+            stringValue = String(describing: value)
+        }
+
+        let trimmedValue = stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedValue.isEmpty ? "organic" : trimmedValue
+    }
     
     func onConversionDataSuccess(_ installData: [AnyHashable : Any]) {
+        syncAppsFlyerConversionAttributes(from: installData)
+
         let status = installData["af_status"] as? String
         guard status == "Non-organic" else { return }
 

@@ -210,6 +210,11 @@ final class NewPaywallViewModel: ObservableObject {
             onboardId: onboardId
         )
         let introEligibilityStatus = await AF.trialEligibilityStatus(for: p)
+        Telemetry.shared.syncRevenueCatAttributes(
+            onboardId: onboardId,
+            paywallId: paywallId,
+            purchasePaywallId: paywallId
+        )
 
         do {
             let result = try await Purchases.shared.purchase(package: pkg)
