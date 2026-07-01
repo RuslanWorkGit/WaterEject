@@ -30,6 +30,21 @@
       "type" : "NonConsumable"
     },
     {
+      "displayPrice" : "5.99",
+      "familyShareable" : false,
+      "internalID" : "6783494470",
+      "localizations" : [
+        {
+          "description" : "Grants Pro Access to User",
+          "displayName" : "Pro Sub",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "KyryloVoinov.WaterEject.lifetime.accessFour",
+      "referenceName" : "Lifetime Access Four",
+      "type" : "NonConsumable"
+    },
+    {
       "displayPrice" : "0.99",
       "familyShareable" : false,
       "internalID" : "6778037813",
@@ -83,7 +98,7 @@
     "_developerTeamID" : "LBA86YKHYN",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 802622685.65614104,
+    "_lastSynchronizedDate" : 804615056.53380096,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "USA",
@@ -112,7 +127,7 @@
           "groupNumber" : 2,
           "internalID" : "6749955956",
           "introductoryOffer" : {
-            "internalID" : "9806374E",
+            "internalID" : "F61E10D8",
             "numberOfPeriods" : 1,
             "paymentMode" : "free",
             "subscriptionPeriod" : "P3D"
@@ -146,7 +161,7 @@
           "internalID" : "6756081159",
           "introductoryOffer" : {
             "displayPrice" : "2.99",
-            "internalID" : "1C3CEDB7",
+            "internalID" : "ADBCBE6D",
             "numberOfPeriods" : 1,
             "paymentMode" : "payAsYouGo",
             "subscriptionPeriod" : "P1W"
@@ -179,7 +194,7 @@
           "groupNumber" : 5,
           "internalID" : "6771787134",
           "introductoryOffer" : {
-            "internalID" : "54CBAC9B",
+            "internalID" : "A8BA4986",
             "numberOfPeriods" : 1,
             "paymentMode" : "free",
             "subscriptionPeriod" : "P3D"
@@ -212,7 +227,7 @@
           "groupNumber" : 4,
           "internalID" : "6771777041",
           "introductoryOffer" : {
-            "internalID" : "21AA8D7F",
+            "internalID" : "5EA96C53",
             "numberOfPeriods" : 1,
             "paymentMode" : "free",
             "subscriptionPeriod" : "P3D"
