@@ -95,8 +95,6 @@ final class OnboardingControlProvider {
         tiers: nil
     )
 
-    private var countryTierMapping = OnboardingCountryTierMapping()
-
     private init() {}
 
     func updateFromRemoteConfig(_ jsonString: String) {
@@ -143,7 +141,7 @@ final class OnboardingControlProvider {
     }
 
     func activeTier() -> String {
-        countryTierMapping.tier(for: currentCountryCode())
+        CountryTierResolver.shared.resolution().tier
     }
 
     func debugSummary() -> String {
@@ -410,12 +408,6 @@ final class OnboardingControlProvider {
         defaults.set(data, forKey: assignmentKey)
     }
 
-    private func currentCountryCode() -> String {
-        if #available(iOS 16.0, *) {
-            return Locale.current.region?.identifier ?? Locale.current.regionCode ?? "unknown"
-        }
-        return Locale.current.regionCode ?? "unknown"
-    }
 }
 
 private struct OnboardingControlContext {
@@ -434,36 +426,4 @@ private struct OnboardingControlResolution {
     let decisionReason: String
     let selectedFlowWeight: Int
     let selectedFlowNormalizedPercent: Double
-}
-
-private struct OnboardingCountryTierMapping {
-    var tier1Countries: Set<String> = [
-        "US", "CA", "AU"
-    ]
-    var tier2Countries: Set<String> = [
-        "AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ",
-        "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IS", "IE", "IT",
-        "XK", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL",
-        "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI",
-        "ES", "SE", "CH", "TR", "UA", "GB", "VA"
-    ]
-    var tier3Countries: Set<String> = [
-        "AE", "AR", "BR", "CL", "CN", "CO", "EC", "HK", "ID", "IL",
-        "IN", "JP", "KR", "MX", "MY", "NZ", "PE", "PH", "SA", "SG",
-        "TH", "UY", "VE", "VN", "ZA"
-    ]
-
-    func tier(for countryCode: String) -> String {
-        let code = countryCode.uppercased()
-        if tier1Countries.contains(code) {
-            return "tier_1"
-        }
-        if tier2Countries.contains(code) {
-            return "tier_2"
-        }
-        if tier3Countries.contains(code) {
-            return "tier_3"
-        }
-        return "tier_3"
-    }
 }

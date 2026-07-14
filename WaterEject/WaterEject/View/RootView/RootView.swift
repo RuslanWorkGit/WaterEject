@@ -105,6 +105,7 @@ struct RootView: View {
 struct BootRCView: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @State private var didProceed = false
+    @State private var didStart = false
 
     var body: some View {
         Color.black.ignoresSafeArea()
@@ -112,17 +113,22 @@ struct BootRCView: View {
     }
 
     private func bootstrap() {
-        guard !didProceed else { return }
+        guard !didStart else { return }
+        didStart = true
 
-        let group = DispatchGroup()
+        // Initialize both wrappers before either one starts fetching because
+        // they share the same Firebase RemoteConfig instance and defaults.
+        _ = OnboardingAB.shared
+        let paywallAB = PaywallAB.shared
 
-        group.enter()
-        OnboardingAB.shared.fetchRemoteConfig { group.leave() }
-
-        group.enter()
-        PaywallAB.shared.fetchRemoteConfig { group.leave() }
-
-        group.notify(queue: .main) { proceed() }
+        Task {
+            await CountryTierResolver.shared.refreshStorefrontCountry()
+            // Both AB wrappers use the same Firebase RemoteConfig singleton,
+            // so a single fetch/activate is enough and avoids concurrent calls.
+            paywallAB.fetchRemoteConfig {
+                DispatchQueue.main.async { proceed() }
+            }
+        }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
             proceed() // fallback якщо немає мережі

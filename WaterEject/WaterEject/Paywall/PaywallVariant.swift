@@ -268,76 +268,6 @@ private struct PaywallProductVariantRemoteConfig: Decodable {
     }
 }
 
-private struct PaywallCountryTierMapping {
-    private let tier1Countries: Set<String> = [
-        "US", "CA", "AU"
-    ]
-    private let tier2Countries: Set<String> = [
-        "AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ",
-        "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IS", "IE", "IT",
-        "XK", "LV", "LI", "LT", "LU", "MT", "MD", "MC", "ME", "NL",
-        "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS", "SK", "SI",
-        "ES", "SE", "CH", "TR", "UA", "GB", "VA"
-    ]
-    private let tier3Countries: Set<String> = [
-        "AE", "AR", "BR", "CL", "CN", "CO", "EC", "HK", "ID", "IL",
-        "IN", "JP", "KR", "MX", "MY", "NZ", "PE", "PH", "SA", "SG",
-        "TH", "UY", "VE", "VN", "ZA"
-    ]
-
-    func tier(for countryCode: String) -> String {
-        let code = Self.normalizedCountryCode(countryCode)
-        if tier1Countries.contains(code) {
-            return "tier_1"
-        }
-        if tier2Countries.contains(code) {
-            return "tier_2"
-        }
-        if tier3Countries.contains(code) {
-            return "tier_3"
-        }
-        return "tier_3"
-    }
-
-    static func normalizedCountryCode(_ value: String) -> String {
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        let uppercased = trimmed.uppercased()
-        if uppercased.count == 2 {
-            return uppercased
-        }
-
-        let aliases = [
-            "BRAZIL": "BR",
-            "KOSOVO": "XK",
-            "UNITED STATES": "US",
-            "UNITED STATES OF AMERICA": "US",
-            "UNITED KINGDOM": "GB",
-            "GREAT BRITAIN": "GB"
-        ]
-        if let alias = aliases[uppercased] {
-            return alias
-        }
-
-        let englishLocale = Locale(identifier: "en_US_POSIX")
-        for code in isoRegionCodes() {
-            let englishName = englishLocale.localizedString(forRegionCode: code)?.uppercased()
-            let currentName = Locale.current.localizedString(forRegionCode: code)?.uppercased()
-            if englishName == uppercased || currentName == uppercased {
-                return code.uppercased()
-            }
-        }
-
-        return uppercased
-    }
-
-    private static func isoRegionCodes() -> [String] {
-        if #available(iOS 16.0, *) {
-            return Locale.Region.isoRegions.map { $0.identifier }
-        }
-        return NSLocale.isoCountryCodes
-    }
-}
-
 final class PaywallAB {
     static let shared = PaywallAB()
 
@@ -464,13 +394,48 @@ final class PaywallAB {
             "paywall_text_controll": "" as NSObject,
             "onboarding_paywall_control": """
             {
-              "version": 1,
+              "version": 2,
               "onboards": {
-                "Onboard_8_1": {
+                "onboard_8_1": {
                   "paywalls": {
-                    "fifth": true,
-                    "paywall_v_5.0": false,
+                    "fifth": false,
+                    "paywall_v_5.0": true,
                     "paywall_first_white_1": false
+                  }
+                }
+              },
+              "tiers": {
+                "tier_1": {
+                  "onboards": {
+                    "onboard_8_1": {
+                      "paywalls": {
+                        "fifth": true,
+                        "paywall_v_5.0": false,
+                        "paywall_first_white_1": false
+                      }
+                    }
+                  }
+                },
+                "tier_2": {
+                  "onboards": {
+                    "onboard_8_1": {
+                      "paywalls": {
+                        "fifth": true,
+                        "paywall_v_5.0": true,
+                        "paywall_first_white_1": false
+                      }
+                    }
+                  }
+                },
+                "tier_3": {
+                  "onboards": {
+                    "onboard_8_1": {
+                      "paywalls": {
+                        "fifth": false,
+                        "paywall_v_5.0": true,
+                        "paywall_first_white_1": false
+                      }
+                    }
                   }
                 }
               }
@@ -486,7 +451,8 @@ final class PaywallAB {
     private let priceModeControlKey = "price_mode_control"
     private let onboardingPaywallControlKey = "onboarding_paywall_control"
     private let fifthPaywallCardControlKey = "fifth_paywall_card_controll"
-    private let countryTierMapping = PaywallCountryTierMapping()
+    private(set) var remoteConfigFetchStatus = "not_started"
+    private(set) var remoteConfigFetchErrorCode = 0
 
     private let allPaywalls: [PaywallVariant] = [.third, .fourth, .fifth]
 
@@ -495,7 +461,35 @@ final class PaywallAB {
     }
 
     func fetchRemoteConfig(completion: (() -> Void)? = nil) {
-        rc.fetchAndActivate { _, _ in completion?() }
+        rc.fetchAndActivate { [weak self] status, error in
+            guard let self else {
+                completion?()
+                return
+            }
+
+            switch status {
+            case .successFetchedFromRemote:
+                self.remoteConfigFetchStatus = "fetched_from_remote"
+            case .successUsingPreFetchedData:
+                self.remoteConfigFetchStatus = "using_prefetched_data"
+            case .error:
+                self.remoteConfigFetchStatus = "error"
+            @unknown default:
+                self.remoteConfigFetchStatus = "unknown"
+            }
+            self.remoteConfigFetchErrorCode = (error as NSError?)?.code ?? 0
+
+            let resolution = CountryTierResolver.shared.resolution()
+            Analytics.logEvent("paywall_remote_config_fetch", parameters: [
+                "status": self.remoteConfigFetchStatus,
+                "error_code": self.remoteConfigFetchErrorCode,
+                "config_source": self.onboardingPaywallConfigSource(),
+                "country_code_used": resolution.countryCode,
+                "country_source": resolution.source,
+                "tier_used": resolution.tier
+            ])
+            completion?()
+        }
     }
 
     func productSettings(for variant: PaywallVariant) -> PaywallProductSettings {
@@ -657,7 +651,7 @@ final class PaywallAB {
             return selectedProductVariant(from: list, forKey: key)
         case .tiers(let tiers):
             let countryCode = currentCountryCode()
-            let tierKey = countryTierMapping.tier(for: countryCode)
+            let tierKey = CountryTierResolver.shared.tier(for: countryCode)
             guard let tierConfig = tiers[tierKey] else { return nil }
 
             if let countryConfig = countryVariantConfig(in: tierConfig, for: countryCode),
@@ -682,14 +676,14 @@ final class PaywallAB {
         for countryCode: String
     ) -> PaywallProductCountryVariantsRemoteConfig? {
         guard let countries = tierConfig.countries else { return nil }
-        let normalizedCode = PaywallCountryTierMapping.normalizedCountryCode(countryCode)
+        let normalizedCode = CountryTierResolver.normalizedCountryCode(countryCode)
 
         if let exact = countries[normalizedCode] {
             return exact
         }
 
         return countries.first { element in
-            PaywallCountryTierMapping.normalizedCountryCode(element.key) == normalizedCode
+            CountryTierResolver.normalizedCountryCode(element.key) == normalizedCode
         }?.value
     }
 
@@ -719,13 +713,41 @@ final class PaywallAB {
     }
 
     private func currentCountryCode() -> String {
-        let countryCode: String?
-        if #available(iOS 16.0, *) {
-            countryCode = Locale.current.region?.identifier ?? Locale.current.regionCode
-        } else {
-            countryCode = Locale.current.regionCode
+        CountryTierResolver.shared.resolution().countryCode
+    }
+
+    private func onboardingPaywallConfig() -> OnboardingPaywallRemoteConfig? {
+        let json = rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !json.isEmpty, let data = json.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(OnboardingPaywallRemoteConfig.self, from: data)
+    }
+
+    private func onboardingPaywallConfigSource() -> String {
+        switch rc[onboardingPaywallControlKey].source {
+        case .remote:
+            return "remote"
+        case .default:
+            return "default"
+        case .static:
+            return "static"
+        @unknown default:
+            return "unknown"
         }
-        return PaywallCountryTierMapping.normalizedCountryCode(countryCode ?? "unknown")
+    }
+
+    func assignmentDiagnostics() -> [String: Any] {
+        let resolution = CountryTierResolver.shared.resolution()
+        let json = rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        return [
+            "country_code_used": resolution.countryCode,
+            "country_source": resolution.source,
+            "tier_used": resolution.tier,
+            "paywall_config_version": onboardingPaywallConfig()?.version ?? 0,
+            "paywall_config_source": onboardingPaywallConfigSource(),
+            "paywall_config_signature": stableSignature(json),
+            "paywall_rc_fetch_status": remoteConfigFetchStatus,
+            "paywall_rc_error_code": remoteConfigFetchErrorCode
+        ]
     }
 
     private func stableBucket(seed: String, upperBound: Int) -> Int {
@@ -841,10 +863,7 @@ final class PaywallAB {
     }
 
     private func remoteAssignedPaywalls(for tag: OnboardTag) -> [AssignedOnboardingPaywall]? {
-        let json = rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !json.isEmpty,
-              let data = json.data(using: .utf8),
-              let config = try? JSONDecoder().decode(OnboardingPaywallRemoteConfig.self, from: data) else {
+        guard let config = onboardingPaywallConfig() else {
             return nil
         }
 
@@ -857,13 +876,23 @@ final class PaywallAB {
             tag == .v8 ? "onb_8_1" : nil,
             tag == .v8 ? "onboard_8_1_steps" : nil
         ].compactMap { $0 }
-        let tierKey = countryTierMapping.tier(for: currentCountryCode())
-        let tierConfig = config.tiers?[tierKey]
-        let entry = onboardKeyAliases.compactMap { tierConfig?.onboards?[$0] }.first
-            ?? tierConfig?.defaultPaywalls
-            ?? onboardKeyAliases.compactMap { config.onboards?[$0] }.first
-            ?? config.defaultPaywalls
-        guard let entry else { return nil }
+        let tierKey = CountryTierResolver.shared.tier(for: currentCountryCode())
+        let entry: OnboardingPaywallRemoteEntry?
+
+        if (config.version ?? 1) >= 2 {
+            // Version 2 is tier-first. Do not silently fall through to the old
+            // global A/B algorithm when a tier or onboarding key is missing.
+            let tierConfig = config.tiers?[tierKey]
+            entry = onboardKeyAliases.compactMap { tierConfig?.onboards?[$0] }.first
+                ?? tierConfig?.defaultPaywalls
+        } else {
+            entry = onboardKeyAliases.compactMap { config.onboards?[$0] }.first
+                ?? config.defaultPaywalls
+        }
+
+        guard let entry else {
+            return tag == .v8 ? [.newSecondBlack] : nil
+        }
 
         var enabled = Set<AssignedOnboardingPaywall>()
 
@@ -886,7 +915,11 @@ final class PaywallAB {
             enable(.newFirstWhite)
         }
 
-        return AssignedOnboardingPaywall.allCases.filter { enabled.contains($0) }
+        let resolved = AssignedOnboardingPaywall.allCases.filter { enabled.contains($0) }
+        if resolved.isEmpty, (config.version ?? 1) >= 2, tag == .v8 {
+            return [.newSecondBlack]
+        }
+        return resolved
     }
 
     private func storedAssignedOnboardingPaywall(for tag: OnboardTag) -> AssignedOnboardingPaywall? {
@@ -898,11 +931,11 @@ final class PaywallAB {
     }
 
     private func assignedOnboardingPaywallStorageKey(for tag: OnboardTag) -> String {
-        let tierKey = countryTierMapping.tier(for: currentCountryCode())
+        let tierKey = CountryTierResolver.shared.tier(for: currentCountryCode())
         let configSignature = stableSignature(
             rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         )
-        return "assigned_onboarding_paywall_v2_\(tag.rawValue)_\(tierKey)_\(configSignature)"
+        return "assigned_onboarding_paywall_v3_\(tag.rawValue)_\(tierKey)_\(configSignature)"
     }
 
     func assignedOnboardingPaywall(for tag: OnboardTag) -> AssignedOnboardingPaywall {
@@ -915,7 +948,7 @@ final class PaywallAB {
             if enabled.count == 1 {
                 assignedPaywall = enabled[0]
             } else {
-                let tierKey = countryTierMapping.tier(for: currentCountryCode())
+                let tierKey = CountryTierResolver.shared.tier(for: currentCountryCode())
                 let configSignature = stableSignature(
                     rc[onboardingPaywallControlKey].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
                 )
@@ -924,6 +957,11 @@ final class PaywallAB {
                 assignedPaywall = enabled[bucket]
             }
         } else {
+            if tag == .v8 {
+                assignedPaywall = .newSecondBlack
+                storeAssignedOnboardingPaywall(assignedPaywall, for: tag)
+                return assignedPaywall
+            }
             switch onboardingPaywallVariant(for: tag) {
             case .third:
                 assignedPaywall = .paywallThird

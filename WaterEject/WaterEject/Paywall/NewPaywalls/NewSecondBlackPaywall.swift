@@ -66,7 +66,7 @@ struct NewSecondBlackPaywall: View {
     let stepsVisited: [String]?     // ⬅️ нове: пройдені екрани
     private let exitDuration: Double = 0.6
     let startAnimations: Bool
-    private let telemetryVariant = PaywallVariant.fifth.rawValue
+    private let telemetryVariant = AssignedOnboardingPaywall.newSecondBlack.rawValue
     private let telemetryPaywallId = "paywall_v_5.0"
     private let textRemoteConfigKey = "paywall_v_5.0"
 
@@ -478,7 +478,9 @@ struct NewSecondBlackPaywall: View {
                     variant: telemetryVariant,
                     entryPoint: entryPoint,
                     reason: "close_button",
-                    sessionId: sessionId
+                    sessionId: sessionId,
+                    paywallId: telemetryPaywallId,
+                    onboardId: onboardId
                 )
                 Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
                 onFinish()

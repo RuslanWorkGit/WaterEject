@@ -234,21 +234,11 @@ final class Telemetry {
     }
 
     private var currentCountryCode: String {
-        if #available(iOS 16.0, *) {
-            return Locale.current.region?.identifier ?? Locale.current.regionCode ?? "unknown"
-        }
-        return Locale.current.regionCode ?? "unknown"
+        CountryTierResolver.shared.resolution().countryCode
     }
 
     private var currentTierSuffix: String {
-        let code = currentCountryCode.uppercased()
-        if ["US", "CA"].contains(code) {
-            return "tier_1"
-        }
-        if europeanCountryCodes.contains(code) {
-            return "tier_2"
-        }
-        return "tier_3"
+        CountryTierResolver.shared.resolution().tier
     }
 
     private func baseParams(
@@ -369,7 +359,11 @@ final class Telemetry {
         case "fourth":
             return "paywall_v_4.0"
         case "fifth":
+            return "fifth"
+        case "paywall_v_5.0":
             return "paywall_v_5.0"
+        case "paywall_first_white_1":
+            return "paywall_first_white_1"
         default:
             return "paywall_unknown"
         }
@@ -434,6 +428,7 @@ final class Telemetry {
             "assigned_yearly_card_plan": settings.yearlyCardPlan.rawValue,
             "assigned_free_trial_enabled": settings.freeTest
         ]
+        params.merge(PaywallAB.shared.assignmentDiagnostics()) { _, new in new }
 
         if let variantID = settings.variantID {
             params["assigned_product_variant_id"] = variantID
@@ -2346,16 +2341,6 @@ extension Telemetry {
 
 // MARK: - Private Helpers
 private extension Telemetry {
-    var europeanCountryCodes: Set<String> {
-        [
-            "AL", "AD", "AM", "AT", "AZ", "BA", "BE", "BG", "BY", "CH", "CY", "CZ",
-            "DE", "DK", "EE", "ES", "FI", "FR", "GB", "GE", "GR", "HR", "HU", "IE",
-            "IS", "IT", "KZ", "LI", "LT", "LU", "LV", "MC", "MD", "ME", "MK", "MT",
-            "NL", "NO", "PL", "PT", "RO", "RS", "SE", "SI", "SK", "SM", "TR", "UA",
-            "VA"
-        ]
-    }
-
     func stableBucket(seed: String, modulo: Int) -> Int {
         abs(seed.hashValue) % max(modulo, 1)
     }
