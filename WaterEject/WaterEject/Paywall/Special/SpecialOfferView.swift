@@ -233,27 +233,30 @@ struct SpecialOfferView: View {
                 
             }
             
-            Button(action: {
-                let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue
-                Telemetry.shared.specialOfferClose(
-                    onboardId: resolvedOnboardId,
-                    variant: "special_offer",
-                    specialOfferVariant: specialOfferVariant,
-                    placeWhereClose: placeWhereBuy,
-                    reason: "close_button"
-                )
-                onFinish()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
-                    .padding(14)
+            if PaywallAB.shared.isPaywallCloseEnabled {
+                Button(action: {
+                    let resolvedOnboardId = OnboardTag.lastFromUserDefaults()?.rawValue
+                    Telemetry.shared.specialOfferClose(
+                        onboardId: resolvedOnboardId,
+                        variant: "special_offer",
+                        specialOfferVariant: specialOfferVariant,
+                        placeWhereClose: placeWhereBuy,
+                        reason: "close_button"
+                    )
+                    onFinish()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255))
+                        .padding(14)
+                }
+                .padding(.top, 20)
+                .padding(.trailing, 18)
             }
-            .padding(.top, 20)
-            .padding(.trailing, 18)
             
 
         }
+        .interactiveDismissDisabled(!PaywallAB.shared.isPaywallCloseEnabled)
         .task {
             await viewModel.loadPricing()
         }

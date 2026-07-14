@@ -338,7 +338,8 @@ struct PaywallThirdView: View {
                 
             }
             
-            Button(action: {
+            if PaywallAB.shared.isPaywallCloseEnabled {
+                Button(action: {
 //                let variant = PaywallAB.shared.variant().rawValue
 //                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
 //                                Telemetry.shared.paywallClose(
@@ -356,15 +357,17 @@ struct PaywallThirdView: View {
                 )
                 Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
                 onFinish()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
-                    .padding(14)
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+                        .padding(14)
+                }
+                .padding(.top, 20)
+                .padding(.trailing, 18)
             }
-            .padding(.top, 20)
-            .padding(.trailing, 18)
         }
+        .interactiveDismissDisabled(!PaywallAB.shared.isPaywallCloseEnabled)
         
         
         .transactionAbandonSpecialOffer(

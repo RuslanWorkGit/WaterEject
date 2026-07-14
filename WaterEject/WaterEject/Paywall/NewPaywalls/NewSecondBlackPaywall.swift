@@ -471,28 +471,31 @@ struct NewSecondBlackPaywall: View {
 
             }
 
-            Button(action: {
-                let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
-                logOnboardSummary(.close)
-                Telemetry.shared.paywallClose(
-                    variant: telemetryVariant,
-                    entryPoint: entryPoint,
-                    reason: "close_button",
-                    sessionId: sessionId,
-                    paywallId: telemetryPaywallId,
-                    onboardId: onboardId
-                )
-                Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
-                onFinish()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
-                    .padding(14)
+            if PaywallAB.shared.isPaywallCloseEnabled {
+                Button(action: {
+                    let entryPoint = paywallGate.currentContext?.rawValue ?? "unknown"
+                    logOnboardSummary(.close)
+                    Telemetry.shared.paywallClose(
+                        variant: telemetryVariant,
+                        entryPoint: entryPoint,
+                        reason: "close_button",
+                        sessionId: sessionId,
+                        paywallId: telemetryPaywallId,
+                        onboardId: onboardId
+                    )
+                    Telemetry.shared.logOnboardingAbandonIfActive(reason: "paywall_close")
+                    onFinish()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color(red: 179 / 255, green: 179 / 255, blue: 179 / 255))
+                        .padding(14)
+                }
+                //.padding(.top, 8)
+                .padding(.trailing, 18)
             }
-            //.padding(.top, 8)
-            .padding(.trailing, 18)
         }
+        .interactiveDismissDisabled(!PaywallAB.shared.isPaywallCloseEnabled)
 
 
         .transactionAbandonSpecialOffer(

@@ -107,6 +107,7 @@ struct FirstFreeTrialPaywal: View {
                 }
             }
         }
+        .interactiveDismissDisabled(!PaywallAB.shared.isPaywallCloseEnabled)
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
@@ -132,14 +133,16 @@ struct FirstFreeTrialPaywal: View {
 
     private func topBar() -> some View {
         HStack {
-            Button(action: closePaywall) {
-                Text("Not Now")
-                    .font(.system(size: 19, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 18)
-                    .frame(height: 44)
-                    .background(Color(red: 31 / 255, green: 36 / 255, blue: 55 / 255))
-                    .clipShape(Capsule())
+            if PaywallAB.shared.isPaywallCloseEnabled {
+                Button(action: closePaywall) {
+                    Text("Not Now")
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 18)
+                        .frame(height: 44)
+                        .background(Color(red: 31 / 255, green: 36 / 255, blue: 55 / 255))
+                        .clipShape(Capsule())
+                }
             }
 
             Spacer()

@@ -369,7 +369,11 @@ final class PaywallAB {
 
     private init() {
         let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 1800 // на проді зроби 3600+
+#if DEBUG
+        settings.minimumFetchInterval = 0
+#else
+        settings.minimumFetchInterval = 1800
+#endif
         rc.configSettings = settings
         rc.setDefaults([
             "paywall_share_A": 50 as NSObject,   // якщо колись повернешся до спліта
@@ -379,6 +383,7 @@ final class PaywallAB {
             "paywall3_enabled": true as NSObject,
             "paywall4_enabled": true as NSObject,
             "paywall5_enabled": true as NSObject,
+            "paywall_controll": true as NSObject,
             "fifth_paywall_card_controll": true as NSObject,
             "price_mode_control": """
             {
@@ -450,6 +455,7 @@ final class PaywallAB {
     private let textJSONKey = "paywall_text_controll"
     private let priceModeControlKey = "price_mode_control"
     private let onboardingPaywallControlKey = "onboarding_paywall_control"
+    private let paywallControlKey = "paywall_controll"
     private let fifthPaywallCardControlKey = "fifth_paywall_card_controll"
     private(set) var remoteConfigFetchStatus = "not_started"
     private(set) var remoteConfigFetchErrorCode = 0
@@ -484,12 +490,17 @@ final class PaywallAB {
                 "status": self.remoteConfigFetchStatus,
                 "error_code": self.remoteConfigFetchErrorCode,
                 "config_source": self.onboardingPaywallConfigSource(),
+                "paywall_close_enabled": self.isPaywallCloseEnabled,
                 "country_code_used": resolution.countryCode,
                 "country_source": resolution.source,
                 "tier_used": resolution.tier
             ])
             completion?()
         }
+    }
+
+    var isPaywallCloseEnabled: Bool {
+        rc[paywallControlKey].boolValue
     }
 
     func productSettings(for variant: PaywallVariant) -> PaywallProductSettings {
@@ -745,6 +756,7 @@ final class PaywallAB {
             "paywall_config_version": onboardingPaywallConfig()?.version ?? 0,
             "paywall_config_source": onboardingPaywallConfigSource(),
             "paywall_config_signature": stableSignature(json),
+            "paywall_close_enabled": isPaywallCloseEnabled,
             "paywall_rc_fetch_status": remoteConfigFetchStatus,
             "paywall_rc_error_code": remoteConfigFetchErrorCode
         ]

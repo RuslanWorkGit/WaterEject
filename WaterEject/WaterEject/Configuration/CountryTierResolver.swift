@@ -91,6 +91,8 @@ final class CountryTierResolver {
         let aliases = [
             "BRAZIL": "BR",
             "KOSOVO": "XK",
+            "XKX": "XK",
+            "XKS": "XK",
             "UNITED STATES": "US",
             "UNITED STATES OF AMERICA": "US",
             "UNITED KINGDOM": "GB",
@@ -98,6 +100,18 @@ final class CountryTierResolver {
         ]
         if let alias = aliases[uppercased] {
             return alias
+        }
+
+        // StoreKit storefronts use ISO 3166-1 alpha-3 country codes (for
+        // example USA, GBR, BRA), while the tier configuration uses alpha-2.
+        // Foundation/ICU performs the complete ISO conversion, so this works
+        // for every standard App Store storefront without maintaining a
+        // partial country table in the app.
+        if uppercased.count == 3 {
+            let alpha2 = Locale(identifier: "und_\(uppercased)").region?.identifier.uppercased()
+            if let alpha2, alpha2.count == 2 {
+                return alpha2
+            }
         }
 
         let englishLocale = Locale(identifier: "en_US_POSIX")

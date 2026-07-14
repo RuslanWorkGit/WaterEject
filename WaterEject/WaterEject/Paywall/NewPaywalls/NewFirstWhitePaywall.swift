@@ -231,15 +231,18 @@ struct NewFirstWhitePaywall: View {
                 .ignoresSafeArea()
         )
         .overlay(alignment: .topTrailing) {
-            Button(action: closePaywall) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color(red: 170 / 255, green: 170 / 255, blue: 170 / 255))
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+            if PaywallAB.shared.isPaywallCloseEnabled {
+                Button(action: closePaywall) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(Color(red: 170 / 255, green: 170 / 255, blue: 170 / 255))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .padding(.trailing, 22)
             }
-            .padding(.trailing, 22)
         }
+        .interactiveDismissDisabled(!PaywallAB.shared.isPaywallCloseEnabled)
         .onAppear {
             viewModel.selectedPlan = .annual
             logOpenIfNeeded()

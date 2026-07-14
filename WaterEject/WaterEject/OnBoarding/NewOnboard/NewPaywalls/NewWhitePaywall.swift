@@ -175,17 +175,20 @@ struct NewWhitePaywall: View {
                 }
                 .ignoresSafeArea(edges: .top)
 
-                Button(action: closePaywall) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(Color(red: 170 / 255, green: 170 / 255, blue: 170 / 255))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
+                if PaywallAB.shared.isPaywallCloseEnabled {
+                    Button(action: closePaywall) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(Color(red: 170 / 255, green: 170 / 255, blue: 170 / 255))
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    //.padding(.top, proxy.safeAreaInsets.top + 50)
+                    .padding(.trailing, 22)
                 }
-                //.padding(.top, proxy.safeAreaInsets.top + 50)
-                .padding(.trailing, 22)
             }
         }
+        .interactiveDismissDisabled(!PaywallAB.shared.isPaywallCloseEnabled)
         .sheet(item: $webViewURL) { url in
             SafariView(url: url)
         }
