@@ -358,7 +358,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.44;
+				MARKETING_VERSION = 1.1.45;
 				PRODUCT_BUNDLE_IDENTIFIER = kyryloVoinov.WaterEject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -394,7 +394,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.44;
+				MARKETING_VERSION = 1.1.45;
 				PRODUCT_BUNDLE_IDENTIFIER = kyryloVoinov.WaterEject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
