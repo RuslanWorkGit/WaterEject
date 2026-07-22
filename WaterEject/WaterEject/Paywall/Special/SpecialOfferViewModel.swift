@@ -216,8 +216,7 @@ final class SpecialOfferViewModel: ObservableObject {
         let purchaseOnboardId = Telemetry.shared.resolveOnboardId(OnboardTag.lastFromUserDefaults()?.rawValue)
         Telemetry.shared.syncRevenueCatAttributes(
             onboardId: purchaseOnboardId,
-            paywallId: paywallId,
-            purchasePaywallId: paywallId
+            paywallId: paywallId
         )
         
         

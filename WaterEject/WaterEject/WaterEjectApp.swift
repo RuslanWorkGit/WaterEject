@@ -69,6 +69,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                     self.isRequestingATT = false
                     print("ATT completion status:", newStatus.rawValue)
 
+                    // Refresh RevenueCat's device identifiers after ATT is resolved.
+                    // In particular, IDFA only becomes available after authorization.
+                    self.syncRevenueCatAttributionIdentifiers()
+
                     if newStatus == .notDetermined {
                         self.attRequestAttempts += 1
 
@@ -146,6 +150,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         af.customerUserID = Purchases.shared.appUserID
         
         af.delegate = self
+
+        // RevenueCat needs the real AppsFlyer UID to route subscription events
+        // back to the same AppsFlyer install. customerUserID above is a separate,
+        // reverse mapping and does not populate RevenueCat's $appsflyerId.
+        syncRevenueCatAttributionIdentifiers()
         
         #if DEBUG
         af.isDebug = true
@@ -156,6 +165,24 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
 
         return true
+    }
+
+    private func syncRevenueCatAttributionIdentifiers() {
+        Purchases.shared.attribution.collectDeviceIdentifiers()
+
+        let appsFlyerID = AppsFlyerLib.shared().getAppsFlyerUID()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !appsFlyerID.isEmpty else {
+            print("❌ AppsFlyer UID is empty; RevenueCat attribution was not updated")
+            return
+        }
+
+        Purchases.shared.attribution.setAppsflyerID(appsFlyerID)
+
+        #if DEBUG
+        print("✅ RevenueCat attribution identifiers updated")
+        #endif
     }
     
     func userNotificationCenter(
@@ -268,15 +295,44 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     private func syncAppsFlyerConversionAttributes(from conversionInfo: [AnyHashable: Any]) {
         let attributes: [String: String] = [
             "campaign": normalizedAppsFlyerConversionValue(conversionInfo["campaign"]),
-            "adgroup": normalizedAppsFlyerConversionValue(conversionInfo["adgroup"]),
+            "adgroup": resolvedAppsFlyerAdGroup(from: conversionInfo),
             "keyword": normalizedAppsFlyerConversionValue(conversionInfo["af_keywords"])
         ]
 
         Purchases.shared.attribution.setAttributes(attributes)
     }
 
+    private func resolvedAppsFlyerAdGroup(from conversionInfo: [AnyHashable: Any]) -> String {
+        // AppsFlyer may use network-specific or legacy names for the same field.
+        // Prefer a readable group/set name, then use its identifier as a fallback.
+        let candidateKeys = [
+            "adgroup", "ad_group", "adgroup_name", "ad_group_name",
+            "af_adgroup", "af_ad_group", "af_adset", "af_adset_name",
+            "adset", "adset_name",
+            "adgroup_id", "ad_group_id", "af_adgroup_id", "af_ad_group_id",
+            "af_adset_id", "adset_id"
+        ]
+
+        let valuesByNormalizedKey = Dictionary(
+            conversionInfo.map { (String(describing: $0.key).lowercased(), $0.value) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        for key in candidateKeys {
+            guard let value = valuesByNormalizedKey[key],
+                  let normalizedValue = normalizedAppsFlyerValue(value) else { continue }
+            return normalizedValue
+        }
+
+        return "unknown"
+    }
+
     private func normalizedAppsFlyerConversionValue(_ value: Any?) -> String {
-        guard let value, !(value is NSNull) else { return "organic" }
+        normalizedAppsFlyerValue(value) ?? "organic"
+    }
+
+    private func normalizedAppsFlyerValue(_ value: Any?) -> String? {
+        guard let value, !(value is NSNull) else { return nil }
 
         let stringValue: String
         if let value = value as? String {
@@ -286,7 +342,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         }
 
         let trimmedValue = stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedValue.isEmpty ? "organic" : trimmedValue
+        return trimmedValue.isEmpty ? nil : trimmedValue
     }
     
     func onConversionDataSuccess(_ installData: [AnyHashable : Any]) {
